@@ -17,18 +17,32 @@
  * under the License.
  */
 
-import * as fs from "fs";
-import * as path from "path";
-import { getMarshaller } from "@kie-tools/bpmn-marshaller";
+import * as React from "react";
+import { useEffect, useState } from "react";
 
-const files = [{ path: "../tests-data--manual/other/sample.bpmn", version: "2.0" }];
+// Hooks
 
-describe("versions", () => {
-  for (const file of files) {
-    test(path.basename(file.path), () => {
-      const xml = fs.readFileSync(path.join(__dirname, file.path), "utf-8");
-      const { version } = getMarshaller(xml, { upgradeTo: "latest" });
-      expect(version).toStrictEqual(file.version);
-    });
-  }
-});
+export function useIsHovered(ref: React.RefObject<HTMLElement | SVGElement>) {
+  const [isHovered, setHovered] = useState(false);
+
+  useEffect(() => {
+    function onEnter() {
+      setHovered(true);
+    }
+
+    function onLeave() {
+      setHovered(false);
+    }
+
+    const r = ref.current;
+
+    r?.addEventListener("mouseenter", onEnter);
+    r?.addEventListener("mouseleave", onLeave);
+    return () => {
+      r?.removeEventListener("mouseleave", onLeave);
+      r?.removeEventListener("mouseenter", onEnter);
+    };
+  }, [ref]);
+
+  return isHovered;
+}

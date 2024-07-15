@@ -17,18 +17,36 @@
  * under the License.
  */
 
-import * as fs from "fs";
-import * as path from "path";
-import { getMarshaller } from "@kie-tools/bpmn-marshaller";
+import * as React from "react";
+import { Preview } from "@storybook/react";
 
-const files = [{ path: "../tests-data--manual/other/sample.bpmn", version: "2.0" }];
+const preview: Preview = {
+  parameters: {
+    actions: { argTypesRegex: "^on[A-Z].*" },
+    controls: {
+      matchers: {
+        color: /(background|color)$/i,
+        date: /Date$/,
+      },
+    },
+    options: {
+      storySort: {
+        order: [
+          "Dev",
+          "Misc",
+          ["Overview", "*", ["Overview", "*", ["Overview", "*"]]],
+          "Use cases",
+          ["Overview", "*", ["Overview", "*", ["Overview", "*"]]],
+        ],
+      },
+    },
+  },
 
-describe("versions", () => {
-  for (const file of files) {
-    test(path.basename(file.path), () => {
-      const xml = fs.readFileSync(path.join(__dirname, file.path), "utf-8");
-      const { version } = getMarshaller(xml, { upgradeTo: "latest" });
-      expect(version).toStrictEqual(file.version);
-    });
-  }
-});
+  decorators: [
+    (Story) => (
+      <div style={{ position: "absolute", width: "100vw", height: "100vh", top: "0px", left: "0px" }}>{Story()}</div>
+    ),
+  ],
+};
+
+export default preview;

@@ -17,18 +17,25 @@
  * under the License.
  */
 
-import * as fs from "fs";
-import * as path from "path";
-import { getMarshaller } from "@kie-tools/bpmn-marshaller";
+import { buildXmlQName } from "@kie-tools/xml-parser-ts/dist/qNames";
+import { parseXmlHref } from "./xmlHrefs";
+import { getXmlNamespaceDeclarationName } from "./xmlNamespaceDeclarations";
+import { XmlParserTsRootElementBaseType } from "@kie-tools/xml-parser-ts";
 
-const files = [{ path: "../tests-data--manual/other/sample.bpmn", version: "2.0" }];
+export function xmlHrefToQName(hrefString: string, rootElement: XmlParserTsRootElementBaseType | undefined) {
+  const href = parseXmlHref(hrefString);
 
-describe("versions", () => {
-  for (const file of files) {
-    test(path.basename(file.path), () => {
-      const xml = fs.readFileSync(path.join(__dirname, file.path), "utf-8");
-      const { version } = getMarshaller(xml, { upgradeTo: "latest" });
-      expect(version).toStrictEqual(file.version);
-    });
+  const qNamePrefix = href.namespace
+    ? getXmlNamespaceDeclarationName({ rootElement, namespace: href.namespace })
+    : undefined;
+
+  if (href.namespace && !qNamePrefix) {
+    throw new Error(`Can't find namespace declaration for namespace '${href.namespace}'`);
   }
-});
+
+  return buildXmlQName({
+    type: "xml-qname",
+    localPart: href.id,
+    prefix: qNamePrefix,
+  });
+}

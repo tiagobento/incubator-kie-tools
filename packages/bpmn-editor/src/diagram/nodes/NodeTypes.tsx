@@ -17,18 +17,17 @@
  * under the License.
  */
 
-import * as fs from "fs";
-import * as path from "path";
-import { getMarshaller } from "@kie-tools/bpmn-marshaller";
-
-const files = [{ path: "../tests-data--manual/other/sample.bpmn", version: "2.0" }];
-
-describe("versions", () => {
-  for (const file of files) {
-    test(path.basename(file.path), () => {
-      const xml = fs.readFileSync(path.join(__dirname, file.path), "utf-8");
-      const { version } = getMarshaller(xml, { upgradeTo: "latest" });
-      expect(version).toStrictEqual(file.version);
-    });
-  }
-});
+export const NODE_TYPES = {
+  startEvent: "node_startEvent" as const,
+  gateway: "node_gateway" as const,
+  task: "node_task" as const,
+  endEvent: "node_endEvent" as const,
+  subprocess: "node_subprocess" as const,
+  lane: "node_lane" as const,
+  intermediateEvent: "node_intermediateEvent" as const,
+  textAnnotation: "node_textAnnotation" as const,
+  group: "node_group" as const,
+  dataObject: "node_dataObject" as const,
+  custom: "node_custom" as const,
+  unknown: "node_unknown" as const,
+};

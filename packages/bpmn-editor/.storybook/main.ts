@@ -17,18 +17,16 @@
  * under the License.
  */
 
-import * as fs from "fs";
-import * as path from "path";
-import { getMarshaller } from "@kie-tools/bpmn-marshaller";
+import { baseConfig } from "@kie-tools/storybook-base/dist/config/baseConfig";
+import common from "@kie-tools-core/webpack-base/webpack.common.config";
 
-const files = [{ path: "../tests-data--manual/other/sample.bpmn", version: "2.0" }];
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+import { env } from "../env";
+const buildEnv: any = env; // build-env is not typed
 
-describe("versions", () => {
-  for (const file of files) {
-    test(path.basename(file.path), () => {
-      const xml = fs.readFileSync(path.join(__dirname, file.path), "utf-8");
-      const { version } = getMarshaller(xml, { upgradeTo: "latest" });
-      expect(version).toStrictEqual(file.version);
-    });
-  }
-});
+const config = {
+  ...baseConfig(buildEnv.webpack.dev, common(buildEnv.webpack)),
+};
+
+export default config;

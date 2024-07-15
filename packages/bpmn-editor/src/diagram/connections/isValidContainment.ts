@@ -17,18 +17,9 @@
  * under the License.
  */
 
-import * as fs from "fs";
-import * as path from "path";
-import { getMarshaller } from "@kie-tools/bpmn-marshaller";
+import { NodeType, containment } from "./graphStructure";
 
-const files = [{ path: "../tests-data--manual/other/sample.bpmn", version: "2.0" }];
-
-describe("versions", () => {
-  for (const file of files) {
-    test(path.basename(file.path), () => {
-      const xml = fs.readFileSync(path.join(__dirname, file.path), "utf-8");
-      const { version } = getMarshaller(xml, { upgradeTo: "latest" });
-      expect(version).toStrictEqual(file.version);
-    });
-  }
-});
+export function isValidContainment({ nodeTypes, inside }: { nodeTypes: Set<NodeType>; inside: NodeType }) {
+  const allowedNodesInside = containment.get(inside);
+  return [...nodeTypes].every((nodeType) => allowedNodesInside?.has(nodeType));
+}

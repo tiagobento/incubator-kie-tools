@@ -17,18 +17,25 @@
  * under the License.
  */
 
-import * as fs from "fs";
-import * as path from "path";
-import { getMarshaller } from "@kie-tools/bpmn-marshaller";
+import { defineConfig } from "@playwright/test";
+import playwirghtBaseConfig from "@kie-tools/playwright-base/playwright.config";
+import merge from "lodash/merge";
+import { env } from "./env";
 
-const files = [{ path: "../tests-data--manual/other/sample.bpmn", version: "2.0" }];
+const buildEnv: any = env;
 
-describe("versions", () => {
-  for (const file of files) {
-    test(path.basename(file.path), () => {
-      const xml = fs.readFileSync(path.join(__dirname, file.path), "utf-8");
-      const { version } = getMarshaller(xml, { upgradeTo: "latest" });
-      expect(version).toStrictEqual(file.version);
-    });
-  }
+const customConfig = defineConfig({
+  use: {
+    baseURL: `http://localhost:${buildEnv.bpmnEditor.storybook.port}`,
+  },
+  /* Run your local dev server before starting the tests */
+  webServer: {
+    command: "pnpm start",
+    url: `http://localhost:${buildEnv.bpmnEditor.storybook.port}/iframe.html?args=&id=use-cases-empty--empty&viewMode=story`,
+    reuseExistingServer: !process.env.CI || true,
+    stdout: "pipe",
+    timeout: 180000,
+  },
 });
+
+export default defineConfig(merge(playwirghtBaseConfig, customConfig));

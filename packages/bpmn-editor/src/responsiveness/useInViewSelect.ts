@@ -17,18 +17,25 @@
  * under the License.
  */
 
-import * as fs from "fs";
-import * as path from "path";
-import { getMarshaller } from "@kie-tools/bpmn-marshaller";
+import * as React from "react";
 
-const files = [{ path: "../tests-data--manual/other/sample.bpmn", version: "2.0" }];
+export const IN_VIEW_SELECT_PADDING = 12;
+export const TABS_HEIGHT = 40;
 
-describe("versions", () => {
-  for (const file of files) {
-    test(path.basename(file.path), () => {
-      const xml = fs.readFileSync(path.join(__dirname, file.path), "utf-8");
-      const { version } = getMarshaller(xml, { upgradeTo: "latest" });
-      expect(version).toStrictEqual(file.version);
-    });
+export function useInViewSelect(ref: React.RefObject<HTMLElement>, self: React.RefObject<HTMLElement>, factor = 1) {
+  const reference = (ref.current ?? document.body).getBoundingClientRect();
+  const s = self.current?.getBoundingClientRect();
+
+  if (!s) {
+    return { maxHeight: undefined, direction: undefined };
   }
-});
+
+  const below = reference.height - (s.y - reference.y + s.height + IN_VIEW_SELECT_PADDING);
+  const above = s.y - reference.y - IN_VIEW_SELECT_PADDING - TABS_HEIGHT;
+
+  if (above > below) {
+    return { maxHeight: above, direction: "up" as const };
+  } else {
+    return { maxHeight: below, direction: "down" as const };
+  }
+}

@@ -17,18 +17,12 @@
  * under the License.
  */
 
-import * as fs from "fs";
-import * as path from "path";
-import { getMarshaller } from "@kie-tools/bpmn-marshaller";
+import { addons } from "@storybook/manager-api";
+import { KieToolsTheme } from "@kie-tools/storybook-base/dist/config/theme";
 
-const files = [{ path: "../tests-data--manual/other/sample.bpmn", version: "2.0" }];
-
-describe("versions", () => {
-  for (const file of files) {
-    test(path.basename(file.path), () => {
-      const xml = fs.readFileSync(path.join(__dirname, file.path), "utf-8");
-      const { version } = getMarshaller(xml, { upgradeTo: "latest" });
-      expect(version).toStrictEqual(file.version);
-    });
-  }
+addons.setConfig({
+  theme: KieToolsTheme,
+  // Disable Storybook keyboard shortcuts.
+  // ReactFlow adds listeners to the document level
+  enableShortcuts: false,
 });

@@ -17,18 +17,35 @@
  * under the License.
  */
 
-import * as fs from "fs";
-import * as path from "path";
-import { getMarshaller } from "@kie-tools/bpmn-marshaller";
+import * as React from "react";
+import { useContext, useMemo } from "react";
 
-const files = [{ path: "../tests-data--manual/other/sample.bpmn", version: "2.0" }];
+export interface DiagramContainerContextType {
+  container: React.RefObject<HTMLElement>;
+}
 
-describe("versions", () => {
-  for (const file of files) {
-    test(path.basename(file.path), () => {
-      const xml = fs.readFileSync(path.join(__dirname, file.path), "utf-8");
-      const { version } = getMarshaller(xml, { upgradeTo: "latest" });
-      expect(version).toStrictEqual(file.version);
-    });
-  }
+const DiagramContainerContext = React.createContext<DiagramContainerContextType>({
+  container: {
+    current: null,
+  },
 });
+
+export function useBpmnEditorDiagramContainer() {
+  return useContext(DiagramContainerContext);
+}
+
+export function DiagramContainerContextProvider({
+  container,
+  children,
+}: React.PropsWithChildren<{
+  container: React.RefObject<HTMLElement>;
+}>) {
+  const value = useMemo(
+    () => ({
+      container,
+    }),
+    [container]
+  );
+
+  return <DiagramContainerContext.Provider value={value}>{children}</DiagramContainerContext.Provider>;
+}

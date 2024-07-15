@@ -17,18 +17,17 @@
  * under the License.
  */
 
-import * as fs from "fs";
-import * as path from "path";
-import { getMarshaller } from "@kie-tools/bpmn-marshaller";
+import { generateUuid } from "@kie-tools/boxed-expression-component/dist/api";
+import {
+  elements as bpmn20elements,
+  meta as bpmn20meta,
+} from "@kie-tools/bpmn-marshaller/dist/schemas/bpmn-2_0/ts-gen/meta";
+import { XmlParserTsIdRandomizer } from "@kie-tools/xml-parser-ts/dist/idRandomizer";
 
-const files = [{ path: "../tests-data--manual/other/sample.bpmn", version: "2.0" }];
-
-describe("versions", () => {
-  for (const file of files) {
-    test(path.basename(file.path), () => {
-      const xml = fs.readFileSync(path.join(__dirname, file.path), "utf-8");
-      const { version } = getMarshaller(xml, { upgradeTo: "latest" });
-      expect(version).toStrictEqual(file.version);
-    });
-  }
-});
+export function getNewBpmnIdRandomizer() {
+  return new XmlParserTsIdRandomizer({
+    meta: bpmn20meta,
+    elements: bpmn20elements,
+    newIdGenerator: generateUuid,
+  });
+}

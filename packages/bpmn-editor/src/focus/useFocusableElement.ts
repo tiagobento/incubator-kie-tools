@@ -17,18 +17,33 @@
  * under the License.
  */
 
-import * as fs from "fs";
-import * as path from "path";
-import { getMarshaller } from "@kie-tools/bpmn-marshaller";
+import { useEffect } from "react";
+import { useBpmnEditorStore, useBpmnEditorStoreApi } from "../store/StoreContext";
 
-const files = [{ path: "../tests-data--manual/other/sample.bpmn", version: "2.0" }];
+export function useFocusableElement(
+  ref: React.RefObject<HTMLInputElement>,
+  id: string | undefined,
+  before?: (cb: () => void) => void
+) {
+  const bpmnEditorStoreApi = useBpmnEditorStoreApi();
 
-describe("versions", () => {
-  for (const file of files) {
-    test(path.basename(file.path), () => {
-      const xml = fs.readFileSync(path.join(__dirname, file.path), "utf-8");
-      const { version } = getMarshaller(xml, { upgradeTo: "latest" });
-      expect(version).toStrictEqual(file.version);
-    });
-  }
-});
+  const shoudFocus = useBpmnEditorStore((s) => s.focus.consumableId === id);
+
+  useEffect(() => {
+    if (!id) {
+      return;
+    }
+
+    const cb = () => {
+      ref.current?.select();
+
+      bpmnEditorStoreApi.setState((state) => {
+        state.focus.consumableId = undefined;
+      });
+    };
+
+    if (shoudFocus && ref.current) {
+      before?.(cb) ?? cb();
+    }
+  }, [before, bpmnEditorStoreApi, id, ref, shoudFocus]);
+}

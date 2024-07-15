@@ -68,12 +68,14 @@
       { "id": "@kie-tools-core/monaco-editor" },
       { "id": "@kie-tools/dmn-language-service" },
       { "id": "@kie-tools/i18n-common-dictionary" },
+      { "id": "@kie-tools/bpmn-editor" },
+      { "id": "@kie-tools-core/react-hooks" },
       { "id": "@kie-tools/bpmn-marshaller" },
+      { "id": "@kie-tools/pmml-editor-marshaller" },
       { "id": "@kie-tools/xml-parser-ts-codegen" },
       { "id": "@kie-tools/xml-parser-ts" },
       { "id": "bpmn-vscode-extension" },
       { "id": "@kie-tools/vscode-java-code-completion-extension-plugin" },
-      { "id": "@kie-tools/pmml-editor-marshaller" },
       { "id": "@kie-tools/stunner-editors-dmn-loader" },
       { "id": "chrome-extension-pack-kogito-kie-editors" },
       { "id": "@kie-tools/chrome-extension-test-helper" },
@@ -105,7 +107,6 @@
       { "id": "@kie-tools/dashbuilder-viewer" },
       { "id": "@kie-tools/dashbuilder-viewer-deployment-webapp" },
       { "id": "@kie-tools-core/workspaces-git-fs" },
-      { "id": "@kie-tools-core/react-hooks" },
       { "id": "@kie-tools/kie-sandbox-fs" },
       { "id": "@kie-tools/dashbuilder-viewer-image" },
       { "id": "@kie-tools/dashbuilder-viewer-image-env" },
@@ -841,8 +842,58 @@
         "weight": 1
       },
       {
+        "source": "@kie-tools/bpmn-editor",
+        "target": "@kie-tools-core/react-hooks",
+        "weight": 1
+      },
+      {
+        "source": "@kie-tools/bpmn-editor",
+        "target": "@kie-tools/boxed-expression-component",
+        "weight": 1
+      },
+      {
+        "source": "@kie-tools/bpmn-editor",
+        "target": "@kie-tools/bpmn-marshaller",
+        "weight": 1
+      },
+      {
+        "source": "@kie-tools/bpmn-editor",
+        "target": "@kie-tools/pmml-editor-marshaller",
+        "weight": 1
+      },
+      {
+        "source": "@kie-tools-core/react-hooks",
+        "target": "@kie-tools/eslint",
+        "weight": 1
+      },
+      {
+        "source": "@kie-tools-core/react-hooks",
+        "target": "@kie-tools/root-env",
+        "weight": 1
+      },
+      {
+        "source": "@kie-tools-core/react-hooks",
+        "target": "@kie-tools/tsconfig",
+        "weight": 1
+      },
+      {
         "source": "@kie-tools/bpmn-marshaller",
         "target": "@kie-tools/xml-parser-ts-codegen",
+        "weight": 1
+      },
+      {
+        "source": "@kie-tools/pmml-editor-marshaller",
+        "target": "@kie-tools/eslint",
+        "weight": 1
+      },
+      {
+        "source": "@kie-tools/pmml-editor-marshaller",
+        "target": "@kie-tools/jest-base",
+        "weight": 1
+      },
+      {
+        "source": "@kie-tools/pmml-editor-marshaller",
+        "target": "@kie-tools/tsconfig",
         "weight": 1
       },
       {
@@ -888,21 +939,6 @@
       {
         "source": "@kie-tools/vscode-java-code-completion-extension-plugin",
         "target": "@kie-tools/maven-base",
-        "weight": 1
-      },
-      {
-        "source": "@kie-tools/pmml-editor-marshaller",
-        "target": "@kie-tools/eslint",
-        "weight": 1
-      },
-      {
-        "source": "@kie-tools/pmml-editor-marshaller",
-        "target": "@kie-tools/jest-base",
-        "weight": 1
-      },
-      {
-        "source": "@kie-tools/pmml-editor-marshaller",
-        "target": "@kie-tools/tsconfig",
         "weight": 1
       },
       {
@@ -1318,21 +1354,6 @@
       {
         "source": "@kie-tools-core/workspaces-git-fs",
         "target": "@kie-tools/kie-sandbox-fs",
-        "weight": 1
-      },
-      {
-        "source": "@kie-tools-core/react-hooks",
-        "target": "@kie-tools/eslint",
-        "weight": 1
-      },
-      {
-        "source": "@kie-tools-core/react-hooks",
-        "target": "@kie-tools/root-env",
-        "weight": 1
-      },
-      {
-        "source": "@kie-tools-core/react-hooks",
-        "target": "@kie-tools/tsconfig",
         "weight": 1
       },
       {
@@ -2388,6 +2409,7 @@
     ["@kie-tools-examples/webapp", "examples/webapp"],
     ["@kie-tools-core/backend", "packages/backend"],
     ["@kie-tools/boxed-expression-component", "packages/boxed-expression-component"],
+    ["@kie-tools/bpmn-editor", "packages/bpmn-editor"],
     ["@kie-tools/bpmn-marshaller", "packages/bpmn-marshaller"],
     ["bpmn-vscode-extension", "packages/bpmn-vscode-extension"],
     ["@kie-tools-core/chrome-extension", "packages/chrome-extension"],
