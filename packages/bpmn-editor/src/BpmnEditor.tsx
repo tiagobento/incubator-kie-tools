@@ -21,22 +21,29 @@ import "@patternfly/react-core/dist/styles/base.css";
 import "reactflow/dist/style.css";
 
 import { AllBpmnMarshallers, BpmnLatestModel } from "@kie-tools/bpmn-marshaller";
-import { Drawer, DrawerContent, DrawerContentBody } from "@patternfly/react-core/dist/js/components/Drawer";
+import {
+  Drawer,
+  DrawerPanelContent,
+  DrawerHead,
+  DrawerContent,
+  DrawerContentBody,
+} from "@patternfly/react-core/dist/js/components/Drawer";
 import { original } from "immer";
 import * as React from "react";
-import { useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
+import { useCallback, useImperativeHandle, useMemo, useRef } from "react";
 import * as ReactDOM from "react-dom";
 import { ErrorBoundary, ErrorBoundaryPropsWithFallback } from "react-error-boundary";
 import * as RF from "reactflow";
 import { BpmnEditorContextProvider, useBpmnEditor } from "./BpmnEditorContext";
 import { BpmnEditorErrorFallback } from "./BpmnEditorErrorFallback";
-import { Diagram, DiagramRef } from "./diagram/Diagram";
+import { BpmnDiagram } from "./diagram/BpmnDiagram";
 import { BpmnVersionLabel } from "./diagram/BpmnVersionLabel";
 import { BpmnEditorExternalModelsContextProvider } from "./externalModels/BpmnEditorExternalModelsContext";
 import { Normalized, normalize } from "./normalization/normalize";
-import { INITIAL_COMPUTED_CACHE } from "./store/computed/initial";
-import { ComputedStateCache } from "./store/ComputedStateCache";
-import { Computed, createBpmnEditorStore, defaultStaticState } from "./store/Store";
+import { INITIAL_COMPUTED_CACHE } from "./store/initialComputedCache";
+import { ComputedStateCache } from "@kie-tools/reactflow-editors-base/dist/store/ComputedStateCache";
+import { ReactflowKieEditorDiagramStoreApiContext } from "@kie-tools/reactflow-editors-base/dist/store/Store";
+import { State, createBpmnEditorStore, getDefaultStaticState } from "./store/Store";
 import {
   BpmnEditorStoreApiContext,
   StoreApiType,
@@ -44,9 +51,18 @@ import {
   useBpmnEditorStoreApi,
 } from "./store/StoreContext";
 import { BpmnDiagramSvg } from "./svg/BpmnDiagramSvg";
-import { useEffectAfterFirstRender } from "./useEffectAfterFirstRender";
+import { useStateAsItWasBeforeConditionBecameTrue } from "@kie-tools/reactflow-editors-base/dist/reactExt/useStateAsItWasBeforeConditionBecameTrue";
+import { useEffectAfterFirstRender } from "@kie-tools/reactflow-editors-base/dist/reactExt/useEffectAfterFirstRender";
 import { Commands, CommandsContextProvider, useCommands } from "./commands/CommandsContextProvider";
-import "./BpmnEditor.css"; // Leave it for last, as this overrides some of the PF and RF styles.
+
+// Leave custom CSS always for last.
+import "@kie-tools/reactflow-editors-base/dist/patternfly-customizations.css";
+import "@kie-tools/reactflow-editors-base/dist/reactflow-customizations.css";
+import "./BpmnEditor.css";
+import { DiagramRef } from "@kie-tools/reactflow-editors-base/dist/diagram/Diagram";
+import { Button, ButtonVariant } from "@patternfly/react-core/dist/js/components/Button";
+import { Form, FormSection } from "@patternfly/react-core/dist/js/components/Form";
+import TimesIcon from "@patternfly/react-icons/dist/js/icons/times-icon";
 
 const ON_MODEL_CHANGE_DEBOUNCE_TIME_IN_MS = 500;
 
@@ -153,7 +169,7 @@ export const BpmnEditorInternal = ({
     () => ({
       reset: (model) => {
         const state = bpmnEditorStoreApi.getState();
-        return state.dispatch(state).bpmn.reset(normalize(model));
+        return state.dispatch(state).reset(normalize(model));
       },
       getDiagramSvg: async () => {
         const nodes = diagramRef.current?.getReactFlowInstance()?.getNodes();
@@ -178,7 +194,7 @@ export const BpmnEditorInternal = ({
         ReactDOM.render(
           // Indepdent of where the nodes are located, they'll always be rendered at the top-left corner of the SVG
           <g transform={`translate(${-bounds.x + SVG_PADDING} ${-bounds.y + SVG_PADDING})`}>
-            <BpmnDiagramSvg nodes={nodes} edges={edges} snapGrid={state.diagram.snapGrid} />
+            <BpmnDiagramSvg nodes={nodes} edges={edges} snapGrid={state.reactflowKieEditorDiagram.snapGrid} />
           </g>,
           svg
         );
@@ -234,7 +250,38 @@ export const BpmnEditorInternal = ({
     };
   }, [isDiagramEditingInProgress, onModelChange, bpmn.model]);
 
-  const diagramPropertiesPanel = useMemo(() => <>Properties</>, []);
+  const diagramPropertiesPanel = useMemo(
+    () => (
+      <DrawerPanelContent
+        data-testid={"kie-tools--bpmn-editor--properties-panel-container"}
+        isResizable={true}
+        minSize={"300px"}
+        defaultSize={"500px"}
+        onKeyDown={(e) => e.stopPropagation()} // Prevent ReactFlow KeyboardShortcuts from triggering when editing stuff on Properties Panel
+      >
+        <DrawerHead>
+          <Form>
+            <FormSection
+              title={
+                <Button
+                  title={"Close"}
+                  variant={ButtonVariant.plain}
+                  onClick={() => {
+                    bpmnEditorStoreApi.setState((state) => {
+                      state.diagram.propertiesPanel.isOpen = false;
+                    });
+                  }}
+                >
+                  <TimesIcon />
+                </Button>
+              }
+            />
+          </Form>
+        </DrawerHead>
+      </DrawerPanelContent>
+    ),
+    [bpmnEditorStoreApi]
+  );
 
   return (
     <div ref={bpmnEditorRootElementRef} className={"kie-bpmn-editor--root"}>
@@ -247,7 +294,7 @@ export const BpmnEditorInternal = ({
               data-testid={"kie-bpmn-editor--diagram-container"}
             >
               {originalVersion && <BpmnVersionLabel version={originalVersion} />}
-              <Diagram ref={diagramRef} container={diagramContainerRef} />
+              <BpmnDiagram ref={diagramRef} container={diagramContainerRef} />
             </div>
           </DrawerContentBody>
         </DrawerContent>
@@ -258,7 +305,8 @@ export const BpmnEditorInternal = ({
 
 export const BpmnEditor = React.forwardRef((props: BpmnEditorProps, ref: React.Ref<BpmnEditorRef>) => {
   const store = useMemo(
-    () => createBpmnEditorStore(props.model, new ComputedStateCache<Computed>(INITIAL_COMPUTED_CACHE)),
+    () =>
+      createBpmnEditorStore(props.model, new ComputedStateCache<ReturnType<State["computed"]>>(INITIAL_COMPUTED_CACHE)),
     // Purposefully empty. This memoizes the initial value of the store
     // eslint-disable-next-line react-hooks/exhaustive-deps
     []
@@ -267,7 +315,7 @@ export const BpmnEditor = React.forwardRef((props: BpmnEditorProps, ref: React.R
 
   const resetState: ErrorBoundaryPropsWithFallback["onReset"] = useCallback(({ args }) => {
     storeRef.current?.setState((state) => {
-      state.diagram = defaultStaticState().diagram;
+      state.diagram = getDefaultStaticState().diagram;
       state.bpmn.model = args[0];
     });
   }, []);
@@ -277,44 +325,14 @@ export const BpmnEditor = React.forwardRef((props: BpmnEditorProps, ref: React.R
       <ErrorBoundary FallbackComponent={BpmnEditorErrorFallback} onReset={resetState}>
         <BpmnEditorExternalModelsContextProvider {...props}>
           <BpmnEditorStoreApiContext.Provider value={storeRef.current}>
-            <CommandsContextProvider>
-              <BpmnEditorInternal forwardRef={ref} {...props} />
-            </CommandsContextProvider>
+            <ReactflowKieEditorDiagramStoreApiContext.Provider value={storeRef.current}>
+              <CommandsContextProvider>
+                <BpmnEditorInternal forwardRef={ref} {...props} />
+              </CommandsContextProvider>
+            </ReactflowKieEditorDiagramStoreApiContext.Provider>
           </BpmnEditorStoreApiContext.Provider>
         </BpmnEditorExternalModelsContextProvider>
       </ErrorBoundary>
     </BpmnEditorContextProvider>
   );
 });
-
-export function usePrevious<T>(value: T) {
-  const [current, setCurrent] = useState<T>(value);
-  const [previous, setPrevious] = useState<T>(value);
-
-  if (value !== current) {
-    setPrevious(current);
-    setCurrent(value);
-  }
-
-  return previous;
-}
-
-/**
- *
- * @param state The state to save when condition is true
- * @param condition Boolean that, when becomes true, sets the ref with the previous value of the first parameter -- `state`.
- * @param ref The ref that stores the value
- * @returns The ref that was given as the 3rd parameter.
- */
-export function useStateAsItWasBeforeConditionBecameTrue<T>(state: T, condition: boolean, set: (prev: T) => void) {
-  const previous = usePrevious(state);
-
-  useEffect(() => {
-    if (condition) {
-      console.debug("HOOK: `useStateBeforeCondition` --> ASSIGN");
-      set(previous);
-    }
-    // !!!! EXCEPTIONAL CASE: Ignore "previous" changes on purpose, as we only want to save the last state before `condition` became true.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [condition, set]);
-}

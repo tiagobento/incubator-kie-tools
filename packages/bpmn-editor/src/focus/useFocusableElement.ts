@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import * as React from "react";
 import { useEffect } from "react";
 import { useBpmnEditorStore, useBpmnEditorStoreApi } from "../store/StoreContext";
 

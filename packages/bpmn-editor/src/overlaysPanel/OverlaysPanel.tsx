@@ -35,6 +35,7 @@ interface OverlaysPanelProps {
 }
 
 export function OverlaysPanel({ availableHeight }: OverlaysPanelProps) {
+  const snapGrid = useBpmnEditorStore((s) => s.reactflowKieEditorDiagram.snapGrid);
   const diagram = useBpmnEditorStore((s) => s.diagram);
   const bpmnEditorStoreApi = useBpmnEditorStoreApi();
   const overlayPanelContainer = useRef<HTMLDivElement>(null);
@@ -60,10 +61,10 @@ export function OverlaysPanel({ availableHeight }: OverlaysPanelProps) {
         <FormGroup label="Snapping">
           <Switch
             aria-label={"Snapping"}
-            isChecked={diagram.snapGrid.isEnabled}
+            isChecked={snapGrid.isEnabled}
             onChange={(newValue) =>
               bpmnEditorStoreApi.setState((state) => {
-                state.diagram.snapGrid.isEnabled = newValue;
+                state.reactflowKieEditorDiagram.snapGrid.isEnabled = newValue;
               })
             }
           />
@@ -72,18 +73,21 @@ export function OverlaysPanel({ availableHeight }: OverlaysPanelProps) {
           <Slider
             data-testid={"kie-tools--bpmn-editor--horizontal-snapping-control"}
             className={"kie-bpmn-editor--snap-slider"}
-            isDisabled={!diagram.snapGrid.isEnabled}
-            value={diagram.snapGrid.x}
+            isDisabled={!snapGrid.isEnabled}
+            value={snapGrid.x}
             min={MIN_SNAP}
             max={MAX_SNAP}
             isInputVisible={true}
-            inputValue={diagram.snapGrid.x}
+            inputValue={snapGrid.x}
             step={SNAP_STEP}
             showTicks={true}
             hasTooltipOverThumb={true}
             onChange={(newSliderValue, newInputValue) =>
               bpmnEditorStoreApi.setState((state) => {
-                state.diagram.snapGrid.x = Math.min(MAX_SNAP, Math.max(MIN_SNAP, newInputValue ?? newSliderValue));
+                state.reactflowKieEditorDiagram.snapGrid.x = Math.min(
+                  MAX_SNAP,
+                  Math.max(MIN_SNAP, newInputValue ?? newSliderValue)
+                );
               })
             }
           />
@@ -92,18 +96,21 @@ export function OverlaysPanel({ availableHeight }: OverlaysPanelProps) {
           <Slider
             data-testid={"kie-tools--bpmn-editor--vertical-snapping-control"}
             className={"kie-bpmn-editor--snap-slider"}
-            isDisabled={!diagram.snapGrid.isEnabled}
-            value={diagram.snapGrid.y}
+            isDisabled={!snapGrid.isEnabled}
+            value={snapGrid.y}
             min={MIN_SNAP}
             max={MAX_SNAP}
             isInputVisible={true}
-            inputValue={diagram.snapGrid.y}
+            inputValue={snapGrid.y}
             step={SNAP_STEP}
             showTicks={true}
             hasTooltipOverThumb={true}
             onChange={(newSliderValue, newInputValue) =>
               bpmnEditorStoreApi.setState((state) => {
-                state.diagram.snapGrid.y = Math.min(MAX_SNAP, Math.max(MIN_SNAP, newInputValue ?? newSliderValue));
+                state.reactflowKieEditorDiagram.snapGrid.y = Math.min(
+                  MAX_SNAP,
+                  Math.max(MIN_SNAP, newInputValue ?? newSliderValue)
+                );
               })
             }
           />

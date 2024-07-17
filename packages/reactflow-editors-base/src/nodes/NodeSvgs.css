@@ -1,0 +1,7 @@
+.kie-bpmn-editor--node-containerNodeInteractionRect {
+  pointer-events: stroke !important;
+  opacity: 0;
+  /* ⬇ Uncomment for debugging purposes:*/
+  /* stroke: purple;
+    opacity: 0.2; */
+}

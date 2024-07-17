@@ -17,17 +17,36 @@
  * under the License.
  */
 
+import { switchExpression } from "@kie-tools-core/switch-expression-ts";
+import { NodeBpmnObjects } from "./Nodes";
+
 export const NODE_TYPES = {
   startEvent: "node_startEvent" as const,
-  gateway: "node_gateway" as const,
-  task: "node_task" as const,
+  intermediateCatchEvent: "node_intermediateCatchEvent" as const,
+  intermediateThrowEvent: "node_intermediateThrowEvent" as const,
   endEvent: "node_endEvent" as const,
-  subprocess: "node_subprocess" as const,
-  lane: "node_lane" as const,
-  intermediateEvent: "node_intermediateEvent" as const,
-  textAnnotation: "node_textAnnotation" as const,
-  group: "node_group" as const,
+  task: "node_task" as const,
+  subProcess: "node_subProcess" as const,
+  gateway: "node_gateway" as const,
   dataObject: "node_dataObject" as const,
-  custom: "node_custom" as const,
+  textAnnotation: "node_textAnnotation" as const,
   unknown: "node_unknown" as const,
+  group: "node_group" as const,
+  // lane: "node_lane" as const,
+  // custom: "node_custom" as const,
 };
+
+export function getNodeTypeFromBpmnObject(bpmnObject: NodeBpmnObjects) {
+  if (!bpmnObject) {
+    return NODE_TYPES.unknown;
+  }
+
+  const type = switchExpression(bpmnObject.__$$element, {
+    dataObject: NODE_TYPES.dataObject,
+    task: NODE_TYPES.task,
+    textAnnotation: NODE_TYPES.textAnnotation,
+    default: undefined,
+  });
+
+  return type;
+}

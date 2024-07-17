@@ -72,7 +72,9 @@
       { "id": "@kie-tools-core/react-hooks" },
       { "id": "@kie-tools/bpmn-marshaller" },
       { "id": "@kie-tools/pmml-editor-marshaller" },
+      { "id": "@kie-tools/reactflow-editors-base" },
       { "id": "@kie-tools/xml-parser-ts-codegen" },
+      { "id": "@kie-tools-core/switch-expression-ts" },
       { "id": "@kie-tools/xml-parser-ts" },
       { "id": "bpmn-vscode-extension" },
       { "id": "@kie-tools/vscode-java-code-completion-extension-plugin" },
@@ -124,7 +126,6 @@
       { "id": "@kie-tools/dmn-marshaller" },
       { "id": "@kie-tools/dmn-marshaller-backend-compatibility-tester" },
       { "id": "@kie-tools/dmn-testing-models" },
-      { "id": "@kie-tools-core/switch-expression-ts" },
       { "id": "@kie-tools/dmn-runner" },
       { "id": "@kie-tools/extended-services-api" },
       { "id": "dmn-vscode-extension" },
@@ -862,6 +863,11 @@
         "weight": 1
       },
       {
+        "source": "@kie-tools/bpmn-editor",
+        "target": "@kie-tools/reactflow-editors-base",
+        "weight": 1
+      },
+      {
         "source": "@kie-tools-core/react-hooks",
         "target": "@kie-tools/eslint",
         "weight": 1
@@ -897,8 +903,33 @@
         "weight": 1
       },
       {
+        "source": "@kie-tools/reactflow-editors-base",
+        "target": "@kie-tools-core/switch-expression-ts",
+        "weight": 1
+      },
+      {
+        "source": "@kie-tools/reactflow-editors-base",
+        "target": "@kie-tools/xml-parser-ts",
+        "weight": 1
+      },
+      {
         "source": "@kie-tools/xml-parser-ts-codegen",
         "target": "@kie-tools/xml-parser-ts",
+        "weight": 1
+      },
+      {
+        "source": "@kie-tools-core/switch-expression-ts",
+        "target": "@kie-tools/eslint",
+        "weight": 1
+      },
+      {
+        "source": "@kie-tools-core/switch-expression-ts",
+        "target": "@kie-tools/jest-base",
+        "weight": 1
+      },
+      {
+        "source": "@kie-tools-core/switch-expression-ts",
+        "target": "@kie-tools/tsconfig",
         "weight": 1
       },
       {
@@ -1529,21 +1560,6 @@
       {
         "source": "@kie-tools/dmn-testing-models",
         "target": "@kie-tools/maven-base",
-        "weight": 1
-      },
-      {
-        "source": "@kie-tools-core/switch-expression-ts",
-        "target": "@kie-tools/eslint",
-        "weight": 1
-      },
-      {
-        "source": "@kie-tools-core/switch-expression-ts",
-        "target": "@kie-tools/jest-base",
-        "weight": 1
-      },
-      {
-        "source": "@kie-tools-core/switch-expression-ts",
-        "target": "@kie-tools/tsconfig",
         "weight": 1
       },
       {
@@ -2506,6 +2522,7 @@
     ["pmml-vscode-extension", "packages/pmml-vscode-extension"],
     ["@kie-tools/python-venv", "packages/python-venv"],
     ["@kie-tools-core/react-hooks", "packages/react-hooks"],
+    ["@kie-tools/reactflow-editors-base", "packages/reactflow-editors-base"],
     ["@kie-tools/root-env", "packages/root-env"],
     ["@kie-tools/runtime-tools-components", "packages/runtime-tools-components"],
     ["@kie-tools/runtime-tools-management-console-webapp", "packages/runtime-tools-management-console-webapp"],

@@ -17,22 +17,36 @@
  * under the License.
  */
 
-import { SnapGrid } from "../../store/Store";
-import { snapPoint } from "../SnapGrid";
-import { NodeType } from "../connections/graphStructure";
+import { SnapGrid, snapPoint } from "@kie-tools/reactflow-editors-base/dist/snapgrid/SnapGrid";
 import { NODE_TYPES } from "./NodeTypes";
-import { DC__Dimension } from "../maths/DiMaths";
+import { NodeSizes } from "@kie-tools/reactflow-editors-base/dist/nodes/NodeSizes";
+import { BpmnNodeType } from "../BpmnGraphStructure";
+import { CONTAINER_NODES_DESIRABLE_PADDING } from "@kie-tools/reactflow-editors-base/dist/maths/DcMaths";
 
-export type NodeSizes<T extends NodeType = NodeType> = {
-  [K in T]: (args: { snapGrid: SnapGrid }) => DC__Dimension;
-};
-
-// FIXME: Tiago: Add all node types
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-export const MIN_NODE_SIZES: NodeSizes = {
-  [NODE_TYPES.dataObject]: ({ snapGrid }) => {
-    const snappedMinSize = MIN_SIZE_FOR_NODES(snapGrid, NODE_MIN_WIDTH / 2, NODE_MIN_HEIGHT + 20);
+export const MIN_NODE_SIZES: NodeSizes<BpmnNodeType> = {
+  [NODE_TYPES.startEvent]: ({ snapGrid }) => {
+    const snappedMinSize = MIN_SIZE_FOR_NODES(snapGrid, 50, 50);
+    return {
+      "@_width": snappedMinSize.width,
+      "@_height": snappedMinSize.height,
+    };
+  },
+  [NODE_TYPES.intermediateCatchEvent]: ({ snapGrid }) => {
+    const snappedMinSize = MIN_SIZE_FOR_NODES(snapGrid, 50, 50);
+    return {
+      "@_width": snappedMinSize.width,
+      "@_height": snappedMinSize.height,
+    };
+  },
+  [NODE_TYPES.intermediateThrowEvent]: ({ snapGrid }) => {
+    const snappedMinSize = MIN_SIZE_FOR_NODES(snapGrid, 50, 50);
+    return {
+      "@_width": snappedMinSize.width,
+      "@_height": snappedMinSize.height,
+    };
+  },
+  [NODE_TYPES.endEvent]: ({ snapGrid }) => {
+    const snappedMinSize = MIN_SIZE_FOR_NODES(snapGrid, 50, 50);
     return {
       "@_width": snappedMinSize.width,
       "@_height": snappedMinSize.height,
@@ -40,6 +54,38 @@ export const MIN_NODE_SIZES: NodeSizes = {
   },
   [NODE_TYPES.task]: ({ snapGrid }) => {
     const snappedMinSize = MIN_SIZE_FOR_NODES(snapGrid);
+    return {
+      "@_width": snappedMinSize.width,
+      "@_height": snappedMinSize.height,
+    };
+  },
+  [NODE_TYPES.subProcess]: ({ snapGrid }) => {
+    const snappedMinSize = MIN_SIZE_FOR_NODES(snapGrid);
+    return {
+      "@_width": snappedMinSize.width,
+      "@_height": snappedMinSize.height,
+    };
+  },
+  [NODE_TYPES.gateway]: ({ snapGrid }) => {
+    const snappedMinSize = MIN_SIZE_FOR_NODES(snapGrid, 50, 50);
+    return {
+      "@_width": snappedMinSize.width,
+      "@_height": snappedMinSize.height,
+    };
+  },
+  [NODE_TYPES.dataObject]: ({ snapGrid }) => {
+    const snappedMinSize = MIN_SIZE_FOR_NODES(snapGrid, NODE_MIN_WIDTH / 2, NODE_MIN_HEIGHT + 20);
+    return {
+      "@_width": snappedMinSize.width,
+      "@_height": snappedMinSize.height,
+    };
+  },
+  [NODE_TYPES.group]: ({ snapGrid }) => {
+    const snappedMinSize = MIN_SIZE_FOR_NODES(
+      snapGrid,
+      NODE_MIN_WIDTH + CONTAINER_NODES_DESIRABLE_PADDING * 2,
+      NODE_MIN_HEIGHT + CONTAINER_NODES_DESIRABLE_PADDING * 2
+    );
     return {
       "@_width": snappedMinSize.width,
       "@_height": snappedMinSize.height,
@@ -61,12 +107,30 @@ export const MIN_NODE_SIZES: NodeSizes = {
   },
 };
 
-// FIXME: Tiago: Add all node types
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-export const DEFAULT_NODE_SIZES: NodeSizes = {
-  [NODE_TYPES.dataObject]: ({ snapGrid }) => {
-    const snappedMinSize = MIN_SIZE_FOR_NODES(snapGrid, NODE_MIN_WIDTH / 2, NODE_MIN_HEIGHT + 20);
+export const DEFAULT_NODE_SIZES: NodeSizes<BpmnNodeType> = {
+  [NODE_TYPES.startEvent]: ({ snapGrid }) => {
+    const snappedMinSize = MIN_SIZE_FOR_NODES(snapGrid, 50, 50);
+    return {
+      "@_width": snappedMinSize.width,
+      "@_height": snappedMinSize.height,
+    };
+  },
+  [NODE_TYPES.intermediateCatchEvent]: ({ snapGrid }) => {
+    const snappedMinSize = MIN_SIZE_FOR_NODES(snapGrid, 50, 50);
+    return {
+      "@_width": snappedMinSize.width,
+      "@_height": snappedMinSize.height,
+    };
+  },
+  [NODE_TYPES.intermediateThrowEvent]: ({ snapGrid }) => {
+    const snappedMinSize = MIN_SIZE_FOR_NODES(snapGrid, 50, 50);
+    return {
+      "@_width": snappedMinSize.width,
+      "@_height": snappedMinSize.height,
+    };
+  },
+  [NODE_TYPES.endEvent]: ({ snapGrid }) => {
+    const snappedMinSize = MIN_SIZE_FOR_NODES(snapGrid, 50, 50);
     return {
       "@_width": snappedMinSize.width,
       "@_height": snappedMinSize.height,
@@ -74,6 +138,34 @@ export const DEFAULT_NODE_SIZES: NodeSizes = {
   },
   [NODE_TYPES.task]: ({ snapGrid }) => {
     const snappedMinSize = MIN_SIZE_FOR_NODES(snapGrid);
+    return {
+      "@_width": snappedMinSize.width,
+      "@_height": snappedMinSize.height,
+    };
+  },
+  [NODE_TYPES.subProcess]: ({ snapGrid }) => {
+    const snappedMinSize = MIN_SIZE_FOR_NODES(snapGrid);
+    return {
+      "@_width": snappedMinSize.width,
+      "@_height": snappedMinSize.height,
+    };
+  },
+  [NODE_TYPES.gateway]: ({ snapGrid }) => {
+    const snappedMinSize = MIN_SIZE_FOR_NODES(snapGrid, 50, 50);
+    return {
+      "@_width": snappedMinSize.width,
+      "@_height": snappedMinSize.height,
+    };
+  },
+  [NODE_TYPES.dataObject]: ({ snapGrid }) => {
+    const snappedMinSize = MIN_SIZE_FOR_NODES(snapGrid, NODE_MIN_WIDTH / 2, NODE_MIN_HEIGHT + 20);
+    return {
+      "@_width": snappedMinSize.width,
+      "@_height": snappedMinSize.height,
+    };
+  },
+  [NODE_TYPES.group]: ({ snapGrid }) => {
+    const snappedMinSize = MIN_SIZE_FOR_NODES(snapGrid, NODE_MIN_WIDTH * 2, NODE_MIN_WIDTH * 2); // This is not a mistake, we want the Group node to be a bigger square.
     return {
       "@_width": snappedMinSize.width,
       "@_height": snappedMinSize.height,

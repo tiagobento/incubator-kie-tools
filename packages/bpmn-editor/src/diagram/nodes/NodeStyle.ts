@@ -18,11 +18,11 @@
  */
 
 import React, { useMemo } from "react";
-import { NodeType } from "../connections/graphStructure";
+import { BpmnNodeType } from "../BpmnGraphStructure";
 import { NODE_TYPES } from "./NodeTypes";
-import { NodeLabelPosition } from "./NodeSvgs";
 import { Normalized } from "../../normalization/normalize";
-import { BPMNDI__BPMNLabelStyle, DC__Font } from "@kie-tools/bpmn-marshaller/dist/schemas/bpmn-2_0/ts-gen/types";
+import { DC__Font } from "@kie-tools/bpmn-marshaller/dist/schemas/bpmn-2_0/ts-gen/types";
+import { NodeLabelPosition } from "@kie-tools/reactflow-editors-base/dist/nodes/NodeSvgs";
 
 export interface NodeStyle {
   fontCssProperties: React.CSSProperties;
@@ -42,11 +42,10 @@ export const DEFAULT_NODE_GREEN_FILL = 255;
 export const DEFAULT_NODE_BLUE_FILL = 255;
 export const DEFAULT_NODE_OPACITY = 0.9;
 export const DEFAULT_NODE_FILL = `rgba(${DEFAULT_NODE_RED_FILL}, ${DEFAULT_NODE_GREEN_FILL}, ${DEFAULT_NODE_BLUE_FILL}, ${DEFAULT_NODE_OPACITY})`;
-export const DEFAULT_NODE_STROKE_WIDTH = 1.5;
 export const DEFAULT_NODE_STROKE_COLOR = "rgba(0, 0, 0, 1)";
 export const DEFAULT_FONT_COLOR = "rgba(0, 0, 0, 1)";
 
-export function useNodeStyle(args: { nodeType?: NodeType; isEnabled?: boolean }): NodeStyle {
+export function useNodeStyle(args: { nodeType?: BpmnNodeType; isEnabled?: boolean }): NodeStyle {
   const bpmnFontStyle = useMemo(() => getBpmnFontStyle({ isEnabled: args.isEnabled }), [args.isEnabled]);
 
   return useMemo(() => getNodeStyle({ bpmnFontStyle }), [bpmnFontStyle]);
@@ -92,23 +91,24 @@ export function getFontCssProperties(bpmnFontStyle?: BpmnFontStyle): React.CSSPr
   };
 }
 
-export function getNodeLabelPosition({ nodeType }: { nodeType: NodeType }): NodeLabelPosition {
+export function getNodeLabelPosition({ nodeType }: { nodeType: BpmnNodeType }): NodeLabelPosition {
   switch (nodeType) {
-    case NODE_TYPES.subprocess:
-    case NODE_TYPES.lane:
+    case NODE_TYPES.subProcess:
+      // case NODE_TYPES.lane:
       return "top-center";
-    case NODE_TYPES.dataObject:
     case NODE_TYPES.startEvent:
-    case NODE_TYPES.gateway:
+    case NODE_TYPES.intermediateCatchEvent:
+    case NODE_TYPES.intermediateThrowEvent:
     case NODE_TYPES.endEvent:
-    case NODE_TYPES.intermediateEvent:
+    case NODE_TYPES.gateway:
+    case NODE_TYPES.dataObject:
       return "center-bottom";
     case NODE_TYPES.group:
     case NODE_TYPES.textAnnotation:
       return "top-left";
     case NODE_TYPES.task:
     case NODE_TYPES.unknown:
-    case NODE_TYPES.custom:
+      // case NODE_TYPES.custom:
       return "center-center";
     default:
       assertUnreachable(nodeType);

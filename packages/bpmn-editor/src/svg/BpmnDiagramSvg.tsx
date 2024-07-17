@@ -21,22 +21,18 @@ import { Text } from "@visx/text";
 import * as React from "react";
 import { useMemo } from "react";
 import * as RF from "reactflow";
-import { NodeType } from "../diagram/connections/graphStructure";
-import { EdgeMarkers } from "../diagram/edges/EdgeMarkers";
-import { AssociationPath, BpmnDiagramEdgeData, SequenceFlowPath } from "../diagram/edges/Edges";
+import { BpmnNodeType } from "../diagram/BpmnGraphStructure";
+import { EdgeMarkers } from "@kie-tools/reactflow-editors-base/src/edges/EdgeMarkers";
+import { BpmnDiagramEdgeData } from "../diagram/edges/Edges";
 import { EDGE_TYPES } from "../diagram/edges/EdgeTypes";
-import { getSnappedMultiPointAnchoredEdgePath } from "../diagram/edges/getSnappedMultiPointAnchoredEdgePath";
+import { getSnappedMultiPointAnchoredEdgePath } from "@kie-tools/reactflow-editors-base/dist/edges/getSnappedMultiPointAnchoredEdgePath";
 import { BpmnDiagramNodeData } from "../diagram/nodes/Nodes";
 import { assertUnreachable, getBpmnFontStyle, getNodeLabelPosition, getNodeStyle } from "../diagram/nodes/NodeStyle";
-import {
-  DataObjectNodeSvg,
-  NodeLabelPosition,
-  TaskNodeSvg,
-  TextAnnotationNodeSvg,
-  UnknownNodeSvg,
-} from "../diagram/nodes/NodeSvgs";
+import { DataObjectNodeSvg, TaskNodeSvg, TextAnnotationNodeSvg, UnknownNodeSvg } from "../diagram/nodes/NodeSvgs";
 import { NODE_TYPES } from "../diagram/nodes/NodeTypes";
-import { SnapGrid } from "../store/Store";
+import { SnapGrid } from "@kie-tools/reactflow-editors-base/dist/snapgrid/SnapGrid";
+import { NodeLabelPosition } from "@kie-tools/reactflow-editors-base/dist/nodes/NodeSvgs";
+import { AssociationPath, SequenceFlowPath } from "../diagram/edges/EdgeSvgs";
 
 export function BpmnDiagramSvg({
   nodes,
@@ -107,7 +103,10 @@ export function BpmnDiagramSvg({
                 lineHeight={fontStyle.lineHeight}
                 style={{ ...fontStyle }}
                 dy={`calc(1.5em * ${i})`}
-                {...getNodeLabelSvgTextAlignmentProps(node, getNodeLabelPosition({ nodeType: node.type as NodeType }))}
+                {...getNodeLabelSvgTextAlignmentProps(
+                  node,
+                  getNodeLabelPosition({ nodeType: node.type as BpmnNodeType })
+                )}
               >
                 {labelLine}
               </Text>
@@ -128,9 +127,9 @@ export function BpmnDiagramSvg({
         const t = nodesById?.get(e.target);
         const { path } = getSnappedMultiPointAnchoredEdgePath({
           snapGrid,
-          bpmnEdge: e.data?.bpmnEdge,
-          bpmnShapeSource: e.data?.bpmnShapeSource,
-          bpmnShapeTarget: e.data?.bpmnShapeTarget,
+          edge: e.data?.bpmnEdge,
+          shapeSource: e.data?.bpmnShapeSource,
+          shapeTarget: e.data?.bpmnShapeTarget,
           sourceNodeBounds: {
             x: s?.positionAbsolute?.x,
             y: s?.positionAbsolute?.y,

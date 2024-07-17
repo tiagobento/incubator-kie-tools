@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { NodeType } from "../diagram/connections/graphStructure";
+import { BpmnNodeType } from "../diagram/BpmnGraphStructure";
 import { NODE_TYPES } from "../diagram/nodes/NodeTypes";
 
 export enum NodeNature {
@@ -27,19 +27,20 @@ export enum NodeNature {
   UNKNOWN = "UNKNOWN",
 }
 
-export const nodeNatures: Record<NodeType, NodeNature> = {
+export const nodeNatures: Record<BpmnNodeType, NodeNature> = {
   // TOP_LEVEL
   [NODE_TYPES.dataObject]: NodeNature.TOP_LEVEL,
-  [NODE_TYPES.lane]: NodeNature.TOP_LEVEL,
+  // [NODE_TYPES.lane]: NodeNature.TOP_LEVEL,
 
   // PROCESS_FLOW_ELELEMENT
-  [NODE_TYPES.task]: NodeNature.PROCESS_FLOW_ELEMENT,
   [NODE_TYPES.startEvent]: NodeNature.PROCESS_FLOW_ELEMENT,
+  [NODE_TYPES.intermediateCatchEvent]: NodeNature.PROCESS_FLOW_ELEMENT,
+  [NODE_TYPES.intermediateThrowEvent]: NodeNature.PROCESS_FLOW_ELEMENT,
   [NODE_TYPES.endEvent]: NodeNature.PROCESS_FLOW_ELEMENT,
-  [NODE_TYPES.intermediateEvent]: NodeNature.PROCESS_FLOW_ELEMENT,
+  [NODE_TYPES.task]: NodeNature.PROCESS_FLOW_ELEMENT,
+  [NODE_TYPES.subProcess]: NodeNature.PROCESS_FLOW_ELEMENT,
   [NODE_TYPES.gateway]: NodeNature.PROCESS_FLOW_ELEMENT,
-  [NODE_TYPES.custom]: NodeNature.PROCESS_FLOW_ELEMENT,
-  [NODE_TYPES.subprocess]: NodeNature.PROCESS_FLOW_ELEMENT,
+  // [NODE_TYPES.custom]: NodeNature.PROCESS_FLOW_ELEMENT,
 
   // ARTIFACT
   [NODE_TYPES.textAnnotation]: NodeNature.ARTIFACT,

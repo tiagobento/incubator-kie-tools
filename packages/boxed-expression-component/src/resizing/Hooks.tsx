@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import * as React from "react";
 import { useEffect, useMemo, useState } from "react";
 import { BoxedExpression } from "../api";
 import { BeeTableRef } from "../table/BeeTable";

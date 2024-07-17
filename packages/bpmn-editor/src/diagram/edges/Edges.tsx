@@ -18,68 +18,28 @@
  */
 
 import { BPMNDI__BPMNEdge, BPMNDI__BPMNShape } from "@kie-tools/bpmn-marshaller/dist/schemas/bpmn-2_0/ts-gen/types";
+import { useEdgeClassName } from "@kie-tools/reactflow-editors-base/dist/edges/Hooks";
+import { PotentialWaypoint, Waypoints } from "@kie-tools/reactflow-editors-base/dist/edges/Waypoints";
+import { useAlwaysVisibleEdgeUpdatersAtNodeBorders } from "@kie-tools/reactflow-editors-base/dist/edges/useAlwaysVisibleEdgeUpdatersAtNodeBorders";
+import { usePathForEdgeWithWaypoints } from "@kie-tools/reactflow-editors-base/dist/edges/usePathForEdgeWithWaypoints";
+import { usePotentialWaypointControls } from "@kie-tools/reactflow-editors-base/dist/edges/usePotentialWaypointControls";
+import { DEFAULT_INTRACTION_WIDTH } from "@kie-tools/reactflow-editors-base/dist/maths/DcMaths";
+import { propsHaveSameValuesDeep } from "@kie-tools/reactflow-editors-base/dist/memoization/memoization";
+import { useIsHovered } from "@kie-tools/reactflow-editors-base/dist/reactExt/useIsHovered";
+import { ReactFlowKieEditorDiagramEdgeData } from "@kie-tools/reactflow-editors-base/dist/store/State";
 import * as React from "react";
 import { useRef } from "react";
 import * as RF from "reactflow";
-import { DEFAULT_INTRACTION_WIDTH } from "../maths/DiMaths";
-import { propsHaveSameValuesDeep } from "../memoization/memoization";
-import { useIsHovered } from "../useIsHovered";
-import { PotentialWaypoint, Waypoints } from "./Waypoints";
-import { useAlwaysVisibleEdgeUpdatersAtNodeBorders } from "./useAlwaysVisibleEdgeUpdatersAtNodeBorders";
-import { useKieEdgePath } from "./useKieEdgePath";
-import { usePotentialWaypointControls } from "./usePotentialWaypointControls";
 import { Normalized } from "../../normalization/normalize";
+import { AssociationPath, SequenceFlowPath } from "./EdgeSvgs";
 
-export type BpmnDiagramEdgeData = {
-  bpmnEdge: (Normalized<BPMNDI__BPMNEdge> & { index: number }) | undefined;
+export type BpmnDiagramEdgeData = ReactFlowKieEditorDiagramEdgeData & {
+  bpmnEdge: Normalized<BPMNDI__BPMNEdge> | undefined;
+  bpmnEdgeIndex: number;
   bpmnObject: unknown; // FIXME: Tiago: ?
   bpmnShapeSource: Normalized<BPMNDI__BPMNShape> | undefined;
   bpmnShapeTarget: Normalized<BPMNDI__BPMNShape> | undefined;
 };
-
-export const SequenceFlowPath = React.memo(
-  (_props: React.SVGProps<SVGPathElement> & { svgRef?: React.RefObject<SVGPathElement> }) => {
-    const { svgRef, ...props } = _props;
-    return (
-      <>
-        <path ref={svgRef} style={{ strokeWidth: 1, stroke: "black" }} markerEnd={"url(#closed-arrow)"} {...props} />
-      </>
-    );
-  }
-);
-
-export const AssociationPath = React.memo(
-  (__props: React.SVGProps<SVGPathElement> & { svgRef?: React.RefObject<SVGPathElement> }) => {
-    const strokeWidth = __props.strokeWidth ?? 1.5;
-    const { svgRef, ...props } = __props;
-    return (
-      <>
-        <path
-          ref={svgRef}
-          strokeWidth={strokeWidth}
-          strokeLinecap="butt"
-          strokeLinejoin="round"
-          style={{ stroke: "black", strokeDasharray: `${strokeWidth},10` }}
-          {...props}
-        />
-      </>
-    );
-  }
-);
-
-export function useEdgeClassName(isConnecting: boolean, isDraggingWaypoint: boolean) {
-  if (isConnecting) {
-    return "dimmed";
-  }
-
-  if (isDraggingWaypoint) {
-    return "dragging-waypoint";
-  }
-
-  return "normal";
-}
-
-//
 
 const interactionStrokeProps: Partial<React.SVGAttributes<SVGPathElement>> = {
   strokeOpacity: 1,
@@ -94,18 +54,23 @@ export const SequenceFlowEdge = React.memo((props: RF.EdgeProps<BpmnDiagramEdgeD
   const renderCount = useRef<number>(0);
   renderCount.current++;
 
-  const { path, points: waypoints } = useKieEdgePath(props.source, props.target, props.data);
+  const { path, points: waypoints } = usePathForEdgeWithWaypoints(
+    props.source,
+    props.target,
+    props.data?.bpmnEdge,
+    props.data?.bpmnShapeSource,
+    props.data?.bpmnShapeTarget
+  );
 
   const interactionPathRef = React.useRef<SVGPathElement>(null);
   const isHovered = useIsHovered(interactionPathRef);
 
-  const { onMouseMove, onDoubleClick, potentialWaypoint, isDraggingWaypoint } = usePotentialWaypointControls(
-    waypoints,
-    props.selected,
-    props.id,
-    props.data?.bpmnEdge?.index,
-    interactionPathRef
-  );
+  const {
+    onMouseMove: onMouseMoveOnEdge,
+    onDoubleClick: onDoubleClickEdge,
+    potentialWaypoint,
+    isDraggingWaypoint,
+  } = usePotentialWaypointControls(waypoints, props.selected, props.id, props.data?.bpmnEdgeIndex, interactionPathRef);
 
   const isConnecting = !!RF.useStore((s) => s.connectionNodeId);
   const className = useEdgeClassName(isConnecting, isDraggingWaypoint);
@@ -120,8 +85,8 @@ export const SequenceFlowEdge = React.memo((props: RF.EdgeProps<BpmnDiagramEdgeD
         {...interactionStrokeProps}
         className={`${interactionStrokeProps.className} ${className}`}
         strokeWidth={props.interactionWidth ?? DEFAULT_INTRACTION_WIDTH}
-        onMouseMove={onMouseMove}
-        onDoubleClick={onDoubleClick}
+        onMouseMove={onMouseMoveOnEdge}
+        onDoubleClick={onDoubleClickEdge}
         data-edgetype={"information-requirement"}
       />
       <SequenceFlowPath d={path} className={`kie-bpmn-editor--edge ${className}`} />
@@ -129,9 +94,9 @@ export const SequenceFlowEdge = React.memo((props: RF.EdgeProps<BpmnDiagramEdgeD
       {props.selected && !isConnecting && props.data?.bpmnEdge && (
         <Waypoints
           edgeId={props.id}
-          edgeIndex={props.data.bpmnEdge.index}
+          edgeIndex={props.data.bpmnEdgeIndex}
           waypoints={waypoints}
-          onDragStop={onMouseMove}
+          onDragStop={onMouseMoveOnEdge}
         />
       )}
       {isHovered && potentialWaypoint && <PotentialWaypoint point={potentialWaypoint.point} />}
@@ -143,18 +108,23 @@ export const AssociationEdge = React.memo((props: RF.EdgeProps<BpmnDiagramEdgeDa
   const renderCount = useRef<number>(0);
   renderCount.current++;
 
-  const { path, points: waypoints } = useKieEdgePath(props.source, props.target, props.data);
+  const { path, points: waypoints } = usePathForEdgeWithWaypoints(
+    props.source,
+    props.target,
+    props.data?.bpmnEdge,
+    props.data?.bpmnShapeSource,
+    props.data?.bpmnShapeTarget
+  );
 
   const interactionPathRef = React.useRef<SVGPathElement>(null);
   const isHovered = useIsHovered(interactionPathRef);
 
-  const { onMouseMove, onDoubleClick, potentialWaypoint, isDraggingWaypoint } = usePotentialWaypointControls(
-    waypoints,
-    props.selected,
-    props.id,
-    props.data?.bpmnEdge?.index,
-    interactionPathRef
-  );
+  const {
+    onMouseMove: onMouseMoveOnEdge,
+    onDoubleClick: onDoubleClickEdge,
+    potentialWaypoint,
+    isDraggingWaypoint,
+  } = usePotentialWaypointControls(waypoints, props.selected, props.id, props.data?.bpmnEdgeIndex, interactionPathRef);
 
   const isConnecting = !!RF.useStore((s) => s.connectionNodeId);
   const className = useEdgeClassName(isConnecting, isDraggingWaypoint);
@@ -169,8 +139,8 @@ export const AssociationEdge = React.memo((props: RF.EdgeProps<BpmnDiagramEdgeDa
         {...interactionStrokeProps}
         className={`${interactionStrokeProps.className} ${className}`}
         strokeWidth={props.interactionWidth ?? DEFAULT_INTRACTION_WIDTH}
-        onMouseMove={onMouseMove}
-        onDoubleClick={onDoubleClick}
+        onMouseMove={onMouseMoveOnEdge}
+        onDoubleClick={onDoubleClickEdge}
         data-edgetype={"association"}
       />
       <AssociationPath d={path} className={`kie-bpmn-editor--edge ${className}`} />
@@ -178,9 +148,9 @@ export const AssociationEdge = React.memo((props: RF.EdgeProps<BpmnDiagramEdgeDa
       {props.selected && !isConnecting && props.data?.bpmnEdge && (
         <Waypoints
           edgeId={props.id}
-          edgeIndex={props.data.bpmnEdge.index}
+          edgeIndex={props.data.bpmnEdgeIndex}
           waypoints={waypoints}
-          onDragStop={onMouseMove}
+          onDragStop={onMouseMoveOnEdge}
         />
       )}
       {isHovered && potentialWaypoint && <PotentialWaypoint point={potentialWaypoint.point} />}

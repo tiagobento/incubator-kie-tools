@@ -18,53 +18,13 @@
  */
 
 import * as React from "react";
-import * as RF from "reactflow";
-import { DEFAULT_INTRACTION_WIDTH } from "../maths/DiMaths";
-import { DEFAULT_NODE_FILL, DEFAULT_NODE_STROKE_COLOR, DEFAULT_NODE_STROKE_WIDTH } from "./NodeStyle";
-
-export type NodeLabelPosition = "center-bottom" | "center-center" | "top-center" | "center-left" | "top-left";
-
-export type NodeSvgProps = RF.Dimensions &
-  RF.XYPosition & {
-    fillColor?: string;
-    strokeColor?: string;
-    strokeWidth?: number;
-  };
-
-export const ___NASTY_HACK_FOR_SAFARI_to_force_redrawing_svgs_and_avoid_repaint_glitches = { flag: false };
-
-export const containerNodeInteractionRectCssClassName = "kie-bpmn-editor--node-containerNodeInteractionRect";
-
-// This function makes sure that independent of strokeWidth, the size and position of the element is preserved. Much like `box-sizing: border-box`;
-export function normalize<T extends NodeSvgProps>(_props: T) {
-  const {
-    strokeWidth: _strokeWidth,
-    x: _x,
-    y: _y,
-    width: _width,
-    height: _height,
-    fillColor: _fillColor,
-    strokeColor: _strokeColor,
-    ...props
-  } = _props;
-
-  const strokeWidth = _strokeWidth ?? DEFAULT_NODE_STROKE_WIDTH;
-  const halfStrokeWidth = strokeWidth / 2;
-
-  const x = _x + halfStrokeWidth;
-  const y = _y + halfStrokeWidth;
-  const width = _width - strokeWidth;
-  const height = _height - strokeWidth;
-
-  return {
-    strokeWidth,
-    x,
-    y,
-    width: width + (___NASTY_HACK_FOR_SAFARI_to_force_redrawing_svgs_and_avoid_repaint_glitches.flag ? 0.1 : 0),
-    height: height + (___NASTY_HACK_FOR_SAFARI_to_force_redrawing_svgs_and_avoid_repaint_glitches.flag ? 0 : 0.1),
-    props,
-  };
-}
+import { DEFAULT_INTRACTION_WIDTH } from "@kie-tools/reactflow-editors-base/dist/maths/DcMaths";
+import { DEFAULT_NODE_FILL, DEFAULT_NODE_STROKE_COLOR } from "./NodeStyle";
+import {
+  containerNodeInteractionRectCssClassName,
+  NodeSvgProps,
+  normalize,
+} from "@kie-tools/reactflow-editors-base/dist/nodes/NodeSvgs";
 
 export function DataObjectNodeSvg(__props: NodeSvgProps & { isIcon: boolean; transform?: string }) {
   const {
@@ -117,6 +77,150 @@ export function DataObjectNodeSvg(__props: NodeSvgProps & { isIcon: boolean; tra
   );
 }
 
+export function StartEventNodeSvg(__props: NodeSvgProps) {
+  const {
+    x,
+    y,
+    width,
+    height,
+    strokeWidth,
+    props: { ...props },
+  } = normalize(__props);
+
+  return (
+    <>
+      <circle
+        cx={"50%"}
+        cy={"50%"}
+        strokeWidth={strokeWidth}
+        width={width}
+        height={height}
+        fill={"transparent"}
+        stroke={"#4aa241"}
+        strokeLinejoin={"round"}
+        r="90"
+        {...props}
+      />
+    </>
+  );
+}
+export function IntermediateCatchEventNodeSvg(__props: NodeSvgProps & { rimWidth?: number }) {
+  const {
+    x,
+    y,
+    width,
+    height,
+    strokeWidth,
+    props: { ..._props },
+  } = normalize(__props);
+
+  const { rimWidth, ...props } = { ..._props };
+
+  const outerCirculeRadius = 100;
+  const innerCircleRadius = outerCirculeRadius - (rimWidth ?? 20);
+
+  return (
+    <>
+      <circle
+        cx={"50%"}
+        cy={"50%"}
+        strokeWidth={strokeWidth}
+        width={width}
+        height={height}
+        fill={"#fbefcf"}
+        stroke={"#e6a000"}
+        strokeLinejoin={"round"}
+        r={outerCirculeRadius}
+        {...props}
+      />
+      <circle
+        cx={"50%"}
+        cy={"50%"}
+        strokeWidth={strokeWidth}
+        width={width}
+        height={height}
+        fill={"#fbefcf"}
+        stroke={"#e6a000"}
+        strokeLinejoin={"round"}
+        r={innerCircleRadius}
+        {...props}
+      />
+    </>
+  );
+}
+export function IntermediateThrowEventNodeSvg(__props: NodeSvgProps & { rimWidth?: number }) {
+  const {
+    x,
+    y,
+    width,
+    height,
+    strokeWidth,
+    props: { ..._props },
+  } = normalize(__props);
+
+  const { rimWidth, ...props } = { ..._props };
+
+  const outerCirculeRadius = 100;
+  const innerCircleRadius = outerCirculeRadius - (rimWidth ?? 20);
+
+  return (
+    <>
+      <circle
+        cx={"50%"}
+        cy={"50%"}
+        strokeWidth={strokeWidth}
+        width={width}
+        height={height}
+        fill={"#bddee1"}
+        stroke={"#007a87"}
+        strokeLinejoin={"round"}
+        r={outerCirculeRadius}
+        {...props}
+      />
+      <circle
+        cx={"50%"}
+        cy={"50%"}
+        strokeWidth={strokeWidth}
+        width={width}
+        height={height}
+        fill={"#bddee1"}
+        stroke={"#007a87"}
+        strokeLinejoin={"round"}
+        r={innerCircleRadius}
+        {...props}
+      />
+    </>
+  );
+}
+
+export function EndEventNodeSvg(__props: NodeSvgProps) {
+  const {
+    x,
+    y,
+    width,
+    height,
+    strokeWidth,
+    props: { ...props },
+  } = normalize(__props);
+
+  return (
+    <>
+      <circle
+        cx={"50%"}
+        cy={"50%"}
+        strokeWidth={strokeWidth * 2}
+        width={width}
+        height={height}
+        fill={"#fce7e7"}
+        stroke={"#a30000"}
+        strokeLinejoin={"round"}
+        r="90"
+        {...props}
+      />
+    </>
+  );
+}
+
 export function TaskNodeSvg(__props: NodeSvgProps) {
   const {
     x,
@@ -138,8 +242,124 @@ export function TaskNodeSvg(__props: NodeSvgProps) {
         fill={DEFAULT_NODE_FILL}
         stroke={DEFAULT_NODE_STROKE_COLOR}
         strokeLinejoin={"round"}
-        rx="30"
-        ry="30"
+        rx="5"
+        ry="5"
+        {...props}
+      />
+    </>
+  );
+}
+
+export function SubProcessNodeSvg(__props: NodeSvgProps) {
+  const {
+    x,
+    y,
+    width,
+    height,
+    strokeWidth,
+    props: { ...props },
+  } = normalize(__props);
+
+  return (
+    <>
+      <rect
+        x={x}
+        y={y}
+        strokeWidth={strokeWidth}
+        width={width}
+        height={height}
+        fill={DEFAULT_NODE_FILL}
+        stroke={DEFAULT_NODE_STROKE_COLOR}
+        strokeLinejoin={"round"}
+        rx="5"
+        ry="5"
+        {...props}
+      />
+      <rect
+        x={x + (width / 2 - width / 3 / 2)}
+        y={y + (height - height / 3)}
+        strokeWidth={strokeWidth}
+        width={width / 3}
+        height={height / 3}
+        fill={"black"}
+        stroke={"black"}
+        strokeLinejoin={"round"}
+        rx="0"
+        ry="0"
+        {...props}
+      />
+    </>
+  );
+}
+
+export function GatewayNodeSvg(__props: NodeSvgProps) {
+  const {
+    x,
+    y,
+    width,
+    height,
+    strokeWidth,
+    props: { ...props },
+  } = normalize(__props);
+
+  const w = width - 40;
+
+  return (
+    <>
+      <rect
+        x={x + 20}
+        y={y}
+        transform={`rotate(45,${x + width / 2},${x + width / 2})`}
+        strokeWidth={strokeWidth}
+        width={w}
+        height={w}
+        fill={"#fef5ea"}
+        stroke={"#ec7b08"}
+        strokeLinejoin={"round"}
+        rx="15"
+        ry="15"
+        {...props}
+      />
+    </>
+  );
+}
+
+export function LaneNodeSvg(__props: NodeSvgProps) {
+  const {
+    x,
+    y,
+    width,
+    height,
+    strokeWidth,
+    props: { ...props },
+  } = normalize(__props);
+
+  return (
+    <>
+      <rect
+        x={x}
+        y={y}
+        strokeWidth={strokeWidth}
+        width={width}
+        height={height}
+        fill={DEFAULT_NODE_FILL}
+        stroke={DEFAULT_NODE_STROKE_COLOR}
+        strokeLinejoin={"round"}
+        rx="0"
+        ry="0"
+        {...props}
+      />
+      <rect
+        x={x}
+        y={y}
+        strokeWidth={strokeWidth}
+        width={width / 4}
+        height={height}
+        fill={DEFAULT_NODE_FILL}
+        stroke={"black"}
+        strokeLinejoin={"round"}
+        rx="0"
+        ry="0"
         {...props}
       />
     </>
