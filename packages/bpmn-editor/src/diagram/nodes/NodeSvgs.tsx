@@ -303,22 +303,20 @@ export function GatewayNodeSvg(__props: NodeSvgProps) {
     props: { ...props },
   } = normalize(__props);
 
-  const w = width - 40;
-
   return (
     <>
       <rect
-        x={x + 20}
-        y={y}
-        transform={`rotate(45,${x + width / 2},${x + width / 2})`}
+        x={8 + x}
+        y={8 + y}
+        transform={`rotate(45,${x + width / 2},${y + height / 2})`}
         strokeWidth={strokeWidth}
-        width={w}
-        height={w}
+        width={width / 1.4} // sqrt(2)
+        height={height / 1.4} // sqrt(2)
         fill={"#fef5ea"}
         stroke={"#ec7b08"}
         strokeLinejoin={"round"}
-        rx="15"
-        ry="15"
+        rx="5"
+        ry="5"
         {...props}
       />
     </>
