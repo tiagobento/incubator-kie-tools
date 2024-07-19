@@ -29,6 +29,12 @@ import { useReactflowKieEditorDiagramStore } from "../store/Store";
 import { snapPoint } from "../snapgrid/SnapGrid";
 import { NodeSizes } from "../nodes/NodeSizes";
 
+export type NodeComponent = React.ComponentType<{ x: number; y: number; width: number; height: number }>;
+export type ConnectionLineNodeMapping<N extends string> = Record<N, NodeComponent>;
+
+export type EdgeComponent = React.ComponentType<{ d: string }>;
+export type ConnectionLineEdgeMapping<E extends string> = Record<E, EdgeComponent>;
+
 export function ConnectionLine<N extends string, E extends string>({
   toX,
   toY,
@@ -36,7 +42,14 @@ export function ConnectionLine<N extends string, E extends string>({
   fromHandle,
   DEFAULT_NODE_SIZES,
   graphStructure,
-}: RF.ConnectionLineComponentProps & { DEFAULT_NODE_SIZES: NodeSizes<N>; graphStructure: GraphStructure<N, E> }) {
+  nodeMapping,
+  edgeMapping,
+}: RF.ConnectionLineComponentProps & {
+  DEFAULT_NODE_SIZES: NodeSizes<N>;
+  graphStructure: GraphStructure<N, E>;
+  nodeMapping: ConnectionLineNodeMapping<N>;
+  edgeMapping: ConnectionLineEdgeMapping<E>;
+}) {
   const snapGrid = useReactflowKieEditorDiagramStore((s) => s.reactflowKieEditorDiagram.snapGrid);
   const edgeBeingUpdated = useReactflowKieEditorDiagramStore((s) =>
     s.reactflowKieEditorDiagram.edgeIdBeingUpdated
@@ -78,60 +91,50 @@ export function ConnectionLine<N extends string, E extends string>({
 
   // Edges
   // FIMXE: Tiago: Edges
-  // if (handleId === EDGE_TYPES.sequenceFlow) {
-  //   return <SequenceFlowPath d={connectionLinePath} />;
-  // } else if (handleId === EDGE_TYPES.association) {
-  //   return <AssociationPath d={connectionLinePath} />;
-  // }
-
-  // Nodes
-  // else {
-  const nodeType = handleId as N;
-  const { "@_x": toXsnapped, "@_y": toYsnapped } = snapPoint(snapGrid, { "@_x": toX, "@_y": toY });
-
-  const defaultSize = DEFAULT_NODE_SIZES[nodeType]({ snapGrid });
-  const [toXauto, toYauto] = getPositionalHandlePosition(
-    { x: toXsnapped, y: toYsnapped, width: defaultSize["@_width"], height: defaultSize["@_height"] },
-    { x: fromX, y: fromY, width: 1, height: 1 }
-  );
-
-  const edgeType = getDefaultEdgeTypeBetween(graphStructure, fromNode?.type as N, handleId as N);
-  if (!edgeType) {
-    throw new Error(`Invalid structure: ${fromNode?.type} --(any)--> ${handleId}`);
+  const EdgeConnectionLine = edgeMapping[handleId as E] as EdgeComponent;
+  if (EdgeConnectionLine !== undefined) {
+    return <EdgeConnectionLine d={connectionLinePath} />;
   }
 
-  const path = `M${fromX},${fromY} L${toXauto},${toYauto}`;
+  // Nodes
+  else {
+    const nodeType = handleId as N;
+    const { "@_x": toXsnapped, "@_y": toYsnapped } = snapPoint(snapGrid, { "@_x": toX, "@_y": toY });
 
-  // FIXME: Tiago: Nodes
-  // const edgeSvg = switchExpression(edgeType, {
-  //   [EDGE_TYPES.sequenceFlow]: <SequenceFlowPath d={path} />,
-  //   [EDGE_TYPES.association]: <AssociationPath d={path} />,
-  // });
+    const defaultSize = DEFAULT_NODE_SIZES[nodeType]({ snapGrid });
+    const [toXauto, toYauto] = getPositionalHandlePosition(
+      { x: toXsnapped, y: toYsnapped, width: defaultSize["@_width"], height: defaultSize["@_height"] },
+      { x: fromX, y: fromY, width: 1, height: 1 }
+    );
 
-  // if (nodeType === NODE_TYPES.task) {
-  //   return (
-  //     <g>
-  //       {edgeSvg}
-  //       <TaskNodeSvg x={toXsnapped} y={toYsnapped} width={defaultSize["@_width"]} height={defaultSize["@_height"]} />
-  //     </g>
-  //   );
-  // } else if (nodeType === NODE_TYPES.textAnnotation) {
-  //   return (
-  //     <g>
-  //       {edgeSvg}
-  //       <TextAnnotationNodeSvg
-  //         x={toXsnapped}
-  //         y={toYsnapped}
-  //         width={defaultSize["@_width"]}
-  //         height={defaultSize["@_height"]}
-  //       />
-  //     </g>
-  //   );
-  // }
-  // }
+    const edgeType = getDefaultEdgeTypeBetween(graphStructure, fromNode?.type as N, handleId as N);
+    if (!edgeType) {
+      throw new Error(`Invalid structure: ${fromNode?.type} --(any)--> ${handleId}`);
+    }
 
-  // throw new Error(`Unknown source of ConnectionLine '${handleId}'.`);
+    const path = `M${fromX},${fromY} L${toXauto},${toYauto}`;
 
-  // FIXME: Tiago: Delete this
-  return <></>;
+    const EdgeConnectionLine = edgeMapping[edgeType] as EdgeComponent;
+    if (EdgeConnectionLine === undefined) {
+      throw new Error("Nonexisting mapping for edge of type " + edgeType);
+    }
+
+    const NodeConnectionLine = nodeMapping[nodeType] as NodeComponent;
+    if (NodeConnectionLine === undefined) {
+      throw new Error("Nonexisting mapping for node of type " + nodeType);
+    }
+
+    return (
+      <g>
+        <EdgeConnectionLine d={path} />
+        <NodeConnectionLine
+          x={toXsnapped}
+          y={toYsnapped}
+          width={defaultSize["@_width"]}
+          height={defaultSize["@_height"]}
+        />
+      </g>
+    );
+  }
+  throw new Error(`Unknown source of ConnectionLine '${handleId}'.`);
 }

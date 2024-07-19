@@ -32,7 +32,7 @@ import { BpmnPalette } from "./BpmnPalette";
 import { DiagramContainerContextProvider } from "./DiagramContainerContext";
 import { EDGE_TYPES } from "./edges/EdgeTypes";
 import { AssociationEdge, SequenceFlowEdge } from "./edges/Edges";
-import { MIN_NODE_SIZES } from "./nodes/DefaultSizes";
+import { MIN_NODE_SIZES } from "./nodes/NodeSizes";
 import { NODE_TYPES } from "./nodes/NodeTypes";
 import {
   DataObjectNode,
@@ -48,8 +48,23 @@ import {
   GatewayNode,
 } from "./nodes/Nodes";
 import { TopRightCornerPanels } from "./BpmnDiagramTopRightPanels";
-import { ConnectionLine as ReactFlowDiagramConnectionLine } from "@kie-tools/reactflow-editors-base/dist/edges/ConnectionLine";
-import { DEFAULT_NODE_SIZES } from "./nodes/DefaultSizes";
+import {
+  ConnectionLineEdgeMapping,
+  ConnectionLineNodeMapping,
+  ConnectionLine as ReactFlowDiagramConnectionLine,
+} from "@kie-tools/reactflow-editors-base/dist/edges/ConnectionLine";
+import { DEFAULT_NODE_SIZES } from "./nodes/NodeSizes";
+import {
+  EndEventNodeSvg,
+  GatewayNodeSvg,
+  IntermediateCatchEventNodeSvg,
+  IntermediateThrowEventNodeSvg,
+  StartEventNodeSvg,
+  SubProcessNodeSvg,
+  TaskNodeSvg,
+  TextAnnotationNodeSvg,
+} from "./nodes/NodeSvgs";
+import { AssociationPath, SequenceFlowPath } from "./edges/EdgeSvgs";
 
 const nodeTypes: Record<BpmnNodeType, any> = {
   [NODE_TYPES.startEvent]: StartEventNode,
@@ -131,12 +146,34 @@ export function BpmnDiagram({
   );
 }
 
+const nodeMapping: ConnectionLineNodeMapping<BpmnNodeType> = {
+  [NODE_TYPES.startEvent]: StartEventNodeSvg,
+  [NODE_TYPES.intermediateCatchEvent]: IntermediateCatchEventNodeSvg,
+  [NODE_TYPES.intermediateThrowEvent]: IntermediateThrowEventNodeSvg,
+  [NODE_TYPES.endEvent]: EndEventNodeSvg,
+  [NODE_TYPES.task]: TaskNodeSvg,
+  [NODE_TYPES.subProcess]: SubProcessNodeSvg,
+  [NODE_TYPES.gateway]: GatewayNodeSvg,
+  [NODE_TYPES.textAnnotation]: TextAnnotationNodeSvg,
+  // Ignore
+  node_dataObject: undefined as any,
+  node_unknown: undefined as any,
+  node_group: undefined as any,
+};
+
+const edgeMapping: ConnectionLineEdgeMapping<BpmnEdgeType> = {
+  [EDGE_TYPES.sequenceFlow]: SequenceFlowPath,
+  [EDGE_TYPES.association]: AssociationPath,
+};
+
 export function ConnectionLine<N extends string, E extends string>(props: RF.ConnectionLineComponentProps) {
   return (
     <ReactFlowDiagramConnectionLine
       {...props}
       DEFAULT_NODE_SIZES={DEFAULT_NODE_SIZES}
       graphStructure={bpmnGraphStructure}
+      nodeMapping={nodeMapping}
+      edgeMapping={edgeMapping}
     />
   );
 }

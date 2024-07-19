@@ -20,17 +20,56 @@
 import * as RF from "reactflow";
 import { BpmnNodeType } from "../diagram/BpmnGraphStructure";
 import { BpmnDiagramEdgeData } from "../diagram/edges/Edges";
-import { BpmnDiagramNodeData } from "../diagram/nodes/Nodes";
+import { BpmnDiagramNodeData, NodeBpmnObjects } from "../diagram/nodes/Nodes";
 import { State } from "./Store";
 import { ReactFlowEditorDiagramData } from "@kie-tools/reactflow-editors-base/dist/store/State";
 import { NODE_TYPES } from "../diagram/nodes/NodeTypes";
 import { SnapGrid, snapShapeDimensions } from "@kie-tools/reactflow-editors-base/dist/snapgrid/SnapGrid";
-import { MIN_NODE_SIZES } from "../diagram/nodes/DefaultSizes";
+import { MIN_NODE_SIZES } from "../diagram/nodes/NodeSizes";
 
 export function computeDiagramData(
   definitions: State["bpmn"]["model"]["definitions"],
   snapGrid: SnapGrid
 ): ReactFlowEditorDiagramData<BpmnNodeType, BpmnDiagramNodeData, BpmnDiagramEdgeData> {
+  const bpmnObjectsById =
+    definitions.rootElement
+      ?.flatMap((s) => {
+        if (s.__$$element !== "process") {
+          return [];
+        }
+
+        return s;
+      })
+      .flatMap((s) => {
+        return s.flowElement;
+      })
+      .reduce((acc, flowElement) => {
+        if (
+          flowElement?.__$$element === "startEvent" ||
+          flowElement?.__$$element === "intermediateCatchEvent" ||
+          flowElement?.__$$element === "intermediateThrowEvent" ||
+          flowElement?.__$$element === "complexGateway" ||
+          flowElement?.__$$element === "eventBasedGateway" ||
+          flowElement?.__$$element === "exclusiveGateway" ||
+          flowElement?.__$$element === "inclusiveGateway" ||
+          flowElement?.__$$element === "parallelGateway" ||
+          flowElement?.__$$element === "businessRuleTask" ||
+          flowElement?.__$$element === "choreographyTask" ||
+          flowElement?.__$$element === "manualTask" ||
+          flowElement?.__$$element === "receiveTask" ||
+          flowElement?.__$$element === "scriptTask" ||
+          flowElement?.__$$element === "sendTask" ||
+          flowElement?.__$$element === "serviceTask" ||
+          flowElement?.__$$element === "task" ||
+          flowElement?.__$$element === "userTask" ||
+          flowElement?.__$$element === "endEvent"
+        ) {
+          return acc.set(flowElement["@_id"], flowElement);
+        } else {
+          return acc;
+        }
+      }, new Map<string, NodeBpmnObjects>()) ?? new Map<string, NodeBpmnObjects>();
+
   const nodes: RF.Node<BpmnDiagramNodeData>[] =
     definitions["bpmndi:BPMNDiagram"]
       ?.flatMap((s) => s["bpmndi:BPMNPlane"]["di:DiagramElement"])
@@ -38,6 +77,12 @@ export function computeDiagramData(
         if (s?.__$$element !== "bpmndi:BPMNShape") {
           return [];
         }
+
+        const bpmnObject = bpmnObjectsById.get(s["@_bpmnElement"]!);
+        if (!bpmnObject) {
+          return {} as any; // FIXME: Tiago: Unknown node
+        }
+        const nodeType = elementToNodeType[bpmnObject.__$$element];
         return {
           id: s?.["@_id"],
           position: {
@@ -45,10 +90,7 @@ export function computeDiagramData(
             y: s?.["dc:Bounds"]?.["@_y"],
           },
           data: {
-            bpmnObject: {
-              "@_id": s["@_id"],
-              __$$element: "task",
-            },
+            bpmnObject,
             shape: s,
             index: i,
             shapeIndex: i,
@@ -56,15 +98,10 @@ export function computeDiagramData(
           },
           width: s?.["dc:Bounds"]?.["@_width"],
           height: s?.["dc:Bounds"]?.["@_height"],
-          type: NODE_TYPES.task,
-          style: { ...snapShapeDimensions(snapGrid, s, MIN_NODE_SIZES[NODE_TYPES.task]({ snapGrid: snapGrid })) },
+          type: nodeType,
+          style: { ...snapShapeDimensions(snapGrid, s, MIN_NODE_SIZES[nodeType]({ snapGrid })) },
         };
       }) ?? [];
-
-  // definitions.rootElement
-  //   ?.filter((s) => s.__$$element === "process")[0]
-  //   .flowElement?.filter((s) => s.__$$element === "task")
-  //   .map((s) => s["@_id"]);
 
   return {
     graphStructureEdges: [],
@@ -78,3 +115,51 @@ export function computeDiagramData(
     selectedEdgesById: new Map<string, RF.Edge<BpmnDiagramEdgeData>>(),
   };
 }
+
+export const elementToNodeType: Record<NonNullable<NodeBpmnObjects>["__$$element"], BpmnNodeType> = {
+  // start event
+  startEvent: NODE_TYPES.startEvent,
+  // intermediate events
+  intermediateCatchEvent: NODE_TYPES.intermediateCatchEvent,
+  intermediateThrowEvent: NODE_TYPES.intermediateThrowEvent,
+  // tasks
+  businessRuleTask: NODE_TYPES.task,
+  choreographyTask: NODE_TYPES.task,
+  task: NODE_TYPES.task,
+  userTask: NODE_TYPES.task,
+  manualTask: NODE_TYPES.task,
+  scriptTask: NODE_TYPES.task,
+  sendTask: NODE_TYPES.task,
+  serviceTask: NODE_TYPES.task,
+  // subprocess
+  subProcess: NODE_TYPES.subProcess,
+  // end event
+  endEvent: NODE_TYPES.endEvent,
+  // gateway
+  complexGateway: NODE_TYPES.gateway,
+  eventBasedGateway: NODE_TYPES.gateway,
+  exclusiveGateway: NODE_TYPES.gateway,
+  inclusiveGateway: NODE_TYPES.gateway,
+  parallelGateway: NODE_TYPES.gateway,
+  // misc
+  dataObject: NODE_TYPES.dataObject,
+  group: NODE_TYPES.group,
+  textAnnotation: NODE_TYPES.textAnnotation,
+  //
+  // unknown
+  //
+  adHocSubProcess: NODE_TYPES.unknown,
+  boundaryEvent: NODE_TYPES.unknown,
+  callActivity: NODE_TYPES.unknown,
+  callChoreography: NODE_TYPES.unknown,
+  event: NODE_TYPES.unknown,
+  implicitThrowEvent: NODE_TYPES.unknown,
+  receiveTask: NODE_TYPES.unknown,
+  subChoreography: NODE_TYPES.unknown,
+  transaction: NODE_TYPES.unknown,
+  // edges
+  dataObjectReference: NODE_TYPES.unknown,
+  dataStoreReference: NODE_TYPES.unknown,
+  sequenceFlow: NODE_TYPES.unknown,
+  association: NODE_TYPES.unknown,
+};

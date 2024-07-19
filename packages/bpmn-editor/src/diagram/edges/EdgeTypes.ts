@@ -18,6 +18,6 @@
  */
 
 export const EDGE_TYPES = {
-  sequenceFlow: "edge_informationRequirement" as const,
+  sequenceFlow: "edge_sequenceFlow" as const,
   association: "edge_association" as const,
 };

@@ -27,8 +27,20 @@ export type BpmnNodeType = Values<typeof NODE_TYPES>;
 export type BpmnEdgeType = Values<typeof EDGE_TYPES>;
 
 export const bpmnGraphStructure: GraphStructure<BpmnNodeType, BpmnEdgeType> = new Map([
-  [NODE_TYPES.dataObject, new Map([])],
-  [NODE_TYPES.task, new Map([])],
+  [
+    NODE_TYPES.startEvent,
+    new Map<BpmnEdgeType, Set<BpmnNodeType>>([
+      [EDGE_TYPES.sequenceFlow, new Set([NODE_TYPES.task])],
+      [EDGE_TYPES.association, new Set([NODE_TYPES.textAnnotation])],
+    ]),
+  ],
+  [
+    NODE_TYPES.task,
+    new Map<BpmnEdgeType, Set<BpmnNodeType>>([
+      [EDGE_TYPES.sequenceFlow, new Set([NODE_TYPES.task, NODE_TYPES.endEvent])],
+      [EDGE_TYPES.association, new Set([NODE_TYPES.textAnnotation])],
+    ]),
+  ],
   [NODE_TYPES.textAnnotation, new Map([])],
 ]);
 
@@ -50,7 +62,7 @@ export const bpmnGraphOutgoingStructure = {
     edges: [],
   },
   [NODE_TYPES.task]: {
-    nodes: [NODE_TYPES.task],
+    nodes: [NODE_TYPES.task, NODE_TYPES.endEvent, NODE_TYPES.textAnnotation],
     edges: [EDGE_TYPES.sequenceFlow],
   },
   [NODE_TYPES.subProcess]: {

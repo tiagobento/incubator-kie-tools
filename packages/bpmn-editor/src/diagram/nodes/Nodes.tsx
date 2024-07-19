@@ -44,7 +44,7 @@ import { Normalized } from "../../normalization/normalize";
 import { useBpmnEditorStore, useBpmnEditorStoreApi } from "../../store/StoreContext";
 import { BpmnNodeType, bpmnGraphOutgoingStructure, bpmnNodesContainmentMap } from "../BpmnGraphStructure";
 import { EDGE_TYPES } from "../edges/EdgeTypes";
-import { MIN_NODE_SIZES } from "./DefaultSizes";
+import { MIN_NODE_SIZES } from "./NodeSizes";
 import { getNodeLabelPosition, useNodeStyle } from "./NodeStyle";
 import {
   DataObjectNodeSvg,
@@ -82,6 +82,7 @@ import { useIsHovered } from "@kie-tools/reactflow-editors-base/dist/reactExt/us
 import { Unpacked } from "@kie-tools/reactflow-editors-base/dist/tsExt/tsExt";
 import { getContainmentRelationship } from "@kie-tools/reactflow-editors-base/dist/maths/DcMaths";
 import { BpmnDiagramEdgeData } from "../edges/Edges";
+import { bpmnEdgesOutgoingStuffNodePanelMapping, bpmnNodesOutgoingStuffNodePanelMapping } from "./NodeMapping";
 
 export type NodeBpmnObjects = null | Unpacked<
   Normalized<BPMN20__tProcess["flowElement"] | BPMN20__tProcess["artifact"]>
@@ -173,6 +174,8 @@ export const StartEventNode = React.memo(
             />
 
             <OutgoingStuffNodePanel
+              nodeMapping={bpmnNodesOutgoingStuffNodePanelMapping}
+              edgeMapping={bpmnEdgesOutgoingStuffNodePanelMapping}
               nodeHref={id}
               isVisible={!isTargeted && shouldActLikeHovered}
               nodeTypes={bpmnGraphOutgoingStructure[NODE_TYPES.startEvent].nodes}
@@ -264,6 +267,8 @@ export const IntermediateCatchEventNode = React.memo(
             />
 
             <OutgoingStuffNodePanel
+              nodeMapping={bpmnNodesOutgoingStuffNodePanelMapping}
+              edgeMapping={bpmnEdgesOutgoingStuffNodePanelMapping}
               nodeHref={id}
               isVisible={!isTargeted && shouldActLikeHovered}
               nodeTypes={bpmnGraphOutgoingStructure[NODE_TYPES.intermediateCatchEvent].nodes}
@@ -355,6 +360,8 @@ export const IntermediateThrowEventNode = React.memo(
             />
 
             <OutgoingStuffNodePanel
+              nodeMapping={bpmnNodesOutgoingStuffNodePanelMapping}
+              edgeMapping={bpmnEdgesOutgoingStuffNodePanelMapping}
               nodeHref={id}
               isVisible={!isTargeted && shouldActLikeHovered}
               nodeTypes={bpmnGraphOutgoingStructure[NODE_TYPES.intermediateThrowEvent].nodes}
@@ -373,7 +380,7 @@ export const IntermediateThrowEventNode = React.memo(
 
 export const EndEventNode = React.memo(
   ({
-    data: { bpmnObject: EndEvent, shape, index, shapeIndex },
+    data: { bpmnObject: endEvent, shape, index, shapeIndex },
     selected,
     dragging,
     zIndex,
@@ -444,6 +451,8 @@ export const EndEventNode = React.memo(
             />
 
             <OutgoingStuffNodePanel
+              nodeMapping={bpmnNodesOutgoingStuffNodePanelMapping}
+              edgeMapping={bpmnEdgesOutgoingStuffNodePanelMapping}
               nodeHref={id}
               isVisible={!isTargeted && shouldActLikeHovered}
               nodeTypes={bpmnGraphOutgoingStructure[NODE_TYPES.endEvent].nodes}
@@ -532,7 +541,11 @@ export const TaskNode = React.memo(
               }, [bpmnEditorStoreApi])}
             />
 
+            <>{task["@_name"]}</>
+
             <OutgoingStuffNodePanel
+              nodeMapping={bpmnNodesOutgoingStuffNodePanelMapping}
+              edgeMapping={bpmnEdgesOutgoingStuffNodePanelMapping}
               nodeHref={id}
               isVisible={!isTargeted && shouldActLikeHovered}
               nodeTypes={bpmnGraphOutgoingStructure[NODE_TYPES.task].nodes}
@@ -548,9 +561,6 @@ export const TaskNode = React.memo(
               />
             )}
           </div>
-          {/* Creates a div element with the node size to push down the <EditableNodeLabel /> */}
-          {<div style={{ height: nodeDimensions.height, flexShrink: 0 }} />}
-          {<div>{task["@_name"]}</div>}
         </div>
       </>
     );
@@ -631,6 +641,8 @@ export const SubProcessNode = React.memo(
             />
 
             <OutgoingStuffNodePanel
+              nodeMapping={bpmnNodesOutgoingStuffNodePanelMapping}
+              edgeMapping={bpmnEdgesOutgoingStuffNodePanelMapping}
               nodeHref={id}
               isVisible={!isTargeted && shouldActLikeHovered}
               nodeTypes={bpmnGraphOutgoingStructure[NODE_TYPES.subProcess].nodes}
@@ -746,6 +758,8 @@ export const GatewayNode = React.memo(
             />
 
             <OutgoingStuffNodePanel
+              nodeMapping={bpmnNodesOutgoingStuffNodePanelMapping}
+              edgeMapping={bpmnEdgesOutgoingStuffNodePanelMapping}
               nodeHref={id}
               isVisible={!isTargeted && shouldActLikeHovered}
               nodeTypes={bpmnGraphOutgoingStructure[NODE_TYPES.gateway].nodes}
@@ -850,6 +864,8 @@ export const DataObjectNode = React.memo(
             />
 
             <OutgoingStuffNodePanel
+              nodeMapping={bpmnNodesOutgoingStuffNodePanelMapping}
+              edgeMapping={bpmnEdgesOutgoingStuffNodePanelMapping}
               nodeHref={id}
               isVisible={!isTargeted && shouldActLikeHovered}
               nodeTypes={bpmnGraphOutgoingStructure[NODE_TYPES.dataObject].nodes}
@@ -960,6 +976,8 @@ export const GroupNode = React.memo(
           {/* {`render count: ${renderCount.current}`}
           <br /> */}
           <OutgoingStuffNodePanel
+            nodeMapping={bpmnNodesOutgoingStuffNodePanelMapping}
+            edgeMapping={bpmnEdgesOutgoingStuffNodePanelMapping}
             nodeHref={id}
             isVisible={!isTargeted && selected && !dragging}
             nodeTypes={bpmnGraphOutgoingStructure[NODE_TYPES.group].nodes}
@@ -1057,6 +1075,8 @@ export const TextAnnotationNode = React.memo(
             }, [bpmnEditorStoreApi])}
           />
           <OutgoingStuffNodePanel
+            nodeMapping={bpmnNodesOutgoingStuffNodePanelMapping}
+            edgeMapping={bpmnEdgesOutgoingStuffNodePanelMapping}
             nodeHref={id}
             isVisible={!isTargeted && shouldActLikeHovered}
             nodeTypes={bpmnGraphOutgoingStructure[NODE_TYPES.textAnnotation].nodes}

@@ -36,11 +36,29 @@ export const handleStyle: React.CSSProperties = {
   transform: "unset",
 };
 
+export type OutgoingStuffNodePanelNodeMapping<N extends string> = Record<
+  N,
+  {
+    actionTitle: string;
+    icon: React.ReactElement;
+  }
+>;
+
+export type OutgoingStuffNodePanelEdgeMapping<E extends string> = Record<
+  E,
+  {
+    actionTitle: string;
+    icon: React.ReactElement;
+  }
+>;
+
 export function OutgoingStuffNodePanel<N extends string, E extends string>(props: {
   isVisible: boolean;
   nodeTypes: N[];
   edgeTypes: E[];
   nodeHref: string;
+  nodeMapping: OutgoingStuffNodePanelNodeMapping<N>;
+  edgeMapping: OutgoingStuffNodePanelEdgeMapping<E>;
 }) {
   const style: React.CSSProperties = React.useMemo(
     () => ({
@@ -48,24 +66,6 @@ export function OutgoingStuffNodePanel<N extends string, E extends string>(props
     }),
     [props.isVisible]
   );
-
-  const getEdgeActionTitle = React.useCallback((edgeType: string): string => {
-    switch (edgeType) {
-      // FIXME: Tiago: Map edge types
-      default: {
-        throw new Error("Add Unknown edge type");
-      }
-    }
-  }, []);
-
-  const getNodeActionTitle = React.useCallback((nodeType: string): string => {
-    switch (nodeType) {
-      // FIXME: Tiago: Map node types
-      default: {
-        throw new Error("Add Unknown node type");
-      }
-    }
-  }, []);
 
   return (
     <>
@@ -80,7 +80,7 @@ export function OutgoingStuffNodePanel<N extends string, E extends string>(props
                 type={"source"}
                 style={handleStyle}
                 position={RF.Position.Top}
-                title={getEdgeActionTitle(edgeType)}
+                title={props.edgeMapping[edgeType].actionTitle}
                 data-testid={`${props.nodeHref}-add-${edgeType}`}
               >
                 <svg
@@ -105,7 +105,7 @@ export function OutgoingStuffNodePanel<N extends string, E extends string>(props
                 type={"source"}
                 style={handleStyle}
                 position={RF.Position.Top}
-                title={getNodeActionTitle(nodeType)}
+                title={props.nodeMapping[nodeType].actionTitle}
                 data-testid={`${props.nodeHref}-add-${nodeType}`}
               >
                 <svg

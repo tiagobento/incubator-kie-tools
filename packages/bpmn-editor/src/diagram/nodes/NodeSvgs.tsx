@@ -22,6 +22,7 @@ import { DEFAULT_INTRACTION_WIDTH } from "@kie-tools/reactflow-editors-base/dist
 import { DEFAULT_NODE_FILL, DEFAULT_NODE_STROKE_COLOR } from "./NodeStyle";
 import {
   containerNodeInteractionRectCssClassName,
+  DEFAULT_NODE_STROKE_WIDTH,
   NodeSvgProps,
   normalize,
 } from "@kie-tools/reactflow-editors-base/dist/nodes/NodeSvgs";
@@ -90,15 +91,15 @@ export function StartEventNodeSvg(__props: NodeSvgProps) {
   return (
     <>
       <circle
-        cx={"50%"}
-        cy={"50%"}
+        cx={x + width / 2}
+        cy={y + height / 2}
         strokeWidth={strokeWidth}
         width={width}
         height={height}
-        fill={"transparent"}
+        fill={"#e8fae6"}
         stroke={"#4aa241"}
         strokeLinejoin={"round"}
-        r="90"
+        r={width / 2}
         {...props}
       />
     </>
@@ -116,14 +117,14 @@ export function IntermediateCatchEventNodeSvg(__props: NodeSvgProps & { rimWidth
 
   const { rimWidth, ...props } = { ..._props };
 
-  const outerCirculeRadius = 100;
-  const innerCircleRadius = outerCirculeRadius - (rimWidth ?? 20);
+  const outerCirculeRadius = width / 2;
+  const innerCircleRadius = outerCirculeRadius - (rimWidth ?? 5);
 
   return (
     <>
       <circle
-        cx={"50%"}
-        cy={"50%"}
+        cx={x + width / 2}
+        cy={y + height / 2}
         strokeWidth={strokeWidth}
         width={width}
         height={height}
@@ -134,8 +135,8 @@ export function IntermediateCatchEventNodeSvg(__props: NodeSvgProps & { rimWidth
         {...props}
       />
       <circle
-        cx={"50%"}
-        cy={"50%"}
+        cx={x + width / 2}
+        cy={y + height / 2}
         strokeWidth={strokeWidth}
         width={width}
         height={height}
@@ -160,14 +161,14 @@ export function IntermediateThrowEventNodeSvg(__props: NodeSvgProps & { rimWidth
 
   const { rimWidth, ...props } = { ..._props };
 
-  const outerCirculeRadius = 100;
-  const innerCircleRadius = outerCirculeRadius - (rimWidth ?? 20);
+  const outerCirculeRadius = width / 2;
+  const innerCircleRadius = outerCirculeRadius - (rimWidth ?? 5);
 
   return (
     <>
       <circle
-        cx={"50%"}
-        cy={"50%"}
+        cx={x + width / 2}
+        cy={y + height / 2}
         strokeWidth={strokeWidth}
         width={width}
         height={height}
@@ -178,8 +179,8 @@ export function IntermediateThrowEventNodeSvg(__props: NodeSvgProps & { rimWidth
         {...props}
       />
       <circle
-        cx={"50%"}
-        cy={"50%"}
+        cx={x + width / 2}
+        cy={y + height / 2}
         strokeWidth={strokeWidth}
         width={width}
         height={height}
@@ -201,20 +202,20 @@ export function EndEventNodeSvg(__props: NodeSvgProps) {
     height,
     strokeWidth,
     props: { ...props },
-  } = normalize(__props);
+  } = normalize({ ...__props, strokeWidth: (__props.strokeWidth ?? DEFAULT_NODE_STROKE_WIDTH) * 2 });
 
   return (
     <>
       <circle
-        cx={"50%"}
-        cy={"50%"}
-        strokeWidth={strokeWidth * 2}
+        cx={x + width / 2}
+        cy={y + height / 2}
+        strokeWidth={strokeWidth}
         width={width}
         height={height}
         fill={"#fce7e7"}
         stroke={"#a30000"}
         strokeLinejoin={"round"}
-        r="90"
+        r={width / 2}
         {...props}
       />
     </>
