@@ -146,14 +146,6 @@ export function computeDiagramData(
         return [];
       }
 
-      // (begin)
-      // This logic comes from the BPMN Editor (classic). Where the id of an edge contains information about the source/target shapes.
-      // edge_shape__FC832C6B-4A2F-40F0-96DD-A3CB34B22575_to_shape__88064D68-4F0B-47D4-9618-0972B954DFDC
-      const [ss, tt] = bpmnEdge["@_id"].replace("edge_shape_", "").split("_to_shape_");
-      const sourceId = bpmnEdge["@_sourceElement"] ?? ss;
-      const targetId = bpmnEdge["@_targetElement"] ?? tt;
-      // (end)
-
       const bpmnElement = edgeBpmnElementsById.get(bpmnEdge["@_bpmnElement"]!);
       if (bpmnElement?.__$$element !== "sequenceFlow" && bpmnElement?.__$$element !== "association") {
         return []; // Ignoring edge with wrong type of bpmnElement.
@@ -162,6 +154,9 @@ export function computeDiagramData(
         console.warn("WARNING: BPMNEdge without SequenceFlow/Association: " + bpmnEdge["@_id"]);
         return []; // Ignoring BPMNEdge without SequenceFlow/Association
       }
+
+      const sourceId = bpmnElement["@_sourceRef"];
+      const targetId = bpmnElement["@_targetRef"];
 
       const shapeSource = nodesById.get(sourceId)?.data?.shape;
       const shapeTarget = nodesById.get(targetId)?.data?.shape;
