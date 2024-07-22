@@ -42,7 +42,7 @@ import { useCallback, useEffect, useMemo, useRef } from "react";
 import * as RF from "reactflow";
 import { Normalized } from "../../normalization/normalize";
 import { useBpmnEditorStore, useBpmnEditorStoreApi } from "../../store/StoreContext";
-import { BpmnNodeType, bpmnGraphOutgoingStructure, bpmnNodesContainmentMap } from "../BpmnGraphStructure";
+import { BpmnNodeType, BPMN_OUTGOING_STRUCTURE, BPMN_CONTAINMENT_MAP } from "../BpmnGraphStructure";
 import { EDGE_TYPES } from "../edges/EdgeTypes";
 import { MIN_NODE_SIZES } from "./NodeSizes";
 import { getNodeLabelPosition, useNodeStyle } from "./NodeStyle";
@@ -135,7 +135,7 @@ export const StartEventNode = React.memo(
     const bpmnEditorStoreApi = useBpmnEditorStoreApi();
 
     const { isTargeted, isValidConnectionTarget } = useConnectionTargetStatus(id, shouldActLikeHovered);
-    const className = useNodeClassName(bpmnNodesContainmentMap, isValidConnectionTarget, id, NODE_TYPES, EDGE_TYPES);
+    const className = useNodeClassName(BPMN_CONTAINMENT_MAP, isValidConnectionTarget, id, NODE_TYPES, EDGE_TYPES);
     const nodeDimensions = useNodeDimensions({ shape, nodeType: type as BpmnNodeType, MIN_NODE_SIZES });
 
     const setName = useCallback<OnEditableNodeLabelChange>(
@@ -185,8 +185,8 @@ export const StartEventNode = React.memo(
               edgeMapping={bpmnEdgesOutgoingStuffNodePanelMapping}
               nodeHref={id}
               isVisible={!isTargeted && shouldActLikeHovered}
-              nodeTypes={bpmnGraphOutgoingStructure[NODE_TYPES.startEvent].nodes}
-              edgeTypes={bpmnGraphOutgoingStructure[NODE_TYPES.startEvent].edges}
+              nodeTypes={BPMN_OUTGOING_STRUCTURE[NODE_TYPES.startEvent].nodes}
+              edgeTypes={BPMN_OUTGOING_STRUCTURE[NODE_TYPES.startEvent].edges}
             />
           </div>
           {/* Creates a div element with the node size to push down the <EditableNodeLabel /> */}
@@ -228,7 +228,7 @@ export const IntermediateCatchEventNode = React.memo(
     const bpmnEditorStoreApi = useBpmnEditorStoreApi();
 
     const { isTargeted, isValidConnectionTarget } = useConnectionTargetStatus(id, shouldActLikeHovered);
-    const className = useNodeClassName(bpmnNodesContainmentMap, isValidConnectionTarget, id, NODE_TYPES, EDGE_TYPES);
+    const className = useNodeClassName(BPMN_CONTAINMENT_MAP, isValidConnectionTarget, id, NODE_TYPES, EDGE_TYPES);
     const nodeDimensions = useNodeDimensions({ shape, nodeType: type as BpmnNodeType, MIN_NODE_SIZES });
 
     const setName = useCallback<OnEditableNodeLabelChange>(
@@ -278,8 +278,8 @@ export const IntermediateCatchEventNode = React.memo(
               edgeMapping={bpmnEdgesOutgoingStuffNodePanelMapping}
               nodeHref={id}
               isVisible={!isTargeted && shouldActLikeHovered}
-              nodeTypes={bpmnGraphOutgoingStructure[NODE_TYPES.intermediateCatchEvent].nodes}
-              edgeTypes={bpmnGraphOutgoingStructure[NODE_TYPES.intermediateCatchEvent].edges}
+              nodeTypes={BPMN_OUTGOING_STRUCTURE[NODE_TYPES.intermediateCatchEvent].nodes}
+              edgeTypes={BPMN_OUTGOING_STRUCTURE[NODE_TYPES.intermediateCatchEvent].edges}
             />
           </div>
           {/* Creates a div element with the node size to push down the <EditableNodeLabel /> */}
@@ -321,7 +321,7 @@ export const IntermediateThrowEventNode = React.memo(
     const bpmnEditorStoreApi = useBpmnEditorStoreApi();
 
     const { isTargeted, isValidConnectionTarget } = useConnectionTargetStatus(id, shouldActLikeHovered);
-    const className = useNodeClassName(bpmnNodesContainmentMap, isValidConnectionTarget, id, NODE_TYPES, EDGE_TYPES);
+    const className = useNodeClassName(BPMN_CONTAINMENT_MAP, isValidConnectionTarget, id, NODE_TYPES, EDGE_TYPES);
     const nodeDimensions = useNodeDimensions({ shape, nodeType: type as BpmnNodeType, MIN_NODE_SIZES });
 
     const setName = useCallback<OnEditableNodeLabelChange>(
@@ -371,8 +371,8 @@ export const IntermediateThrowEventNode = React.memo(
               edgeMapping={bpmnEdgesOutgoingStuffNodePanelMapping}
               nodeHref={id}
               isVisible={!isTargeted && shouldActLikeHovered}
-              nodeTypes={bpmnGraphOutgoingStructure[NODE_TYPES.intermediateThrowEvent].nodes}
-              edgeTypes={bpmnGraphOutgoingStructure[NODE_TYPES.intermediateThrowEvent].edges}
+              nodeTypes={BPMN_OUTGOING_STRUCTURE[NODE_TYPES.intermediateThrowEvent].nodes}
+              edgeTypes={BPMN_OUTGOING_STRUCTURE[NODE_TYPES.intermediateThrowEvent].edges}
             />
           </div>
           {/* Creates a div element with the node size to push down the <EditableNodeLabel /> */}
@@ -412,7 +412,7 @@ export const EndEventNode = React.memo(
     const bpmnEditorStoreApi = useBpmnEditorStoreApi();
 
     const { isTargeted, isValidConnectionTarget } = useConnectionTargetStatus(id, shouldActLikeHovered);
-    const className = useNodeClassName(bpmnNodesContainmentMap, isValidConnectionTarget, id, NODE_TYPES, EDGE_TYPES);
+    const className = useNodeClassName(BPMN_CONTAINMENT_MAP, isValidConnectionTarget, id, NODE_TYPES, EDGE_TYPES);
     const nodeDimensions = useNodeDimensions({ shape, nodeType: type as BpmnNodeType, MIN_NODE_SIZES });
 
     const setName = useCallback<OnEditableNodeLabelChange>(
@@ -462,8 +462,8 @@ export const EndEventNode = React.memo(
               edgeMapping={bpmnEdgesOutgoingStuffNodePanelMapping}
               nodeHref={id}
               isVisible={!isTargeted && shouldActLikeHovered}
-              nodeTypes={bpmnGraphOutgoingStructure[NODE_TYPES.endEvent].nodes}
-              edgeTypes={bpmnGraphOutgoingStructure[NODE_TYPES.endEvent].edges}
+              nodeTypes={BPMN_OUTGOING_STRUCTURE[NODE_TYPES.endEvent].nodes}
+              edgeTypes={BPMN_OUTGOING_STRUCTURE[NODE_TYPES.endEvent].edges}
             />
           </div>
           {/* Creates a div element with the node size to push down the <EditableNodeLabel /> */}
@@ -503,7 +503,7 @@ export const TaskNode = React.memo(
     const bpmnEditorStoreApi = useBpmnEditorStoreApi();
 
     const { isTargeted, isValidConnectionTarget } = useConnectionTargetStatus(id, shouldActLikeHovered);
-    const className = useNodeClassName(bpmnNodesContainmentMap, isValidConnectionTarget, id, NODE_TYPES, EDGE_TYPES);
+    const className = useNodeClassName(BPMN_CONTAINMENT_MAP, isValidConnectionTarget, id, NODE_TYPES, EDGE_TYPES);
     const nodeDimensions = useNodeDimensions({ shape, nodeType: type as BpmnNodeType, MIN_NODE_SIZES });
 
     const setName = useCallback<OnEditableNodeLabelChange>(
@@ -555,8 +555,8 @@ export const TaskNode = React.memo(
               edgeMapping={bpmnEdgesOutgoingStuffNodePanelMapping}
               nodeHref={id}
               isVisible={!isTargeted && shouldActLikeHovered}
-              nodeTypes={bpmnGraphOutgoingStructure[NODE_TYPES.task].nodes}
-              edgeTypes={bpmnGraphOutgoingStructure[NODE_TYPES.task].edges}
+              nodeTypes={BPMN_OUTGOING_STRUCTURE[NODE_TYPES.task].nodes}
+              edgeTypes={BPMN_OUTGOING_STRUCTURE[NODE_TYPES.task].edges}
             />
 
             {shouldActLikeHovered && (
@@ -602,7 +602,7 @@ export const SubProcessNode = React.memo(
     const bpmnEditorStoreApi = useBpmnEditorStoreApi();
 
     const { isTargeted, isValidConnectionTarget } = useConnectionTargetStatus(id, shouldActLikeHovered);
-    const className = useNodeClassName(bpmnNodesContainmentMap, isValidConnectionTarget, id, NODE_TYPES, EDGE_TYPES);
+    const className = useNodeClassName(BPMN_CONTAINMENT_MAP, isValidConnectionTarget, id, NODE_TYPES, EDGE_TYPES);
     const nodeDimensions = useNodeDimensions({ shape, nodeType: type as BpmnNodeType, MIN_NODE_SIZES });
 
     const setName = useCallback<OnEditableNodeLabelChange>(
@@ -652,8 +652,8 @@ export const SubProcessNode = React.memo(
               edgeMapping={bpmnEdgesOutgoingStuffNodePanelMapping}
               nodeHref={id}
               isVisible={!isTargeted && shouldActLikeHovered}
-              nodeTypes={bpmnGraphOutgoingStructure[NODE_TYPES.subProcess].nodes}
-              edgeTypes={bpmnGraphOutgoingStructure[NODE_TYPES.subProcess].edges}
+              nodeTypes={BPMN_OUTGOING_STRUCTURE[NODE_TYPES.subProcess].nodes}
+              edgeTypes={BPMN_OUTGOING_STRUCTURE[NODE_TYPES.subProcess].edges}
             />
 
             {shouldActLikeHovered && (
@@ -719,7 +719,7 @@ export const GatewayNode = React.memo(
     const bpmnEditorStoreApi = useBpmnEditorStoreApi();
 
     const { isTargeted, isValidConnectionTarget } = useConnectionTargetStatus(id, shouldActLikeHovered);
-    const className = useNodeClassName(bpmnNodesContainmentMap, isValidConnectionTarget, id, NODE_TYPES, EDGE_TYPES);
+    const className = useNodeClassName(BPMN_CONTAINMENT_MAP, isValidConnectionTarget, id, NODE_TYPES, EDGE_TYPES);
     const nodeDimensions = useNodeDimensions({ shape, nodeType: type as BpmnNodeType, MIN_NODE_SIZES });
 
     const setName = useCallback<OnEditableNodeLabelChange>(
@@ -769,8 +769,8 @@ export const GatewayNode = React.memo(
               edgeMapping={bpmnEdgesOutgoingStuffNodePanelMapping}
               nodeHref={id}
               isVisible={!isTargeted && shouldActLikeHovered}
-              nodeTypes={bpmnGraphOutgoingStructure[NODE_TYPES.gateway].nodes}
-              edgeTypes={bpmnGraphOutgoingStructure[NODE_TYPES.gateway].edges}
+              nodeTypes={BPMN_OUTGOING_STRUCTURE[NODE_TYPES.gateway].nodes}
+              edgeTypes={BPMN_OUTGOING_STRUCTURE[NODE_TYPES.gateway].edges}
             />
           </div>
           {/* Creates a div element with the node size to push down the <EditableNodeLabel /> */}
@@ -810,7 +810,7 @@ export const DataObjectNode = React.memo(
     const bpmnEditorStoreApi = useBpmnEditorStoreApi();
 
     const { isTargeted, isValidConnectionTarget } = useConnectionTargetStatus(id, shouldActLikeHovered);
-    const className = useNodeClassName(bpmnNodesContainmentMap, isValidConnectionTarget, id, NODE_TYPES, EDGE_TYPES);
+    const className = useNodeClassName(BPMN_CONTAINMENT_MAP, isValidConnectionTarget, id, NODE_TYPES, EDGE_TYPES);
     const nodeDimensions = useNodeDimensions({ shape, nodeType: type as BpmnNodeType, MIN_NODE_SIZES });
 
     const setName = useCallback<OnEditableNodeLabelChange>(
@@ -875,8 +875,8 @@ export const DataObjectNode = React.memo(
               edgeMapping={bpmnEdgesOutgoingStuffNodePanelMapping}
               nodeHref={id}
               isVisible={!isTargeted && shouldActLikeHovered}
-              nodeTypes={bpmnGraphOutgoingStructure[NODE_TYPES.dataObject].nodes}
-              edgeTypes={bpmnGraphOutgoingStructure[NODE_TYPES.dataObject].edges}
+              nodeTypes={BPMN_OUTGOING_STRUCTURE[NODE_TYPES.dataObject].nodes}
+              edgeTypes={BPMN_OUTGOING_STRUCTURE[NODE_TYPES.dataObject].edges}
             />
 
             {shouldActLikeHovered && (
@@ -924,7 +924,7 @@ export const GroupNode = React.memo(
 
     const { isEditingLabel, setEditingLabel, triggerEditing, triggerEditingIfEnter } = useEditableNodeLabel(id);
     const { isTargeted, isValidConnectionTarget } = useConnectionTargetStatus(id, shouldActLikeHovered);
-    const className = useNodeClassName(bpmnNodesContainmentMap, isValidConnectionTarget, id, NODE_TYPES, EDGE_TYPES);
+    const className = useNodeClassName(BPMN_CONTAINMENT_MAP, isValidConnectionTarget, id, NODE_TYPES, EDGE_TYPES);
     const nodeDimensions = useNodeDimensions({ shape, nodeType: type as BpmnNodeType, MIN_NODE_SIZES });
     const setName = useCallback<OnEditableNodeLabelChange>(
       (newName: string) => {
@@ -987,8 +987,8 @@ export const GroupNode = React.memo(
             edgeMapping={bpmnEdgesOutgoingStuffNodePanelMapping}
             nodeHref={id}
             isVisible={!isTargeted && selected && !dragging}
-            nodeTypes={bpmnGraphOutgoingStructure[NODE_TYPES.group].nodes}
-            edgeTypes={bpmnGraphOutgoingStructure[NODE_TYPES.group].edges}
+            nodeTypes={BPMN_OUTGOING_STRUCTURE[NODE_TYPES.group].nodes}
+            edgeTypes={BPMN_OUTGOING_STRUCTURE[NODE_TYPES.group].edges}
           />
 
           {selected && !dragging && (
@@ -1033,7 +1033,7 @@ export const TextAnnotationNode = React.memo(
     const bpmnEditorStoreApi = useBpmnEditorStoreApi();
 
     const { isTargeted, isValidConnectionTarget } = useConnectionTargetStatus(id, shouldActLikeHovered);
-    const className = useNodeClassName(bpmnNodesContainmentMap, isValidConnectionTarget, id, NODE_TYPES, EDGE_TYPES);
+    const className = useNodeClassName(BPMN_CONTAINMENT_MAP, isValidConnectionTarget, id, NODE_TYPES, EDGE_TYPES);
     const nodeDimensions = useNodeDimensions({
       nodeType: type as typeof NODE_TYPES.textAnnotation,
       shape,
@@ -1086,8 +1086,8 @@ export const TextAnnotationNode = React.memo(
             edgeMapping={bpmnEdgesOutgoingStuffNodePanelMapping}
             nodeHref={id}
             isVisible={!isTargeted && shouldActLikeHovered}
-            nodeTypes={bpmnGraphOutgoingStructure[NODE_TYPES.textAnnotation].nodes}
-            edgeTypes={bpmnGraphOutgoingStructure[NODE_TYPES.textAnnotation].edges}
+            nodeTypes={BPMN_OUTGOING_STRUCTURE[NODE_TYPES.textAnnotation].nodes}
+            edgeTypes={BPMN_OUTGOING_STRUCTURE[NODE_TYPES.textAnnotation].edges}
           />
           <div>{"" + textAnnotation.text /* FIXME: Tiago: XML*/}</div>
           {shouldActLikeHovered && (
@@ -1121,7 +1121,7 @@ export const UnknownNode = React.memo(
     const bpmnEditorStoreApi = useBpmnEditorStoreApi();
 
     const { isTargeted, isValidConnectionTarget } = useConnectionTargetStatus(id, shouldActLikeHovered);
-    const className = useNodeClassName(bpmnNodesContainmentMap, isValidConnectionTarget, id, NODE_TYPES, EDGE_TYPES);
+    const className = useNodeClassName(BPMN_CONTAINMENT_MAP, isValidConnectionTarget, id, NODE_TYPES, EDGE_TYPES);
     const nodeDimensions = useNodeDimensions({
       nodeType: type as typeof NODE_TYPES.unknown,
       shape,

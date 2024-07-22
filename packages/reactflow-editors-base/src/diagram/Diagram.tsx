@@ -51,33 +51,44 @@ export function Diagram<
   NData extends ReactFlowKieEditorDiagramNodeData,
   EData extends ReactFlowKieEditorDiagramEdgeData,
 >({
-  modelBeforeEditingRef,
+  // model
   model,
+  modelBeforeEditingRef,
   resetToBeforeEditingBegan,
+  // infra
+  ref,
+  children,
+  container,
+  // components
+  connectionLineComponent,
+  nodeComponents,
+  edgeComponents,
+  // domain
   containmentMap,
   nodeTypes,
-  edgeTypes,
-  NODE_TYPES,
-  MIN_NODE_SIZES,
+  minNodeSizes,
   graphStructure,
-  children,
-  connectionLineComponent,
-  container,
-  ref,
 }: {
-  nodeTypes: RF.NodeTypes;
-  edgeTypes: RF.EdgeTypes;
-  modelBeforeEditingRef: React.MutableRefObject<unknown>;
+  // model
   model: unknown;
+  modelBeforeEditingRef: React.MutableRefObject<unknown>;
   resetToBeforeEditingBegan: () => void;
-  containmentMap: ContainmentMap<N>;
-  NODE_TYPES: Record<string, string>;
-  MIN_NODE_SIZES: NodeSizes<N>;
-  graphStructure: GraphStructure<N, E>;
+
+  // components
   connectionLineComponent: RF.ConnectionLineComponent;
-  children: React.ReactElement[];
+  nodeComponents: RF.NodeTypes;
+  edgeComponents: RF.EdgeTypes;
+
+  // infra
   ref: React.RefObject<DiagramRef>;
+  children: React.ReactElement[];
   container: React.RefObject<HTMLElement>;
+
+  // domain
+  containmentMap: ContainmentMap<N>;
+  nodeTypes: Record<string, string>;
+  minNodeSizes: NodeSizes<N>;
+  graphStructure: GraphStructure<N, E>;
 }) {
   // Contexts
   const reactflowKieEditorDiagramStoreApi = useReactflowKieEditorDiagramStoreApi();
@@ -87,15 +98,7 @@ export function Diagram<
   const [reactFlowInstance, setReactFlowInstance] = useState<RF.ReactFlowInstance<NData, EData> | undefined>(undefined);
 
   // Refs
-  React.useImperativeHandle(
-    ref,
-    () => ({
-      getReactFlowInstance: () => {
-        return reactFlowInstance;
-      },
-    }),
-    [reactFlowInstance]
-  );
+  React.useImperativeHandle(ref, () => ({ getReactFlowInstance: () => reactFlowInstance }), [reactFlowInstance]);
 
   const nodeIdBeingDraggedRef = useRef<string | null>(null);
 
@@ -151,11 +154,11 @@ export function Diagram<
               bounds: bounds!,
               container: node.data.shape["dc:Bounds"]!,
               snapGrid,
-              containerMinSizes: MIN_NODE_SIZES[node.type as N],
+              containerMinSizes: minNodeSizes[node.type as N],
               boundsMinSizes: minSizes,
             }).isInside
         ),
-    [MIN_NODE_SIZES, reactFlowInstance]
+    [minNodeSizes, reactFlowInstance]
   );
 
   const onDragOver = useCallback((e: React.DragEvent) => {
@@ -240,7 +243,7 @@ export function Diagram<
         });
 
         // only try to create node if source handle is compatible
-        if (!Object.values(NODE_TYPES).find((n) => n === state.reactflowKieEditorDiagram.ongoingConnection!.handleId)) {
+        if (!Object.values(nodeTypes).find((n) => n === state.reactflowKieEditorDiagram.ongoingConnection!.handleId)) {
           return;
         }
 
@@ -283,7 +286,7 @@ export function Diagram<
         state.reactflowKieEditorDiagram.ongoingConnection = undefined;
       });
     },
-    [reactflowKieEditorDiagramStoreApi, container, reactFlowInstance, NODE_TYPES, graphStructure]
+    [reactflowKieEditorDiagramStoreApi, container, reactFlowInstance, nodeTypes, graphStructure]
   );
 
   const isValidConnection = useCallback<RF.IsValidConnection>(
@@ -341,7 +344,7 @@ export function Diagram<
                 const snappedShape = snapShapeDimensions(
                   state.reactflowKieEditorDiagram.snapGrid,
                   node.data.shape,
-                  MIN_NODE_SIZES[node.type as N]({
+                  minNodeSizes[node.type as N]({
                     snapGrid: state.reactflowKieEditorDiagram.snapGrid,
                   })
                 );
@@ -393,7 +396,7 @@ export function Diagram<
         }
       });
     },
-    [MIN_NODE_SIZES, reactFlowInstance, reactflowKieEditorDiagramStoreApi]
+    [minNodeSizes, reactFlowInstance, reactflowKieEditorDiagramStoreApi]
   );
 
   const onNodeDrag = useCallback<RF.NodeDragHandler>(
@@ -408,12 +411,12 @@ export function Diagram<
             "@_width": node.width ?? 0,
             "@_height": node.height ?? 0,
           },
-          MIN_NODE_SIZES[node.type as N],
+          minNodeSizes[node.type as N],
           state.reactflowKieEditorDiagram.snapGrid
         );
       });
     },
-    [reactflowKieEditorDiagramStoreApi, getFirstNodeFittingBounds, MIN_NODE_SIZES]
+    [reactflowKieEditorDiagramStoreApi, getFirstNodeFittingBounds, minNodeSizes]
   );
 
   const onNodeDragStart = useCallback<RF.NodeDragHandler>(
@@ -664,8 +667,8 @@ export function Diagram<
         onNodeDrag={onNodeDrag}
         // (end)
         onNodeDragStop={onNodeDragStop}
-        nodeTypes={nodeTypes}
-        edgeTypes={edgeTypes}
+        nodeTypes={nodeComponents}
+        edgeTypes={edgeComponents}
         snapToGrid={true}
         snapGrid={rfSnapGrid}
         defaultViewport={DEFAULT_VIEWPORT}

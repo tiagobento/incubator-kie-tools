@@ -40,15 +40,15 @@ export function ConnectionLine<N extends string, E extends string>({
   toY,
   fromNode,
   fromHandle,
-  DEFAULT_NODE_SIZES,
+  defaultNodeSizes,
   graphStructure,
-  nodeMapping,
-  edgeMapping,
+  nodeComponentsMapping,
+  edgeComponentsMapping,
 }: RF.ConnectionLineComponentProps & {
-  DEFAULT_NODE_SIZES: NodeSizes<N>;
+  defaultNodeSizes: NodeSizes<N>;
   graphStructure: GraphStructure<N, E>;
-  nodeMapping: ConnectionLineNodeMapping<N>;
-  edgeMapping: ConnectionLineEdgeMapping<E>;
+  nodeComponentsMapping: ConnectionLineNodeMapping<N>;
+  edgeComponentsMapping: ConnectionLineEdgeMapping<E>;
 }) {
   const snapGrid = useReactflowKieEditorDiagramStore((s) => s.reactflowKieEditorDiagram.snapGrid);
   const edgeBeingUpdated = useReactflowKieEditorDiagramStore((s) =>
@@ -91,7 +91,7 @@ export function ConnectionLine<N extends string, E extends string>({
 
   // Edges
   // FIMXE: Tiago: Edges
-  const EdgeConnectionLine = edgeMapping[handleId as E] as EdgeComponent;
+  const EdgeConnectionLine = edgeComponentsMapping[handleId as E] as EdgeComponent;
   if (EdgeConnectionLine !== undefined) {
     return <EdgeConnectionLine d={connectionLinePath} />;
   }
@@ -101,7 +101,7 @@ export function ConnectionLine<N extends string, E extends string>({
     const nodeType = handleId as N;
     const { "@_x": toXsnapped, "@_y": toYsnapped } = snapPoint(snapGrid, { "@_x": toX, "@_y": toY });
 
-    const defaultSize = DEFAULT_NODE_SIZES[nodeType]({ snapGrid });
+    const defaultSize = defaultNodeSizes[nodeType]({ snapGrid });
     const [toXauto, toYauto] = getPositionalHandlePosition(
       { x: toXsnapped, y: toYsnapped, width: defaultSize["@_width"], height: defaultSize["@_height"] },
       { x: fromX, y: fromY, width: 1, height: 1 }
@@ -114,12 +114,12 @@ export function ConnectionLine<N extends string, E extends string>({
 
     const path = `M${fromX},${fromY} L${toXauto},${toYauto}`;
 
-    const EdgeConnectionLine = edgeMapping[edgeType] as EdgeComponent;
+    const EdgeConnectionLine = edgeComponentsMapping[edgeType] as EdgeComponent;
     if (EdgeConnectionLine === undefined) {
       throw new Error("Nonexisting mapping for edge of type " + edgeType);
     }
 
-    const NodeConnectionLine = nodeMapping[nodeType] as NodeComponent;
+    const NodeConnectionLine = nodeComponentsMapping[nodeType] as NodeComponent;
     if (NodeConnectionLine === undefined) {
       throw new Error("Nonexisting mapping for node of type " + nodeType);
     }

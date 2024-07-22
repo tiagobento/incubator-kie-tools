@@ -32,7 +32,7 @@ import { enableMapSet } from "immer";
 import { create } from "zustand";
 import { immer } from "zustand/middleware/immer";
 import { BpmnDiagramEdgeData } from "../diagram/edges/Edges";
-import { BpmnNodeType, bpmnNodesContainmentMap } from "../diagram/BpmnGraphStructure";
+import { BpmnNodeType, BPMN_CONTAINMENT_MAP } from "../diagram/BpmnGraphStructure";
 import { BpmnDiagramNodeData } from "../diagram/nodes/Nodes";
 import { Normalized, normalize } from "../normalization/normalize";
 import { computeDiagramData } from "./computeDiagramData";
@@ -162,7 +162,7 @@ export function createBpmnEditorStore(
           computedCache.cached("isDropTargetNodeValidForSelection", computeIsDropTargetNodeValidForSelection, [
             s.reactflowKieEditorDiagram.dropTargetNode,
             s.computed(s).getDiagramData(),
-            bpmnNodesContainmentMap,
+            BPMN_CONTAINMENT_MAP,
           ]),
 
         getDiagramData: () =>

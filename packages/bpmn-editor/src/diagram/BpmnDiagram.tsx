@@ -27,7 +27,7 @@ import { normalize } from "../normalization/normalize";
 import { useBpmnEditorStore, useBpmnEditorStoreApi } from "../store/StoreContext";
 import { BpmnDiagramCommands } from "./BpmnDiagramCommands";
 import { BpmnDiagramEmptyState } from "./BpmnDiagramEmptyState";
-import { BpmnEdgeType, BpmnNodeType, bpmnGraphStructure, bpmnNodesContainmentMap } from "./BpmnGraphStructure";
+import { BpmnEdgeType, BpmnNodeType, BPMN_GRAPH_STRUCTURE, BPMN_CONTAINMENT_MAP } from "./BpmnGraphStructure";
 import { BpmnPalette } from "./BpmnPalette";
 import { DiagramContainerContextProvider } from "./DiagramContainerContext";
 import { EDGE_TYPES } from "./edges/EdgeTypes";
@@ -66,25 +66,6 @@ import {
 } from "./nodes/NodeSvgs";
 import { AssociationPath, SequenceFlowPath } from "./edges/EdgeSvgs";
 
-const nodeTypes: Record<BpmnNodeType, any> = {
-  [NODE_TYPES.startEvent]: StartEventNode,
-  [NODE_TYPES.intermediateCatchEvent]: IntermediateCatchEventNode,
-  [NODE_TYPES.intermediateThrowEvent]: IntermediateThrowEventNode,
-  [NODE_TYPES.endEvent]: EndEventNode,
-  [NODE_TYPES.task]: TaskNode,
-  [NODE_TYPES.subProcess]: SubProcessNode,
-  [NODE_TYPES.gateway]: GatewayNode,
-  [NODE_TYPES.group]: GroupNode,
-  [NODE_TYPES.textAnnotation]: TextAnnotationNode,
-  [NODE_TYPES.dataObject]: DataObjectNode,
-  [NODE_TYPES.unknown]: UnknownNode,
-};
-
-const edgeTypes: Record<BpmnEdgeType, any> = {
-  [EDGE_TYPES.sequenceFlow]: SequenceFlowEdge,
-  [EDGE_TYPES.association]: AssociationEdge,
-};
-
 export function BpmnDiagram({
   container,
   ref,
@@ -96,7 +77,7 @@ export function BpmnDiagram({
 
   const bpmnEditorStoreApi = useBpmnEditorStoreApi();
 
-  const thisBpmn = useBpmnEditorStore((s) => s.bpmn.model);
+  const model = useBpmnEditorStore((s) => s.bpmn.model);
 
   const { bpmnModelBeforeEditingRef } = useBpmnEditor();
 
@@ -124,18 +105,22 @@ export function BpmnDiagram({
         </svg>
 
         <Diagram
+          // infra
           ref={ref}
           container={container}
-          nodeTypes={nodeTypes}
-          edgeTypes={edgeTypes}
+          // model
           modelBeforeEditingRef={bpmnModelBeforeEditingRef}
-          model={thisBpmn}
+          model={model}
           resetToBeforeEditingBegan={resetToBeforeEditingBegan}
-          containmentMap={bpmnNodesContainmentMap}
-          NODE_TYPES={NODE_TYPES}
-          MIN_NODE_SIZES={MIN_NODE_SIZES}
-          graphStructure={bpmnGraphStructure}
+          // components
           connectionLineComponent={ConnectionLine}
+          nodeComponents={RF_NODE_TYPES}
+          edgeComponents={RF_EDGE_TYPES}
+          // domain
+          containmentMap={BPMN_CONTAINMENT_MAP}
+          nodeTypes={NODE_TYPES}
+          minNodeSizes={MIN_NODE_SIZES}
+          graphStructure={BPMN_GRAPH_STRUCTURE}
         >
           <BpmnPalette pulse={isEmptyStateShowing} />
           <TopRightCornerPanels availableHeight={container.current?.offsetHeight} />
@@ -146,7 +131,38 @@ export function BpmnDiagram({
   );
 }
 
-const nodeMapping: ConnectionLineNodeMapping<BpmnNodeType> = {
+export function ConnectionLine<N extends string, E extends string>(props: RF.ConnectionLineComponentProps) {
+  return (
+    <ReactFlowDiagramConnectionLine
+      {...props}
+      defaultNodeSizes={DEFAULT_NODE_SIZES}
+      graphStructure={BPMN_GRAPH_STRUCTURE}
+      nodeComponentsMapping={CONNECTION_LINE_NODE_COMPONENT_MAPPING}
+      edgeComponentsMapping={CONNECTION_LINE_EDGE_COMPONENTS_MAPPING}
+    />
+  );
+}
+
+const RF_NODE_TYPES: Record<BpmnNodeType, any> = {
+  [NODE_TYPES.startEvent]: StartEventNode,
+  [NODE_TYPES.intermediateCatchEvent]: IntermediateCatchEventNode,
+  [NODE_TYPES.intermediateThrowEvent]: IntermediateThrowEventNode,
+  [NODE_TYPES.endEvent]: EndEventNode,
+  [NODE_TYPES.task]: TaskNode,
+  [NODE_TYPES.subProcess]: SubProcessNode,
+  [NODE_TYPES.gateway]: GatewayNode,
+  [NODE_TYPES.group]: GroupNode,
+  [NODE_TYPES.textAnnotation]: TextAnnotationNode,
+  [NODE_TYPES.dataObject]: DataObjectNode,
+  [NODE_TYPES.unknown]: UnknownNode,
+};
+
+const RF_EDGE_TYPES: Record<BpmnEdgeType, any> = {
+  [EDGE_TYPES.sequenceFlow]: SequenceFlowEdge,
+  [EDGE_TYPES.association]: AssociationEdge,
+};
+
+const CONNECTION_LINE_NODE_COMPONENT_MAPPING: ConnectionLineNodeMapping<BpmnNodeType> = {
   [NODE_TYPES.startEvent]: StartEventNodeSvg,
   [NODE_TYPES.intermediateCatchEvent]: IntermediateCatchEventNodeSvg,
   [NODE_TYPES.intermediateThrowEvent]: IntermediateThrowEventNodeSvg,
@@ -161,19 +177,7 @@ const nodeMapping: ConnectionLineNodeMapping<BpmnNodeType> = {
   node_group: undefined as any,
 };
 
-const edgeMapping: ConnectionLineEdgeMapping<BpmnEdgeType> = {
+const CONNECTION_LINE_EDGE_COMPONENTS_MAPPING: ConnectionLineEdgeMapping<BpmnEdgeType> = {
   [EDGE_TYPES.sequenceFlow]: SequenceFlowPath,
   [EDGE_TYPES.association]: AssociationPath,
 };
-
-export function ConnectionLine<N extends string, E extends string>(props: RF.ConnectionLineComponentProps) {
-  return (
-    <ReactFlowDiagramConnectionLine
-      {...props}
-      DEFAULT_NODE_SIZES={DEFAULT_NODE_SIZES}
-      graphStructure={bpmnGraphStructure}
-      nodeMapping={nodeMapping}
-      edgeMapping={edgeMapping}
-    />
-  );
-}
