@@ -22,3 +22,9 @@ export type ElementFilter<E extends { __$$element: string }, Filter extends stri
     ? E
     : never
   : never;
+
+export type ElementExclusion<E extends { __$$element: string }, Filter extends string> = E extends any
+  ? E["__$$element"] extends Filter
+    ? never
+    : E
+  : never;

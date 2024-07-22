@@ -32,11 +32,12 @@ import { useRef } from "react";
 import * as RF from "reactflow";
 import { Normalized } from "../../normalization/normalize";
 import { AssociationPath, SequenceFlowPath } from "./EdgeSvgs";
+import { EdgeBpmnElements } from "../nodes/Nodes";
 
 export type BpmnDiagramEdgeData = ReactFlowKieEditorDiagramEdgeData & {
   bpmnEdge: Normalized<BPMNDI__BPMNEdge> | undefined;
   bpmnEdgeIndex: number;
-  bpmnObject: unknown; // FIXME: Tiago: ?
+  bpmnElement: EdgeBpmnElements;
   bpmnShapeSource: Normalized<BPMNDI__BPMNShape> | undefined;
   bpmnShapeTarget: Normalized<BPMNDI__BPMNShape> | undefined;
 };

@@ -69,6 +69,21 @@ export function OutgoingStuffNodePanel<N extends string, E extends string>(props
 
   return (
     <>
+      {/* Only here for when Nodes don't have anything in their OutgoingStuff panels, as every node needs a 'source' handle. */}
+      {props.edgeTypes.length + props.nodeTypes.length === 0 && (
+        <>
+          <RF.Handle
+            key={"unique-source-handle"} // Arbitrary string. Shouldn't be referenced.
+            id={"unique-source-handle"} // Arbitrary string. Shouldn't be referenced.
+            isConnectableEnd={false}
+            isConnectableStart={false}
+            type={"source"}
+            style={{ ...handleStyle, opacity: 0 }} // Invisible on purpose, as this shouldn't be interacted with.
+            position={RF.Position.Top} // Doesn't really impact anything.
+            title={""}
+          />
+        </>
+      )}
       <Flex className={"kie-bpmn-editor--outgoing-stuff-node-panel"} style={style}>
         {props.edgeTypes.length > 0 && (
           <FlexItem>

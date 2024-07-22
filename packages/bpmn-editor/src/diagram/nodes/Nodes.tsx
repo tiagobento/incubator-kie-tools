@@ -83,13 +83,20 @@ import { Unpacked } from "@kie-tools/reactflow-editors-base/dist/tsExt/tsExt";
 import { getContainmentRelationship } from "@kie-tools/reactflow-editors-base/dist/maths/DcMaths";
 import { BpmnDiagramEdgeData } from "../edges/Edges";
 import { bpmnEdgesOutgoingStuffNodePanelMapping, bpmnNodesOutgoingStuffNodePanelMapping } from "./NodeMapping";
+import { ElementExclusion, ElementFilter } from "@kie-tools/xml-parser-ts/dist/elementFilter";
 
-export type NodeBpmnObjects = null | Unpacked<
-  Normalized<BPMN20__tProcess["flowElement"] | BPMN20__tProcess["artifact"]>
+export type NodeBpmnElements = null | Normalized<
+  | ElementExclusion<Unpacked<NonNullable<BPMN20__tProcess["flowElement"]>>, "sequenceFlow">
+  | ElementExclusion<Unpacked<NonNullable<BPMN20__tProcess["artifact"]>>, "association">
 >;
 
-export type BpmnDiagramNodeData<T extends NodeBpmnObjects = NodeBpmnObjects> = {
-  bpmnObject: T;
+export type EdgeBpmnElements = null | Normalized<
+  | ElementFilter<Unpacked<NonNullable<BPMN20__tProcess["flowElement"]>>, "sequenceFlow">
+  | ElementFilter<Unpacked<NonNullable<BPMN20__tProcess["artifact"]>>, "association">
+>;
+
+export type BpmnDiagramNodeData<T extends NodeBpmnElements = NodeBpmnElements> = {
+  bpmnElement: T;
   shape: Normalized<BPMNDI__BPMNShape>;
   shapeIndex: number;
   index: number;
@@ -103,7 +110,7 @@ export type BpmnDiagramNodeData<T extends NodeBpmnObjects = NodeBpmnObjects> = {
 
 export const StartEventNode = React.memo(
   ({
-    data: { bpmnObject: startEvent, shape, index, shapeIndex },
+    data: { bpmnElement: startEvent, shape, index, shapeIndex },
     selected,
     dragging,
     zIndex,
@@ -194,7 +201,7 @@ export const StartEventNode = React.memo(
 
 export const IntermediateCatchEventNode = React.memo(
   ({
-    data: { bpmnObject: intermediateCatchEvent, shape, index, shapeIndex },
+    data: { bpmnElement: intermediateCatchEvent, shape, index, shapeIndex },
     selected,
     dragging,
     zIndex,
@@ -287,7 +294,7 @@ export const IntermediateCatchEventNode = React.memo(
 
 export const IntermediateThrowEventNode = React.memo(
   ({
-    data: { bpmnObject: intermediateThrowEvent, shape, index, shapeIndex },
+    data: { bpmnElement: intermediateThrowEvent, shape, index, shapeIndex },
     selected,
     dragging,
     zIndex,
@@ -380,7 +387,7 @@ export const IntermediateThrowEventNode = React.memo(
 
 export const EndEventNode = React.memo(
   ({
-    data: { bpmnObject: endEvent, shape, index, shapeIndex },
+    data: { bpmnElement: endEvent, shape, index, shapeIndex },
     selected,
     dragging,
     zIndex,
@@ -471,7 +478,7 @@ export const EndEventNode = React.memo(
 
 export const TaskNode = React.memo(
   ({
-    data: { bpmnObject: task, shape, index, shapeIndex },
+    data: { bpmnElement: task, shape, index, shapeIndex },
     selected,
     dragging,
     zIndex,
@@ -570,7 +577,7 @@ export const TaskNode = React.memo(
 
 export const SubProcessNode = React.memo(
   ({
-    data: { bpmnObject: subProcess, shape, index, shapeIndex },
+    data: { bpmnElement: subProcess, shape, index, shapeIndex },
     selected,
     dragging,
     zIndex,
@@ -670,7 +677,7 @@ export const SubProcessNode = React.memo(
 
 export const GatewayNode = React.memo(
   ({
-    data: { bpmnObject: gateway, shape, index, shapeIndex },
+    data: { bpmnElement: gateway, shape, index, shapeIndex },
     selected,
     dragging,
     zIndex,
@@ -778,7 +785,7 @@ export const GatewayNode = React.memo(
 
 export const DataObjectNode = React.memo(
   ({
-    data: { bpmnObject: dataObject, shape, index, shapeIndex },
+    data: { bpmnElement: dataObject, shape, index, shapeIndex },
     selected,
     dragging,
     zIndex,
@@ -893,7 +900,7 @@ export const DataObjectNode = React.memo(
 
 export const GroupNode = React.memo(
   ({
-    data: { bpmnObject: group, shape, index, shapeIndex },
+    data: { bpmnElement: group, shape, index, shapeIndex },
     selected,
     dragging,
     zIndex,
@@ -1001,7 +1008,7 @@ export const GroupNode = React.memo(
 
 export const TextAnnotationNode = React.memo(
   ({
-    data: { bpmnObject: textAnnotation, shape, index, shapeIndex },
+    data: { bpmnElement: textAnnotation, shape, index, shapeIndex },
     selected,
     dragging,
     zIndex,
@@ -1062,7 +1069,7 @@ export const TextAnnotationNode = React.memo(
           onDoubleClick={triggerEditing}
           onKeyDown={triggerEditingIfEnter}
           data-nodehref={id}
-          data-nodelabel={textAnnotation.text as string} // FIXME: Tiago: XML
+          data-nodelabel={"" + textAnnotation.text} // FIXME: Tiago: XML
         >
           {/* {`render count: ${renderCount.current}`}
           <br /> */}
@@ -1082,7 +1089,7 @@ export const TextAnnotationNode = React.memo(
             nodeTypes={bpmnGraphOutgoingStructure[NODE_TYPES.textAnnotation].nodes}
             edgeTypes={bpmnGraphOutgoingStructure[NODE_TYPES.textAnnotation].edges}
           />
-          <div>{textAnnotation.text /* FIXME: Tiago: XML*/}</div>
+          <div>{"" + textAnnotation.text /* FIXME: Tiago: XML*/}</div>
           {shouldActLikeHovered && (
             <NodeResizerHandle
               nodeType={type as typeof NODE_TYPES.textAnnotation}

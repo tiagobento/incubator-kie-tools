@@ -43,8 +43,14 @@ export enum DiagramLhsPanel {
   NONE = "NONE",
 }
 
-export interface State
-  extends ReactFlowEditorDiagramState<State, BpmnNodeType, BpmnDiagramNodeData, BpmnDiagramEdgeData> {
+export type BpmnReactFlowEditorDiagramState = ReactFlowEditorDiagramState<
+  State,
+  BpmnNodeType,
+  BpmnDiagramNodeData,
+  BpmnDiagramEdgeData
+>;
+
+export interface State extends BpmnReactFlowEditorDiagramState {
   // Read this to understand why we need computed as part of the store.
   // https://github.com/pmndrs/zustand/issues/132#issuecomment-1120467721
   computed: (s: State) => {
@@ -162,6 +168,7 @@ export function createBpmnEditorStore(
         getDiagramData: () =>
           computedCache.cached("getDiagramData", computeDiagramData, [
             s.bpmn.model.definitions,
+            s.reactflowKieEditorDiagram,
             s.reactflowKieEditorDiagram.snapGrid,
           ]),
       }),

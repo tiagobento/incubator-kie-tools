@@ -18,7 +18,7 @@
  */
 
 import { switchExpression } from "@kie-tools-core/switch-expression-ts";
-import { NodeBpmnObjects } from "./Nodes";
+import { NodeBpmnElements } from "./Nodes";
 
 export const NODE_TYPES = {
   startEvent: "node_startEvent" as const,
@@ -36,7 +36,7 @@ export const NODE_TYPES = {
   // custom: "node_custom" as const,
 };
 
-export function getNodeTypeFromBpmnObject(bpmnObject: NodeBpmnObjects) {
+export function getNodeTypeFromBpmnObject(bpmnObject: NodeBpmnElements) {
   if (!bpmnObject) {
     return NODE_TYPES.unknown;
   }
