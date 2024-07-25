@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import * as RF from "reactflow";
 import {
   ReactFlowEditorDiagramState,
   ReactFlowKieEditorDiagramEdgeData,
@@ -32,7 +33,7 @@ export function computeIsDropTargetNodeValidForSelection<
   NData extends ReactFlowKieEditorDiagramNodeData,
   EData extends ReactFlowKieEditorDiagramEdgeData,
 >(
-  dropTargetNode: ReactFlowEditorDiagramState<S, N, NData, EData>["reactflowKieEditorDiagram"]["dropTargetNode"],
+  dropTargetNode: RF.Node<NData>,
   diagramData: ReactFlowEditorDiagramData<N, NData, EData>,
   containmentMap: ContainmentMap<N>
 ) {

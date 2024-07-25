@@ -27,42 +27,22 @@ import {
   ReactFlowKieEditorDiagramNodeData,
 } from "./State";
 
-// Just to satisfy the recursiveness with itself.
-interface S
-  extends ReactFlowEditorDiagramState<
-    S,
-    string,
-    ReactFlowKieEditorDiagramNodeData,
-    ReactFlowKieEditorDiagramEdgeData
-  > {}
+export type StoreApiType<
+  S extends ReactFlowEditorDiagramState<S, N, NData, EData>,
+  N extends string,
+  NData extends ReactFlowKieEditorDiagramNodeData,
+  EData extends ReactFlowKieEditorDiagramEdgeData,
+> = UseBoundStore<WithImmer<StoreApi<S>>>;
 
-type ExtractState =
-  StoreApi<
-    ReactFlowEditorDiagramState<S, string, ReactFlowKieEditorDiagramNodeData, ReactFlowKieEditorDiagramEdgeData>
-  > extends { getState: () => infer T }
-    ? T
-    : never;
-
-export type StoreApiType = UseBoundStore<
-  WithImmer<
-    StoreApi<
-      ReactFlowEditorDiagramState<S, string, ReactFlowKieEditorDiagramNodeData, ReactFlowKieEditorDiagramEdgeData>
-    >
-  >
->;
-
-export const ReactflowKieEditorDiagramStoreApiContext = createContext<StoreApiType>({} as any);
+export const ReactflowKieEditorDiagramStoreApiContext = createContext<StoreApiType<any, any, any, any>>({} as any);
 
 export function useReactflowKieEditorDiagramStore<
   S extends ReactFlowEditorDiagramState<S, N, NData, EData>,
   N extends string,
   NData extends ReactFlowKieEditorDiagramNodeData,
   EData extends ReactFlowKieEditorDiagramEdgeData,
-  StateSlice = ExtractState,
->(
-  selector: (state: ReactFlowEditorDiagramState<S, N, NData, EData>) => StateSlice,
-  equalityFn?: (a: StateSlice, b: StateSlice) => boolean
-) {
+  StateSlice = StoreApi<S> extends { getState: () => infer T } ? T : never,
+>(selector: (state: S) => StateSlice, equalityFn?: (a: StateSlice, b: StateSlice) => boolean) {
   const store = useContext(ReactflowKieEditorDiagramStoreApiContext);
 
   if (store === null) {
@@ -72,6 +52,11 @@ export function useReactflowKieEditorDiagramStore<
   return useStoreWithEqualityFn(store, selector, equalityFn);
 }
 
-export function useReactflowKieEditorDiagramStoreApi() {
-  return useContext(ReactflowKieEditorDiagramStoreApiContext);
+export function useReactflowKieEditorDiagramStoreApi<
+  S extends ReactFlowEditorDiagramState<S, N, NData, EData>,
+  N extends string,
+  NData extends ReactFlowKieEditorDiagramNodeData,
+  EData extends ReactFlowKieEditorDiagramEdgeData,
+>(): StoreApiType<S, N, NData, EData> {
+  return useContext(ReactflowKieEditorDiagramStoreApiContext) as StoreApiType<S, N, NData, EData>;
 }

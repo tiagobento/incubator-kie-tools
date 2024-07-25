@@ -294,7 +294,7 @@ export const BpmnEditorInternal = ({
               data-testid={"kie-bpmn-editor--diagram-container"}
             >
               {originalVersion && <BpmnVersionLabel version={originalVersion} />}
-              <BpmnDiagram ref={diagramRef} container={diagramContainerRef} />
+              <BpmnDiagram diagramRef={diagramRef} container={diagramContainerRef} />
             </div>
           </DrawerContentBody>
         </DrawerContent>

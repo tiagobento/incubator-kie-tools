@@ -29,7 +29,11 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useReactflowKieEditorDiagramStore, useReactflowKieEditorDiagramStoreApi } from "../store/Store";
 import { NodeSizes } from "../nodes/NodeSizes";
 import { SelectionStatusLabel } from "./SelectionStatusLabel";
-import { ReactFlowKieEditorDiagramEdgeData, ReactFlowKieEditorDiagramNodeData } from "../store/State";
+import {
+  ReactFlowEditorDiagramState,
+  ReactFlowKieEditorDiagramEdgeData,
+  ReactFlowKieEditorDiagramNodeData,
+} from "../store/State";
 
 const isFirefox = typeof (window as any).InstallTrigger !== "undefined"; // See https://stackoverflow.com/questions/9847580/how-to-detect-safari-chrome-ie-firefox-and-opera-browsers
 
@@ -45,7 +49,43 @@ export type DiagramRef = {
   getReactFlowInstance: () => RF.ReactFlowInstance | undefined;
 };
 
+export type OnNodeRepositioned<NData extends ReactFlowKieEditorDiagramNodeData> = (args: {
+  node: RF.Node<NData>;
+  newPosition: RF.XYPosition;
+}) => void;
+
+export type OnNodeDeleted<NData extends ReactFlowKieEditorDiagramNodeData> = (args: { node: RF.Node<NData> }) => void;
+
+export type Props<
+  N extends string,
+  E extends string,
+  NData extends ReactFlowKieEditorDiagramNodeData,
+  EData extends ReactFlowKieEditorDiagramEdgeData,
+> = {
+  // model
+  model: unknown;
+  modelBeforeEditingRef: React.MutableRefObject<unknown>;
+  resetToBeforeEditingBegan: () => void;
+  // components
+  connectionLineComponent: RF.ConnectionLineComponent;
+  nodeComponents: RF.NodeTypes;
+  edgeComponents: RF.EdgeTypes;
+  // infra
+  diagramRef: React.RefObject<DiagramRef>;
+  children: React.ReactElement[];
+  container: React.RefObject<HTMLElement>;
+  // domain
+  containmentMap: ContainmentMap<N>;
+  nodeTypes: Record<string, string>;
+  minNodeSizes: NodeSizes<N>;
+  graphStructure: GraphStructure<N, E>;
+  // actions
+  onNodeRepositioned: OnNodeRepositioned<NData>;
+  onNodeDeleted: OnNodeDeleted<NData>;
+};
+
 export function Diagram<
+  S extends ReactFlowEditorDiagramState<S, N, NData, EData>,
   N extends string,
   E extends string,
   NData extends ReactFlowKieEditorDiagramNodeData,
@@ -56,7 +96,7 @@ export function Diagram<
   modelBeforeEditingRef,
   resetToBeforeEditingBegan,
   // infra
-  ref,
+  diagramRef,
   children,
   container,
   // components
@@ -68,37 +108,19 @@ export function Diagram<
   nodeTypes,
   minNodeSizes,
   graphStructure,
-}: {
-  // model
-  model: unknown;
-  modelBeforeEditingRef: React.MutableRefObject<unknown>;
-  resetToBeforeEditingBegan: () => void;
-
-  // components
-  connectionLineComponent: RF.ConnectionLineComponent;
-  nodeComponents: RF.NodeTypes;
-  edgeComponents: RF.EdgeTypes;
-
-  // infra
-  ref: React.RefObject<DiagramRef>;
-  children: React.ReactElement[];
-  container: React.RefObject<HTMLElement>;
-
-  // domain
-  containmentMap: ContainmentMap<N>;
-  nodeTypes: Record<string, string>;
-  minNodeSizes: NodeSizes<N>;
-  graphStructure: GraphStructure<N, E>;
-}) {
+  // actions
+  onNodeRepositioned,
+  onNodeDeleted,
+}: Props<N, E, NData, EData>) {
   // Contexts
-  const reactflowKieEditorDiagramStoreApi = useReactflowKieEditorDiagramStoreApi();
+  const reactflowKieEditorDiagramStoreApi = useReactflowKieEditorDiagramStoreApi<S, N, NData, EData>();
   const snapGrid = useReactflowKieEditorDiagramStore((s) => s.reactflowKieEditorDiagram.snapGrid);
 
   // State
   const [reactFlowInstance, setReactFlowInstance] = useState<RF.ReactFlowInstance<NData, EData> | undefined>(undefined);
 
   // Refs
-  React.useImperativeHandle(ref, () => ({ getReactFlowInstance: () => reactFlowInstance }), [reactFlowInstance]);
+  React.useImperativeHandle(diagramRef, () => ({ getReactFlowInstance: () => reactFlowInstance }), [reactFlowInstance]);
 
   const nodeIdBeingDraggedRef = useRef<string | null>(null);
 
@@ -157,7 +179,7 @@ export function Diagram<
               containerMinSizes: minNodeSizes[node.type as N],
               boundsMinSizes: minSizes,
             }).isInside
-        ),
+        ) as any, // FIXME: Tiago
     [minNodeSizes, reactFlowInstance]
   );
 
@@ -326,77 +348,83 @@ export function Diagram<
         return;
       }
 
-      reactflowKieEditorDiagramStoreApi.setState((state) => {
-        const controlWaypointsByEdge = new Map<number, Set<number>>();
+      const controlWaypointsByEdge = new Map<number, Set<number>>();
 
-        for (const change of changes) {
-          switch (change.type) {
-            case "add":
-              console.debug(`BPMN DIAGRAM: 'onNodesChange' --> add '${change.item.id}'`);
-              state.dispatch(state).setNodeStatus(change.item.id, { selected: true });
-              break;
-            case "dimensions":
-              console.debug(`BPMN DIAGRAM: 'onNodesChange' --> dimensions '${change.id}'`);
-              state.dispatch(state).setNodeStatus(change.id, { resizing: change.resizing });
-              if (change.dimensions) {
-                const node = state.computed(state).getDiagramData().nodesById.get(change.id)!;
-                // We only need to resize the node if its snapped dimensions change, as snapping is non-destructive.
-                const snappedShape = snapShapeDimensions(
-                  state.reactflowKieEditorDiagram.snapGrid,
-                  node.data.shape,
-                  minNodeSizes[node.type as N]({
-                    snapGrid: state.reactflowKieEditorDiagram.snapGrid,
-                  })
-                );
-                if (
-                  snappedShape.width !== change.dimensions.width ||
-                  snappedShape.height !== change.dimensions.height
-                ) {
-                  console.log("XYFLOW-DIAGRAM: Node resized");
-                  // FIXME: Tiago: Mutation
-                  // resizeNode({
-                }
-              }
-              break;
-            case "position":
-              console.debug(`BPMN DIAGRAM: 'onNodesChange' --> position '${change.id}'`);
+      for (const change of changes) {
+        switch (change.type) {
+          case "add":
+            // const state = reactflowKieEditorDiagramStoreApi.getState();
+            // console.debug(`BPMN DIAGRAM: 'onNodesChange' --> add '${change.item.id}'`);
+            // state.dispatch(state).setNodeStatus(change.item.id, { selected: true });
+            break;
+          case "dimensions":
+            // console.debug(`BPMN DIAGRAM: 'onNodesChange' --> dimensions '${change.id}'`);
+            // state.dispatch(state).setNodeStatus(change.id, { resizing: change.resizing });
+            // if (change.dimensions) {
+            //   const node = state.computed(state).getDiagramData().nodesById.get(change.id)!;
+            //   // We only need to resize the node if its snapped dimensions change, as snapping is non-destructive.
+            //   const snappedShape = snapShapeDimensions(
+            //     state.reactflowKieEditorDiagram.snapGrid,
+            //     node.data.shape,
+            //     minNodeSizes[node.type as N]({
+            //       snapGrid: state.reactflowKieEditorDiagram.snapGrid,
+            //     })
+            //   );
+            //   if (snappedShape.width !== change.dimensions.width || snappedShape.height !== change.dimensions.height) {
+            //     console.log("XYFLOW-DIAGRAM: Node resized");
+            //     // FIXME: Tiago: Mutation
+            //     // resizeNode({
+            //   }
+            // }
+            break;
+          case "position":
+            console.debug(`BPMN DIAGRAM: 'onNodesChange' --> position '${change.id}'`);
+            reactflowKieEditorDiagramStoreApi.setState((state) => {
               state.dispatch(state).setNodeStatus(change.id, { dragging: change.dragging });
+            });
+
+            {
+              const state = reactflowKieEditorDiagramStoreApi.getState();
               if (change.positionAbsolute) {
                 const node = state.computed(state).getDiagramData().nodesById.get(change.id)!;
 
                 console.log("XYFLOW-DIAGRAM: Node repositioned");
-                // FIXME: Tiago: Mutation
-                // repositionNode({
+                onNodeRepositioned({ node, newPosition: change.positionAbsolute });
               }
-              break;
-            case "remove":
+            }
+            break;
+          case "remove":
+            {
+              const state = reactflowKieEditorDiagramStoreApi.getState();
+
               console.debug(`BPMN DIAGRAM: 'onNodesChange' --> remove '${change.id}'`);
               const node = state.computed(state).getDiagramData().nodesById.get(change.id)!;
               console.log("XYFLOW-DIAGRAM: Node deleted");
-              // FIXME: Tiago: Mutation
-              // deleteNode({
+              onNodeDeleted({ node });
 
-              state.dispatch(state).setNodeStatus(node.id, {
-                selected: false,
-                dragging: false,
-                resizing: false,
+              reactflowKieEditorDiagramStoreApi.setState((state) => {
+                state.dispatch(state).setNodeStatus(node.id, { selected: false, dragging: false, resizing: false });
               });
-              break;
-            case "reset":
+            }
+            break;
+          case "reset":
+            reactflowKieEditorDiagramStoreApi.setState((state) => {
               state.dispatch(state).setNodeStatus(change.item.id, {
                 selected: false,
                 dragging: false,
                 resizing: false,
               });
-              break;
-            case "select":
+            });
+            break;
+          case "select":
+            reactflowKieEditorDiagramStoreApi.setState((state) => {
               state.dispatch(state).setNodeStatus(change.id, { selected: change.selected });
-              break;
-          }
+            });
+            break;
         }
-      });
+      }
     },
-    [minNodeSizes, reactFlowInstance, reactflowKieEditorDiagramStoreApi]
+    [onNodeDeleted, onNodeRepositioned, reactFlowInstance, reactflowKieEditorDiagramStoreApi]
   );
 
   const onNodeDrag = useCallback<RF.NodeDragHandler>(
@@ -585,9 +613,8 @@ export function Diagram<
   // Override Reactflow's behavior by intercepting the keydown event using its `capture` variant.
   const handleRfKeyDownCapture = useCallback(
     (e: React.KeyboardEvent) => {
-      const s = reactflowKieEditorDiagramStoreApi.getState();
-
       if (e.key === "Escape") {
+        const s = reactflowKieEditorDiagramStoreApi.getState();
         if (s.computed(s).isDiagramEditingInProgress() && modelBeforeEditingRef.current) {
           console.debug(
             "BPMN DIAGRAM: Intercepting Escape pressed and preventing propagation. Reverting BPMN model to what it was before editing began."
@@ -600,16 +627,16 @@ export function Diagram<
         } else if (!s.reactflowKieEditorDiagram.ongoingConnection) {
           reactflowKieEditorDiagramStoreApi.setState((state) => {
             if (
-              state.computed(s).getDiagramData().selectedNodesById.size > 0 ||
-              state.computed(s).getDiagramData().selectedEdgesById.size > 0
+              state.computed(state).getDiagramData().selectedNodesById.size > 0 ||
+              state.computed(state).getDiagramData().selectedEdgesById.size > 0
             ) {
               console.debug("BPMN DIAGRAM: Esc pressed. Desselecting everything.");
               state.reactflowKieEditorDiagram._selectedNodes = [];
               state.reactflowKieEditorDiagram._selectedEdges = [];
               e.preventDefault();
             } else if (
-              state.computed(s).getDiagramData().selectedNodesById.size <= 0 &&
-              state.computed(s).getDiagramData().selectedEdgesById.size <= 0
+              state.computed(state).getDiagramData().selectedNodesById.size <= 0 &&
+              state.computed(state).getDiagramData().selectedEdgesById.size <= 0
             ) {
               console.debug("BPMN DIAGRAM: Esc pressed. Closing all open panels.");
               console.log("XYFLOW-DIAGRAM: Esc pressed");

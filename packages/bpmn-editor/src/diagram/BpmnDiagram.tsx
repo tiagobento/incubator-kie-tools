@@ -17,43 +17,35 @@
  * under the License.
  */
 
-import { Diagram, DiagramRef } from "@kie-tools/reactflow-editors-base/dist/diagram/Diagram";
-import { EdgeMarkers } from "@kie-tools/reactflow-editors-base/dist/edges/EdgeMarkers";
-import * as React from "react";
-import * as RF from "reactflow";
-import { useCallback, useState } from "react";
-import { useBpmnEditor } from "../BpmnEditorContext";
-import { normalize } from "../normalization/normalize";
-import { useBpmnEditorStore, useBpmnEditorStoreApi } from "../store/StoreContext";
-import { BpmnDiagramCommands } from "./BpmnDiagramCommands";
-import { BpmnDiagramEmptyState } from "./BpmnDiagramEmptyState";
-import { BpmnEdgeType, BpmnNodeType, BPMN_GRAPH_STRUCTURE, BPMN_CONTAINMENT_MAP } from "./BpmnGraphStructure";
-import { BpmnPalette } from "./BpmnPalette";
-import { DiagramContainerContextProvider } from "./DiagramContainerContext";
-import { EDGE_TYPES } from "./edges/EdgeTypes";
-import { AssociationEdge, SequenceFlowEdge } from "./edges/Edges";
-import { MIN_NODE_SIZES } from "./nodes/NodeSizes";
-import { NODE_TYPES } from "./nodes/NodeTypes";
+import { BPMN20__tProcess, BPMNDI__BPMNShape } from "@kie-tools/bpmn-marshaller/dist/schemas/bpmn-2_0/ts-gen/types";
 import {
-  DataObjectNode,
-  TextAnnotationNode,
-  UnknownNode,
-  TaskNode,
-  StartEventNode,
-  IntermediateCatchEventNode,
-  IntermediateThrowEventNode,
-  EndEventNode,
-  GroupNode,
-  SubProcessNode,
-  GatewayNode,
-} from "./nodes/Nodes";
-import { TopRightCornerPanels } from "./BpmnDiagramTopRightPanels";
+  Diagram,
+  DiagramRef,
+  OnNodeDeleted,
+  OnNodeRepositioned,
+} from "@kie-tools/reactflow-editors-base/dist/diagram/Diagram";
 import {
   ConnectionLineEdgeMapping,
   ConnectionLineNodeMapping,
   ConnectionLine as ReactFlowDiagramConnectionLine,
 } from "@kie-tools/reactflow-editors-base/dist/edges/ConnectionLine";
-import { DEFAULT_NODE_SIZES } from "./nodes/NodeSizes";
+import { EdgeMarkers } from "@kie-tools/reactflow-editors-base/dist/edges/EdgeMarkers";
+import * as React from "react";
+import { useCallback, useState } from "react";
+import * as RF from "reactflow";
+import { useBpmnEditor } from "../BpmnEditorContext";
+import { normalize } from "../normalization/normalize";
+import { useBpmnEditorStore, useBpmnEditorStoreApi } from "../store/StoreContext";
+import { BpmnDiagramCommands } from "./BpmnDiagramCommands";
+import { BpmnDiagramEmptyState } from "./BpmnDiagramEmptyState";
+import { TopRightCornerPanels } from "./BpmnDiagramTopRightPanels";
+import { BPMN_CONTAINMENT_MAP, BPMN_GRAPH_STRUCTURE, BpmnEdgeType, BpmnNodeType } from "./BpmnGraphStructure";
+import { BpmnPalette } from "./BpmnPalette";
+import { DiagramContainerContextProvider } from "./DiagramContainerContext";
+import { AssociationPath, SequenceFlowPath } from "./edges/EdgeSvgs";
+import { EDGE_TYPES } from "./edges/EdgeTypes";
+import { AssociationEdge, SequenceFlowEdge } from "./edges/Edges";
+import { DEFAULT_NODE_SIZES, MIN_NODE_SIZES } from "./nodes/NodeSizes";
 import {
   EndEventNodeSvg,
   GatewayNodeSvg,
@@ -64,13 +56,27 @@ import {
   TaskNodeSvg,
   TextAnnotationNodeSvg,
 } from "./nodes/NodeSvgs";
-import { AssociationPath, SequenceFlowPath } from "./edges/EdgeSvgs";
+import { NODE_TYPES } from "./nodes/NodeTypes";
+import {
+  BpmnDiagramNodeData,
+  DataObjectNode,
+  EndEventNode,
+  GatewayNode,
+  GroupNode,
+  IntermediateCatchEventNode,
+  IntermediateThrowEventNode,
+  StartEventNode,
+  SubProcessNode,
+  TaskNode,
+  TextAnnotationNode,
+  UnknownNode,
+} from "./nodes/Nodes";
 
 export function BpmnDiagram({
   container,
-  ref,
+  diagramRef,
 }: {
-  ref: React.RefObject<DiagramRef>;
+  diagramRef: React.RefObject<DiagramRef>;
   container: React.RefObject<HTMLElement>;
 }) {
   const [showEmptyState, setShowEmptyState] = useState(true);
@@ -96,6 +102,42 @@ export function BpmnDiagram({
 
   const isEmptyStateShowing = showEmptyState && nodes.length === 0;
 
+  const onNodeRepositioned = useCallback<OnNodeRepositioned<BpmnDiagramNodeData>>(
+    ({ node, newPosition }) => {
+      bpmnEditorStoreApi.setState((s) => {
+        const shape = (s.bpmn.model.definitions["bpmndi:BPMNDiagram"] ?? [])
+          .flatMap((d) => d["bpmndi:BPMNPlane"]["di:DiagramElement"])
+          .filter((bpmnElement) => bpmnElement?.__$$element === "bpmndi:BPMNShape")
+          .filter((bpmnShape) => bpmnShape?.["@_bpmnElement"] === node.id)?.[0] as BPMNDI__BPMNShape;
+
+        shape["dc:Bounds"]["@_x"] = newPosition.x;
+        shape["dc:Bounds"]["@_y"] = newPosition.y;
+      });
+    },
+    [bpmnEditorStoreApi]
+  );
+
+  const onNodeDeleted = useCallback<OnNodeDeleted<BpmnDiagramNodeData>>(
+    ({ node }) => {
+      bpmnEditorStoreApi.setState((s) => {
+        const process = s.bpmn.model.definitions.rootElement?.find(
+          (s) => s.__$$element === "process"
+        ) as BPMN20__tProcess;
+
+        if (process) {
+          process.artifact = process.artifact?.filter((s) => s["@_id"] !== node.id);
+          process.flowElement = process.flowElement?.filter((s) => s["@_id"] !== node.id);
+        }
+
+        const plane = s.bpmn.model.definitions["bpmndi:BPMNDiagram"]?.[0]?.["bpmndi:BPMNPlane"];
+        if (plane) {
+          plane["di:DiagramElement"] = plane["di:DiagramElement"]?.filter((s) => s["@_bpmnElement"] !== node.id);
+        }
+      });
+    },
+    [bpmnEditorStoreApi]
+  );
+
   return (
     <>
       {isEmptyStateShowing && <BpmnDiagramEmptyState setShowEmptyState={setShowEmptyState} />}
@@ -106,7 +148,7 @@ export function BpmnDiagram({
 
         <Diagram
           // infra
-          ref={ref}
+          diagramRef={diagramRef}
           container={container}
           // model
           modelBeforeEditingRef={bpmnModelBeforeEditingRef}
@@ -121,6 +163,8 @@ export function BpmnDiagram({
           nodeTypes={NODE_TYPES}
           minNodeSizes={MIN_NODE_SIZES}
           graphStructure={BPMN_GRAPH_STRUCTURE}
+          onNodeRepositioned={onNodeRepositioned}
+          onNodeDeleted={onNodeDeleted}
         >
           <BpmnPalette pulse={isEmptyStateShowing} />
           <TopRightCornerPanels availableHeight={container.current?.offsetHeight} />

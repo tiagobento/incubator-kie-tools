@@ -44,7 +44,7 @@ export type ReactFlowEditorDiagramData<
   nodes: RF.Node<NData>[];
   edges: RF.Edge<EData>[];
   edgesById: Map<string, RF.Edge<EData>>;
-  nodesById: Map<string, RF.Node<NData>>;
+  nodesById: Map<string, RF.Node<NData, N>>;
   selectedNodeTypes: Set<N>;
   selectedNodesById: Map<string, RF.Node<NData>>;
   selectedEdgesById: Map<string, RF.Edge<EData>>;
@@ -60,18 +60,18 @@ export interface ReactFlowKieEditorDiagramEdgeStatus {
   draggingWaypoint: boolean;
 }
 
-export type ReactFlowEditorDiagramState<
+export interface ReactFlowEditorDiagramState<
   S extends ReactFlowEditorDiagramState<S, N, NData, EData>,
   N extends string,
   NData extends ReactFlowKieEditorDiagramNodeData,
   EData extends ReactFlowKieEditorDiagramEdgeData,
-> = {
-  computed(s: S): {
+> {
+  computed: (s: ThisType<this>) => {
     getDiagramData(): ReactFlowEditorDiagramData<N, NData, EData>;
     isDiagramEditingInProgress(): boolean;
     isDropTargetNodeValidForSelection(): boolean;
   };
-  dispatch(s: S): {
+  dispatch: (s: ThisType<this>) => {
     setNodeStatus: (nodeId: string, status: Partial<ReactFlowKieEditorDiagramNodeStatus>) => any;
     setEdgeStatus: (edgeId: string, status: Partial<ReactFlowKieEditorDiagramEdgeStatus>) => any;
   };
@@ -86,4 +86,4 @@ export type ReactFlowEditorDiagramState<
     dropTargetNode: undefined | RF.Node<NData>;
     ongoingConnection: RF.OnConnectStartParams | undefined;
   };
-};
+}

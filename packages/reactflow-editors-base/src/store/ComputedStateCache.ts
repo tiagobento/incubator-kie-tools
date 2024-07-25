@@ -53,6 +53,7 @@ export class ComputedStateCache<T extends Record<string, any>> {
       for (let i = 0; i < cachedDeps.length; i++) {
         if (!Object.is(cachedDeps[i], dependencies[i])) {
           depsAreEqual = false;
+          break;
         }
       }
     } else {

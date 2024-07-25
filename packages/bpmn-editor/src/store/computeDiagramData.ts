@@ -88,7 +88,7 @@ export function computeDiagramData(
     selectedEdges: new Set(reactflowKieEditorDiagram._selectedEdges),
   };
 
-  const nodes: RF.Node<BpmnDiagramNodeData>[] = (definitions["bpmndi:BPMNDiagram"] ?? [])
+  const nodes: RF.Node<BpmnDiagramNodeData, BpmnNodeType>[] = (definitions["bpmndi:BPMNDiagram"] ?? [])
     .flatMap((d) => d["bpmndi:BPMNPlane"]["di:DiagramElement"])
     .flatMap((bpmnShape, i) => {
       if (bpmnShape?.__$$element !== "bpmndi:BPMNShape") {
@@ -102,7 +102,7 @@ export function computeDiagramData(
       const nodeType = elementToNodeType[bpmnElement.__$$element];
       const id = bpmnElement["@_id"];
 
-      const n: RF.Node<BpmnDiagramNodeData> = {
+      const n: RF.Node<BpmnDiagramNodeData, BpmnNodeType> = {
         id,
         position: {
           x: bpmnShape?.["dc:Bounds"]?.["@_x"],
@@ -127,11 +127,14 @@ export function computeDiagramData(
       return n;
     });
 
-  const nodesById = nodes.reduce((acc, n) => acc.set(n.id, n), new Map<string, RF.Node<BpmnDiagramNodeData>>());
+  const nodesById = nodes.reduce(
+    (acc, n) => acc.set(n.id, n),
+    new Map<string, RF.Node<BpmnDiagramNodeData, BpmnNodeType>>()
+  );
 
   const selectedNodesById = reactflowKieEditorDiagram._selectedNodes.reduce(
     (acc, s) => acc.set(s, nodesById.get(s)!),
-    new Map<string, RF.Node<BpmnDiagramNodeData>>()
+    new Map<string, RF.Node<BpmnDiagramNodeData, BpmnNodeType>>()
   );
 
   const selectedNodeTypes = reactflowKieEditorDiagram._selectedNodes.reduce(
