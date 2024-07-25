@@ -35,7 +35,7 @@ import { switchExpression } from "@kie-tools-core/switch-expression-ts";
 import { BpmnNodeType } from "../BpmnDiagramDomain";
 import { NODE_TYPES } from "../BpmnDiagramDomain";
 import { QuestionCircleIcon } from "@patternfly/react-icons/dist/js/icons/question-circle-icon";
-import { nodeSvgProps, RoundSvg } from "@kie-tools/reactflow-editors-base/dist/nodes/NodeIcons";
+import { nodeSvgProps, RoundSvg } from "@kie-tools/xyflow-kie-diagram/dist/nodes/NodeIcons";
 
 export function NodeIcon({ nodeType }: { nodeType: BpmnNodeType }) {
   return switchExpression(nodeType, {

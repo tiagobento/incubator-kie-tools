@@ -28,9 +28,9 @@ import {
 } from "../clipboard/Clipboard";
 import { useCommands } from "../commands/CommandsContextProvider";
 import { useBpmnEditorStoreApi } from "../store/StoreContext";
-import { DEFAULT_VIEWPORT } from "@kie-tools/reactflow-editors-base/dist/diagram/Diagram";
+import { DEFAULT_VIEWPORT } from "@kie-tools/xyflow-kie-diagram/dist/diagram/Diagram";
 import { BpmnDiagramEdgeData } from "./BpmnDiagramDomain";
-import { getBounds } from "@kie-tools/reactflow-editors-base/dist/maths/DcMaths";
+import { getBounds } from "@kie-tools/xyflow-kie-diagram/dist/maths/DcMaths";
 import { BpmnDiagramNodeData } from "./BpmnDiagramDomain";
 
 export function BpmnDiagramCommands(props: {}) {

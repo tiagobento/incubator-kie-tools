@@ -17,13 +17,13 @@
  * under the License.
  */
 
-import { ContainmentMap, GraphStructure } from "@kie-tools/reactflow-editors-base/dist/graph/graphStructure";
+import { ContainmentMap, GraphStructure } from "@kie-tools/xyflow-kie-diagram/dist/graph/graphStructure";
 import {
   BPMN20__tProcess,
   BPMNDI__BPMNEdge,
   BPMNDI__BPMNShape,
 } from "@kie-tools/bpmn-marshaller/dist/schemas/bpmn-2_0/ts-gen/types";
-import { XyFlowKieDiagramEdgeData, XyFlowKieDiagramNodeData } from "@kie-tools/reactflow-editors-base/dist/store/State";
+import { XyFlowKieDiagramEdgeData, XyFlowKieDiagramNodeData } from "@kie-tools/xyflow-kie-diagram/dist/store/State";
 import { Normalized } from "../normalization/normalize";
 import {
   DataObjectNode,
@@ -41,7 +41,7 @@ import {
 import {
   ConnectionLineEdgeMapping,
   ConnectionLineNodeMapping,
-} from "@kie-tools/reactflow-editors-base/dist/edges/ConnectionLine";
+} from "@kie-tools/xyflow-kie-diagram/dist/edges/ConnectionLine";
 import { SequenceFlowPath, AssociationPath } from "./edges/EdgeSvgs";
 import {
   StartEventNodeSvg,
@@ -54,16 +54,16 @@ import {
   TextAnnotationNodeSvg,
 } from "./nodes/NodeSvgs";
 import { SequenceFlowEdge, AssociationEdge } from "./edges/Edges";
-import { Unpacked } from "@kie-tools/reactflow-editors-base/dist/tsExt/tsExt";
+import { Unpacked } from "@kie-tools/xyflow-kie-diagram/dist/tsExt/tsExt";
 import { ElementExclusion, ElementFilter } from "@kie-tools/xml-parser-ts/dist/elementFilter";
 import { switchExpression } from "@kie-tools-core/switch-expression-ts";
 import {
   OutgoingStuffNodePanelEdgeMapping,
   OutgoingStuffNodePanelNodeMapping,
-} from "@kie-tools/reactflow-editors-base/dist/nodes/OutgoingStuffNodePanel";
-import { CONTAINER_NODES_DESIRABLE_PADDING } from "@kie-tools/reactflow-editors-base/dist/maths/DcMaths";
-import { NodeSizes } from "@kie-tools/reactflow-editors-base/dist/nodes/NodeSizes";
-import { SnapGrid, snapPoint } from "@kie-tools/reactflow-editors-base/dist/snapgrid/SnapGrid";
+} from "@kie-tools/xyflow-kie-diagram/dist/nodes/OutgoingStuffNodePanel";
+import { CONTAINER_NODES_DESIRABLE_PADDING } from "@kie-tools/xyflow-kie-diagram/dist/maths/DcMaths";
+import { NodeSizes } from "@kie-tools/xyflow-kie-diagram/dist/nodes/NodeSizes";
+import { SnapGrid, snapPoint } from "@kie-tools/xyflow-kie-diagram/dist/snapgrid/SnapGrid";
 
 export const NODE_TYPES = {
   startEvent: "node_startEvent" as const,

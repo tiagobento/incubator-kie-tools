@@ -41,8 +41,8 @@ import { BpmnVersionLabel } from "./diagram/BpmnVersionLabel";
 import { BpmnEditorExternalModelsContextProvider } from "./externalModels/BpmnEditorExternalModelsContext";
 import { Normalized, normalize } from "./normalization/normalize";
 import { INITIAL_COMPUTED_CACHE } from "./store/initialComputedCache";
-import { ComputedStateCache } from "@kie-tools/reactflow-editors-base/dist/store/ComputedStateCache";
-import { XyFlowKieDiagramStoreApiContext } from "@kie-tools/reactflow-editors-base/dist/store/Store";
+import { ComputedStateCache } from "@kie-tools/xyflow-kie-diagram/dist/store/ComputedStateCache";
+import { XyFlowKieDiagramStoreApiContext } from "@kie-tools/xyflow-kie-diagram/dist/store/Store";
 import { State, createBpmnEditorStore, getDefaultStaticState } from "./store/Store";
 import {
   BpmnEditorStoreApiContext,
@@ -51,15 +51,15 @@ import {
   useBpmnEditorStoreApi,
 } from "./store/StoreContext";
 import { BpmnDiagramSvg } from "./svg/BpmnDiagramSvg";
-import { useStateAsItWasBeforeConditionBecameTrue } from "@kie-tools/reactflow-editors-base/dist/reactExt/useStateAsItWasBeforeConditionBecameTrue";
-import { useEffectAfterFirstRender } from "@kie-tools/reactflow-editors-base/dist/reactExt/useEffectAfterFirstRender";
+import { useStateAsItWasBeforeConditionBecameTrue } from "@kie-tools/xyflow-kie-diagram/dist/reactExt/useStateAsItWasBeforeConditionBecameTrue";
+import { useEffectAfterFirstRender } from "@kie-tools/xyflow-kie-diagram/dist/reactExt/useEffectAfterFirstRender";
 import { Commands, CommandsContextProvider, useCommands } from "./commands/CommandsContextProvider";
 
 // Leave custom CSS always for last.
-import "@kie-tools/reactflow-editors-base/dist/patternfly-customizations.css";
-import "@kie-tools/reactflow-editors-base/dist/xyflow-customizations.css";
+import "@kie-tools/xyflow-kie-diagram/dist/patternfly-customizations.css";
+import "@kie-tools/xyflow-kie-diagram/dist/xyflow-customizations.css";
 import "./BpmnEditor.css";
-import { DiagramRef } from "@kie-tools/reactflow-editors-base/dist/diagram/Diagram";
+import { DiagramRef } from "@kie-tools/xyflow-kie-diagram/dist/diagram/Diagram";
 import { Button, ButtonVariant } from "@patternfly/react-core/dist/js/components/Button";
 import { Form, FormSection } from "@patternfly/react-core/dist/js/components/Form";
 import TimesIcon from "@patternfly/react-icons/dist/js/icons/times-icon";

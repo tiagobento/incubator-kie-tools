@@ -22,16 +22,16 @@ import * as React from "react";
 import { useMemo } from "react";
 import * as RF from "reactflow";
 import { BpmnNodeType } from "../diagram/BpmnDiagramDomain";
-import { EdgeMarkers } from "@kie-tools/reactflow-editors-base/dist/edges/EdgeMarkers";
+import { EdgeMarkers } from "@kie-tools/xyflow-kie-diagram/dist/edges/EdgeMarkers";
 import { BpmnDiagramEdgeData } from "../diagram/BpmnDiagramDomain";
 import { EDGE_TYPES } from "../diagram/BpmnDiagramDomain";
-import { getSnappedMultiPointAnchoredEdgePath } from "@kie-tools/reactflow-editors-base/dist/edges/getSnappedMultiPointAnchoredEdgePath";
+import { getSnappedMultiPointAnchoredEdgePath } from "@kie-tools/xyflow-kie-diagram/dist/edges/getSnappedMultiPointAnchoredEdgePath";
 import { BpmnDiagramNodeData } from "../diagram/BpmnDiagramDomain";
 import { assertUnreachable, getBpmnFontStyle, getNodeLabelPosition, getNodeStyle } from "../diagram/nodes/NodeStyle";
 import { DataObjectNodeSvg, TaskNodeSvg, TextAnnotationNodeSvg, UnknownNodeSvg } from "../diagram/nodes/NodeSvgs";
 import { NODE_TYPES } from "../diagram/BpmnDiagramDomain";
-import { SnapGrid } from "@kie-tools/reactflow-editors-base/dist/snapgrid/SnapGrid";
-import { NodeLabelPosition } from "@kie-tools/reactflow-editors-base/dist/nodes/NodeSvgs";
+import { SnapGrid } from "@kie-tools/xyflow-kie-diagram/dist/snapgrid/SnapGrid";
+import { NodeLabelPosition } from "@kie-tools/xyflow-kie-diagram/dist/nodes/NodeSvgs";
 import { AssociationPath, SequenceFlowPath } from "../diagram/edges/EdgeSvgs";
 
 export function BpmnDiagramSvg({

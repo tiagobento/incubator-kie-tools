@@ -35,9 +35,9 @@ import {
   OnWaypointAdded,
   OnWaypointDeleted,
   OnWaypointRepositioned,
-} from "@kie-tools/reactflow-editors-base/dist/diagram/Diagram";
-import { ConnectionLine as ReactFlowDiagramConnectionLine } from "@kie-tools/reactflow-editors-base/dist/edges/ConnectionLine";
-import { EdgeMarkers } from "@kie-tools/reactflow-editors-base/dist/edges/EdgeMarkers";
+} from "@kie-tools/xyflow-kie-diagram/dist/diagram/Diagram";
+import { ConnectionLine as ReactFlowDiagramConnectionLine } from "@kie-tools/xyflow-kie-diagram/dist/edges/ConnectionLine";
+import { EdgeMarkers } from "@kie-tools/xyflow-kie-diagram/dist/edges/EdgeMarkers";
 import * as React from "react";
 import { useCallback, useState } from "react";
 import * as RF from "reactflow";

@@ -18,14 +18,14 @@
  */
 
 import * as React from "react";
-import { DEFAULT_INTRACTION_WIDTH } from "@kie-tools/reactflow-editors-base/dist/maths/DcMaths";
+import { DEFAULT_INTRACTION_WIDTH } from "@kie-tools/xyflow-kie-diagram/dist/maths/DcMaths";
 import { DEFAULT_NODE_FILL, DEFAULT_NODE_STROKE_COLOR } from "./NodeStyle";
 import {
   containerNodeInteractionRectCssClassName,
   DEFAULT_NODE_STROKE_WIDTH,
   NodeSvgProps,
   normalize,
-} from "@kie-tools/reactflow-editors-base/dist/nodes/NodeSvgs";
+} from "@kie-tools/xyflow-kie-diagram/dist/nodes/NodeSvgs";
 
 export function DataObjectNodeSvg(__props: NodeSvgProps & { isIcon: boolean; transform?: string }) {
   const {

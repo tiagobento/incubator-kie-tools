@@ -17,14 +17,14 @@
  * under the License.
  */
 
-import { useEdgeClassName } from "@kie-tools/reactflow-editors-base/dist/edges/Hooks";
-import { PotentialWaypoint, Waypoints } from "@kie-tools/reactflow-editors-base/dist/edges/Waypoints";
-import { useAlwaysVisibleEdgeUpdatersAtNodeBorders } from "@kie-tools/reactflow-editors-base/dist/edges/useAlwaysVisibleEdgeUpdatersAtNodeBorders";
-import { usePathForEdgeWithWaypoints } from "@kie-tools/reactflow-editors-base/dist/edges/usePathForEdgeWithWaypoints";
-import { usePotentialWaypointControls } from "@kie-tools/reactflow-editors-base/dist/edges/usePotentialWaypointControls";
-import { DEFAULT_INTRACTION_WIDTH } from "@kie-tools/reactflow-editors-base/dist/maths/DcMaths";
-import { propsHaveSameValuesDeep } from "@kie-tools/reactflow-editors-base/dist/memoization/memoization";
-import { useIsHovered } from "@kie-tools/reactflow-editors-base/dist/reactExt/useIsHovered";
+import { useEdgeClassName } from "@kie-tools/xyflow-kie-diagram/dist/edges/Hooks";
+import { PotentialWaypoint, Waypoints } from "@kie-tools/xyflow-kie-diagram/dist/edges/Waypoints";
+import { useAlwaysVisibleEdgeUpdatersAtNodeBorders } from "@kie-tools/xyflow-kie-diagram/dist/edges/useAlwaysVisibleEdgeUpdatersAtNodeBorders";
+import { usePathForEdgeWithWaypoints } from "@kie-tools/xyflow-kie-diagram/dist/edges/usePathForEdgeWithWaypoints";
+import { usePotentialWaypointControls } from "@kie-tools/xyflow-kie-diagram/dist/edges/usePotentialWaypointControls";
+import { DEFAULT_INTRACTION_WIDTH } from "@kie-tools/xyflow-kie-diagram/dist/maths/DcMaths";
+import { propsHaveSameValuesDeep } from "@kie-tools/xyflow-kie-diagram/dist/memoization/memoization";
+import { useIsHovered } from "@kie-tools/xyflow-kie-diagram/dist/reactExt/useIsHovered";
 import * as React from "react";
 import { useRef } from "react";
 import * as RF from "reactflow";

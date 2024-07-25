@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Cache } from "@kie-tools/reactflow-editors-base/dist/store/ComputedStateCache";
+import { Cache } from "@kie-tools/xyflow-kie-diagram/dist/store/ComputedStateCache";
 import { State } from "./Store";
 
 export const INITIAL_COMPUTED_CACHE: Cache<ReturnType<State["computed"]>> = {

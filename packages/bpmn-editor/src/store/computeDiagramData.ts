@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { GraphStructureAdjacencyList, GraphStructureEdge } from "@kie-tools/reactflow-editors-base/dist/graph/graph";
-import { snapShapeDimensions } from "@kie-tools/reactflow-editors-base/dist/snapgrid/SnapGrid";
-import { XyFlowDiagramData } from "@kie-tools/reactflow-editors-base/dist/store/State";
+import { GraphStructureAdjacencyList, GraphStructureEdge } from "@kie-tools/xyflow-kie-diagram/dist/graph/graph";
+import { snapShapeDimensions } from "@kie-tools/xyflow-kie-diagram/dist/snapgrid/SnapGrid";
+import { XyFlowDiagramData } from "@kie-tools/xyflow-kie-diagram/dist/store/State";
 import * as RF from "reactflow";
 import {
   BpmnDiagramEdgeData,

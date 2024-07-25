@@ -57,13 +57,13 @@ import {
   UnknownNodeSvg,
 } from "./NodeSvgs";
 
-import { getContainmentRelationship } from "@kie-tools/reactflow-editors-base/dist/maths/DcMaths";
-import { propsHaveSameValuesDeep } from "@kie-tools/reactflow-editors-base/dist/memoization/memoization";
+import { getContainmentRelationship } from "@kie-tools/xyflow-kie-diagram/dist/maths/DcMaths";
+import { propsHaveSameValuesDeep } from "@kie-tools/xyflow-kie-diagram/dist/memoization/memoization";
 import {
   EditableNodeLabel,
   OnEditableNodeLabelChange,
   useEditableNodeLabel,
-} from "@kie-tools/reactflow-editors-base/dist/nodes/EditableNodeLabel";
+} from "@kie-tools/xyflow-kie-diagram/dist/nodes/EditableNodeLabel";
 import {
   NodeResizerHandle,
   useConnectionTargetStatus,
@@ -71,11 +71,11 @@ import {
   useNodeClassName,
   useNodeDimensions,
   useNodeResizing,
-} from "@kie-tools/reactflow-editors-base/dist/nodes/Hooks";
-import { InfoNodePanel } from "@kie-tools/reactflow-editors-base/dist/nodes/InfoNodePanel";
-import { OutgoingStuffNodePanel } from "@kie-tools/reactflow-editors-base/dist/nodes/OutgoingStuffNodePanel";
-import { PositionalNodeHandles } from "@kie-tools/reactflow-editors-base/dist/nodes/PositionalNodeHandles";
-import { useIsHovered } from "@kie-tools/reactflow-editors-base/dist/reactExt/useIsHovered";
+} from "@kie-tools/xyflow-kie-diagram/dist/nodes/Hooks";
+import { InfoNodePanel } from "@kie-tools/xyflow-kie-diagram/dist/nodes/InfoNodePanel";
+import { OutgoingStuffNodePanel } from "@kie-tools/xyflow-kie-diagram/dist/nodes/OutgoingStuffNodePanel";
+import { PositionalNodeHandles } from "@kie-tools/xyflow-kie-diagram/dist/nodes/PositionalNodeHandles";
+import { useIsHovered } from "@kie-tools/xyflow-kie-diagram/dist/reactExt/useIsHovered";
 import { BpmnDiagramEdgeData } from "../BpmnDiagramDomain";
 import { bpmnNodesOutgoingStuffNodePanelMapping } from "../BpmnDiagramDomain";
 import { bpmnEdgesOutgoingStuffNodePanelMapping } from "../BpmnDiagramDomain";

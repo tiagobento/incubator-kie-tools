@@ -18,16 +18,16 @@
  */
 
 import { BpmnLatestModel } from "@kie-tools/bpmn-marshaller";
-import { ComputedStateCache } from "@kie-tools/reactflow-editors-base/dist/store/ComputedStateCache";
+import { ComputedStateCache } from "@kie-tools/xyflow-kie-diagram/dist/store/ComputedStateCache";
 import {
   XyFlowDiagramState,
   XyFlowKieDiagramEdgeStatus,
   XyFlowKieDiagramNodeStatus,
-} from "@kie-tools/reactflow-editors-base/dist/store/State";
-import { computeIsDiagramEditingInProgress } from "@kie-tools/reactflow-editors-base/dist/store/computed/computeIsDiagramEditingInProgress";
-import { computeIsDropTargetNodeValidForSelection } from "@kie-tools/reactflow-editors-base/dist/store/computed/computeIsDropTargetNodeValidForSelection";
-import { setNodeStatus } from "@kie-tools/reactflow-editors-base/dist/store/dispatch/setNodeStatus";
-import { setEdgeStatus } from "@kie-tools/reactflow-editors-base/dist/store/dispatch/setEdgeStatus";
+} from "@kie-tools/xyflow-kie-diagram/dist/store/State";
+import { computeIsDiagramEditingInProgress } from "@kie-tools/xyflow-kie-diagram/dist/store/computed/computeIsDiagramEditingInProgress";
+import { computeIsDropTargetNodeValidForSelection } from "@kie-tools/xyflow-kie-diagram/dist/store/computed/computeIsDropTargetNodeValidForSelection";
+import { setNodeStatus } from "@kie-tools/xyflow-kie-diagram/dist/store/dispatch/setNodeStatus";
+import { setEdgeStatus } from "@kie-tools/xyflow-kie-diagram/dist/store/dispatch/setEdgeStatus";
 import { enableMapSet } from "immer";
 import { create } from "zustand";
 import { immer } from "zustand/middleware/immer";
