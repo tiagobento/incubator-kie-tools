@@ -21,7 +21,7 @@
 handles, we make their indicators be ::before elements. The handle 
 itself is a 0px by 0px div, as connection lines can move freely when
 the cursor is inside it. By making it adimensional, that never happens.  */
-.kie-bpmn-editor--node-handle.connecting::before {
+.xyflow-kie-diagram--node-handle.connecting::before {
   content: "";
   position: absolute;
   background: #0388ce;
@@ -33,7 +33,7 @@ the cursor is inside it. By making it adimensional, that never happens.  */
   top: -10px;
   left: -10px;
 }
-.kie-bpmn-editor--node-handle:not(.connecting)::before {
+.xyflow-kie-diagram--node-handle:not(.connecting)::before {
   content: "";
   position: absolute;
   background: #0388ce;
@@ -45,7 +45,7 @@ the cursor is inside it. By making it adimensional, that never happens.  */
   top: -7px;
   left: -7px;
 }
-.kie-bpmn-editor--node-handle {
+.xyflow-kie-diagram--node-handle {
   /* These 0px are is by design. See explanation above. */
   width: 0px;
   min-width: 0px;
@@ -54,23 +54,23 @@ the cursor is inside it. By making it adimensional, that never happens.  */
   border: 0;
   z-index: 20;
 }
-.kie-bpmn-editor--node-handle.top {
+.xyflow-kie-diagram--node-handle.top {
   top: 0;
   left: 50%;
 }
-.kie-bpmn-editor--node-handle.right {
+.xyflow-kie-diagram--node-handle.right {
   top: 50%;
   right: 0;
 }
-.kie-bpmn-editor--node-handle.bottom {
+.xyflow-kie-diagram--node-handle.bottom {
   bottom: 0;
   left: 50%;
 }
-.kie-bpmn-editor--node-handle.left {
+.xyflow-kie-diagram--node-handle.left {
   top: 50%;
   left: 0;
 }
-.kie-bpmn-editor--node-handle.center {
+.xyflow-kie-diagram--node-handle.center {
   top: 50%;
   left: 50%;
 }

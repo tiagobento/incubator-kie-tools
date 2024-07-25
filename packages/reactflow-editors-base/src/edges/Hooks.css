@@ -17,7 +17,7 @@
  * under the License.
  */
 
-.kie-bpmn-editor--edge.dimmed {
+.xyflow-kie-diagram--edge.dimmed {
   opacity: 0.3;
   pointer-events: none;
 }

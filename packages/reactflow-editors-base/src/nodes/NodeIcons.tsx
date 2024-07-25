@@ -43,7 +43,7 @@ export function RoundSvg({
 
   return (
     <svg
-      className={"kie-bpmn-editor--round-svg-container"}
+      className={"xyflow-kie-diagram--round-svg-container"}
       viewBox={`0 0 ${nodeSvgViewboxSize} ${nodeSvgViewboxSize}`}
       style={style}
     >

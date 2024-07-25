@@ -79,7 +79,7 @@ export const SequenceFlowEdge = React.memo((props: RF.EdgeProps<BpmnDiagramEdgeD
         onDoubleClick={onDoubleClickEdge}
         data-edgetype={"information-requirement"}
       />
-      <SequenceFlowPath d={path} className={`kie-bpmn-editor--edge ${className}`} />
+      <SequenceFlowPath d={path} className={`xyflow-kie-diagram--edge ${className}`} />
 
       {props.selected && !isConnecting && props.data?.bpmnEdge && (
         <Waypoints

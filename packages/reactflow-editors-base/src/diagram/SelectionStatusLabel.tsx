@@ -27,7 +27,7 @@ export function SelectionStatusLabel() {
 
   const selectedNodesCount = useXyFlowKieDiagramStore((s) => s.computed(s).getDiagramData().selectedNodesById.size);
   const selectedEdgesCount = useXyFlowKieDiagramStore((s) => s.computed(s).getDiagramData().selectedEdgesById.size);
-  const bpmnEditorStoreApi = useXyFlowKieDiagramStoreApi();
+  const xyFlowKieDiagramStoreApi = useXyFlowKieDiagramStoreApi();
 
   React.useEffect(() => {
     if (selectedNodesCount >= 2) {
@@ -38,12 +38,12 @@ export function SelectionStatusLabel() {
   const onClose = React.useCallback(
     (e: React.MouseEvent) => {
       e.stopPropagation();
-      bpmnEditorStoreApi.setState((state) => {
+      xyFlowKieDiagramStoreApi.setState((state) => {
         state.xyFlowKieDiagram._selectedNodes = [];
         state.xyFlowKieDiagram._selectedEdges = [];
       });
     },
-    [bpmnEditorStoreApi]
+    [xyFlowKieDiagramStoreApi]
   );
 
   return (

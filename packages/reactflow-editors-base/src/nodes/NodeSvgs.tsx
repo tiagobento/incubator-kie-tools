@@ -33,7 +33,7 @@ export const DEFAULT_NODE_STROKE_WIDTH = 1.5;
 
 export const ___NASTY_HACK_FOR_SAFARI_to_force_redrawing_svgs_and_avoid_repaint_glitches = { flag: false };
 
-export const containerNodeInteractionRectCssClassName = "kie-bpmn-editor--node-containerNodeInteractionRect";
+export const containerNodeInteractionRectCssClassName = "xyflow-kie-diagram--node-containerNodeInteractionRect";
 
 // This function makes sure that independent of strokeWidth, the size and position of the element is preserved. Much like `box-sizing: border-box`;
 export function normalize<T extends NodeSvgProps>(_props: T) {

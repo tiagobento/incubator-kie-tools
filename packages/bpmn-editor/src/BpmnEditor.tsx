@@ -57,7 +57,7 @@ import { Commands, CommandsContextProvider, useCommands } from "./commands/Comma
 
 // Leave custom CSS always for last.
 import "@kie-tools/reactflow-editors-base/dist/patternfly-customizations.css";
-import "@kie-tools/reactflow-editors-base/dist/reactflow-customizations.css";
+import "@kie-tools/reactflow-editors-base/dist/xyflow-customizations.css";
 import "./BpmnEditor.css";
 import { DiagramRef } from "@kie-tools/reactflow-editors-base/dist/diagram/Diagram";
 import { Button, ButtonVariant } from "@patternfly/react-core/dist/js/components/Button";

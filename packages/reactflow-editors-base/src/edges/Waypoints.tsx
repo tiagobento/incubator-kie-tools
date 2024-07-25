@@ -26,7 +26,9 @@ import { useXyFlowKieDiagramStoreApi } from "../store/Store";
 import "./Waypoints.css";
 
 export function PotentialWaypoint(props: { point: { x: number; y: number } }) {
-  return <circle className={"kie-bpmn-editor--edge-waypoint-potential"} r={5} cx={props.point.x} cy={props.point.y} />;
+  return (
+    <circle className={"xyflow-kie-diagram--edge-waypoint-potential"} r={5} cx={props.point.x} cy={props.point.y} />
+  );
 }
 
 export function Waypoints(props: {
@@ -102,7 +104,7 @@ export function Waypoint({
     <circle
       data-waypointindex={index}
       ref={circleRef}
-      className={"kie-bpmn-editor--diagram-edge-waypoint"}
+      className={"xyflow-kie-diagram--diagram-edge-waypoint"}
       cx={point["@_x"]}
       cy={point["@_y"]}
       r={1}

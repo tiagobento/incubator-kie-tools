@@ -17,41 +17,41 @@
  * under the License.
  */
 
-.kie-bpmn-editor--editable-node-name-input {
+.xyflow-kie-diagram--editable-node-name-input {
   height: 100%;
   width: 100%;
   display: flex;
 }
 
-.kie-bpmn-editor--editable-node-name-input.top-center {
+.xyflow-kie-diagram--editable-node-name-input.top-center {
   align-items: start;
   text-align: center;
   justify-content: center;
 }
-.kie-bpmn-editor--editable-node-name-input.top-left {
+.xyflow-kie-diagram--editable-node-name-input.top-left {
   align-items: start;
   text-align: left;
   padding: 8px;
 }
-.kie-bpmn-editor--editable-node-name-input.center-bottom {
+.xyflow-kie-diagram--editable-node-name-input.center-bottom {
   text-align: center;
   justify-content: center;
 }
-.kie-bpmn-editor--editable-node-name-input.center-center {
+.xyflow-kie-diagram--editable-node-name-input.center-center {
   align-items: center;
   text-align: center;
   justify-content: center;
 }
-.kie-bpmn-editor--editable-node-name-input.center-left {
+.xyflow-kie-diagram--editable-node-name-input.center-left {
   align-items: center;
   text-align: left;
 }
-.kie-bpmn-editor--editable-node-name-input.top-center input,
-.kie-bpmn-editor--editable-node-name-input.center-center input {
+.xyflow-kie-diagram--editable-node-name-input.top-center input,
+.xyflow-kie-diagram--editable-node-name-input.center-center input {
   text-align: center;
 }
 
-.kie-bpmn-editor--editable-node-name-input input {
+.xyflow-kie-diagram--editable-node-name-input input {
   border: 0;
   width: 100%;
   padding: 0;
@@ -59,13 +59,13 @@
   background: transparent;
 }
 
-.kie-bpmn-editor--editable-node-name-input input:focus {
+.xyflow-kie-diagram--editable-node-name-input input:focus {
   outline: 0;
 }
 
-.kie-bpmn-editor--editable-node-name-input.grow,
-.kie-bpmn-editor--editable-node-name-input.grow input,
-.kie-bpmn-editor--editable-node-name-input.grow span {
+.xyflow-kie-diagram--editable-node-name-input.grow,
+.xyflow-kie-diagram--editable-node-name-input.grow input,
+.xyflow-kie-diagram--editable-node-name-input.grow span {
   width: 100%;
   flex-grow: 1;
 }

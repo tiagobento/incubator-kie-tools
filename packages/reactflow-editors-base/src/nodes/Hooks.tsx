@@ -53,7 +53,7 @@ export function NodeResizerHandle<N extends string>(props: NodeResizeHandleProps
   return (
     <RF.NodeResizeControl style={resizerControlStyle} minWidth={minSize["@_width"]} minHeight={minSize["@_height"]}>
       <div
-        data-testid={`kie-tools--bpmn-editor--${props.nodeId}-resize-handle`}
+        data-testid={`kie-tools--xyflow-kie-diagram--${props.nodeId}-resize-handle`}
         style={{
           position: "absolute",
           top: "-10px",

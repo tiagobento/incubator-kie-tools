@@ -18,10 +18,10 @@
  */
 
 /* edge selection / hover */
-.react-flow__edge > .kie-bpmn-editor--edge {
+.react-flow__edge > .xyflow-kie-diagram--edge {
   pointer-events: none;
 }
-.react-flow__edge.selected > .kie-bpmn-editor--edge {
+.react-flow__edge.selected > .xyflow-kie-diagram--edge {
   fill: #006ba4 !important;
   stroke: #006ba4 !important;
   stroke-width: 3px !important;
@@ -33,49 +33,49 @@
 .react-flow__edge.selected .react-flow__edge-interaction.dragging-waypoint,
 .react-flow__edge.selected
   .react-flow__edge-interaction.dragging-waypoint
-  ~ .kie-bpmn-editor--diagram-edge-waypoints
+  ~ .xyflow-kie-diagram--diagram-edge-waypoints
   circle {
   cursor: grabbing;
 }
-.react-flow__edge:not(.selected) .kie-bpmn-editor--edge:hover,
-.react-flow__edge:not(.selected) .react-flow__edge-interaction:hover + .kie-bpmn-editor--edge {
+.react-flow__edge:not(.selected) .xyflow-kie-diagram--edge:hover,
+.react-flow__edge:not(.selected) .react-flow__edge-interaction:hover + .xyflow-kie-diagram--edge {
   stroke-width: 2px !important;
 }
 
 /* nodes selection / hover */
-.react-flow__node:not(.selected):hover > .kie-bpmn-editor--node-shape.normal {
+.react-flow__node:not(.selected):hover > .xyflow-kie-diagram--node-shape.normal {
   filter: drop-shadow(2px 2px 2px rgb(127, 127, 127));
 }
 .react-flow__node.selected {
   color: #006ba4 !important;
 }
-.react-flow__node > .kie-bpmn-editor--node-shape.drop-target-invalid ~ .kie-bpmn-editor--node {
+.react-flow__node > .xyflow-kie-diagram--node-shape.drop-target-invalid ~ .xyflow-kie-diagram--node {
   border-color: red !important;
   color: red !important;
   opacity: 0.4;
 }
-.react-flow__node > .kie-bpmn-editor--node-shape.drop-target-invalid {
+.react-flow__node > .xyflow-kie-diagram--node-shape.drop-target-invalid {
   border-color: red !important;
 }
-.react-flow__node > .kie-bpmn-editor--node-shape.drop-target-invalid > * {
+.react-flow__node > .xyflow-kie-diagram--node-shape.drop-target-invalid > * {
   stroke: rgba(255, 0, 0, 0.2) !important;
   fill: rgba(164, 0, 0, 0.1) !important;
 }
-.react-flow__node > .kie-bpmn-editor--node-shape.drop-target ~ .kie-bpmn-editor--node {
+.react-flow__node > .xyflow-kie-diagram--node-shape.drop-target ~ .xyflow-kie-diagram--node {
   color: #006ba4 !important;
 }
-.react-flow__node > .kie-bpmn-editor--node-shape.drop-target,
-.react-flow__node.selected > .kie-bpmn-editor--node-shape.normal {
+.react-flow__node > .xyflow-kie-diagram--node-shape.drop-target,
+.react-flow__node.selected > .xyflow-kie-diagram--node-shape.normal {
   border-color: #006ba4 !important;
   filter: drop-shadow(2px 2px 2px #006ba477);
 }
-.react-flow__node > .kie-bpmn-editor--node-shape.drop-target > * {
+.react-flow__node > .xyflow-kie-diagram--node-shape.drop-target > * {
   stroke: #006ba4 !important;
   fill: rgba(0, 107, 164, 0.1) !important;
 }
 
 .react-flow__node.selected:not(.react-flow__node-node_unknown):not(.react-flow__node-node_textAnnotation)
-  > .kie-bpmn-editor--node-shape
+  > .xyflow-kie-diagram--node-shape
   > * {
   stroke: #006ba4 !important;
 }

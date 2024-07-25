@@ -17,14 +17,14 @@
  * under the License.
  */
 
-.kie-bpmn-editor--info-node-panel {
+.xyflow-kie-diagram--info-node-panel {
   position: absolute;
   top: 0;
   right: calc(100% + 4px - 21px);
   padding-right: 21px;
   height: max(25%, 40px);
 }
-.kie-bpmn-editor--info-label {
+.xyflow-kie-diagram--info-label {
   padding: 4px 5px;
   height: 19px;
   cursor: pointer;
@@ -33,12 +33,12 @@
   font-weight: bold;
   box-shadow: 4px 4px 2px 0px rgb(127 127 127);
 }
-.kie-bpmn-editor--info-label > .pf-c-label__content::before {
+.xyflow-kie-diagram--info-label > .pf-c-label__content::before {
   border: 1px solid black;
 }
-.kie-bpmn-editor--info-label:hover {
+.xyflow-kie-diagram--info-label:hover {
   filter: brightness(95%);
 }
-.kie-bpmn-editor--info-label:active {
+.xyflow-kie-diagram--info-label:active {
   filter: brightness(90%);
 }

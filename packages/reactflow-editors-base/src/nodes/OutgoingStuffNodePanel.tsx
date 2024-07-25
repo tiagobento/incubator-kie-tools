@@ -84,7 +84,7 @@ export function OutgoingStuffNodePanel<N extends string, E extends string>(props
           />
         </>
       )}
-      <Flex className={"kie-bpmn-editor--outgoing-stuff-node-panel"} style={style}>
+      <Flex className={"xyflow-kie-diagram--outgoing-stuff-node-panel"} style={style}>
         {props.edgeTypes.length > 0 && (
           <FlexItem>
             {props.edgeTypes.map((edgeType) => (
@@ -99,7 +99,7 @@ export function OutgoingStuffNodePanel<N extends string, E extends string>(props
                 data-testid={`${props.nodeHref}-add-${edgeType}`}
               >
                 <svg
-                  className={"kie-bpmn-editor--round-svg-container"}
+                  className={"xyflow-kie-diagram--round-svg-container"}
                   viewBox={`0 0 ${edgeSvgViewboxSize} ${edgeSvgViewboxSize}`}
                   style={{ padding: `${svgViewboxPadding}px` }}
                 >
@@ -124,7 +124,7 @@ export function OutgoingStuffNodePanel<N extends string, E extends string>(props
                 data-testid={`${props.nodeHref}-add-${nodeType}`}
               >
                 <svg
-                  className={"kie-bpmn-editor--round-svg-container"}
+                  className={"xyflow-kie-diagram--round-svg-container"}
                   viewBox={`0 0 ${nodeSvgViewboxSize} ${nodeSvgViewboxSize}`}
                   style={{ padding: `${svgViewboxPadding}px` }}
                 >

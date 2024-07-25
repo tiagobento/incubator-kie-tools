@@ -17,7 +17,7 @@
  * under the License.
  */
 
-.kie-bpmn-editor--node {
+.xyflow-kie-diagram--node {
   height: 100%;
   width: 100%;
   padding: 10px;
@@ -37,15 +37,15 @@
   overflow: visible;
   z-index: 10000; /* Makes the data type node panel appear correctly, on top of the node */
 }
-.kie-bpmn-editor--node:focus {
+.xyflow-kie-diagram--node:focus {
   outline: none;
 }
-.kie-bpmn-editor--node.dimmed,
-.kie-bpmn-editor--node-shape.dimmed {
+.xyflow-kie-diagram--node.dimmed,
+.xyflow-kie-diagram--node-shape.dimmed {
   opacity: 0.3;
   pointer-events: none;
 }
-.kie-bpmn-editor--node-shape {
+.xyflow-kie-diagram--node-shape {
   position: absolute;
   top: 0;
   left: 0;
@@ -57,7 +57,7 @@
 
 /* (begin) containment nodes */
 /* CONTAINMENT NODES HAVE A SPECIFIC SELECTION MECHANISM TO ALLOW EDITING EDGES INSIDE THEM */
-.kie-bpmn-editor--containment-node-visibleRect {
+.xyflow-kie-diagram--containment-node-visibleRect {
   pointer-events: none;
 }
 .react-flow__node-node_containment {
@@ -65,12 +65,12 @@
   background: transparent;
   box-shadow: none !important;
 }
-.react-flow__node-node_containment:not(.selected) .kie-bpmn-editor--node-shape {
+.react-flow__node-node_containment:not(.selected) .xyflow-kie-diagram--node-shape {
   filter: none !important;
 }
-.react-flow__node-node_containment .kie-bpmn-editor--outgoing-stuff-node-panel,
-.react-flow__node-node_containment .kie-bpmn-editor--editable-node-name-input span,
-.react-flow__node-node_containment .kie-bpmn-editor--info-node-panel,
+.react-flow__node-node_containment .xyflow-kie-diagram--outgoing-stuff-node-panel,
+.react-flow__node-node_containment .xyflow-kie-diagram--editable-node-name-input span,
+.react-flow__node-node_containment .xyflow-kie-diagram--info-node-panel,
 .react-flow__node-node_containment .react-flow__resize-control div {
   pointer-events: all !important;
 }

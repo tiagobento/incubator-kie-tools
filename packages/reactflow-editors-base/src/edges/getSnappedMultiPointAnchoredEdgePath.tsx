@@ -65,11 +65,11 @@ export function getSnappedMultiPointAnchoredEdgePath({
   ///////
 
   if (!edge?.["di:waypoint"]) {
-    console.warn("BPMN DIAGRAM: No waypoints found. Creating a default straight line.");
+    console.warn("XYFLOW KIE DIAGRAM: No waypoints found. Creating a default straight line.");
     points[0] = { "@_x": discreteAuto.sx, "@_y": discreteAuto.sy };
     points[points.length - 1] = { "@_x": discreteAuto.tx, "@_y": discreteAuto.ty };
   } else if (edge?.["di:waypoint"].length < 2) {
-    console.warn("BPMN DIAGRAM: Invalid waypoints for edge. Creating a default straight line.");
+    console.warn("XYFLOW KIE DIAGRAM: Invalid waypoints for edge. Creating a default straight line.");
     points[0] = { "@_x": discreteAuto.sx, "@_y": discreteAuto.sy };
     points[points.length - 1] = { "@_x": discreteAuto.tx, "@_y": discreteAuto.ty };
   } else {

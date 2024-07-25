@@ -39,12 +39,12 @@ export function BpmnDiagramSvg({
   edges,
   snapGrid,
 }: {
-  nodes: RF.Node<BpmnDiagramNodeData>[];
+  nodes: RF.Node<BpmnDiagramNodeData, BpmnNodeType>[];
   edges: RF.Edge<BpmnDiagramEdgeData>[];
   snapGrid: SnapGrid;
 }) {
   const { nodesSvg, nodesById } = useMemo(() => {
-    const nodesById = new Map<string, RF.Node<BpmnDiagramNodeData>>();
+    const nodesById = new Map<string, RF.Node<BpmnDiagramNodeData, BpmnNodeType>>();
 
     const nodesSvg = nodes.map((node) => {
       const { fontCssProperties: fontStyle } = getNodeStyle({
@@ -158,7 +158,10 @@ export function BpmnDiagramSvg({
 const SVG_NODE_LABEL_TEXT_PADDING_ALL = 10;
 const SVG_NODE_LABEL_TEXT_ADDITIONAL_PADDING_TOP_LEFT = 8;
 
-export function getNodeLabelSvgTextAlignmentProps(n: RF.Node<BpmnDiagramNodeData>, labelPosition: NodeLabelPosition) {
+export function getNodeLabelSvgTextAlignmentProps(
+  n: RF.Node<BpmnDiagramNodeData, BpmnNodeType>,
+  labelPosition: NodeLabelPosition
+) {
   switch (labelPosition) {
     case "center-bottom":
       const cbTx = n.position.x! + n.width! / 2;

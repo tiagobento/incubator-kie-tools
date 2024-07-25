@@ -127,7 +127,7 @@ export const StartEventNode = React.memo(
 
     return (
       <>
-        <svg className={`kie-bpmn-editor--node-shape ${className} ${selected ? "selected" : ""}`}>
+        <svg className={`xyflow-kie-diagram--node-shape ${className} ${selected ? "selected" : ""}`}>
           <StartEventNodeSvg {...nodeDimensions} x={0} y={0} />
         </svg>
         <PositionalNodeHandles isTargeted={isTargeted && isValidConnectionTarget} nodeId={id} />
@@ -142,7 +142,7 @@ export const StartEventNode = React.memo(
         >
           {/* {`render count: ${renderCount.current}`}
           <br /> */}
-          <div className={"kie-bpmn-editor--node"}>
+          <div className={"xyflow-kie-diagram--node"}>
             <InfoNodePanel
               isVisible={!isTargeted && shouldActLikeHovered}
               onClick={useCallback(() => {
@@ -220,7 +220,7 @@ export const IntermediateCatchEventNode = React.memo(
 
     return (
       <>
-        <svg className={`kie-bpmn-editor--node-shape ${className} ${selected ? "selected" : ""}`}>
+        <svg className={`xyflow-kie-diagram--node-shape ${className} ${selected ? "selected" : ""}`}>
           <IntermediateCatchEventNodeSvg {...nodeDimensions} x={0} y={0} />
         </svg>
         <PositionalNodeHandles isTargeted={isTargeted && isValidConnectionTarget} nodeId={id} />
@@ -235,7 +235,7 @@ export const IntermediateCatchEventNode = React.memo(
         >
           {/* {`render count: ${renderCount.current}`}
           <br /> */}
-          <div className={"kie-bpmn-editor--node"}>
+          <div className={"xyflow-kie-diagram--node"}>
             <InfoNodePanel
               isVisible={!isTargeted && shouldActLikeHovered}
               onClick={useCallback(() => {
@@ -313,7 +313,7 @@ export const IntermediateThrowEventNode = React.memo(
 
     return (
       <>
-        <svg className={`kie-bpmn-editor--node-shape ${className} ${selected ? "selected" : ""}`}>
+        <svg className={`xyflow-kie-diagram--node-shape ${className} ${selected ? "selected" : ""}`}>
           <IntermediateThrowEventNodeSvg {...nodeDimensions} x={0} y={0} />
         </svg>
         <PositionalNodeHandles isTargeted={isTargeted && isValidConnectionTarget} nodeId={id} />
@@ -328,7 +328,7 @@ export const IntermediateThrowEventNode = React.memo(
         >
           {/* {`render count: ${renderCount.current}`}
           <br /> */}
-          <div className={"kie-bpmn-editor--node"}>
+          <div className={"xyflow-kie-diagram--node"}>
             <InfoNodePanel
               isVisible={!isTargeted && shouldActLikeHovered}
               onClick={useCallback(() => {
@@ -404,7 +404,7 @@ export const EndEventNode = React.memo(
 
     return (
       <>
-        <svg className={`kie-bpmn-editor--node-shape ${className} ${selected ? "selected" : ""}`}>
+        <svg className={`xyflow-kie-diagram--node-shape ${className} ${selected ? "selected" : ""}`}>
           <EndEventNodeSvg {...nodeDimensions} x={0} y={0} />
         </svg>
         <PositionalNodeHandles isTargeted={isTargeted && isValidConnectionTarget} nodeId={id} />
@@ -419,7 +419,7 @@ export const EndEventNode = React.memo(
         >
           {/* {`render count: ${renderCount.current}`}
           <br /> */}
-          <div className={"kie-bpmn-editor--node"}>
+          <div className={"xyflow-kie-diagram--node"}>
             <InfoNodePanel
               isVisible={!isTargeted && shouldActLikeHovered}
               onClick={useCallback(() => {
@@ -495,7 +495,7 @@ export const TaskNode = React.memo(
 
     return (
       <>
-        <svg className={`kie-bpmn-editor--node-shape ${className} ${selected ? "selected" : ""}`}>
+        <svg className={`xyflow-kie-diagram--node-shape ${className} ${selected ? "selected" : ""}`}>
           <TaskNodeSvg {...nodeDimensions} x={0} y={0} />
         </svg>
         <PositionalNodeHandles isTargeted={isTargeted && isValidConnectionTarget} nodeId={id} />
@@ -510,7 +510,7 @@ export const TaskNode = React.memo(
         >
           {/* {`render count: ${renderCount.current}`}
           <br /> */}
-          <div className={"kie-bpmn-editor--node"}>
+          <div className={"xyflow-kie-diagram--node"}>
             <InfoNodePanel
               isVisible={!isTargeted && shouldActLikeHovered}
               onClick={useCallback(() => {
@@ -594,7 +594,7 @@ export const SubProcessNode = React.memo(
 
     return (
       <>
-        <svg className={`kie-bpmn-editor--node-shape ${className} ${selected ? "selected" : ""}`}>
+        <svg className={`xyflow-kie-diagram--node-shape ${className} ${selected ? "selected" : ""}`}>
           <SubProcessNodeSvg {...nodeDimensions} x={0} y={0} />
         </svg>
         <PositionalNodeHandles isTargeted={isTargeted && isValidConnectionTarget} nodeId={id} />
@@ -609,7 +609,7 @@ export const SubProcessNode = React.memo(
         >
           {/* {`render count: ${renderCount.current}`}
           <br /> */}
-          <div className={"kie-bpmn-editor--node"}>
+          <div className={"xyflow-kie-diagram--node"}>
             <InfoNodePanel
               isVisible={!isTargeted && shouldActLikeHovered}
               onClick={useCallback(() => {
@@ -711,7 +711,7 @@ export const GatewayNode = React.memo(
 
     return (
       <>
-        <svg className={`kie-bpmn-editor--node-shape ${className} ${selected ? "selected" : ""}`}>
+        <svg className={`xyflow-kie-diagram--node-shape ${className} ${selected ? "selected" : ""}`}>
           <GatewayNodeSvg {...nodeDimensions} x={0} y={0} />
         </svg>
         <PositionalNodeHandles isTargeted={isTargeted && isValidConnectionTarget} nodeId={id} />
@@ -726,7 +726,7 @@ export const GatewayNode = React.memo(
         >
           {/* {`render count: ${renderCount.current}`}
           <br /> */}
-          <div className={"kie-bpmn-editor--node"}>
+          <div className={"xyflow-kie-diagram--node"}>
             <InfoNodePanel
               isVisible={!isTargeted && shouldActLikeHovered}
               onClick={useCallback(() => {
@@ -816,7 +816,7 @@ export const DataObjectNode = React.memo(
 
     return (
       <>
-        <svg className={`kie-bpmn-editor--node-shape ${className} ${selected ? "selected" : ""}`}>
+        <svg className={`xyflow-kie-diagram--node-shape ${className} ${selected ? "selected" : ""}`}>
           <DataObjectNodeSvg {...nodeDimensions} x={0} y={0} isIcon={false} />
         </svg>
         <PositionalNodeHandles isTargeted={isTargeted && isValidConnectionTarget} nodeId={id} />
@@ -832,7 +832,7 @@ export const DataObjectNode = React.memo(
         >
           {/* {`render count: ${renderCount.current}`}
           <br /> */}
-          <div className={"kie-bpmn-editor--node"}>
+          <div className={"xyflow-kie-diagram--node"}>
             <InfoNodePanel
               isVisible={!isTargeted && shouldActLikeHovered}
               onClick={useCallback(() => {
@@ -940,12 +940,12 @@ export const GroupNode = React.memo(
 
     return (
       <>
-        <svg className={`kie-dmn-editor--node-shape ${className}`}>
+        <svg className={`xyflow-kie-diagram--node-shape ${className}`}>
           <GroupNodeSvg ref={ref} {...nodeDimensions} x={0} y={0} strokeWidth={3} />
         </svg>
 
         <div
-          className={`kie-dmn-editor--node kie-dmn-editor--group-node ${className}`}
+          className={`xyflow-kie-diagram--node kie-bpmn-editor--group-node ${className}`}
           tabIndex={-1}
           onDoubleClick={triggerEditing}
           onKeyDown={triggerEditingIfEnter}
@@ -1028,7 +1028,7 @@ export const TextAnnotationNode = React.memo(
 
     return (
       <>
-        <svg className={`kie-bpmn-editor--node-shape ${className}`}>
+        <svg className={`xyflow-kie-diagram--node-shape ${className}`}>
           <TextAnnotationNodeSvg {...nodeDimensions} x={0} y={0} />
         </svg>
 
@@ -1036,7 +1036,7 @@ export const TextAnnotationNode = React.memo(
 
         <div
           ref={ref}
-          className={`kie-bpmn-editor--node kie-bpmn-editor--text-annotation-node ${className}`}
+          className={`xyflow-kie-diagram--node kie-bpmn-editor--text-annotation-node ${className}`}
           tabIndex={-1}
           onDoubleClick={triggerEditing}
           onKeyDown={triggerEditingIfEnter}
@@ -1102,7 +1102,7 @@ export const UnknownNode = React.memo(
 
     return (
       <>
-        <svg className={`kie-bpmn-editor--node-shape ${className}`}>
+        <svg className={`xyflow-kie-diagram--node-shape ${className}`}>
           <UnknownNodeSvg {...nodeDimensions} x={0} y={0} />
         </svg>
 
@@ -1110,7 +1110,7 @@ export const UnknownNode = React.memo(
 
         <div
           ref={ref}
-          className={`kie-bpmn-editor--node kie-bpmn-editor--unknown-node ${className}`}
+          className={`xyflow-kie-diagram--node kie-bpmn-editor--unknown-node ${className}`}
           tabIndex={-1}
           data-nodehref={id}
         >

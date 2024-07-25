@@ -26,8 +26,8 @@ export function InfoNodePanel({ isVisible, onClick }: { isVisible: boolean; onCl
   return (
     <>
       {isVisible && (
-        <div className={"kie-bpmn-editor--info-node-panel"}>
-          <Label onClick={onClick} className={"kie-bpmn-editor--info-label"}>
+        <div className={"xyflow-kie-diagram--info-node-panel"}>
+          <Label onClick={onClick} className={"xyflow-kie-diagram--info-label"}>
             <InfoIcon style={{ width: "0.7em", height: "0.7em" }} />
           </Label>
         </div>

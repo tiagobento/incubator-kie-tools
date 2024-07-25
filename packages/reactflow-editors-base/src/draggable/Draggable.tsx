@@ -221,14 +221,14 @@ export function Draggable(props: {
   const isDragging = useMemo(() => props.index === source && leftOrigin, [leftOrigin, props.index, source]);
 
   const rowClassName = useMemo(() => {
-    let className = "kie-bpmn-editor--draggable-row";
+    let className = "xyflow-kie-diagram--draggable-row";
 
     if (hovered) {
-      className += " kie-bpmn-editor--draggable-row-hovered";
+      className += " xyflow-kie-diagram--draggable-row-hovered";
     }
 
     if (isDragging) {
-      className += " kie-bpmn-editor--draggable-row-is-dragging";
+      className += " xyflow-kie-diagram--draggable-row-is-dragging";
     }
 
     return className;
@@ -253,14 +253,16 @@ export function Draggable(props: {
     >
       {!props.isDisabled ? (
         <Icon
-          className={"kie-bpmn-editor--draggable-icon"}
+          className={"xyflow-kie-diagram--draggable-icon"}
           onPointerEnter={() => setDraggable(true)}
           onPointerLeave={() => setDraggable(false)}
           style={props.handlerStyle}
         >
           <GripVerticalIcon
             className={
-              hovered ? "kie-bpmn-editor--draggable-icon-handler-hovered" : "kie-bpmn-editor--draggable-icon-handler"
+              hovered
+                ? "xyflow-kie-diagram--draggable-icon-handler-hovered"
+                : "xyflow-kie-diagram--draggable-icon-handler"
             }
           />
         </Icon>
@@ -269,7 +271,7 @@ export function Draggable(props: {
       )}
       <div
         style={props.childrenStyle}
-        className={`kie-bpmn-editor--draggable-children ${props.childrenClassName ? props.childrenClassName : ""}`}
+        className={`xyflow-kie-diagram--draggable-children ${props.childrenClassName ? props.childrenClassName : ""}`}
       >
         <DraggableItemContext.Provider value={{ hovered }}>{props.children}</DraggableItemContext.Provider>
       </div>

@@ -17,37 +17,37 @@
  * under the License.
  */
 
-.kie-bpmn-editor--draggable-row {
+.xyflow-kie-diagram--draggable-row {
   display: flex;
   flex-direction: row;
   background-color: transparent;
 }
 
-.kie-bpmn-editor--draggable-row-hovered {
+.xyflow-kie-diagram--draggable-row-hovered {
   background-color: rgb(220, 220, 220);
 }
 
-.kie-bpmn-editor--draggable-row-is-dragging {
+.xyflow-kie-diagram--draggable-row-is-dragging {
   opacity: 0;
 }
 
-.kie-bpmn-editor--draggable-icon {
+.xyflow-kie-diagram--draggable-icon {
   align-self: center;
   cursor: grab;
 }
 
-.kie-bpmn-editor--draggable-icon:active {
+.xyflow-kie-diagram--draggable-icon:active {
   cursor: grabbing;
 }
 
-.kie-bpmn-editor--draggable-icon-handler {
+.xyflow-kie-diagram--draggable-icon-handler {
   color: transparent;
 }
 
-.kie-bpmn-editor--draggable-icon-handler-hovered {
+.xyflow-kie-diagram--draggable-icon-handler-hovered {
   color: gray;
 }
 
-.kie-bpmn-editor--draggable-children {
+.xyflow-kie-diagram--draggable-children {
   flex-grow: 1;
 }

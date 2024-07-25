@@ -171,7 +171,7 @@ export function EditableNodeLabel({
   const ref = useRef<HTMLInputElement>(null);
 
   return (
-    <div className={`kie-bpmn-editor--editable-node-name-input ${position} ${grow ? "grow" : ""}`}>
+    <div className={`xyflow-kie-diagram--editable-node-name-input ${position} ${grow ? "grow" : ""}`}>
       {(isEditing && (
         <input
           spellCheck={"false"} // Let's not confuse FEEL name validation with the browser's grammar check.

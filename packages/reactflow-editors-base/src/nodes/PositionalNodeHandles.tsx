@@ -42,35 +42,35 @@ export function PositionalNodeHandles(props: { isTargeted: boolean; nodeId: stri
     <>
       <RF.Handle
         id={PositionalNodeHandleId.Left}
-        className={"kie-bpmn-editor--node-handle left"}
+        className={"xyflow-kie-diagram--node-handle left"}
         style={{ ...targetsStyle }}
         type={type}
         position={RF.Position.Left}
       />
       <RF.Handle
         id={PositionalNodeHandleId.Top}
-        className={"kie-bpmn-editor--node-handle top"}
+        className={"xyflow-kie-diagram--node-handle top"}
         style={{ ...targetsStyle }}
         type={type}
         position={RF.Position.Top}
       />
       <RF.Handle
         id={PositionalNodeHandleId.Right}
-        className={"kie-bpmn-editor--node-handle right"}
+        className={"xyflow-kie-diagram--node-handle right"}
         style={{ ...targetsStyle }}
         type={type}
         position={RF.Position.Right}
       />
       <RF.Handle
         id={PositionalNodeHandleId.Bottom}
-        className={"kie-bpmn-editor--node-handle bottom"}
+        className={"xyflow-kie-diagram--node-handle bottom"}
         style={{ ...targetsStyle }}
         type={type}
         position={RF.Position.Bottom}
       />
       <RF.Handle
         id={PositionalNodeHandleId.Center}
-        className={"kie-bpmn-editor--node-handle center"}
+        className={"xyflow-kie-diagram--node-handle center"}
         style={{ ...targetsStyle }}
         type={type}
         position={RF.Position.Top}

@@ -87,7 +87,7 @@ export function getHandlePosition({
   } else if (getDistance(left, waypoint) <= 1) {
     return { handlePosition: PositionalNodeHandleId.Left, point: left };
   } else {
-    console.warn("BPMN DIAGRAM: Can't find a match of NSWE/Center handles. Using Center as default.");
+    console.warn("XYFLOW KIE DIAGRAM: Can't find a match of NSWE/Center handles. Using Center as default.");
     return { handlePosition: PositionalNodeHandleId.Center, point: center };
   }
 }
@@ -227,13 +227,14 @@ export function pointsToPath(points: DC__Point[]): string {
   return path;
 }
 
-export const DISCRETE_AUTO_POSITIONING_BPMN_EDGE_ID_MARKER = [
+export const XYFLOW_KIE_DIAGRAM_DISCRETE_AUTO_POSITIONED_EDGE_ID_MARKER = [
   AutoPositionedEdgeMarker.BOTH, // This needs to be the first element.
   AutoPositionedEdgeMarker.SOURCE,
   AutoPositionedEdgeMarker.TARGET,
 ];
+
 export function getDiscreteAutoPositioningEdgeIdMarker(edgeId: string): AutoPositionedEdgeMarker | undefined {
-  for (const marker of DISCRETE_AUTO_POSITIONING_BPMN_EDGE_ID_MARKER) {
+  for (const marker of XYFLOW_KIE_DIAGRAM_DISCRETE_AUTO_POSITIONED_EDGE_ID_MARKER) {
     if (edgeId.endsWith(marker)) {
       return marker;
     }

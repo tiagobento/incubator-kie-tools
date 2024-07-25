@@ -17,20 +17,20 @@
  * under the License.
  */
 
-circle.kie-bpmn-editor--diagram-edge-waypoint {
+circle.xyflow-kie-diagram--diagram-edge-waypoint {
   fill: black;
   stroke-width: 8;
   stroke: #006ba4;
 }
-circle.kie-bpmn-editor--diagram-edge-waypoint:active,
-circle.kie-bpmn-editor--diagram-edge-waypoint:hover {
+circle.xyflow-kie-diagram--diagram-edge-waypoint:active,
+circle.xyflow-kie-diagram--diagram-edge-waypoint:hover {
   stroke-width: 16;
   cursor: grab;
 }
-.react-flow__edge.selected .kie-bpmn-editor--edge-waypoint-potential,
-.react-flow__edge:not(.selected) .kie-bpmn-editor--edge-waypoint-potential {
+.react-flow__edge.selected .xyflow-kie-diagram--edge-waypoint-potential,
+.react-flow__edge:not(.selected) .xyflow-kie-diagram--edge-waypoint-potential {
   fill: #4d809b96;
 }
-.kie-bpmn-editor--edge-waypoint-potential {
+.xyflow-kie-diagram--edge-waypoint-potential {
   pointer-events: none;
 }
