@@ -32,6 +32,9 @@ import {
   OnNodeRepositioned,
   OnNodeResized,
   OnNodeUnparented,
+  OnWaypointAdded,
+  OnWaypointDeleted,
+  OnWaypointRepositioned,
 } from "@kie-tools/reactflow-editors-base/dist/diagram/Diagram";
 import { ConnectionLine as ReactFlowDiagramConnectionLine } from "@kie-tools/reactflow-editors-base/dist/edges/ConnectionLine";
 import { EdgeMarkers } from "@kie-tools/reactflow-editors-base/dist/edges/EdgeMarkers";
@@ -94,6 +97,8 @@ export function BpmnDiagram({
 
   const isEmptyStateShowing = showEmptyState && nodes.length === 0;
 
+  // nodes
+
   const onNodeAdded = useCallback<OnNodeAdded<BpmnNodeType, BpmnDiagramNodeData>>(() => {}, []);
 
   const onConnectedNodeAdded = useCallback<
@@ -142,6 +147,8 @@ export function BpmnDiagram({
 
   const onNodeResized = useCallback<OnNodeResized<BpmnNodeType, BpmnDiagramNodeData>>(() => {}, []);
 
+  // edges
+
   const onEdgeAdded = useCallback<
     OnEdgeAdded<BpmnNodeType, BpmnEdgeType, BpmnDiagramNodeData, BpmnDiagramEdgeData>
   >(() => {}, []);
@@ -152,6 +159,8 @@ export function BpmnDiagram({
 
   const onEdgeDeleted = useCallback<OnEdgeDeleted<BpmnEdgeType, BpmnDiagramEdgeData>>(() => {}, []);
 
+  // misc
+
   const onEscPressed = useCallback<OnEscPressed>(() => {
     bpmnEditorStoreApi.setState((state) => {
       state.diagram.propertiesPanel.isOpen = false;
@@ -159,6 +168,12 @@ export function BpmnDiagram({
       state.diagram.openLhsPanel = BpmnDiagramLhsPanel.NONE;
     });
   }, [bpmnEditorStoreApi]);
+
+  // waypoints
+
+  const onWaypointAdded = useCallback<OnWaypointAdded>(() => {}, []);
+  const onWaypointRepositioned = useCallback<OnWaypointRepositioned>(() => {}, []);
+  const onWaypointDeleted = useCallback<OnWaypointDeleted>(() => {}, []);
 
   return (
     <>
@@ -197,6 +212,9 @@ export function BpmnDiagram({
           onNodeParented={onNodeParented}
           onNodeResized={onNodeResized}
           onEscPressed={onEscPressed}
+          onWaypointAdded={onWaypointAdded}
+          onWaypointRepositioned={onWaypointRepositioned}
+          onWaypointDeleted={onWaypointDeleted}
         >
           <BpmnPalette pulse={isEmptyStateShowing} />
           <TopRightCornerPanels availableHeight={container.current?.offsetHeight} />

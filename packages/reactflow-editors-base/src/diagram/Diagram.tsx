@@ -32,20 +32,6 @@ import { SelectionStatusLabel } from "./SelectionStatusLabel";
 import { XyFlowDiagramState, XyFlowKieDiagramEdgeData, XyFlowKieDiagramNodeData } from "../store/State";
 import { Draft } from "immer";
 
-const isFirefox = typeof (window as any).InstallTrigger !== "undefined"; // See https://stackoverflow.com/questions/9847580/how-to-detect-safari-chrome-ie-firefox-and-opera-browsers
-
-const PAN_ON_DRAG = [1, 2];
-
-const FIT_VIEW_OPTIONS: RF.FitViewOptions = { maxZoom: 1, minZoom: 0.1, duration: 400 };
-
-export const DEFAULT_VIEWPORT = { x: 100, y: 100, zoom: 1 };
-
-const DELETE_NODE_KEY_CODES = ["Backspace", "Delete"];
-
-export type DiagramRef = {
-  getReactFlowInstance: () => RF.ReactFlowInstance | undefined;
-};
-
 // nodes
 
 export type OnNodeAdded<N extends string, NData extends XyFlowKieDiagramNodeData<N, NData>> = (args: {
@@ -111,9 +97,17 @@ export type OnEdgeDeleted<E extends string, EData extends XyFlowKieDiagramEdgeDa
   edge: RF.Edge<EData>;
 }) => void;
 
+// waypoints
+
+export type OnWaypointAdded = () => void;
+export type OnWaypointRepositioned = () => void;
+export type OnWaypointDeleted = () => void;
+
 // misc
 
 export type OnEscPressed = () => void;
+
+//
 
 export type Props<
   N extends string,
@@ -151,6 +145,25 @@ export type Props<
   onEdgeUpdated: OnEdgeUpdated<N, E, NData, EData>;
   onEdgeDeleted: OnEdgeDeleted<E, EData>;
   onEscPressed: OnEscPressed;
+  onWaypointAdded: OnWaypointAdded;
+  onWaypointRepositioned: OnWaypointRepositioned;
+  onWaypointDeleted: OnWaypointDeleted;
+};
+
+//
+
+const isFirefox = typeof (window as any).InstallTrigger !== "undefined"; // See https://stackoverflow.com/questions/9847580/how-to-detect-safari-chrome-ie-firefox-and-opera-browsers
+
+const PAN_ON_DRAG = [1, 2];
+
+const FIT_VIEW_OPTIONS: RF.FitViewOptions = { maxZoom: 1, minZoom: 0.1, duration: 400 };
+
+export const DEFAULT_VIEWPORT = { x: 100, y: 100, zoom: 1 };
+
+const DELETE_NODE_KEY_CODES = ["Backspace", "Delete"];
+
+export type DiagramRef = {
+  getReactFlowInstance: () => RF.ReactFlowInstance | undefined;
 };
 
 export function Diagram<
