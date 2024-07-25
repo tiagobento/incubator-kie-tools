@@ -23,18 +23,15 @@ import {
   BPMN20__tEndEvent,
   BPMN20__tEventBasedGateway,
   BPMN20__tExclusiveGateway,
-  BPMN20__tGateway,
   BPMN20__tGroup,
   BPMN20__tInclusiveGateway,
   BPMN20__tIntermediateCatchEvent,
   BPMN20__tIntermediateThrowEvent,
   BPMN20__tParallelGateway,
-  BPMN20__tProcess,
   BPMN20__tStartEvent,
   BPMN20__tSubProcess,
   BPMN20__tTask,
   BPMN20__tTextAnnotation,
-  BPMNDI__BPMNShape,
 } from "@kie-tools/bpmn-marshaller/dist/schemas/bpmn-2_0/ts-gen/types";
 
 import * as React from "react";
@@ -42,9 +39,9 @@ import { useCallback, useEffect, useMemo, useRef } from "react";
 import * as RF from "reactflow";
 import { Normalized } from "../../normalization/normalize";
 import { useBpmnEditorStore, useBpmnEditorStoreApi } from "../../store/StoreContext";
-import { BpmnNodeType, BPMN_OUTGOING_STRUCTURE, BPMN_CONTAINMENT_MAP } from "../BpmnGraphStructure";
-import { EDGE_TYPES } from "../edges/EdgeTypes";
-import { MIN_NODE_SIZES } from "./NodeSizes";
+import { BPMN_CONTAINMENT_MAP, BpmnDiagramNodeData, BpmnNodeType, EDGE_TYPES, NODE_TYPES } from "../BpmnDiagramDomain";
+import { BPMN_OUTGOING_STRUCTURE } from "../BpmnDiagramDomain";
+import { MIN_NODE_SIZES } from "../BpmnDiagramDomain";
 import { getNodeLabelPosition, useNodeStyle } from "./NodeStyle";
 import {
   DataObjectNodeSvg,
@@ -59,8 +56,8 @@ import {
   TextAnnotationNodeSvg,
   UnknownNodeSvg,
 } from "./NodeSvgs";
-import { NODE_TYPES } from "./NodeTypes";
 
+import { getContainmentRelationship } from "@kie-tools/reactflow-editors-base/dist/maths/DcMaths";
 import { propsHaveSameValuesDeep } from "@kie-tools/reactflow-editors-base/dist/memoization/memoization";
 import {
   EditableNodeLabel,
@@ -79,34 +76,9 @@ import { InfoNodePanel } from "@kie-tools/reactflow-editors-base/dist/nodes/Info
 import { OutgoingStuffNodePanel } from "@kie-tools/reactflow-editors-base/dist/nodes/OutgoingStuffNodePanel";
 import { PositionalNodeHandles } from "@kie-tools/reactflow-editors-base/dist/nodes/PositionalNodeHandles";
 import { useIsHovered } from "@kie-tools/reactflow-editors-base/dist/reactExt/useIsHovered";
-import { Unpacked } from "@kie-tools/reactflow-editors-base/dist/tsExt/tsExt";
-import { getContainmentRelationship } from "@kie-tools/reactflow-editors-base/dist/maths/DcMaths";
-import { BpmnDiagramEdgeData } from "../edges/Edges";
-import { bpmnEdgesOutgoingStuffNodePanelMapping, bpmnNodesOutgoingStuffNodePanelMapping } from "./NodeMapping";
-import { ElementExclusion, ElementFilter } from "@kie-tools/xml-parser-ts/dist/elementFilter";
-
-export type NodeBpmnElements = null | Normalized<
-  | ElementExclusion<Unpacked<NonNullable<BPMN20__tProcess["flowElement"]>>, "sequenceFlow">
-  | ElementExclusion<Unpacked<NonNullable<BPMN20__tProcess["artifact"]>>, "association">
->;
-
-export type EdgeBpmnElements = null | Normalized<
-  | ElementFilter<Unpacked<NonNullable<BPMN20__tProcess["flowElement"]>>, "sequenceFlow">
-  | ElementFilter<Unpacked<NonNullable<BPMN20__tProcess["artifact"]>>, "association">
->;
-
-export type BpmnDiagramNodeData<T extends NodeBpmnElements = NodeBpmnElements> = {
-  bpmnElement: T;
-  shape: Normalized<BPMNDI__BPMNShape>;
-  shapeIndex: number;
-  index: number;
-  /**
-   * We don't use Reactflow's parenting mechanism because it is
-   * too opinionated on how it deletes nodes/edges that are
-   * inside/connected to nodes with parents
-   * */
-  parentRfNode: RF.Node<BpmnDiagramNodeData> | undefined;
-};
+import { BpmnDiagramEdgeData } from "../BpmnDiagramDomain";
+import { bpmnNodesOutgoingStuffNodePanelMapping } from "../BpmnDiagramDomain";
+import { bpmnEdgesOutgoingStuffNodePanelMapping } from "../BpmnDiagramDomain";
 
 export const StartEventNode = React.memo(
   ({
@@ -126,7 +98,7 @@ export const StartEventNode = React.memo(
     const isHovered = useIsHovered(ref);
     const isResizing = useNodeResizing(id);
     const shouldActLikeHovered = useBpmnEditorStore(
-      (s) => (isHovered || isResizing) && s.reactflowKieEditorDiagram.draggingNodes.length === 0
+      (s) => (isHovered || isResizing) && s.xyFlowKieDiagram.draggingNodes.length === 0
     );
 
     const { isEditingLabel, setEditingLabel, triggerEditing, triggerEditingIfEnter } = useEditableNodeLabel(id);
@@ -141,7 +113,7 @@ export const StartEventNode = React.memo(
     const setName = useCallback<OnEditableNodeLabelChange>(
       (newName: string) => {
         bpmnEditorStoreApi.setState((state) => {
-          // FIXME: Tiago: Mutation
+          // FIXME: Tiago: Mutation (set node name)
           // renameProcessFlowElement({
         });
       },
@@ -219,7 +191,7 @@ export const IntermediateCatchEventNode = React.memo(
     const isHovered = useIsHovered(ref);
     const isResizing = useNodeResizing(id);
     const shouldActLikeHovered = useBpmnEditorStore(
-      (s) => (isHovered || isResizing) && s.reactflowKieEditorDiagram.draggingNodes.length === 0
+      (s) => (isHovered || isResizing) && s.xyFlowKieDiagram.draggingNodes.length === 0
     );
 
     const { isEditingLabel, setEditingLabel, triggerEditing, triggerEditingIfEnter } = useEditableNodeLabel(id);
@@ -234,7 +206,7 @@ export const IntermediateCatchEventNode = React.memo(
     const setName = useCallback<OnEditableNodeLabelChange>(
       (newName: string) => {
         bpmnEditorStoreApi.setState((state) => {
-          // FIXME: Tiago: Mutation
+          // FIXME: Tiago: Mutation (set node name)
           // renameProcessFlowElement({
         });
       },
@@ -312,7 +284,7 @@ export const IntermediateThrowEventNode = React.memo(
     const isHovered = useIsHovered(ref);
     const isResizing = useNodeResizing(id);
     const shouldActLikeHovered = useBpmnEditorStore(
-      (s) => (isHovered || isResizing) && s.reactflowKieEditorDiagram.draggingNodes.length === 0
+      (s) => (isHovered || isResizing) && s.xyFlowKieDiagram.draggingNodes.length === 0
     );
 
     const { isEditingLabel, setEditingLabel, triggerEditing, triggerEditingIfEnter } = useEditableNodeLabel(id);
@@ -327,7 +299,7 @@ export const IntermediateThrowEventNode = React.memo(
     const setName = useCallback<OnEditableNodeLabelChange>(
       (newName: string) => {
         bpmnEditorStoreApi.setState((state) => {
-          // FIXME: Tiago: Mutation
+          // FIXME: Tiago: Mutation (set node name)
           // renameProcessFlowElement({
         });
       },
@@ -403,7 +375,7 @@ export const EndEventNode = React.memo(
     const isHovered = useIsHovered(ref);
     const isResizing = useNodeResizing(id);
     const shouldActLikeHovered = useBpmnEditorStore(
-      (s) => (isHovered || isResizing) && s.reactflowKieEditorDiagram.draggingNodes.length === 0
+      (s) => (isHovered || isResizing) && s.xyFlowKieDiagram.draggingNodes.length === 0
     );
 
     const { isEditingLabel, setEditingLabel, triggerEditing, triggerEditingIfEnter } = useEditableNodeLabel(id);
@@ -418,7 +390,7 @@ export const EndEventNode = React.memo(
     const setName = useCallback<OnEditableNodeLabelChange>(
       (newName: string) => {
         bpmnEditorStoreApi.setState((state) => {
-          // FIXME: Tiago: Mutation
+          // FIXME: Tiago: Mutation (set node name)
           // renameProcessFlowElement({
         });
       },
@@ -494,7 +466,7 @@ export const TaskNode = React.memo(
     const isHovered = useIsHovered(ref);
     const isResizing = useNodeResizing(id);
     const shouldActLikeHovered = useBpmnEditorStore(
-      (s) => (isHovered || isResizing) && s.reactflowKieEditorDiagram.draggingNodes.length === 0
+      (s) => (isHovered || isResizing) && s.xyFlowKieDiagram.draggingNodes.length === 0
     );
 
     const { isEditingLabel, setEditingLabel, triggerEditing, triggerEditingIfEnter } = useEditableNodeLabel(id);
@@ -509,7 +481,7 @@ export const TaskNode = React.memo(
     const setName = useCallback<OnEditableNodeLabelChange>(
       (newName: string) => {
         bpmnEditorStoreApi.setState((state) => {
-          // FIXME: Tiago: Mutation
+          // FIXME: Tiago: Mutation (set node name)
           // renameProcessFlowElement({
         });
       },
@@ -593,7 +565,7 @@ export const SubProcessNode = React.memo(
     const isHovered = useIsHovered(ref);
     const isResizing = useNodeResizing(id);
     const shouldActLikeHovered = useBpmnEditorStore(
-      (s) => (isHovered || isResizing) && s.reactflowKieEditorDiagram.draggingNodes.length === 0
+      (s) => (isHovered || isResizing) && s.xyFlowKieDiagram.draggingNodes.length === 0
     );
 
     const { isEditingLabel, setEditingLabel, triggerEditing, triggerEditingIfEnter } = useEditableNodeLabel(id);
@@ -608,7 +580,7 @@ export const SubProcessNode = React.memo(
     const setName = useCallback<OnEditableNodeLabelChange>(
       (newName: string) => {
         bpmnEditorStoreApi.setState((state) => {
-          // FIXME: Tiago: Mutation
+          // FIXME: Tiago: Mutation (set node name)
           // renameProcessFlowElement({
         });
       },
@@ -710,7 +682,7 @@ export const GatewayNode = React.memo(
     const isHovered = useIsHovered(ref);
     const isResizing = useNodeResizing(id);
     const shouldActLikeHovered = useBpmnEditorStore(
-      (s) => (isHovered || isResizing) && s.reactflowKieEditorDiagram.draggingNodes.length === 0
+      (s) => (isHovered || isResizing) && s.xyFlowKieDiagram.draggingNodes.length === 0
     );
 
     const { isEditingLabel, setEditingLabel, triggerEditing, triggerEditingIfEnter } = useEditableNodeLabel(id);
@@ -725,7 +697,7 @@ export const GatewayNode = React.memo(
     const setName = useCallback<OnEditableNodeLabelChange>(
       (newName: string) => {
         bpmnEditorStoreApi.setState((state) => {
-          // FIXME: Tiago: Mutation
+          // FIXME: Tiago: Mutation (set node name)
           // renameProcessFlowElement({
         });
       },
@@ -801,7 +773,7 @@ export const DataObjectNode = React.memo(
     const isHovered = useIsHovered(ref);
     const isResizing = useNodeResizing(id);
     const shouldActLikeHovered = useBpmnEditorStore(
-      (s) => (isHovered || isResizing) && s.reactflowKieEditorDiagram.draggingNodes.length === 0
+      (s) => (isHovered || isResizing) && s.xyFlowKieDiagram.draggingNodes.length === 0
     );
 
     const { isEditingLabel, setEditingLabel, triggerEditing, triggerEditingIfEnter } = useEditableNodeLabel(id);
@@ -816,7 +788,7 @@ export const DataObjectNode = React.memo(
     const setName = useCallback<OnEditableNodeLabelChange>(
       (newName: string) => {
         bpmnEditorStoreApi.setState((state) => {
-          // FIXME: Tiago: Mutation
+          // FIXME: Tiago: Mutation (set node name)
           // renameProcessFlowElement({
         });
       },
@@ -912,12 +884,12 @@ export const GroupNode = React.memo(
 
     const ref = useRef<SVGRectElement>(null);
 
-    const snapGrid = useBpmnEditorStore((s) => s.reactflowKieEditorDiagram.snapGrid);
+    const snapGrid = useBpmnEditorStore((s) => s.xyFlowKieDiagram.snapGrid);
     const enableCustomNodeStyles = useBpmnEditorStore((s) => s.diagram.overlays.enableCustomNodeStyles);
     const isHovered = useIsHovered(ref);
     const isResizing = useNodeResizing(id);
     const shouldActLikeHovered = useBpmnEditorStore(
-      (s) => (isHovered || isResizing) && s.reactflowKieEditorDiagram.draggingNodes.length === 0
+      (s) => (isHovered || isResizing) && s.xyFlowKieDiagram.draggingNodes.length === 0
     );
     const bpmnEditorStoreApi = useBpmnEditorStoreApi();
     const reactFlow = RF.useReactFlow<BpmnDiagramNodeData, BpmnDiagramEdgeData>();
@@ -929,7 +901,7 @@ export const GroupNode = React.memo(
     const setName = useCallback<OnEditableNodeLabelChange>(
       (newName: string) => {
         bpmnEditorStoreApi.setState((state) => {
-          // FIXME: Tiago: Mutation
+          // FIXME: Tiago: Mutation (set node name)
           // renameGroupNode({ definitions: state.bpmn.model.definitions, newName, index });
         });
       },
@@ -940,11 +912,11 @@ export const GroupNode = React.memo(
     useEffect(() => {
       const onDoubleClick = () => {
         bpmnEditorStoreApi.setState((state) => {
-          state.reactflowKieEditorDiagram._selectedNodes = reactFlow.getNodes().flatMap((n) =>
+          state.xyFlowKieDiagram._selectedNodes = reactFlow.getNodes().flatMap((n) =>
             getContainmentRelationship({
               bounds: n.data.shape["dc:Bounds"]!,
               container: shape["dc:Bounds"]!,
-              snapGrid: state.reactflowKieEditorDiagram.snapGrid,
+              snapGrid: state.xyFlowKieDiagram.snapGrid,
               containerMinSizes: MIN_NODE_SIZES[NODE_TYPES.group],
               boundsMinSizes: MIN_NODE_SIZES[n.type as BpmnNodeType],
             }).isInside
@@ -1024,7 +996,7 @@ export const TextAnnotationNode = React.memo(
     const isHovered = useIsHovered(ref);
     const isResizing = useNodeResizing(id);
     const shouldActLikeHovered = useBpmnEditorStore(
-      (s) => (isHovered || isResizing) && s.reactflowKieEditorDiagram.draggingNodes.length === 0
+      (s) => (isHovered || isResizing) && s.xyFlowKieDiagram.draggingNodes.length === 0
     );
 
     const { isEditingLabel, setEditingLabel, triggerEditing, triggerEditingIfEnter } = useEditableNodeLabel(id);
@@ -1042,7 +1014,7 @@ export const TextAnnotationNode = React.memo(
     const setText = useCallback(
       (newText: string) => {
         bpmnEditorStoreApi.setState((state) => {
-          // FIXME: Tiago: Mutation
+          // FIXME: Tiago: Mutation (set node name)
           // updateTextAnnotation({ definitions: state.bpmn.model.definitions, newText, index });
         });
       },
@@ -1069,7 +1041,7 @@ export const TextAnnotationNode = React.memo(
           onDoubleClick={triggerEditing}
           onKeyDown={triggerEditingIfEnter}
           data-nodehref={id}
-          data-nodelabel={"" + textAnnotation.text} // FIXME: Tiago: XML
+          data-nodelabel={String(textAnnotation.text)}
         >
           {/* {`render count: ${renderCount.current}`}
           <br /> */}
@@ -1089,7 +1061,7 @@ export const TextAnnotationNode = React.memo(
             nodeTypes={BPMN_OUTGOING_STRUCTURE[NODE_TYPES.textAnnotation].nodes}
             edgeTypes={BPMN_OUTGOING_STRUCTURE[NODE_TYPES.textAnnotation].edges}
           />
-          <div>{"" + textAnnotation.text /* FIXME: Tiago: XML*/}</div>
+          <div>{String(textAnnotation.text)}</div>
           {shouldActLikeHovered && (
             <NodeResizerHandle
               nodeType={type as typeof NODE_TYPES.textAnnotation}
@@ -1115,7 +1087,7 @@ export const UnknownNode = React.memo(
     const isHovered = useIsHovered(ref);
     const isResizing = useNodeResizing(id);
     const shouldActLikeHovered = useBpmnEditorStore(
-      (s) => (isHovered || isResizing) && s.reactflowKieEditorDiagram.draggingNodes.length === 0
+      (s) => (isHovered || isResizing) && s.xyFlowKieDiagram.draggingNodes.length === 0
     );
 
     const bpmnEditorStoreApi = useBpmnEditorStoreApi();

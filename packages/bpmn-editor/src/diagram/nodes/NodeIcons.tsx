@@ -32,8 +32,8 @@ import {
   TextAnnotationNodeSvg,
 } from "./NodeSvgs";
 import { switchExpression } from "@kie-tools-core/switch-expression-ts";
-import { BpmnNodeType } from "../BpmnGraphStructure";
-import { NODE_TYPES } from "./NodeTypes";
+import { BpmnNodeType } from "../BpmnDiagramDomain";
+import { NODE_TYPES } from "../BpmnDiagramDomain";
 import { QuestionCircleIcon } from "@patternfly/react-icons/dist/js/icons/question-circle-icon";
 import { nodeSvgProps, RoundSvg } from "@kie-tools/reactflow-editors-base/dist/nodes/NodeIcons";
 

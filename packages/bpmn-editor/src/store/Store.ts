@@ -20,9 +20,9 @@
 import { BpmnLatestModel } from "@kie-tools/bpmn-marshaller";
 import { ComputedStateCache } from "@kie-tools/reactflow-editors-base/dist/store/ComputedStateCache";
 import {
-  ReactFlowEditorDiagramState,
-  ReactFlowKieEditorDiagramEdgeStatus,
-  ReactFlowKieEditorDiagramNodeStatus,
+  XyFlowDiagramState,
+  XyFlowKieDiagramEdgeStatus,
+  XyFlowKieDiagramNodeStatus,
 } from "@kie-tools/reactflow-editors-base/dist/store/State";
 import { computeIsDiagramEditingInProgress } from "@kie-tools/reactflow-editors-base/dist/store/computed/computeIsDiagramEditingInProgress";
 import { computeIsDropTargetNodeValidForSelection } from "@kie-tools/reactflow-editors-base/dist/store/computed/computeIsDropTargetNodeValidForSelection";
@@ -31,26 +31,22 @@ import { setEdgeStatus } from "@kie-tools/reactflow-editors-base/dist/store/disp
 import { enableMapSet } from "immer";
 import { create } from "zustand";
 import { immer } from "zustand/middleware/immer";
-import { BpmnDiagramEdgeData } from "../diagram/edges/Edges";
-import { BpmnNodeType, BPMN_CONTAINMENT_MAP } from "../diagram/BpmnGraphStructure";
-import { BpmnDiagramNodeData } from "../diagram/nodes/Nodes";
+import { BpmnDiagramEdgeData } from "../diagram/BpmnDiagramDomain";
+import { BPMN_CONTAINMENT_MAP } from "../diagram/BpmnDiagramDomain";
+import { BpmnNodeType } from "../diagram/BpmnDiagramDomain";
+import { BpmnDiagramNodeData } from "../diagram/BpmnDiagramDomain";
 import { Normalized, normalize } from "../normalization/normalize";
 import { computeDiagramData } from "./computeDiagramData";
 
 enableMapSet(); // Necessary because `Computed` has a lot of Maps and Sets.
 
-export enum DiagramLhsPanel {
+export enum BpmnDiagramLhsPanel {
   NONE = "NONE",
 }
 
-export type BpmnReactFlowEditorDiagramState = ReactFlowEditorDiagramState<
-  State,
-  BpmnNodeType,
-  BpmnDiagramNodeData,
-  BpmnDiagramEdgeData
->;
+export type BpmnXyFlowDiagramState = XyFlowDiagramState<State, BpmnNodeType, BpmnDiagramNodeData, BpmnDiagramEdgeData>;
 
-export interface State extends BpmnReactFlowEditorDiagramState {
+export interface State extends BpmnXyFlowDiagramState {
   // Read this to understand why we need computed as part of the store.
   // https://github.com/pmndrs/zustand/issues/132#issuecomment-1120467721
   computed: (s: State) => {
@@ -59,8 +55,8 @@ export interface State extends BpmnReactFlowEditorDiagramState {
     isDiagramEditingInProgress(): boolean;
   };
   dispatch: (s: State) => {
-    setNodeStatus: (nodeId: string, status: Partial<ReactFlowKieEditorDiagramNodeStatus>) => any;
-    setEdgeStatus: (edgeId: string, status: Partial<ReactFlowKieEditorDiagramEdgeStatus>) => any;
+    setNodeStatus: (nodeId: string, status: Partial<XyFlowKieDiagramNodeStatus>) => any;
+    setEdgeStatus: (edgeId: string, status: Partial<XyFlowKieDiagramEdgeStatus>) => any;
     reset(model: Normalized<BpmnLatestModel>): void;
   };
   bpmn: {
@@ -77,7 +73,7 @@ export interface State extends BpmnReactFlowEditorDiagramState {
     overlaysPanel: {
       isOpen: boolean;
     };
-    openLhsPanel: DiagramLhsPanel;
+    openLhsPanel: BpmnDiagramLhsPanel;
     overlays: {
       enableNodeHierarchyHighlight: boolean;
       enableCustomNodeStyles: boolean;
@@ -98,14 +94,14 @@ export const getDefaultStaticState = (): Omit<State, "bpmn" | "computed" | "disp
     overlaysPanel: {
       isOpen: false,
     },
-    openLhsPanel: DiagramLhsPanel.NONE,
+    openLhsPanel: BpmnDiagramLhsPanel.NONE,
     overlays: {
       enableNodeHierarchyHighlight: false,
       enableCustomNodeStyles: true,
     },
     isEditingStyle: false,
   },
-  reactflowKieEditorDiagram: {
+  xyFlowKieDiagram: {
     snapGrid: { isEnabled: true, x: 20, y: 20 },
     _selectedNodes: [],
     _selectedEdges: [],
@@ -131,9 +127,9 @@ export function createBpmnEditorStore(
       dispatch: (s) => ({
         reset: (model) => {
           s.bpmn.model = model;
-          s.reactflowKieEditorDiagram._selectedNodes = [];
-          s.reactflowKieEditorDiagram.draggingNodes = [];
-          s.reactflowKieEditorDiagram.resizingNodes = [];
+          s.xyFlowKieDiagram._selectedNodes = [];
+          s.xyFlowKieDiagram.draggingNodes = [];
+          s.xyFlowKieDiagram.resizingNodes = [];
         },
         setNodeStatus: (nodeId, newStatus) => setNodeStatus(nodeId, newStatus, s),
         setEdgeStatus: (edgeId, newStatus) => setEdgeStatus(edgeId, newStatus, s),
@@ -151,16 +147,16 @@ export function createBpmnEditorStore(
               computeIsDiagramEditingInProgress(draggingNodesCount, resizingNodesCount, draggingWaypointsCount) ||
               isisEditingStyle,
             [
-              s.reactflowKieEditorDiagram.draggingNodes.length,
-              s.reactflowKieEditorDiagram.resizingNodes.length,
-              s.reactflowKieEditorDiagram.draggingWaypoints.length,
+              s.xyFlowKieDiagram.draggingNodes.length,
+              s.xyFlowKieDiagram.resizingNodes.length,
+              s.xyFlowKieDiagram.draggingWaypoints.length,
               s.diagram.isEditingStyle,
             ]
           ),
 
         isDropTargetNodeValidForSelection: () =>
           computedCache.cached("isDropTargetNodeValidForSelection", computeIsDropTargetNodeValidForSelection, [
-            s.reactflowKieEditorDiagram.dropTargetNode,
+            s.xyFlowKieDiagram.dropTargetNode,
             s.computed(s).getDiagramData(),
             BPMN_CONTAINMENT_MAP,
           ]),
@@ -168,8 +164,8 @@ export function createBpmnEditorStore(
         getDiagramData: () =>
           computedCache.cached("getDiagramData", computeDiagramData, [
             s.bpmn.model.definitions,
-            s.reactflowKieEditorDiagram,
-            s.reactflowKieEditorDiagram.snapGrid,
+            s.xyFlowKieDiagram,
+            s.xyFlowKieDiagram.snapGrid,
           ]),
       }),
     }))

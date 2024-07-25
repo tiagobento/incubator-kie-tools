@@ -210,7 +210,7 @@ export function EditableNodeLabel({
   );
 }
 
-// FIXME: Tiago
+// FIXME: Tiago: Not sure why I added this FIXME here.
 export const invalidInlineFeelNameStyle = {
   color: "red",
   textDecoration: "red dotted underline",

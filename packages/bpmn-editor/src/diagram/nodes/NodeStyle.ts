@@ -18,8 +18,8 @@
  */
 
 import React, { useMemo } from "react";
-import { BpmnNodeType } from "../BpmnGraphStructure";
-import { NODE_TYPES } from "./NodeTypes";
+import { BpmnNodeType } from "../BpmnDiagramDomain";
+import { NODE_TYPES } from "../BpmnDiagramDomain";
 import { Normalized } from "../../normalization/normalize";
 import { DC__Font } from "@kie-tools/bpmn-marshaller/dist/schemas/bpmn-2_0/ts-gen/types";
 import { NodeLabelPosition } from "@kie-tools/reactflow-editors-base/dist/nodes/NodeSvgs";

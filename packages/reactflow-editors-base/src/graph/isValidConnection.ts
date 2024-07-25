@@ -22,7 +22,7 @@ import { GraphStructure } from "../graph/graphStructure";
 
 export function checkIsValidConnection<N extends string, E extends string, NData>(
   graphStructure: GraphStructure<N, E>,
-  nodesById: Map<string, RF.Node<NData>>,
+  nodesById: Map<string, RF.Node<NData, N>>,
   edgeOrConnection: RF.Edge | RF.Connection,
   ongoingConnectionEdgeType: E | undefined
 ) {

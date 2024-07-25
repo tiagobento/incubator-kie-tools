@@ -18,46 +18,40 @@
  */
 
 import {
-  ReactFlowEditorDiagramState,
-  ReactFlowKieEditorDiagramEdgeData,
-  ReactFlowKieEditorDiagramNodeData,
-  ReactFlowKieEditorDiagramNodeStatus,
+  XyFlowDiagramState,
+  XyFlowKieDiagramEdgeData,
+  XyFlowKieDiagramNodeData,
+  XyFlowKieDiagramNodeStatus,
 } from "../../store/State";
 
 export function setNodeStatus<
-  S extends ReactFlowEditorDiagramState<S, N, NData, EData>,
+  S extends XyFlowDiagramState<S, N, NData, EData>,
   N extends string,
-  NData extends ReactFlowKieEditorDiagramNodeData,
-  EData extends ReactFlowKieEditorDiagramEdgeData,
->(
-  nodeId: string,
-  newStatus: Partial<ReactFlowKieEditorDiagramNodeStatus>,
-  s: ReactFlowEditorDiagramState<S, N, NData, EData>
-) {
+  NData extends XyFlowKieDiagramNodeData<N, NData>,
+  EData extends XyFlowKieDiagramEdgeData,
+>(nodeId: string, newStatus: Partial<XyFlowKieDiagramNodeStatus>, s: XyFlowDiagramState<S, N, NData, EData>) {
   //selected
   if (newStatus.selected !== undefined) {
     if (newStatus.selected) {
-      s.reactflowKieEditorDiagram._selectedNodes.push(nodeId);
+      s.xyFlowKieDiagram._selectedNodes.push(nodeId);
     } else {
-      s.reactflowKieEditorDiagram._selectedNodes = s.reactflowKieEditorDiagram._selectedNodes.filter(
-        (s) => s !== nodeId
-      );
+      s.xyFlowKieDiagram._selectedNodes = s.xyFlowKieDiagram._selectedNodes.filter((s) => s !== nodeId);
     }
   }
   //dragging
   if (newStatus.dragging !== undefined) {
     if (newStatus.dragging) {
-      s.reactflowKieEditorDiagram.draggingNodes.push(nodeId);
+      s.xyFlowKieDiagram.draggingNodes.push(nodeId);
     } else {
-      s.reactflowKieEditorDiagram.draggingNodes = s.reactflowKieEditorDiagram.draggingNodes.filter((s) => s !== nodeId);
+      s.xyFlowKieDiagram.draggingNodes = s.xyFlowKieDiagram.draggingNodes.filter((s) => s !== nodeId);
     }
   }
   // resizing
   if (newStatus.resizing !== undefined) {
     if (newStatus.resizing) {
-      s.reactflowKieEditorDiagram.resizingNodes.push(nodeId);
+      s.xyFlowKieDiagram.resizingNodes.push(nodeId);
     } else {
-      s.reactflowKieEditorDiagram.resizingNodes = s.reactflowKieEditorDiagram.resizingNodes.filter((s) => s !== nodeId);
+      s.xyFlowKieDiagram.resizingNodes = s.xyFlowKieDiagram.resizingNodes.filter((s) => s !== nodeId);
     }
   }
 }

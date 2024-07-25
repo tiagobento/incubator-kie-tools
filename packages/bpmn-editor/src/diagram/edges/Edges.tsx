@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { BPMNDI__BPMNEdge, BPMNDI__BPMNShape } from "@kie-tools/bpmn-marshaller/dist/schemas/bpmn-2_0/ts-gen/types";
 import { useEdgeClassName } from "@kie-tools/reactflow-editors-base/dist/edges/Hooks";
 import { PotentialWaypoint, Waypoints } from "@kie-tools/reactflow-editors-base/dist/edges/Waypoints";
 import { useAlwaysVisibleEdgeUpdatersAtNodeBorders } from "@kie-tools/reactflow-editors-base/dist/edges/useAlwaysVisibleEdgeUpdatersAtNodeBorders";
@@ -26,21 +25,11 @@ import { usePotentialWaypointControls } from "@kie-tools/reactflow-editors-base/
 import { DEFAULT_INTRACTION_WIDTH } from "@kie-tools/reactflow-editors-base/dist/maths/DcMaths";
 import { propsHaveSameValuesDeep } from "@kie-tools/reactflow-editors-base/dist/memoization/memoization";
 import { useIsHovered } from "@kie-tools/reactflow-editors-base/dist/reactExt/useIsHovered";
-import { ReactFlowKieEditorDiagramEdgeData } from "@kie-tools/reactflow-editors-base/dist/store/State";
 import * as React from "react";
 import { useRef } from "react";
 import * as RF from "reactflow";
-import { Normalized } from "../../normalization/normalize";
 import { AssociationPath, SequenceFlowPath } from "./EdgeSvgs";
-import { EdgeBpmnElements } from "../nodes/Nodes";
-
-export type BpmnDiagramEdgeData = ReactFlowKieEditorDiagramEdgeData & {
-  bpmnEdge: Normalized<BPMNDI__BPMNEdge> | undefined;
-  bpmnEdgeIndex: number;
-  bpmnElement: EdgeBpmnElements;
-  bpmnShapeSource: Normalized<BPMNDI__BPMNShape> | undefined;
-  bpmnShapeTarget: Normalized<BPMNDI__BPMNShape> | undefined;
-};
+import { BpmnDiagramEdgeData } from "../BpmnDiagramDomain";
 
 const interactionStrokeProps: Partial<React.SVGAttributes<SVGPathElement>> = {
   strokeOpacity: 1,

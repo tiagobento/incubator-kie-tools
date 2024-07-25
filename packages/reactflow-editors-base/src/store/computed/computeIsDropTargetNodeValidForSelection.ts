@@ -18,23 +18,19 @@
  */
 
 import * as RF from "reactflow";
-import {
-  ReactFlowEditorDiagramState,
-  ReactFlowKieEditorDiagramEdgeData,
-  ReactFlowKieEditorDiagramNodeData,
-} from "../../store/State";
-import { ReactFlowEditorDiagramData } from "../../store/State";
+import { XyFlowDiagramState, XyFlowKieDiagramEdgeData, XyFlowKieDiagramNodeData } from "../../store/State";
+import { XyFlowDiagramData } from "../../store/State";
 import { isValidContainment } from "../../graph/isValidContainment";
 import { ContainmentMap } from "../../graph/graphStructure";
 
 export function computeIsDropTargetNodeValidForSelection<
-  S extends ReactFlowEditorDiagramState<S, N, NData, EData>,
+  S extends XyFlowDiagramState<S, N, NData, EData>,
   N extends string,
-  NData extends ReactFlowKieEditorDiagramNodeData,
-  EData extends ReactFlowKieEditorDiagramEdgeData,
+  NData extends XyFlowKieDiagramNodeData<N, NData>,
+  EData extends XyFlowKieDiagramEdgeData,
 >(
-  dropTargetNode: RF.Node<NData>,
-  diagramData: ReactFlowEditorDiagramData<N, NData, EData>,
+  dropTargetNode: RF.Node<NData, N>,
+  diagramData: XyFlowDiagramData<N, NData, EData>,
   containmentMap: ContainmentMap<N>
 ) {
   return (

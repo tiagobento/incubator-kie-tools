@@ -23,7 +23,7 @@ export type UniqueNameIndex = Map<string, string>;
 
 export const BPMN20_SPEC = {
   isValidName: (id: string, name: string | undefined, allUniqueNames: UniqueNameIndex): boolean => {
-    return true; // FIXME: Tiago: Implement
+    return true; // FIXME: Tiago: Implement (valid name)
   },
 };
 

@@ -23,7 +23,7 @@ import { SnapGrid, snapShapeDimensions } from "../snapgrid/SnapGrid";
 import { DC__Shape } from "../maths/model";
 import { useLayoutEffect, useMemo } from "react";
 import { ContainmentMap } from "../graph/graphStructure";
-import { useReactflowKieEditorDiagramStore } from "../store/Store";
+import { useXyFlowKieDiagramStore } from "../store/Store";
 import { NodeSizes } from "./NodeSizes";
 import "./Hooks.css";
 
@@ -47,7 +47,7 @@ export type NodeResizeHandleProps<N extends string> = {
 };
 
 export function NodeResizerHandle<N extends string>(props: NodeResizeHandleProps<N>) {
-  const snapGrid = useReactflowKieEditorDiagramStore((s) => s.reactflowKieEditorDiagram.snapGrid);
+  const snapGrid = useXyFlowKieDiagramStore((s) => s.xyFlowKieDiagram.snapGrid);
 
   const minSize = props.MIN_NODE_SIZES[props.nodeType]({ snapGrid });
   return (
@@ -79,7 +79,7 @@ export type NodeDimensionsArgs<N extends string> = {
 };
 
 export function useNodeDimensions<N extends string>(args: NodeDimensionsArgs<N>): RF.Dimensions {
-  const snapGrid = useReactflowKieEditorDiagramStore((s) => s.reactflowKieEditorDiagram.snapGrid);
+  const snapGrid = useXyFlowKieDiagramStore((s) => s.xyFlowKieDiagram.snapGrid);
 
   const { nodeType, shape } = args;
 
@@ -125,7 +125,7 @@ export function useConnection(nodeId: string) {
   const source = connectionNodeId;
   const target = nodeId;
 
-  const edgeIdBeingUpdated = useReactflowKieEditorDiagramStore((s) => s.reactflowKieEditorDiagram.edgeIdBeingUpdated);
+  const edgeIdBeingUpdated = useXyFlowKieDiagramStore((s) => s.xyFlowKieDiagram.edgeIdBeingUpdated);
   const sourceHandle = RF.useStore(
     (s) => s.connectionHandleId ?? s.edges.find((e) => e.id === edgeIdBeingUpdated)?.type ?? null
   );
@@ -164,12 +164,12 @@ export function useNodeClassName<N extends string, E extends string>(
   NODE_TYPES: Record<string, N>,
   EDGE_TYPES: Record<string, E>
 ) {
-  const isDropTarget = useReactflowKieEditorDiagramStore(
+  const isDropTarget = useXyFlowKieDiagramStore(
     (s) =>
-      s.reactflowKieEditorDiagram.dropTargetNode?.id === nodeId &&
-      containmentMap.get(s.reactflowKieEditorDiagram.dropTargetNode?.type as N)
+      s.xyFlowKieDiagram.dropTargetNode?.id === nodeId &&
+      containmentMap.get(s.xyFlowKieDiagram.dropTargetNode?.type as N)
   );
-  const isDropTargetNodeValidForSelection = useReactflowKieEditorDiagramStore((s) =>
+  const isDropTargetNodeValidForSelection = useXyFlowKieDiagramStore((s) =>
     s.computed(s).isDropTargetNodeValidForSelection()
   );
   const isConnectionNodeId = RF.useStore((s) => s.connectionNodeId === nodeId);

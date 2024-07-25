@@ -77,7 +77,7 @@ export function BpmnDiagramEmptyState({
               variant={ButtonVariant.link}
               icon={<UserIcon />}
               onClick={() => {
-                // FIXME: Tiago: ...
+                // FIXME: Tiago: Implement (new human task)
               }}
             >
               New Human Task...
@@ -87,7 +87,7 @@ export function BpmnDiagramEmptyState({
               variant={ButtonVariant.link}
               icon={<AngleDoubleRightIcon />}
               onClick={() => {
-                // FIXME: Tiago: ...
+                // FIXME: Tiago: Implement (new stp)
               }}
             >
               New Straight-Through Process (STP)...

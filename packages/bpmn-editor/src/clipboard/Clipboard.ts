@@ -38,8 +38,8 @@ export type BpmnEditorDiagramClipboard = {
   edges: Normalized<BPMNDI__BPMNEdge>[];
 };
 
-export function buildClipboardFromDiagram(rfState: RF.ReactFlowState, bpmnEditorState: State) {
-  return undefined as any; // FIXME: Tiago: ?
+export function buildClipboardFromDiagram(xyFlowState: RF.ReactFlowState, bpmnEditorState: State) {
+  return undefined as any; // FIXME: Tiago: Implement (clipboard)
 }
 
 export function getClipboard<T extends { mimeType: string }>(text: string, mimeType: string): T | undefined {

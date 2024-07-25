@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { BpmnNodeType } from "../diagram/BpmnGraphStructure";
-import { NODE_TYPES } from "../diagram/nodes/NodeTypes";
+import { BpmnNodeType } from "../diagram/BpmnDiagramDomain";
+import { NODE_TYPES } from "../diagram/BpmnDiagramDomain";
 
 export enum NodeNature {
   TOP_LEVEL = "TOP_LEVEL",

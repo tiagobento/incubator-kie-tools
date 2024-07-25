@@ -22,11 +22,17 @@ import { SnapGrid } from "../snapgrid/SnapGrid";
 import { DC__Point, DC__Shape } from "../maths/model";
 import { GraphStructureAdjacencyList, GraphStructureEdge } from "../graph/graph";
 
-export type ReactFlowKieEditorDiagramNodeData = {
+export type XyFlowKieDiagramNodeData<N extends string, NData extends XyFlowKieDiagramNodeData<N, NData>> = {
   shape: DC__Shape;
+  /**
+   * We don't use Reactflow's parenting mechanism because it is
+   * too opinionated on how it deletes nodes/edges that are
+   * inside/connected to nodes with parents
+   * */
+  parentXyFlowNode: RF.Node<NData, N> | undefined;
 };
 
-export type ReactFlowKieEditorDiagramEdgeData = {
+export type XyFlowKieDiagramEdgeData = {
   edgeInfo: GraphStructureEdge;
   ["di:waypoint"]: DC__Point[];
   ["@_id"]: string;
@@ -34,48 +40,48 @@ export type ReactFlowKieEditorDiagramEdgeData = {
   shapeTarget: DC__Shape;
 };
 
-export type ReactFlowEditorDiagramData<
+export type XyFlowDiagramData<
   N extends string,
-  NData extends ReactFlowKieEditorDiagramNodeData,
-  EData extends ReactFlowKieEditorDiagramEdgeData,
+  NData extends XyFlowKieDiagramNodeData<N, NData>,
+  EData extends XyFlowKieDiagramEdgeData,
 > = {
   graphStructureEdges: GraphStructureEdge[];
   graphStructureAdjacencyList: GraphStructureAdjacencyList;
-  nodes: RF.Node<NData>[];
+  nodes: RF.Node<NData, N>[];
   edges: RF.Edge<EData>[];
   edgesById: Map<string, RF.Edge<EData>>;
   nodesById: Map<string, RF.Node<NData, N>>;
   selectedNodeTypes: Set<N>;
-  selectedNodesById: Map<string, RF.Node<NData>>;
+  selectedNodesById: Map<string, RF.Node<NData, N>>;
   selectedEdgesById: Map<string, RF.Edge<EData>>;
 };
 
-export interface ReactFlowKieEditorDiagramNodeStatus {
+export interface XyFlowKieDiagramNodeStatus {
   selected: boolean;
   dragging: boolean;
   resizing: boolean;
 }
-export interface ReactFlowKieEditorDiagramEdgeStatus {
+export interface XyFlowKieDiagramEdgeStatus {
   selected: boolean;
   draggingWaypoint: boolean;
 }
 
-export interface ReactFlowEditorDiagramState<
-  S extends ReactFlowEditorDiagramState<S, N, NData, EData>,
+export interface XyFlowDiagramState<
+  S extends XyFlowDiagramState<S, N, NData, EData>,
   N extends string,
-  NData extends ReactFlowKieEditorDiagramNodeData,
-  EData extends ReactFlowKieEditorDiagramEdgeData,
+  NData extends XyFlowKieDiagramNodeData<N, NData>,
+  EData extends XyFlowKieDiagramEdgeData,
 > {
   computed: (s: ThisType<this>) => {
-    getDiagramData(): ReactFlowEditorDiagramData<N, NData, EData>;
+    getDiagramData(): XyFlowDiagramData<N, NData, EData>;
     isDiagramEditingInProgress(): boolean;
     isDropTargetNodeValidForSelection(): boolean;
   };
   dispatch: (s: ThisType<this>) => {
-    setNodeStatus: (nodeId: string, status: Partial<ReactFlowKieEditorDiagramNodeStatus>) => any;
-    setEdgeStatus: (edgeId: string, status: Partial<ReactFlowKieEditorDiagramEdgeStatus>) => any;
+    setNodeStatus: (nodeId: string, status: Partial<XyFlowKieDiagramNodeStatus>) => any;
+    setEdgeStatus: (edgeId: string, status: Partial<XyFlowKieDiagramEdgeStatus>) => any;
   };
-  reactflowKieEditorDiagram: {
+  xyFlowKieDiagram: {
     snapGrid: SnapGrid;
     _selectedNodes: Array<string>;
     _selectedEdges: Array<string>;
@@ -83,7 +89,7 @@ export interface ReactFlowEditorDiagramState<
     resizingNodes: Array<string>;
     draggingWaypoints: Array<string>;
     edgeIdBeingUpdated: string | undefined;
-    dropTargetNode: undefined | RF.Node<NData>;
+    dropTargetNode: undefined | RF.Node<NData, N>;
     ongoingConnection: RF.OnConnectStartParams | undefined;
   };
 }

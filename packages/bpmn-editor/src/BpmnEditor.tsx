@@ -42,7 +42,7 @@ import { BpmnEditorExternalModelsContextProvider } from "./externalModels/BpmnEd
 import { Normalized, normalize } from "./normalization/normalize";
 import { INITIAL_COMPUTED_CACHE } from "./store/initialComputedCache";
 import { ComputedStateCache } from "@kie-tools/reactflow-editors-base/dist/store/ComputedStateCache";
-import { ReactflowKieEditorDiagramStoreApiContext } from "@kie-tools/reactflow-editors-base/dist/store/Store";
+import { XyFlowKieDiagramStoreApiContext } from "@kie-tools/reactflow-editors-base/dist/store/Store";
 import { State, createBpmnEditorStore, getDefaultStaticState } from "./store/Store";
 import {
   BpmnEditorStoreApiContext,
@@ -194,7 +194,7 @@ export const BpmnEditorInternal = ({
         ReactDOM.render(
           // Indepdent of where the nodes are located, they'll always be rendered at the top-left corner of the SVG
           <g transform={`translate(${-bounds.x + SVG_PADDING} ${-bounds.y + SVG_PADDING})`}>
-            <BpmnDiagramSvg nodes={nodes} edges={edges} snapGrid={state.reactflowKieEditorDiagram.snapGrid} />
+            <BpmnDiagramSvg nodes={nodes} edges={edges} snapGrid={state.xyFlowKieDiagram.snapGrid} />
           </g>,
           svg
         );
@@ -325,11 +325,11 @@ export const BpmnEditor = React.forwardRef((props: BpmnEditorProps, ref: React.R
       <ErrorBoundary FallbackComponent={BpmnEditorErrorFallback} onReset={resetState}>
         <BpmnEditorExternalModelsContextProvider {...props}>
           <BpmnEditorStoreApiContext.Provider value={storeRef.current}>
-            <ReactflowKieEditorDiagramStoreApiContext.Provider value={storeRef.current}>
+            <XyFlowKieDiagramStoreApiContext.Provider value={storeRef.current}>
               <CommandsContextProvider>
                 <BpmnEditorInternal forwardRef={ref} {...props} />
               </CommandsContextProvider>
-            </ReactflowKieEditorDiagramStoreApiContext.Provider>
+            </XyFlowKieDiagramStoreApiContext.Provider>
           </BpmnEditorStoreApiContext.Provider>
         </BpmnEditorExternalModelsContextProvider>
       </ErrorBoundary>

@@ -21,7 +21,7 @@ import * as RF from "reactflow";
 import { useState, useCallback, useMemo } from "react";
 import { snapPoint } from "../snapgrid/SnapGrid";
 import { DC__Point } from "../maths/model";
-import { useReactflowKieEditorDiagramStore } from "../store/Store";
+import { useXyFlowKieDiagramStore } from "../store/Store";
 
 export function usePotentialWaypointControls(
   waypoints: DC__Point[],
@@ -32,9 +32,9 @@ export function usePotentialWaypointControls(
 ) {
   const reactFlowInstance = RF.useReactFlow();
 
-  const snapGrid = useReactflowKieEditorDiagramStore((s) => s.reactflowKieEditorDiagram.snapGrid);
-  const isDraggingWaypoint = useReactflowKieEditorDiagramStore(
-    (s) => !!s.reactflowKieEditorDiagram.draggingWaypoints.find((e) => e === edgeId)
+  const snapGrid = useXyFlowKieDiagramStore((s) => s.xyFlowKieDiagram.snapGrid);
+  const isDraggingWaypoint = useXyFlowKieDiagramStore(
+    (s) => !!s.xyFlowKieDiagram.draggingWaypoints.find((e) => e === edgeId)
   );
 
   const [potentialWaypoint, setPotentialWaypoint] = useState<ReturnType<typeof approximateClosestPoint> | undefined>(
@@ -94,7 +94,7 @@ export function usePotentialWaypointControls(
     }
 
     console.log("XYFLOW-DIAGRAM: Waypoint added");
-    // FIXME: Tiago: Mutation
+    // FIXME: Tiago: Mutation (add waypoint)
     // addEdgeWaypoint({(
   }, [edgeIndex, isExistingWaypoint, potentialWaypoint, snappedPotentialWaypoint, waypoints]);
 

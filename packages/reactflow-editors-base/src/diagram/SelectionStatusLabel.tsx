@@ -19,32 +19,28 @@
 
 import * as React from "react";
 import * as RF from "reactflow";
-import { useReactflowKieEditorDiagramStore, useReactflowKieEditorDiagramStoreApi } from "../store/Store";
+import { useXyFlowKieDiagramStore, useXyFlowKieDiagramStoreApi } from "../store/Store";
 import { Label } from "@patternfly/react-core/dist/js/components/Label";
 
 export function SelectionStatusLabel() {
-  const rfStoreApi = RF.useStoreApi();
+  const xyFlowStoreApi = RF.useStoreApi();
 
-  const selectedNodesCount = useReactflowKieEditorDiagramStore(
-    (s) => s.computed(s).getDiagramData().selectedNodesById.size
-  );
-  const selectedEdgesCount = useReactflowKieEditorDiagramStore(
-    (s) => s.computed(s).getDiagramData().selectedEdgesById.size
-  );
-  const bpmnEditorStoreApi = useReactflowKieEditorDiagramStoreApi();
+  const selectedNodesCount = useXyFlowKieDiagramStore((s) => s.computed(s).getDiagramData().selectedNodesById.size);
+  const selectedEdgesCount = useXyFlowKieDiagramStore((s) => s.computed(s).getDiagramData().selectedEdgesById.size);
+  const bpmnEditorStoreApi = useXyFlowKieDiagramStoreApi();
 
   React.useEffect(() => {
     if (selectedNodesCount >= 2) {
-      rfStoreApi.setState({ nodesSelectionActive: true });
+      xyFlowStoreApi.setState({ nodesSelectionActive: true });
     }
-  }, [rfStoreApi, selectedNodesCount]);
+  }, [xyFlowStoreApi, selectedNodesCount]);
 
   const onClose = React.useCallback(
     (e: React.MouseEvent) => {
       e.stopPropagation();
       bpmnEditorStoreApi.setState((state) => {
-        state.reactflowKieEditorDiagram._selectedNodes = [];
-        state.reactflowKieEditorDiagram._selectedEdges = [];
+        state.xyFlowKieDiagram._selectedNodes = [];
+        state.xyFlowKieDiagram._selectedEdges = [];
       });
     },
     [bpmnEditorStoreApi]

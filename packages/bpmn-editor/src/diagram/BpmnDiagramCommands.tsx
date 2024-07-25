@@ -29,15 +29,15 @@ import {
 import { useCommands } from "../commands/CommandsContextProvider";
 import { useBpmnEditorStoreApi } from "../store/StoreContext";
 import { DEFAULT_VIEWPORT } from "@kie-tools/reactflow-editors-base/dist/diagram/Diagram";
-import { BpmnDiagramEdgeData } from "./edges/Edges";
+import { BpmnDiagramEdgeData } from "./BpmnDiagramDomain";
 import { getBounds } from "@kie-tools/reactflow-editors-base/dist/maths/DcMaths";
-import { BpmnDiagramNodeData } from "./nodes/Nodes";
+import { BpmnDiagramNodeData } from "./BpmnDiagramDomain";
 
 export function BpmnDiagramCommands(props: {}) {
-  const rfStoreApi = RF.useStoreApi();
+  const xyFlowStoreApi = RF.useStoreApi();
   const bpmnEditorStoreApi = useBpmnEditorStoreApi();
   const { commandsRef } = useCommands();
-  const rf = RF.useReactFlow<BpmnDiagramNodeData, BpmnDiagramEdgeData>();
+  const xyFlow = RF.useReactFlow<BpmnDiagramNodeData, BpmnDiagramEdgeData>();
 
   // Cancel action
   useEffect(() => {
@@ -46,20 +46,20 @@ export function BpmnDiagramCommands(props: {}) {
     }
     commandsRef.current.cancelAction = async () => {
       console.debug("BPMN DIAGRAM: COMMANDS: Canceling action...");
-      rfStoreApi.setState((rfState) => {
-        if (rfState.connectionNodeId) {
-          rfState.cancelConnection();
+      xyFlowStoreApi.setState((xyFlowState) => {
+        if (xyFlowState.connectionNodeId) {
+          xyFlowState.cancelConnection();
           bpmnEditorStoreApi.setState((state) => {
-            state.reactflowKieEditorDiagram.ongoingConnection = undefined;
+            state.xyFlowKieDiagram.ongoingConnection = undefined;
           });
         } else {
           (document.activeElement as any)?.blur?.();
         }
 
-        return rfState;
+        return xyFlowState;
       });
     };
-  }, [bpmnEditorStoreApi, commandsRef, rfStoreApi]);
+  }, [bpmnEditorStoreApi, commandsRef, xyFlowStoreApi]);
 
   // Reset position to origin
   useEffect(() => {
@@ -68,9 +68,9 @@ export function BpmnDiagramCommands(props: {}) {
     }
     commandsRef.current.resetPosition = async () => {
       console.debug("BPMN DIAGRAM: COMMANDS: Reseting position...");
-      rf.setViewport(DEFAULT_VIEWPORT, { duration: 200 });
+      xyFlow.setViewport(DEFAULT_VIEWPORT, { duration: 200 });
     };
-  }, [commandsRef, rf]);
+  }, [commandsRef, xyFlow]);
 
   // Focus on selection
   useEffect(() => {
@@ -79,7 +79,7 @@ export function BpmnDiagramCommands(props: {}) {
     }
     commandsRef.current.focusOnSelection = async () => {
       console.debug("BPMN DIAGRAM: COMMANDS: Focusing on selected bounds...");
-      const selectedNodes = rf.getNodes().filter((s) => s.selected);
+      const selectedNodes = xyFlow.getNodes().filter((s) => s.selected);
       if (selectedNodes.length <= 0) {
         return;
       }
@@ -89,7 +89,7 @@ export function BpmnDiagramCommands(props: {}) {
         padding: 100,
       });
 
-      rf.fitBounds(
+      xyFlow.fitBounds(
         {
           x: bounds["@_x"],
           y: bounds["@_y"],
@@ -99,7 +99,7 @@ export function BpmnDiagramCommands(props: {}) {
         { duration: 200 }
       );
     };
-  }, [commandsRef, rf]);
+  }, [commandsRef, xyFlow]);
 
   // Cut nodes
   useEffect(() => {
@@ -109,17 +109,17 @@ export function BpmnDiagramCommands(props: {}) {
     commandsRef.current.cut = async () => {
       console.debug("BPMN DIAGRAM: COMMANDS: Cutting selected nodes...");
       const { clipboard, copiedEdgesById, danglingEdgesById, copiedNodesById } = buildClipboardFromDiagram(
-        rfStoreApi.getState(),
+        xyFlowStoreApi.getState(),
         bpmnEditorStoreApi.getState()
       );
 
       navigator.clipboard.writeText(JSON.stringify(clipboard)).then(() => {
         bpmnEditorStoreApi.setState((state) => {
-          // FIXME: Tiago: ?
+          // FIXME: Tiago: Implement (cut)
         });
       });
     };
-  }, [bpmnEditorStoreApi, commandsRef, rfStoreApi]);
+  }, [bpmnEditorStoreApi, commandsRef, xyFlowStoreApi]);
 
   // Copy nodes
   useEffect(() => {
@@ -128,10 +128,10 @@ export function BpmnDiagramCommands(props: {}) {
     }
     commandsRef.current.copy = async () => {
       console.debug("BPMN DIAGRAM: COMMANDS: Copying selected nodes...");
-      const { clipboard } = buildClipboardFromDiagram(rfStoreApi.getState(), bpmnEditorStoreApi.getState());
+      const { clipboard } = buildClipboardFromDiagram(xyFlowStoreApi.getState(), bpmnEditorStoreApi.getState());
       navigator.clipboard.writeText(JSON.stringify(clipboard));
     };
-  }, [bpmnEditorStoreApi, commandsRef, rfStoreApi]);
+  }, [bpmnEditorStoreApi, commandsRef, xyFlowStoreApi]);
 
   // Paste nodes
   useEffect(() => {
@@ -146,7 +146,7 @@ export function BpmnDiagramCommands(props: {}) {
           return;
         }
 
-        // FIXME: Tiago: ?
+        // FIXME: Tiago: Implement (paste)
       });
     };
   }, [bpmnEditorStoreApi, commandsRef]);
@@ -158,30 +158,30 @@ export function BpmnDiagramCommands(props: {}) {
     }
     commandsRef.current.selectAll = async () => {
       console.debug("BPMN DIAGRAM: COMMANDS: Selecting/Deselecting nodes...");
-      const allNodeIds = rfStoreApi
+      const allNodeIds = xyFlowStoreApi
         .getState()
         .getNodes()
         .map((s) => s.id);
 
-      const allEdgeIds = rfStoreApi.getState().edges.map((s) => s.id);
+      const allEdgeIds = xyFlowStoreApi.getState().edges.map((s) => s.id);
 
       bpmnEditorStoreApi.setState((state) => {
-        const allSelectedNodesSet = new Set(state.reactflowKieEditorDiagram._selectedNodes);
-        const allSelectedEdgesSet = new Set(state.reactflowKieEditorDiagram._selectedEdges);
+        const allSelectedNodesSet = new Set(state.xyFlowKieDiagram._selectedNodes);
+        const allSelectedEdgesSet = new Set(state.xyFlowKieDiagram._selectedEdges);
 
         // If everything is selected, deselect everything.
         if (
           allNodeIds.every((id) => allSelectedNodesSet.has(id) && allEdgeIds.every((id) => allSelectedEdgesSet.has(id)))
         ) {
-          state.reactflowKieEditorDiagram._selectedNodes = [];
-          state.reactflowKieEditorDiagram._selectedEdges = [];
+          state.xyFlowKieDiagram._selectedNodes = [];
+          state.xyFlowKieDiagram._selectedEdges = [];
         } else {
-          state.reactflowKieEditorDiagram._selectedNodes = allNodeIds;
-          state.reactflowKieEditorDiagram._selectedEdges = allEdgeIds;
+          state.xyFlowKieDiagram._selectedNodes = allNodeIds;
+          state.xyFlowKieDiagram._selectedEdges = allEdgeIds;
         }
       });
     };
-  }, [bpmnEditorStoreApi, commandsRef, rfStoreApi]);
+  }, [bpmnEditorStoreApi, commandsRef, xyFlowStoreApi]);
 
   // Create group wrapping selection
   useEffect(() => {
@@ -190,16 +190,16 @@ export function BpmnDiagramCommands(props: {}) {
     }
     commandsRef.current.createGroup = async () => {
       console.debug("BPMN DIAGRAM: COMMANDS: Grouping nodes...");
-      const selectedNodes = rf.getNodes().filter((s) => s.selected);
+      const selectedNodes = xyFlow.getNodes().filter((s) => s.selected);
       if (selectedNodes.length <= 0) {
         return;
       }
 
       bpmnEditorStoreApi.setState((state) => {
-        // FIXME: Tiago: ?
+        // FIXME: Tiago: Implement (group)
       });
     };
-  }, [bpmnEditorStoreApi, commandsRef, rf]);
+  }, [bpmnEditorStoreApi, commandsRef, xyFlow]);
 
   // Toggle hierarchy highlights
   useEffect(() => {

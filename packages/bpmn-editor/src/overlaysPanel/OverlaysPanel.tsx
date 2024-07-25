@@ -35,7 +35,7 @@ interface OverlaysPanelProps {
 }
 
 export function OverlaysPanel({ availableHeight }: OverlaysPanelProps) {
-  const snapGrid = useBpmnEditorStore((s) => s.reactflowKieEditorDiagram.snapGrid);
+  const snapGrid = useBpmnEditorStore((s) => s.xyFlowKieDiagram.snapGrid);
   const diagram = useBpmnEditorStore((s) => s.diagram);
   const bpmnEditorStoreApi = useBpmnEditorStoreApi();
   const overlayPanelContainer = useRef<HTMLDivElement>(null);
@@ -64,7 +64,7 @@ export function OverlaysPanel({ availableHeight }: OverlaysPanelProps) {
             isChecked={snapGrid.isEnabled}
             onChange={(newValue) =>
               bpmnEditorStoreApi.setState((state) => {
-                state.reactflowKieEditorDiagram.snapGrid.isEnabled = newValue;
+                state.xyFlowKieDiagram.snapGrid.isEnabled = newValue;
               })
             }
           />
@@ -84,7 +84,7 @@ export function OverlaysPanel({ availableHeight }: OverlaysPanelProps) {
             hasTooltipOverThumb={true}
             onChange={(newSliderValue, newInputValue) =>
               bpmnEditorStoreApi.setState((state) => {
-                state.reactflowKieEditorDiagram.snapGrid.x = Math.min(
+                state.xyFlowKieDiagram.snapGrid.x = Math.min(
                   MAX_SNAP,
                   Math.max(MIN_SNAP, newInputValue ?? newSliderValue)
                 );
@@ -107,7 +107,7 @@ export function OverlaysPanel({ availableHeight }: OverlaysPanelProps) {
             hasTooltipOverThumb={true}
             onChange={(newSliderValue, newInputValue) =>
               bpmnEditorStoreApi.setState((state) => {
-                state.reactflowKieEditorDiagram.snapGrid.y = Math.min(
+                state.xyFlowKieDiagram.snapGrid.y = Math.min(
                   MAX_SNAP,
                   Math.max(MIN_SNAP, newInputValue ?? newSliderValue)
                 );

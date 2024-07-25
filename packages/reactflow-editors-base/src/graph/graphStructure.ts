@@ -18,6 +18,7 @@
  */
 
 export type GraphStructure<N, E> = Map<N, Map<E, Set<N>>>;
+
 export type ContainmentMap<N> = Map<N, Set<N>>;
 
 function outgoingNodes<N, E>(graphStructure: GraphStructure<N, E>, srcNodeType: N): N[] {

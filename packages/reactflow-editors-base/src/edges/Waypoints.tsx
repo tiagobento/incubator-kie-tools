@@ -22,7 +22,7 @@ import { select } from "d3-selection";
 import { DC__Point } from "../maths/model";
 import * as React from "react";
 import { useEffect } from "react";
-import { useReactflowKieEditorDiagramStoreApi } from "../store/Store";
+import { useXyFlowKieDiagramStoreApi } from "../store/Store";
 import "./Waypoints.css";
 
 export function PotentialWaypoint(props: { point: { x: number; y: number } }) {
@@ -66,7 +66,7 @@ export function Waypoint({
 }) {
   const circleRef = React.useRef<SVGCircleElement>(null);
 
-  const reactflowKieEditorDiagramStoreApi = useReactflowKieEditorDiagramStoreApi();
+  const xyFlowKieDiagramStoreApi = useXyFlowKieDiagramStoreApi();
 
   useEffect(() => {
     if (!circleRef.current) {
@@ -76,18 +76,18 @@ export function Waypoint({
     const selection = select(circleRef.current);
     const dragHandler = drag<SVGCircleElement, unknown>()
       .on("start", (e) => {
-        reactflowKieEditorDiagramStoreApi.setState((state) =>
+        xyFlowKieDiagramStoreApi.setState((state) =>
           state.dispatch(state).setEdgeStatus(edgeId, { draggingWaypoint: true })
         );
       })
       .on("drag", (e) => {
         console.log("XYFLOW-DIAGRAM: Waypoint repositioned");
-        // FIXME: Tiago: Mutation
+        // FIXME: Tiago: Mutation (move waypoint)
         // repositionEdgeWaypoint({(
       })
       .on("end", (e) => {
         onDragStop(e);
-        reactflowKieEditorDiagramStoreApi.setState((state) =>
+        xyFlowKieDiagramStoreApi.setState((state) =>
           state.dispatch(state).setEdgeStatus(edgeId, { draggingWaypoint: false })
         );
       });
@@ -96,7 +96,7 @@ export function Waypoint({
     return () => {
       selection.on(".drag", null);
     };
-  }, [edgeId, edgeIndex, index, onDragStop, reactflowKieEditorDiagramStoreApi]);
+  }, [edgeId, edgeIndex, index, onDragStop, xyFlowKieDiagramStoreApi]);
 
   return (
     <circle
@@ -111,7 +111,7 @@ export function Waypoint({
         e.stopPropagation();
 
         console.log("XYFLOW-DIAGRAM: Waypoint deleted");
-        // FIXME: Tiago: Mutation
+        // FIXME: Tiago: Mutation (remove waypoint)
         // removeEdgeWaypoint({(
       }}
     />

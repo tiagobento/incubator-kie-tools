@@ -21,14 +21,19 @@ import { BPMN20__tProcess, BPMNDI__BPMNShape } from "@kie-tools/bpmn-marshaller/
 import {
   Diagram,
   DiagramRef,
+  OnConnectedNodeAdded,
+  OnEdgeAdded,
+  OnEdgeDeleted,
+  OnEdgeUpdated,
+  OnEscPressed,
+  OnNodeAdded,
   OnNodeDeleted,
+  OnNodeParented,
   OnNodeRepositioned,
+  OnNodeResized,
+  OnNodeUnparented,
 } from "@kie-tools/reactflow-editors-base/dist/diagram/Diagram";
-import {
-  ConnectionLineEdgeMapping,
-  ConnectionLineNodeMapping,
-  ConnectionLine as ReactFlowDiagramConnectionLine,
-} from "@kie-tools/reactflow-editors-base/dist/edges/ConnectionLine";
+import { ConnectionLine as ReactFlowDiagramConnectionLine } from "@kie-tools/reactflow-editors-base/dist/edges/ConnectionLine";
 import { EdgeMarkers } from "@kie-tools/reactflow-editors-base/dist/edges/EdgeMarkers";
 import * as React from "react";
 import { useCallback, useState } from "react";
@@ -39,38 +44,25 @@ import { useBpmnEditorStore, useBpmnEditorStoreApi } from "../store/StoreContext
 import { BpmnDiagramCommands } from "./BpmnDiagramCommands";
 import { BpmnDiagramEmptyState } from "./BpmnDiagramEmptyState";
 import { TopRightCornerPanels } from "./BpmnDiagramTopRightPanels";
-import { BPMN_CONTAINMENT_MAP, BPMN_GRAPH_STRUCTURE, BpmnEdgeType, BpmnNodeType } from "./BpmnGraphStructure";
-import { BpmnPalette } from "./BpmnPalette";
+import {
+  BPMN_CONTAINMENT_MAP,
+  CONNECTION_LINE_EDGE_COMPONENTS_MAPPING,
+  CONNECTION_LINE_NODE_COMPONENT_MAPPING,
+  XY_FLOW_EDGE_TYPES,
+  XY_FLOW_NODE_TYPES,
+} from "./BpmnDiagramDomain";
+import { BpmnEdgeType } from "./BpmnDiagramDomain";
+import { BpmnNodeType } from "./BpmnDiagramDomain";
+import { BPMN_GRAPH_STRUCTURE } from "./BpmnDiagramDomain";
+import { BpmnPalette, MIME_TYPE_FOR_BPMN_EDITOR_NEW_NODE_FROM_PALETTE } from "./BpmnPalette";
 import { DiagramContainerContextProvider } from "./DiagramContainerContext";
-import { AssociationPath, SequenceFlowPath } from "./edges/EdgeSvgs";
-import { EDGE_TYPES } from "./edges/EdgeTypes";
-import { AssociationEdge, SequenceFlowEdge } from "./edges/Edges";
-import { DEFAULT_NODE_SIZES, MIN_NODE_SIZES } from "./nodes/NodeSizes";
-import {
-  EndEventNodeSvg,
-  GatewayNodeSvg,
-  IntermediateCatchEventNodeSvg,
-  IntermediateThrowEventNodeSvg,
-  StartEventNodeSvg,
-  SubProcessNodeSvg,
-  TaskNodeSvg,
-  TextAnnotationNodeSvg,
-} from "./nodes/NodeSvgs";
-import { NODE_TYPES } from "./nodes/NodeTypes";
-import {
-  BpmnDiagramNodeData,
-  DataObjectNode,
-  EndEventNode,
-  GatewayNode,
-  GroupNode,
-  IntermediateCatchEventNode,
-  IntermediateThrowEventNode,
-  StartEventNode,
-  SubProcessNode,
-  TaskNode,
-  TextAnnotationNode,
-  UnknownNode,
-} from "./nodes/Nodes";
+import { BpmnDiagramEdgeData } from "./BpmnDiagramDomain";
+import { DEFAULT_NODE_SIZES } from "./BpmnDiagramDomain";
+import { MIN_NODE_SIZES } from "./BpmnDiagramDomain";
+import { NODE_TYPES } from "./BpmnDiagramDomain";
+import { BpmnNodeElement } from "./BpmnDiagramDomain";
+import { BpmnDiagramNodeData } from "./BpmnDiagramDomain";
+import { BpmnDiagramLhsPanel } from "../store/Store";
 
 export function BpmnDiagram({
   container,
@@ -90,11 +82,11 @@ export function BpmnDiagram({
   const resetToBeforeEditingBegan = useCallback(() => {
     bpmnEditorStoreApi.setState((state) => {
       state.bpmn.model = normalize(bpmnModelBeforeEditingRef.current);
-      state.reactflowKieEditorDiagram.draggingNodes = [];
-      state.reactflowKieEditorDiagram.draggingWaypoints = [];
-      state.reactflowKieEditorDiagram.resizingNodes = [];
-      state.reactflowKieEditorDiagram.dropTargetNode = undefined;
-      state.reactflowKieEditorDiagram.edgeIdBeingUpdated = undefined;
+      state.xyFlowKieDiagram.draggingNodes = [];
+      state.xyFlowKieDiagram.draggingWaypoints = [];
+      state.xyFlowKieDiagram.resizingNodes = [];
+      state.xyFlowKieDiagram.dropTargetNode = undefined;
+      state.xyFlowKieDiagram.edgeIdBeingUpdated = undefined;
     });
   }, [bpmnEditorStoreApi, bpmnModelBeforeEditingRef]);
 
@@ -102,7 +94,13 @@ export function BpmnDiagram({
 
   const isEmptyStateShowing = showEmptyState && nodes.length === 0;
 
-  const onNodeRepositioned = useCallback<OnNodeRepositioned<BpmnDiagramNodeData>>(
+  const onNodeAdded = useCallback<OnNodeAdded<BpmnNodeType, BpmnDiagramNodeData>>(() => {}, []);
+
+  const onConnectedNodeAdded = useCallback<
+    OnConnectedNodeAdded<BpmnNodeType, BpmnEdgeType, BpmnDiagramNodeData>
+  >(() => {}, []);
+
+  const onNodeRepositioned = useCallback<OnNodeRepositioned<BpmnNodeType, BpmnDiagramNodeData>>(
     ({ node, newPosition }) => {
       bpmnEditorStoreApi.setState((s) => {
         const shape = (s.bpmn.model.definitions["bpmndi:BPMNDiagram"] ?? [])
@@ -117,7 +115,7 @@ export function BpmnDiagram({
     [bpmnEditorStoreApi]
   );
 
-  const onNodeDeleted = useCallback<OnNodeDeleted<BpmnDiagramNodeData>>(
+  const onNodeDeleted = useCallback<OnNodeDeleted<BpmnNodeType, BpmnDiagramNodeData>>(
     ({ node }) => {
       bpmnEditorStoreApi.setState((s) => {
         const process = s.bpmn.model.definitions.rootElement?.find(
@@ -138,6 +136,30 @@ export function BpmnDiagram({
     [bpmnEditorStoreApi]
   );
 
+  const onNodeUnparented = useCallback<OnNodeUnparented<BpmnNodeType, BpmnDiagramNodeData>>(() => {}, []);
+
+  const onNodeParented = useCallback<OnNodeParented<BpmnNodeType, BpmnDiagramNodeData>>(() => {}, []);
+
+  const onNodeResized = useCallback<OnNodeResized<BpmnNodeType, BpmnDiagramNodeData>>(() => {}, []);
+
+  const onEdgeAdded = useCallback<
+    OnEdgeAdded<BpmnNodeType, BpmnEdgeType, BpmnDiagramNodeData, BpmnDiagramEdgeData>
+  >(() => {}, []);
+
+  const onEdgeUpdated = useCallback<
+    OnEdgeUpdated<BpmnNodeType, BpmnEdgeType, BpmnDiagramNodeData, BpmnDiagramEdgeData>
+  >(() => {}, []);
+
+  const onEdgeDeleted = useCallback<OnEdgeDeleted<BpmnEdgeType, BpmnDiagramEdgeData>>(() => {}, []);
+
+  const onEscPressed = useCallback<OnEscPressed>(() => {
+    bpmnEditorStoreApi.setState((state) => {
+      state.diagram.propertiesPanel.isOpen = false;
+      state.diagram.overlaysPanel.isOpen = false;
+      state.diagram.openLhsPanel = BpmnDiagramLhsPanel.NONE;
+    });
+  }, [bpmnEditorStoreApi]);
+
   return (
     <>
       {isEmptyStateShowing && <BpmnDiagramEmptyState setShowEmptyState={setShowEmptyState} />}
@@ -156,15 +178,25 @@ export function BpmnDiagram({
           resetToBeforeEditingBegan={resetToBeforeEditingBegan}
           // components
           connectionLineComponent={ConnectionLine}
-          nodeComponents={RF_NODE_TYPES}
-          edgeComponents={RF_EDGE_TYPES}
+          nodeComponents={XY_FLOW_NODE_TYPES}
+          edgeComponents={XY_FLOW_EDGE_TYPES}
           // domain
+          newNodeMimeType={MIME_TYPE_FOR_BPMN_EDITOR_NEW_NODE_FROM_PALETTE}
           containmentMap={BPMN_CONTAINMENT_MAP}
           nodeTypes={NODE_TYPES}
           minNodeSizes={MIN_NODE_SIZES}
           graphStructure={BPMN_GRAPH_STRUCTURE}
+          onNodeAdded={onNodeAdded}
+          onConnectedNodeAdded={onConnectedNodeAdded}
           onNodeRepositioned={onNodeRepositioned}
           onNodeDeleted={onNodeDeleted}
+          onEdgeAdded={onEdgeAdded}
+          onEdgeUpdated={onEdgeUpdated}
+          onEdgeDeleted={onEdgeDeleted}
+          onNodeUnparented={onNodeUnparented}
+          onNodeParented={onNodeParented}
+          onNodeResized={onNodeResized}
+          onEscPressed={onEscPressed}
         >
           <BpmnPalette pulse={isEmptyStateShowing} />
           <TopRightCornerPanels availableHeight={container.current?.offsetHeight} />
@@ -186,42 +218,3 @@ export function ConnectionLine<N extends string, E extends string>(props: RF.Con
     />
   );
 }
-
-const RF_NODE_TYPES: Record<BpmnNodeType, any> = {
-  [NODE_TYPES.startEvent]: StartEventNode,
-  [NODE_TYPES.intermediateCatchEvent]: IntermediateCatchEventNode,
-  [NODE_TYPES.intermediateThrowEvent]: IntermediateThrowEventNode,
-  [NODE_TYPES.endEvent]: EndEventNode,
-  [NODE_TYPES.task]: TaskNode,
-  [NODE_TYPES.subProcess]: SubProcessNode,
-  [NODE_TYPES.gateway]: GatewayNode,
-  [NODE_TYPES.group]: GroupNode,
-  [NODE_TYPES.textAnnotation]: TextAnnotationNode,
-  [NODE_TYPES.dataObject]: DataObjectNode,
-  [NODE_TYPES.unknown]: UnknownNode,
-};
-
-const RF_EDGE_TYPES: Record<BpmnEdgeType, any> = {
-  [EDGE_TYPES.sequenceFlow]: SequenceFlowEdge,
-  [EDGE_TYPES.association]: AssociationEdge,
-};
-
-const CONNECTION_LINE_NODE_COMPONENT_MAPPING: ConnectionLineNodeMapping<BpmnNodeType> = {
-  [NODE_TYPES.startEvent]: StartEventNodeSvg,
-  [NODE_TYPES.intermediateCatchEvent]: IntermediateCatchEventNodeSvg,
-  [NODE_TYPES.intermediateThrowEvent]: IntermediateThrowEventNodeSvg,
-  [NODE_TYPES.endEvent]: EndEventNodeSvg,
-  [NODE_TYPES.task]: TaskNodeSvg,
-  [NODE_TYPES.subProcess]: SubProcessNodeSvg,
-  [NODE_TYPES.gateway]: GatewayNodeSvg,
-  [NODE_TYPES.textAnnotation]: TextAnnotationNodeSvg,
-  // Ignore
-  node_dataObject: undefined as any,
-  node_unknown: undefined as any,
-  node_group: undefined as any,
-};
-
-const CONNECTION_LINE_EDGE_COMPONENTS_MAPPING: ConnectionLineEdgeMapping<BpmnEdgeType> = {
-  [EDGE_TYPES.sequenceFlow]: SequenceFlowPath,
-  [EDGE_TYPES.association]: AssociationPath,
-};

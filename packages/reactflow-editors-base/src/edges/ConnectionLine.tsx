@@ -25,7 +25,7 @@ import { usePathForEdgeWithWaypoints } from "./usePathForEdgeWithWaypoints";
 import { PositionalNodeHandleId } from "../nodes/PositionalNodeHandles";
 import { getBoundsCenterPoint, getPositionalHandlePosition } from "../maths/Maths";
 import { pointsToPath } from "../maths/DcMaths";
-import { useReactflowKieEditorDiagramStore } from "../store/Store";
+import { useXyFlowKieDiagramStore } from "../store/Store";
 import { snapPoint } from "../snapgrid/SnapGrid";
 import { NodeSizes } from "../nodes/NodeSizes";
 
@@ -50,10 +50,10 @@ export function ConnectionLine<N extends string, E extends string>({
   nodeComponentsMapping: ConnectionLineNodeMapping<N>;
   edgeComponentsMapping: ConnectionLineEdgeMapping<E>;
 }) {
-  const snapGrid = useReactflowKieEditorDiagramStore((s) => s.reactflowKieEditorDiagram.snapGrid);
-  const edgeBeingUpdated = useReactflowKieEditorDiagramStore((s) =>
-    s.reactflowKieEditorDiagram.edgeIdBeingUpdated
-      ? s.computed(s).getDiagramData().edgesById.get(s.reactflowKieEditorDiagram.edgeIdBeingUpdated)
+  const snapGrid = useXyFlowKieDiagramStore((s) => s.xyFlowKieDiagram.snapGrid);
+  const edgeBeingUpdated = useXyFlowKieDiagramStore((s) =>
+    s.xyFlowKieDiagram.edgeIdBeingUpdated
+      ? s.computed(s).getDiagramData().edgesById.get(s.xyFlowKieDiagram.edgeIdBeingUpdated)
       : undefined
   );
   const kieEdgePath = usePathForEdgeWithWaypoints(
@@ -90,7 +90,6 @@ export function ConnectionLine<N extends string, E extends string>({
   const handleId = isUpdatingFromSourceHandle ? edgeBeingUpdated?.type : edgeBeingUpdated?.type ?? fromHandle?.id;
 
   // Edges
-  // FIMXE: Tiago: Edges
   const EdgeConnectionLine = edgeComponentsMapping[handleId as E] as EdgeComponent;
   if (EdgeConnectionLine !== undefined) {
     return <EdgeConnectionLine d={connectionLinePath} />;
@@ -136,5 +135,4 @@ export function ConnectionLine<N extends string, E extends string>({
       </g>
     );
   }
-  throw new Error(`Unknown source of ConnectionLine '${handleId}'.`);
 }

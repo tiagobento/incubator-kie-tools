@@ -21,7 +21,7 @@ import { useMemo } from "react";
 import * as RF from "reactflow";
 import { getSnappedMultiPointAnchoredEdgePath, MultiPointAnchoredEdge } from "./getSnappedMultiPointAnchoredEdgePath";
 import { DC__Shape } from "../maths/model";
-import { useReactflowKieEditorDiagramStore } from "../store/Store";
+import { useXyFlowKieDiagramStore } from "../store/Store";
 
 export function usePathForEdgeWithWaypoints(
   source: string | undefined,
@@ -30,7 +30,7 @@ export function usePathForEdgeWithWaypoints(
   shapeSource: DC__Shape | undefined,
   shapeTarget: DC__Shape | undefined
 ) {
-  const snapGrid = useReactflowKieEditorDiagramStore((s) => s.reactflowKieEditorDiagram.snapGrid);
+  const snapGrid = useXyFlowKieDiagramStore((s) => s.xyFlowKieDiagram.snapGrid);
 
   const sourceNodeX = RF.useStore((s) => (source ? s.nodeInternals.get(source)?.positionAbsolute?.x : undefined));
   const sourceNodeY = RF.useStore((s) => (source ? s.nodeInternals.get(source)?.positionAbsolute?.y : undefined));

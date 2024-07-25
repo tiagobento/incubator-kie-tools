@@ -21,42 +21,37 @@ import { createContext, useContext } from "react";
 import { StoreApi, UseBoundStore } from "zustand";
 import { WithImmer } from "zustand/middleware/immer";
 import { useStoreWithEqualityFn } from "zustand/traditional";
-import {
-  ReactFlowEditorDiagramState,
-  ReactFlowKieEditorDiagramEdgeData,
-  ReactFlowKieEditorDiagramNodeData,
-} from "./State";
+import { XyFlowDiagramState, XyFlowKieDiagramEdgeData, XyFlowKieDiagramNodeData } from "./State";
 
 export type StoreApiType<
-  S extends ReactFlowEditorDiagramState<S, N, NData, EData>,
+  S extends XyFlowDiagramState<S, N, NData, EData>,
   N extends string,
-  NData extends ReactFlowKieEditorDiagramNodeData,
-  EData extends ReactFlowKieEditorDiagramEdgeData,
+  NData extends XyFlowKieDiagramNodeData<N, NData>,
+  EData extends XyFlowKieDiagramEdgeData,
 > = UseBoundStore<WithImmer<StoreApi<S>>>;
 
-export const ReactflowKieEditorDiagramStoreApiContext = createContext<StoreApiType<any, any, any, any>>({} as any);
+export const XyFlowKieDiagramStoreApiContext = createContext<StoreApiType<any, any, any, any>>({} as any);
 
-export function useReactflowKieEditorDiagramStore<
-  S extends ReactFlowEditorDiagramState<S, N, NData, EData>,
+export function useXyFlowKieDiagramStore<
+  S extends XyFlowDiagramState<S, N, NData, EData>,
   N extends string,
-  NData extends ReactFlowKieEditorDiagramNodeData,
-  EData extends ReactFlowKieEditorDiagramEdgeData,
+  NData extends XyFlowKieDiagramNodeData<N, NData>,
+  EData extends XyFlowKieDiagramEdgeData,
   StateSlice = StoreApi<S> extends { getState: () => infer T } ? T : never,
 >(selector: (state: S) => StateSlice, equalityFn?: (a: StateSlice, b: StateSlice) => boolean) {
-  const store = useContext(ReactflowKieEditorDiagramStoreApiContext);
-
+  const store = useContext(XyFlowKieDiagramStoreApiContext);
   if (store === null) {
-    throw new Error("Can't use BPMN Editor Store outside of the BpmnEditor component.");
+    throw new Error("Can't use XyFlow KIE Diagram Store outside of the XyFlowKieDiagram component.");
   }
 
   return useStoreWithEqualityFn(store, selector, equalityFn);
 }
 
-export function useReactflowKieEditorDiagramStoreApi<
-  S extends ReactFlowEditorDiagramState<S, N, NData, EData>,
+export function useXyFlowKieDiagramStoreApi<
+  S extends XyFlowDiagramState<S, N, NData, EData>,
   N extends string,
-  NData extends ReactFlowKieEditorDiagramNodeData,
-  EData extends ReactFlowKieEditorDiagramEdgeData,
+  NData extends XyFlowKieDiagramNodeData<N, NData>,
+  EData extends XyFlowKieDiagramEdgeData,
 >(): StoreApiType<S, N, NData, EData> {
-  return useContext(ReactflowKieEditorDiagramStoreApiContext) as StoreApiType<S, N, NData, EData>;
+  return useContext(XyFlowKieDiagramStoreApiContext) as StoreApiType<S, N, NData, EData>;
 }

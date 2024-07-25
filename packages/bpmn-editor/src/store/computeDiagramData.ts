@@ -19,23 +19,28 @@
 
 import { GraphStructureAdjacencyList, GraphStructureEdge } from "@kie-tools/reactflow-editors-base/dist/graph/graph";
 import { snapShapeDimensions } from "@kie-tools/reactflow-editors-base/dist/snapgrid/SnapGrid";
-import { ReactFlowEditorDiagramData } from "@kie-tools/reactflow-editors-base/dist/store/State";
+import { XyFlowDiagramData } from "@kie-tools/reactflow-editors-base/dist/store/State";
 import * as RF from "reactflow";
-import { BpmnEdgeType, BpmnNodeType } from "../diagram/BpmnGraphStructure";
-import { BpmnDiagramEdgeData } from "../diagram/edges/Edges";
-import { EDGE_TYPES } from "../diagram/edges/EdgeTypes";
-import { BpmnDiagramNodeData, EdgeBpmnElements, NodeBpmnElements } from "../diagram/nodes/Nodes";
-import { MIN_NODE_SIZES } from "../diagram/nodes/NodeSizes";
-import { NODE_TYPES } from "../diagram/nodes/NodeTypes";
-import { BpmnReactFlowEditorDiagramState, State } from "./Store";
+import {
+  BpmnDiagramEdgeData,
+  BpmnDiagramNodeData,
+  BpmnEdgeElement,
+  BpmnEdgeType,
+  BpmnNodeElement,
+  BpmnNodeType,
+  EDGE_TYPES,
+  NODE_TYPES,
+} from "../diagram/BpmnDiagramDomain";
+import { MIN_NODE_SIZES } from "../diagram/BpmnDiagramDomain";
+import { BpmnXyFlowDiagramState, State } from "./Store";
 
 export function computeDiagramData(
   definitions: State["bpmn"]["model"]["definitions"],
-  reactflowKieEditorDiagram: BpmnReactFlowEditorDiagramState["reactflowKieEditorDiagram"],
-  snapGrid: BpmnReactFlowEditorDiagramState["reactflowKieEditorDiagram"]["snapGrid"]
-): ReactFlowEditorDiagramData<BpmnNodeType, BpmnDiagramNodeData, BpmnDiagramEdgeData> {
-  const nodeBpmnElementsById = new Map<string, NodeBpmnElements>();
-  const edgeBpmnElementsById = new Map<string, EdgeBpmnElements>();
+  xyFlowKieDiagram: BpmnXyFlowDiagramState["xyFlowKieDiagram"],
+  snapGrid: BpmnXyFlowDiagramState["xyFlowKieDiagram"]["snapGrid"]
+): XyFlowDiagramData<BpmnNodeType, BpmnDiagramNodeData, BpmnDiagramEdgeData> {
+  const nodeBpmnElementsById = new Map<string, BpmnNodeElement>();
+  const edgeBpmnElementsById = new Map<string, BpmnEdgeElement>();
 
   definitions.rootElement
     ?.flatMap((s) => (s.__$$element !== "process" ? [] : s))
@@ -79,13 +84,13 @@ export function computeDiagramData(
       else {
         // ignore
       }
-    }, new Map<string, NodeBpmnElements>()) ?? new Map<string, NodeBpmnElements>();
+    }, new Map<string, BpmnNodeElement>()) ?? new Map<string, BpmnNodeElement>();
 
   const { selectedNodes, draggingNodes, resizingNodes, selectedEdges } = {
-    selectedNodes: new Set(reactflowKieEditorDiagram._selectedNodes),
-    draggingNodes: new Set(reactflowKieEditorDiagram.draggingNodes),
-    resizingNodes: new Set(reactflowKieEditorDiagram.resizingNodes),
-    selectedEdges: new Set(reactflowKieEditorDiagram._selectedEdges),
+    selectedNodes: new Set(xyFlowKieDiagram._selectedNodes),
+    draggingNodes: new Set(xyFlowKieDiagram.draggingNodes),
+    resizingNodes: new Set(xyFlowKieDiagram.resizingNodes),
+    selectedEdges: new Set(xyFlowKieDiagram._selectedEdges),
   };
 
   const nodes: RF.Node<BpmnDiagramNodeData, BpmnNodeType>[] = (definitions["bpmndi:BPMNDiagram"] ?? [])
@@ -113,7 +118,7 @@ export function computeDiagramData(
           shape: bpmnShape,
           index: i,
           shapeIndex: i,
-          parentRfNode: undefined,
+          parentXyFlowNode: undefined,
         },
         selected: selectedNodes.has(id),
         resizing: resizingNodes.has(id),
@@ -132,12 +137,12 @@ export function computeDiagramData(
     new Map<string, RF.Node<BpmnDiagramNodeData, BpmnNodeType>>()
   );
 
-  const selectedNodesById = reactflowKieEditorDiagram._selectedNodes.reduce(
+  const selectedNodesById = xyFlowKieDiagram._selectedNodes.reduce(
     (acc, s) => acc.set(s, nodesById.get(s)!),
     new Map<string, RF.Node<BpmnDiagramNodeData, BpmnNodeType>>()
   );
 
-  const selectedNodeTypes = reactflowKieEditorDiagram._selectedNodes.reduce(
+  const selectedNodeTypes = xyFlowKieDiagram._selectedNodes.reduce(
     (acc, s) => acc.add(nodesById.get(s)!.type as BpmnNodeType),
     new Set<BpmnNodeType>()
   );
@@ -211,7 +216,7 @@ export function computeDiagramData(
 
   const edgesById = edges.reduce((acc, e) => acc.set(e.id, e), new Map<string, RF.Edge<BpmnDiagramEdgeData>>());
 
-  const selectedEdgesById = reactflowKieEditorDiagram._selectedEdges.reduce(
+  const selectedEdgesById = xyFlowKieDiagram._selectedEdges.reduce(
     (acc, s) => acc.set(s, edgesById.get(s)!),
     new Map<string, RF.Edge<BpmnDiagramEdgeData>>()
   );
@@ -229,7 +234,7 @@ export function computeDiagramData(
   };
 }
 
-export const elementToNodeType: Record<NonNullable<NodeBpmnElements>["__$$element"], BpmnNodeType> = {
+export const elementToNodeType: Record<NonNullable<BpmnNodeElement>["__$$element"], BpmnNodeType> = {
   // start event
   startEvent: NODE_TYPES.startEvent,
   // intermediate events
@@ -275,7 +280,7 @@ export const elementToNodeType: Record<NonNullable<NodeBpmnElements>["__$$elemen
   dataStoreReference: NODE_TYPES.unknown,
 };
 
-export const elementToEdgeType: Record<NonNullable<EdgeBpmnElements>["__$$element"], BpmnEdgeType> = {
+export const elementToEdgeType: Record<NonNullable<BpmnEdgeElement>["__$$element"], BpmnEdgeType> = {
   association: EDGE_TYPES.association,
   sequenceFlow: EDGE_TYPES.sequenceFlow,
 };

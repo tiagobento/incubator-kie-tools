@@ -23,17 +23,14 @@ import { buildHierarchy } from "../graph/graph";
 import { ContainmentMap, getDefaultEdgeTypeBetween, GraphStructure } from "../graph/graphStructure";
 import { checkIsValidConnection } from "../graph/isValidConnection";
 import { getContainmentRelationship, getDiBoundsCenterPoint } from "../maths/DcMaths";
-import { DC__Bounds, DC__Dimension, DC__Shape } from "../maths/model";
+import { DC__Bounds, DC__Dimension, DC__Point, DC__Shape } from "../maths/model";
 import { SnapGrid, snapShapeDimensions } from "../snapgrid/SnapGrid";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useReactflowKieEditorDiagramStore, useReactflowKieEditorDiagramStoreApi } from "../store/Store";
+import { useXyFlowKieDiagramStore, useXyFlowKieDiagramStoreApi } from "../store/Store";
 import { NodeSizes } from "../nodes/NodeSizes";
 import { SelectionStatusLabel } from "./SelectionStatusLabel";
-import {
-  ReactFlowEditorDiagramState,
-  ReactFlowKieEditorDiagramEdgeData,
-  ReactFlowKieEditorDiagramNodeData,
-} from "../store/State";
+import { XyFlowDiagramState, XyFlowKieDiagramEdgeData, XyFlowKieDiagramNodeData } from "../store/State";
+import { Draft } from "immer";
 
 const isFirefox = typeof (window as any).InstallTrigger !== "undefined"; // See https://stackoverflow.com/questions/9847580/how-to-detect-safari-chrome-ie-firefox-and-opera-browsers
 
@@ -49,18 +46,80 @@ export type DiagramRef = {
   getReactFlowInstance: () => RF.ReactFlowInstance | undefined;
 };
 
-export type OnNodeRepositioned<NData extends ReactFlowKieEditorDiagramNodeData> = (args: {
-  node: RF.Node<NData>;
+// nodes
+
+export type OnNodeAdded<N extends string, NData extends XyFlowKieDiagramNodeData<N, NData>> = (args: {
+  type: N;
+  dropPoint: { x: number; y: number };
+}) => void;
+
+export type OnConnectedNodeAdded<
+  N extends string,
+  E extends string,
+  NData extends XyFlowKieDiagramNodeData<N, NData>,
+> = (args: { sourceNode: RF.Node<NData, N>; newNodeType: N; edgeType: E; dropPoint: { x: number; y: number } }) => void;
+
+export type OnNodeUnparented<N extends string, NData extends XyFlowKieDiagramNodeData<N, NData>> = (args: {
+  exParentNode: RF.Node<NData, N>;
+  activeNode: RF.Node<NData, N>;
+  selectedNodes: RF.Node<NData, N>[];
+}) => void;
+
+export type OnNodeParented<N extends string, NData extends XyFlowKieDiagramNodeData<N, NData>> = (args: {
+  parentNode: RF.Node<NData, N>;
+  activeNode: RF.Node<NData, N>;
+  selectedNodes: RF.Node<NData, N>[];
+}) => void;
+
+export type OnNodeRepositioned<N extends string, NData extends XyFlowKieDiagramNodeData<N, NData>> = (args: {
+  node: RF.Node<NData, N>;
   newPosition: RF.XYPosition;
 }) => void;
 
-export type OnNodeDeleted<NData extends ReactFlowKieEditorDiagramNodeData> = (args: { node: RF.Node<NData> }) => void;
+export type OnNodeDeleted<N extends string, NData extends XyFlowKieDiagramNodeData<N, NData>> = (args: {
+  node: RF.Node<NData, N>;
+}) => void;
+
+export type OnNodeResized<N extends string, NData extends XyFlowKieDiagramNodeData<N, NData>> = (args: {
+  node: RF.Node<NData, N>;
+  newDimensions: { width: number; height: number };
+}) => void;
+
+// edges
+
+export type OnEdgeAdded<
+  N extends string,
+  E extends string,
+  NData extends XyFlowKieDiagramNodeData<N, NData>,
+  EData extends XyFlowKieDiagramEdgeData,
+> = (args: { sourceNode: RF.Node<NData>; targetNode: RF.Node<NData>; edgeType: E }) => void;
+
+export type OnEdgeUpdated<
+  N extends string,
+  E extends string,
+  NData extends XyFlowKieDiagramNodeData<N, NData>,
+  EData extends XyFlowKieDiagramEdgeData,
+> = (args: {
+  sourceNode: RF.Node<NData>;
+  targetNode: RF.Node<NData>;
+  edge: RF.Edge<EData>;
+  firstWaypoint: DC__Point;
+  lastWaypoint: DC__Point;
+}) => void;
+
+export type OnEdgeDeleted<E extends string, EData extends XyFlowKieDiagramEdgeData> = (args: {
+  edge: RF.Edge<EData>;
+}) => void;
+
+// misc
+
+export type OnEscPressed = () => void;
 
 export type Props<
   N extends string,
   E extends string,
-  NData extends ReactFlowKieEditorDiagramNodeData,
-  EData extends ReactFlowKieEditorDiagramEdgeData,
+  NData extends XyFlowKieDiagramNodeData<N, NData>,
+  EData extends XyFlowKieDiagramEdgeData,
 > = {
   // model
   model: unknown;
@@ -75,21 +134,31 @@ export type Props<
   children: React.ReactElement[];
   container: React.RefObject<HTMLElement>;
   // domain
+  newNodeMimeType: string;
   containmentMap: ContainmentMap<N>;
   nodeTypes: Record<string, string>;
   minNodeSizes: NodeSizes<N>;
   graphStructure: GraphStructure<N, E>;
   // actions
-  onNodeRepositioned: OnNodeRepositioned<NData>;
-  onNodeDeleted: OnNodeDeleted<NData>;
+  onNodeRepositioned: OnNodeRepositioned<N, NData>;
+  onNodeDeleted: OnNodeDeleted<N, NData>;
+  onNodeAdded: OnNodeAdded<N, NData>;
+  onNodeUnparented: OnNodeUnparented<N, NData>;
+  onNodeParented: OnNodeParented<N, NData>;
+  onConnectedNodeAdded: OnConnectedNodeAdded<N, E, NData>;
+  onNodeResized: OnNodeResized<N, NData>;
+  onEdgeAdded: OnEdgeAdded<N, E, NData, EData>;
+  onEdgeUpdated: OnEdgeUpdated<N, E, NData, EData>;
+  onEdgeDeleted: OnEdgeDeleted<E, EData>;
+  onEscPressed: OnEscPressed;
 };
 
 export function Diagram<
-  S extends ReactFlowEditorDiagramState<S, N, NData, EData>,
+  S extends XyFlowDiagramState<S, N, NData, EData>,
   N extends string,
   E extends string,
-  NData extends ReactFlowKieEditorDiagramNodeData,
-  EData extends ReactFlowKieEditorDiagramEdgeData,
+  NData extends XyFlowKieDiagramNodeData<N, NData>,
+  EData extends XyFlowKieDiagramEdgeData,
 >({
   // model
   model,
@@ -104,17 +173,27 @@ export function Diagram<
   nodeComponents,
   edgeComponents,
   // domain
+  newNodeMimeType,
   containmentMap,
   nodeTypes,
   minNodeSizes,
   graphStructure,
   // actions
+  onNodeAdded,
+  onConnectedNodeAdded,
+  onNodeUnparented,
+  onNodeParented,
   onNodeRepositioned,
+  onNodeResized,
   onNodeDeleted,
+  onEdgeAdded,
+  onEdgeUpdated,
+  onEdgeDeleted,
+  onEscPressed,
 }: Props<N, E, NData, EData>) {
   // Contexts
-  const reactflowKieEditorDiagramStoreApi = useReactflowKieEditorDiagramStoreApi<S, N, NData, EData>();
-  const snapGrid = useReactflowKieEditorDiagramStore((s) => s.reactflowKieEditorDiagram.snapGrid);
+  const xyFlowKieDiagramStoreApi = useXyFlowKieDiagramStoreApi<S, N, NData, EData>();
+  const snapGrid = useXyFlowKieDiagramStore((s) => s.xyFlowKieDiagram.snapGrid);
 
   // State
   const [reactFlowInstance, setReactFlowInstance] = useState<RF.ReactFlowInstance<NData, EData> | undefined>(undefined);
@@ -126,7 +205,7 @@ export function Diagram<
 
   // Memos
 
-  const rfSnapGrid = useMemo<[number, number]>(
+  const xyFlowSnapGrid = useMemo<[number, number]>(
     () => (snapGrid.isEnabled ? [snapGrid.x, snapGrid.y] : [1, 1]),
     [snapGrid.isEnabled, snapGrid.x, snapGrid.y]
   );
@@ -136,27 +215,25 @@ export function Diagram<
   const onConnect = useCallback<RF.OnConnect>(
     ({ source, target, sourceHandle, targetHandle }) => {
       console.debug("BPMN DIAGRAM: `onConnect`: ", { source, target, sourceHandle, targetHandle });
-      reactflowKieEditorDiagramStoreApi.setState((state) => {
-        const sourceNode = state.computed(state).getDiagramData().nodesById.get(source!);
-        const targetNode = state.computed(state).getDiagramData().nodesById.get(target!);
-        if (!sourceNode || !targetNode) {
-          throw new Error("Cannot create connection without target and source nodes!");
-        }
+      const state = xyFlowKieDiagramStoreApi.getState();
+      const sourceNode = state.computed(state).getDiagramData().nodesById.get(source!);
+      const targetNode = state.computed(state).getDiagramData().nodesById.get(target!);
+      if (!sourceNode || !targetNode) {
+        throw new Error("Cannot create connection without target and source nodes!");
+      }
 
-        const sourceBounds = sourceNode.data.shape["dc:Bounds"];
-        const targetBounds = targetNode.data.shape["dc:Bounds"];
-        if (!sourceBounds || !targetBounds) {
-          throw new Error("Cannot create connection without target bounds!");
-        }
+      const sourceBounds = sourceNode.data.shape["dc:Bounds"];
+      const targetBounds = targetNode.data.shape["dc:Bounds"];
+      if (!sourceBounds || !targetBounds) {
+        throw new Error("Cannot create connection without target bounds!");
+      }
 
-        // --------- This is where we draw the line between the diagram and the model.
+      // --------- This is where we draw the line between the diagram and the model.
 
-        console.log("XYFLOW-DIAGRAM: Edge added");
-        // FIXME: Tiago: Mutation
-        // addEdge({
-      });
+      console.log("XYFLOW-DIAGRAM: Edge added");
+      onEdgeAdded({ sourceNode, targetNode, edgeType: sourceHandle as E });
     },
-    [reactflowKieEditorDiagramStoreApi]
+    [onEdgeAdded, xyFlowKieDiagramStoreApi]
   );
 
   const getFirstNodeFittingBounds = useCallback(
@@ -179,45 +256,49 @@ export function Diagram<
               containerMinSizes: minNodeSizes[node.type as N],
               boundsMinSizes: minSizes,
             }).isInside
-        ) as any, // FIXME: Tiago
+        ),
     [minNodeSizes, reactFlowInstance]
   );
 
-  const onDragOver = useCallback((e: React.DragEvent) => {
-    //   if (!e.dataTransfer.types.find((t) => t === MIME_TYPE_FOR_BPMN_EDITOR_NEW_NODE_FROM_PALETTE)) {
-    //     return;
-    //   }
-    //   e.preventDefault();
-    //   e.dataTransfer.dropEffect = "move";
-  }, []);
+  const onDragOver = useCallback(
+    (e: React.DragEvent) => {
+      if (!e.dataTransfer.types.find((t) => t === newNodeMimeType)) {
+        return;
+      }
+      e.preventDefault();
+      e.dataTransfer.dropEffect = "move";
+    },
+    [newNodeMimeType]
+  );
 
-  const onDrop = useCallback(async (e: React.DragEvent) => {
-    console.log("XYFLOW-DIAGRAM: Node added (standalone)");
-    // e.preventDefault();
-    // if (!container.current || !reactFlowInstance) {
-    //   return;
-    // }
-    // // we need to remove the wrapper bounds, in order to get the correct position
-    // const dropPoint = reactFlowInstance.screenToFlowPosition({
-    //   x: e.clientX,
-    //   y: e.clientY,
-    // });
-    // if (e.dataTransfer.getData(MIME_TYPE_FOR_BPMN_EDITOR_NEW_NODE_FROM_PALETTE)) {
-    //   const typeOfNewNodeFromPalette = e.dataTransfer.getData(
-    //     MIME_TYPE_FOR_BPMN_EDITOR_NEW_NODE_FROM_PALETTE
-    //   ) as BpmnNodeType;
-    //   e.stopPropagation();
-    //   // --------- This is where we draw the line between the diagram and the model.
-    //   // FIXME: Tiago: Mutation
-    //   // addStandaloneNode({
-    // } else {
-    //   // FIXME: Tiago: Mutation
-    //   // addShape({
-    // }
-    // console.debug(`BPMN DIAGRAM: Adding Process Flow Element node`, JSON.stringify(null));
-  }, []);
+  const onDrop = useCallback(
+    async (e: React.DragEvent) => {
+      console.log("XYFLOW-DIAGRAM: Node added (standalone)");
+      e.preventDefault();
+      if (!container.current || !reactFlowInstance) {
+        return;
+      }
+      // we need to remove the wrapper bounds, in order to get the correct position
+      const dropPoint = reactFlowInstance.screenToFlowPosition({
+        x: e.clientX,
+        y: e.clientY,
+      });
+      if (e.dataTransfer.getData(newNodeMimeType)) {
+        const typeOfNode = e.dataTransfer.getData(newNodeMimeType) as N;
+        e.stopPropagation();
 
-  const ongoingConnection = useReactflowKieEditorDiagramStore((s) => s.reactflowKieEditorDiagram.ongoingConnection);
+        // --------- This is where we draw the line between the diagram and the model.
+
+        onNodeAdded({
+          dropPoint,
+          type: typeOfNode,
+        });
+      }
+    },
+    [container, newNodeMimeType, onNodeAdded, reactFlowInstance]
+  );
+
+  const ongoingConnection = useXyFlowKieDiagramStore((s) => s.xyFlowKieDiagram.ongoingConnection);
   useEffect(() => {
     const edgeUpdaterSource = document.querySelectorAll(
       ".react-flow__edgeupdater-source, .react-flow__edgeupdater-target"
@@ -232,11 +313,11 @@ export function Diagram<
   const onConnectStart = useCallback<RF.OnConnectStart>(
     (e, newConnection) => {
       console.debug("BPMN DIAGRAM: `onConnectStart`");
-      reactflowKieEditorDiagramStoreApi.setState((state) => {
-        state.reactflowKieEditorDiagram.ongoingConnection = newConnection;
+      xyFlowKieDiagramStoreApi.setState((state) => {
+        state.xyFlowKieDiagram.ongoingConnection = newConnection;
       });
     },
-    [reactflowKieEditorDiagramStoreApi]
+    [xyFlowKieDiagramStoreApi]
   );
 
   const onConnectEnd = useCallback<RF.OnConnectEnd>(
@@ -248,14 +329,9 @@ export function Diagram<
 
       console.debug("BPMN DIAGRAM: `onConnectEnd`");
 
-      reactflowKieEditorDiagramStoreApi.setState((state) => {
+      xyFlowKieDiagramStoreApi.setState((state) => {
         const targetIsPane = (e.target as Element | null)?.classList?.contains("react-flow__pane");
-        if (
-          !targetIsPane ||
-          !container.current ||
-          !state.reactflowKieEditorDiagram.ongoingConnection ||
-          !reactFlowInstance
-        ) {
+        if (!targetIsPane || !container.current || !state.xyFlowKieDiagram.ongoingConnection || !reactFlowInstance) {
           return;
         }
 
@@ -265,18 +341,18 @@ export function Diagram<
         });
 
         // only try to create node if source handle is compatible
-        if (!Object.values(nodeTypes).find((n) => n === state.reactflowKieEditorDiagram.ongoingConnection!.handleId)) {
+        if (!Object.values(nodeTypes).find((n) => n === state.xyFlowKieDiagram.ongoingConnection!.handleId)) {
           return;
         }
 
-        if (!state.reactflowKieEditorDiagram.ongoingConnection.nodeId) {
+        if (!state.xyFlowKieDiagram.ongoingConnection.nodeId) {
           return;
         }
 
         const sourceNode = state
           .computed(state)
           .getDiagramData()
-          .nodesById.get(state.reactflowKieEditorDiagram.ongoingConnection.nodeId);
+          .nodesById.get(state.xyFlowKieDiagram.ongoingConnection.nodeId);
         if (!sourceNode) {
           return;
         }
@@ -288,7 +364,7 @@ export function Diagram<
           return;
         }
 
-        const newNodeType = state.reactflowKieEditorDiagram.ongoingConnection.handleId as N;
+        const newNodeType = state.xyFlowKieDiagram.ongoingConnection.handleId as N;
         const sourceNodeType = sourceNode.type as N;
 
         const edgeType = getDefaultEdgeTypeBetween(graphStructure, sourceNodeType as N, newNodeType);
@@ -299,26 +375,30 @@ export function Diagram<
         // --------- This is where we draw the line between the diagram and the model.
 
         console.log("XYFLOW-DIAGRAM: Node added (connected)");
-        // FIXME: Tiago: Mutation
-        // addConnectedNode({
+        onConnectedNodeAdded({
+          sourceNode,
+          newNodeType,
+          edgeType,
+          dropPoint,
+        });
       });
 
       // Indepdent of what happens in the state mutation above, we always need to reset the `ongoingConnection` at the end here.
-      reactflowKieEditorDiagramStoreApi.setState((state) => {
-        state.reactflowKieEditorDiagram.ongoingConnection = undefined;
+      xyFlowKieDiagramStoreApi.setState((state) => {
+        state.xyFlowKieDiagram.ongoingConnection = undefined;
       });
     },
-    [reactflowKieEditorDiagramStoreApi, container, reactFlowInstance, nodeTypes, graphStructure]
+    [xyFlowKieDiagramStoreApi, container, reactFlowInstance, nodeTypes, graphStructure, onConnectedNodeAdded]
   );
 
   const isValidConnection = useCallback<RF.IsValidConnection>(
     (edgeOrConnection) => {
-      const state = reactflowKieEditorDiagramStoreApi.getState();
-      const edgeId = state.reactflowKieEditorDiagram.edgeIdBeingUpdated;
+      const state = xyFlowKieDiagramStoreApi.getState();
+      const edgeId = state.xyFlowKieDiagram.edgeIdBeingUpdated;
       const edgeType = edgeId ? (reactFlowInstance?.getEdge(edgeId)?.type as E) : undefined;
 
       const ongoingConnectionHierarchy = buildHierarchy({
-        nodeId: state.reactflowKieEditorDiagram.ongoingConnection?.nodeId,
+        nodeId: state.xyFlowKieDiagram.ongoingConnection?.nodeId,
         edges: state.computed(state).getDiagramData().graphStructureEdges,
       });
 
@@ -339,7 +419,7 @@ export function Diagram<
         !ongoingConnectionHierarchy.dependents.has(edgeOrConnection.source)
       );
     },
-    [reactflowKieEditorDiagramStoreApi, reactFlowInstance, graphStructure]
+    [xyFlowKieDiagramStoreApi, reactFlowInstance, graphStructure]
   );
 
   const onNodesChange = useCallback<RF.OnNodesChange>(
@@ -353,38 +433,44 @@ export function Diagram<
       for (const change of changes) {
         switch (change.type) {
           case "add":
-            // const state = reactflowKieEditorDiagramStoreApi.getState();
-            // console.debug(`BPMN DIAGRAM: 'onNodesChange' --> add '${change.item.id}'`);
-            // state.dispatch(state).setNodeStatus(change.item.id, { selected: true });
+            console.debug(`BPMN DIAGRAM: 'onNodesChange' --> add '${change.item.id}'`);
+            xyFlowKieDiagramStoreApi.setState((state) => {
+              state.dispatch(state).setNodeStatus(change.item.id, { selected: true });
+            });
             break;
           case "dimensions":
-            // console.debug(`BPMN DIAGRAM: 'onNodesChange' --> dimensions '${change.id}'`);
-            // state.dispatch(state).setNodeStatus(change.id, { resizing: change.resizing });
-            // if (change.dimensions) {
-            //   const node = state.computed(state).getDiagramData().nodesById.get(change.id)!;
-            //   // We only need to resize the node if its snapped dimensions change, as snapping is non-destructive.
-            //   const snappedShape = snapShapeDimensions(
-            //     state.reactflowKieEditorDiagram.snapGrid,
-            //     node.data.shape,
-            //     minNodeSizes[node.type as N]({
-            //       snapGrid: state.reactflowKieEditorDiagram.snapGrid,
-            //     })
-            //   );
-            //   if (snappedShape.width !== change.dimensions.width || snappedShape.height !== change.dimensions.height) {
-            //     console.log("XYFLOW-DIAGRAM: Node resized");
-            //     // FIXME: Tiago: Mutation
-            //     // resizeNode({
-            //   }
-            // }
+            console.debug(`BPMN DIAGRAM: 'onNodesChange' --> dimensions '${change.id}'`);
+            xyFlowKieDiagramStoreApi.setState((state) => {
+              state.dispatch(state).setNodeStatus(change.id, { resizing: change.resizing });
+            });
+            const state = xyFlowKieDiagramStoreApi.getState();
+            if (change.dimensions) {
+              const node = state.computed(state).getDiagramData().nodesById.get(change.id)!;
+              // We only need to resize the node if its snapped dimensions change, as snapping is non-destructive.
+              const snappedShape = snapShapeDimensions(
+                state.xyFlowKieDiagram.snapGrid,
+                node.data.shape,
+                minNodeSizes[node.type as N]({
+                  snapGrid: state.xyFlowKieDiagram.snapGrid,
+                })
+              );
+              if (snappedShape.width !== change.dimensions.width || snappedShape.height !== change.dimensions.height) {
+                console.log("XYFLOW-DIAGRAM: Node resized");
+                onNodeResized({
+                  node,
+                  newDimensions: { ...change.dimensions },
+                });
+              }
+            }
             break;
           case "position":
             console.debug(`BPMN DIAGRAM: 'onNodesChange' --> position '${change.id}'`);
-            reactflowKieEditorDiagramStoreApi.setState((state) => {
+            xyFlowKieDiagramStoreApi.setState((state) => {
               state.dispatch(state).setNodeStatus(change.id, { dragging: change.dragging });
             });
 
             {
-              const state = reactflowKieEditorDiagramStoreApi.getState();
+              const state = xyFlowKieDiagramStoreApi.getState();
               if (change.positionAbsolute) {
                 const node = state.computed(state).getDiagramData().nodesById.get(change.id)!;
 
@@ -395,20 +481,20 @@ export function Diagram<
             break;
           case "remove":
             {
-              const state = reactflowKieEditorDiagramStoreApi.getState();
+              const state = xyFlowKieDiagramStoreApi.getState();
 
               console.debug(`BPMN DIAGRAM: 'onNodesChange' --> remove '${change.id}'`);
               const node = state.computed(state).getDiagramData().nodesById.get(change.id)!;
               console.log("XYFLOW-DIAGRAM: Node deleted");
               onNodeDeleted({ node });
 
-              reactflowKieEditorDiagramStoreApi.setState((state) => {
+              xyFlowKieDiagramStoreApi.setState((state) => {
                 state.dispatch(state).setNodeStatus(node.id, { selected: false, dragging: false, resizing: false });
               });
             }
             break;
           case "reset":
-            reactflowKieEditorDiagramStoreApi.setState((state) => {
+            xyFlowKieDiagramStoreApi.setState((state) => {
               state.dispatch(state).setNodeStatus(change.item.id, {
                 selected: false,
                 dragging: false,
@@ -417,21 +503,21 @@ export function Diagram<
             });
             break;
           case "select":
-            reactflowKieEditorDiagramStoreApi.setState((state) => {
+            xyFlowKieDiagramStoreApi.setState((state) => {
               state.dispatch(state).setNodeStatus(change.id, { selected: change.selected });
             });
             break;
         }
       }
     },
-    [onNodeDeleted, onNodeRepositioned, reactFlowInstance, reactflowKieEditorDiagramStoreApi]
+    [minNodeSizes, onNodeDeleted, onNodeRepositioned, onNodeResized, reactFlowInstance, xyFlowKieDiagramStoreApi]
   );
 
   const onNodeDrag = useCallback<RF.NodeDragHandler>(
-    (e, node: RF.Node<NData>) => {
+    (e, node: RF.Node<NData, N>) => {
       nodeIdBeingDraggedRef.current = node.id;
-      reactflowKieEditorDiagramStoreApi.setState((state) => {
-        state.reactflowKieEditorDiagram.dropTargetNode = getFirstNodeFittingBounds(
+      xyFlowKieDiagramStoreApi.setState((state) => {
+        state.xyFlowKieDiagram.dropTargetNode = getFirstNodeFittingBounds(
           node.id,
           {
             "@_x": node.positionAbsolute?.x ?? 0,
@@ -440,15 +526,15 @@ export function Diagram<
             "@_height": node.height ?? 0,
           },
           minNodeSizes[node.type as N],
-          state.reactflowKieEditorDiagram.snapGrid
-        );
+          state.xyFlowKieDiagram.snapGrid
+        ) as Draft<RF.Node<NData, N>>; // FIXME: Tiago: Not sure why NData is not assignable to Draft<NData>
       });
     },
-    [reactflowKieEditorDiagramStoreApi, getFirstNodeFittingBounds, minNodeSizes]
+    [xyFlowKieDiagramStoreApi, getFirstNodeFittingBounds, minNodeSizes]
   );
 
   const onNodeDragStart = useCallback<RF.NodeDragHandler>(
-    (e, node: RF.Node<NData>, nodes) => {
+    (e, node: RF.Node<NData, N>, nodes) => {
       modelBeforeEditingRef.current = model;
       onNodeDrag(e, node, nodes);
     },
@@ -456,9 +542,9 @@ export function Diagram<
   );
 
   const onNodeDragStop = useCallback<RF.NodeDragHandler>(
-    (e, node: RF.Node<NData>) => {
+    (e, node: RF.Node<NData, N>) => {
       try {
-        reactflowKieEditorDiagramStoreApi.setState((state) => {
+        xyFlowKieDiagramStoreApi.setState((state) => {
           console.debug("BPMN DIAGRAM: `onNodeDragStop`");
           const nodeBeingDragged = state.computed(state).getDiagramData().nodesById.get(nodeIdBeingDraggedRef.current!);
           nodeIdBeingDraggedRef.current = null;
@@ -467,10 +553,10 @@ export function Diagram<
           }
 
           // Validate
-          const dropTargetNode = reactflowKieEditorDiagramStoreApi.getState().reactflowKieEditorDiagram.dropTargetNode;
+          const dropTargetNode = xyFlowKieDiagramStoreApi.getState().xyFlowKieDiagram.dropTargetNode;
           if (
-            dropTargetNode &&
-            containmentMap.has(dropTargetNode.type as N) &&
+            dropTargetNode?.type &&
+            containmentMap.has(dropTargetNode.type) &&
             !state.computed(state).isDropTargetNodeValidForSelection
           ) {
             console.debug(
@@ -484,117 +570,117 @@ export function Diagram<
 
           const selectedNodes = [...state.computed(state).getDiagramData().selectedNodesById.values()];
 
-          state.reactflowKieEditorDiagram.dropTargetNode = undefined;
+          state.xyFlowKieDiagram.dropTargetNode = undefined;
 
           if (!node.dragging) {
             return;
           }
 
           console.log("XYFLOW-DIAGRAM: Node parented");
-          // FIXME: Tiago: Containment
           // Un-parent
-          // if (nodeBeingDragged.data.parentRfNode) {
-          //   const p = state.computed(state).getDiagramData().nodesById.get(nodeBeingDragged.data.parentRfNode.id);
-          //   if (p?.type === NODE_TYPES.lane && nodeBeingDragged.type === NODE_TYPES.lane) {
-          //     // FIXME: Tiago: Containment
-          //   } else {
-          //     console.debug(
-          //       `BPMN DIAGRAM: Ignoring '${nodeBeingDragged.type}' with parent '${dropTargetNode?.type}' dropping somewhere..`
-          //     );
-          //   }
-          // }
+          if (nodeBeingDragged.data.parentXyFlowNode) {
+            const p = state.computed(state).getDiagramData().nodesById.get(nodeBeingDragged.data.parentXyFlowNode.id);
+            if (p?.type && nodeBeingDragged.type && containmentMap.get(nodeBeingDragged.type)?.has(p.type)) {
+              onNodeUnparented({ exParentNode: p, activeNode: nodeBeingDragged, selectedNodes });
+            } else {
+              console.debug(
+                `BPMN DIAGRAM: Ignoring '${nodeBeingDragged.type}' with parent '${dropTargetNode?.type}' dropping somewhere..`
+              );
+            }
+          }
 
           // // Parent
-          // if (dropTargetNode?.type === NODE_TYPES.lane) {
-          //   // FIXME: Tiago: Containment
-          // } else {
-          //   console.debug(
-          //     `BPMN DIAGRAM: Ignoring '${nodeBeingDragged.type}' dropped on top of '${dropTargetNode?.type}'`
-          //   );
-          // }
+          if (dropTargetNode?.type && containmentMap.get(dropTargetNode.type)) {
+            onNodeParented({ parentNode: dropTargetNode, activeNode: nodeBeingDragged, selectedNodes });
+          } else {
+            console.debug(
+              `BPMN DIAGRAM: Ignoring '${nodeBeingDragged.type}' dropped on top of '${dropTargetNode?.type}'`
+            );
+          }
         });
       } catch (e) {
         console.error(e);
         resetToBeforeEditingBegan();
       }
     },
-    [containmentMap, reactflowKieEditorDiagramStoreApi, resetToBeforeEditingBegan]
+    [containmentMap, onNodeParented, onNodeUnparented, xyFlowKieDiagramStoreApi, resetToBeforeEditingBegan]
   );
 
   const onEdgesChange = useCallback<RF.OnEdgesChange>(
     (changes) => {
-      reactflowKieEditorDiagramStoreApi.setState((state) => {
-        for (const change of changes) {
-          switch (change.type) {
-            case "select":
+      for (const change of changes) {
+        switch (change.type) {
+          case "select":
+            xyFlowKieDiagramStoreApi.setState((state) => {
               console.debug(`BPMN DIAGRAM: 'onEdgesChange' --> select '${change.id}'`);
               state.dispatch(state).setEdgeStatus(change.id, { selected: change.selected });
-              break;
-            case "remove":
-              console.debug(`BPMN DIAGRAM: 'onEdgesChange' --> remove '${change.id}'`);
-              const edge = state.computed(state).getDiagramData().edgesById.get(change.id);
-              if (edge?.data) {
-                console.log("XYFLOW-DIAGRAM: Edge deleted");
-                // FIXME: Tiago: Mutation
-                // deleteEdge({
+            });
+            break;
+          case "remove":
+            console.debug(`BPMN DIAGRAM: 'onEdgesChange' --> remove '${change.id}'`);
+            const state = xyFlowKieDiagramStoreApi.getState();
+            const edge = state.computed(state).getDiagramData().edgesById.get(change.id);
+            if (edge?.data) {
+              console.log("XYFLOW-DIAGRAM: Edge deleted");
+              onEdgeDeleted({ edge });
+
+              xyFlowKieDiagramStoreApi.setState((state) => {
                 state.dispatch(state).setEdgeStatus(change.id, {
                   selected: false,
                   draggingWaypoint: false,
                 });
-              }
-              break;
-            case "add":
-            case "reset":
-              console.debug(`BPMN DIAGRAM: 'onEdgesChange' --> add/reset '${change.item.id}'. Ignoring`);
-          }
+              });
+            }
+            break;
+          case "add":
+          case "reset":
+            console.debug(`BPMN DIAGRAM: 'onEdgesChange' --> add/reset '${change.item.id}'. Ignoring`);
         }
-      });
+      }
     },
-    [reactflowKieEditorDiagramStoreApi]
+    [onEdgeDeleted, xyFlowKieDiagramStoreApi]
   );
 
   const onEdgeUpdate = useCallback<RF.OnEdgeUpdateFunc<EData>>(
     (oldEdge, newConnection) => {
       console.debug("BPMN DIAGRAM: `onEdgeUpdate`", oldEdge, newConnection);
 
-      reactflowKieEditorDiagramStoreApi.setState((state) => {
-        const sourceNode = state.computed(state).getDiagramData().nodesById.get(newConnection.source!);
-        const targetNode = state.computed(state).getDiagramData().nodesById.get(newConnection.target!);
-        if (!sourceNode || !targetNode) {
-          throw new Error("Cannot create connection without target and source nodes!");
-        }
+      const state = xyFlowKieDiagramStoreApi.getState();
+      const sourceNode = state.computed(state).getDiagramData().nodesById.get(newConnection.source!);
+      const targetNode = state.computed(state).getDiagramData().nodesById.get(newConnection.target!);
+      if (!sourceNode || !targetNode) {
+        throw new Error("Cannot create connection without target and source nodes!");
+      }
 
-        const sourceBounds = sourceNode.data.shape["dc:Bounds"];
-        const targetBounds = targetNode.data.shape["dc:Bounds"];
-        if (!sourceBounds || !targetBounds) {
-          throw new Error("Cannot create connection without target bounds!");
-        }
+      const sourceBounds = sourceNode.data.shape["dc:Bounds"];
+      const targetBounds = targetNode.data.shape["dc:Bounds"];
+      if (!sourceBounds || !targetBounds) {
+        throw new Error("Cannot create connection without target bounds!");
+      }
 
-        // --------- This is where we draw the line between the diagram and the model.
+      // --------- This is where we draw the line between the diagram and the model.
 
-        const lastWaypoint = oldEdge.data?.edgeInfo
-          ? oldEdge.data!["di:waypoint"]![oldEdge.data!["di:waypoint"]!.length - 1]!
-          : getDiBoundsCenterPoint(targetBounds);
-        const firstWaypoint = oldEdge.data?.edgeInfo
-          ? oldEdge.data!["di:waypoint"]![0]!
-          : getDiBoundsCenterPoint(sourceBounds);
+      const lastWaypoint = oldEdge.data?.edgeInfo
+        ? oldEdge.data!["di:waypoint"]![oldEdge.data!["di:waypoint"]!.length - 1]!
+        : getDiBoundsCenterPoint(targetBounds);
+      const firstWaypoint = oldEdge.data?.edgeInfo
+        ? oldEdge.data!["di:waypoint"]![0]!
+        : getDiBoundsCenterPoint(sourceBounds);
 
-        console.log("XYFLOW-DIAGRAM: Edge updated");
-        // FIXME: Tiago: Mutation
-        // addEdge({
-      });
+      console.log("XYFLOW-DIAGRAM: Edge updated");
+      onEdgeUpdated({ sourceNode, targetNode, lastWaypoint, firstWaypoint, edge: oldEdge });
     },
-    [reactflowKieEditorDiagramStoreApi]
+    [onEdgeUpdated, xyFlowKieDiagramStoreApi]
   );
 
   const onEdgeUpdateStart = useCallback(
     (e: React.MouseEvent | React.TouchEvent, edge: RF.Edge, handleType: RF.HandleType) => {
       console.debug("BPMN DIAGRAM: `onEdgeUpdateStart`");
-      reactflowKieEditorDiagramStoreApi.setState((state) => {
-        state.reactflowKieEditorDiagram.edgeIdBeingUpdated = edge.id;
+      xyFlowKieDiagramStoreApi.setState((state) => {
+        state.xyFlowKieDiagram.edgeIdBeingUpdated = edge.id;
       });
     },
-    [reactflowKieEditorDiagramStoreApi]
+    [xyFlowKieDiagramStoreApi]
   );
 
   const onEdgeUpdateEnd = useCallback(
@@ -602,19 +688,19 @@ export function Diagram<
       console.debug("BPMN DIAGRAM: `onEdgeUpdateEnd`");
 
       // Needed for when the edge update operation doesn't change anything.
-      reactflowKieEditorDiagramStoreApi.setState((state) => {
-        state.reactflowKieEditorDiagram.ongoingConnection = undefined;
-        state.reactflowKieEditorDiagram.edgeIdBeingUpdated = undefined;
+      xyFlowKieDiagramStoreApi.setState((state) => {
+        state.xyFlowKieDiagram.ongoingConnection = undefined;
+        state.xyFlowKieDiagram.edgeIdBeingUpdated = undefined;
       });
     },
-    [reactflowKieEditorDiagramStoreApi]
+    [xyFlowKieDiagramStoreApi]
   );
 
   // Override Reactflow's behavior by intercepting the keydown event using its `capture` variant.
   const handleRfKeyDownCapture = useCallback(
     (e: React.KeyboardEvent) => {
       if (e.key === "Escape") {
-        const s = reactflowKieEditorDiagramStoreApi.getState();
+        const s = xyFlowKieDiagramStoreApi.getState();
         if (s.computed(s).isDiagramEditingInProgress() && modelBeforeEditingRef.current) {
           console.debug(
             "BPMN DIAGRAM: Intercepting Escape pressed and preventing propagation. Reverting BPMN model to what it was before editing began."
@@ -624,15 +710,15 @@ export function Diagram<
           e.preventDefault();
 
           resetToBeforeEditingBegan();
-        } else if (!s.reactflowKieEditorDiagram.ongoingConnection) {
-          reactflowKieEditorDiagramStoreApi.setState((state) => {
+        } else if (!s.xyFlowKieDiagram.ongoingConnection) {
+          xyFlowKieDiagramStoreApi.setState((state) => {
             if (
               state.computed(state).getDiagramData().selectedNodesById.size > 0 ||
               state.computed(state).getDiagramData().selectedEdgesById.size > 0
             ) {
               console.debug("BPMN DIAGRAM: Esc pressed. Desselecting everything.");
-              state.reactflowKieEditorDiagram._selectedNodes = [];
-              state.reactflowKieEditorDiagram._selectedEdges = [];
+              state.xyFlowKieDiagram._selectedNodes = [];
+              state.xyFlowKieDiagram._selectedEdges = [];
               e.preventDefault();
             } else if (
               state.computed(state).getDiagramData().selectedNodesById.size <= 0 &&
@@ -640,11 +726,8 @@ export function Diagram<
             ) {
               console.debug("BPMN DIAGRAM: Esc pressed. Closing all open panels.");
               console.log("XYFLOW-DIAGRAM: Esc pressed");
-              // FIXME: Tiago --> Expose this
-              // state.diagram.propertiesPanel.isOpen = false;
-              // state.diagram.overlaysPanel.isOpen = false;
-              // state.diagram.openLhsPanel = DiagramLhsPanel.NONE;
               e.preventDefault();
+              onEscPressed();
             } else {
               // Let the
             }
@@ -654,11 +737,11 @@ export function Diagram<
         }
       }
     },
-    [reactflowKieEditorDiagramStoreApi, modelBeforeEditingRef, resetToBeforeEditingBegan]
+    [xyFlowKieDiagramStoreApi, modelBeforeEditingRef, resetToBeforeEditingBegan, onEscPressed]
   );
 
-  const nodes = useReactflowKieEditorDiagramStore((s) => s.computed(s).getDiagramData().nodes);
-  const edges = useReactflowKieEditorDiagramStore((s) => s.computed(s).getDiagramData().edges);
+  const nodes = useXyFlowKieDiagramStore((s) => s.computed(s).getDiagramData().nodes);
+  const edges = useXyFlowKieDiagramStore((s) => s.computed(s).getDiagramData().edges);
 
   return (
     <>
@@ -697,7 +780,7 @@ export function Diagram<
         nodeTypes={nodeComponents}
         edgeTypes={edgeComponents}
         snapToGrid={true}
-        snapGrid={rfSnapGrid}
+        snapGrid={xyFlowSnapGrid}
         defaultViewport={DEFAULT_VIEWPORT}
         fitView={false}
         fitViewOptions={FIT_VIEW_OPTIONS}
@@ -721,15 +804,15 @@ export function Diagram<
 }
 
 export function SetConnectionToReactFlowStore(props: {}) {
-  const ongoingConnection = useReactflowKieEditorDiagramStore((s) => s.reactflowKieEditorDiagram.ongoingConnection);
-  const rfStoreApi = RF.useStoreApi();
+  const ongoingConnection = useXyFlowKieDiagramStore((s) => s.xyFlowKieDiagram.ongoingConnection);
+  const xyFlowStoreApi = RF.useStoreApi();
   useEffect(() => {
-    rfStoreApi.setState({
+    xyFlowStoreApi.setState({
       connectionHandleId: ongoingConnection?.handleId,
       connectionHandleType: ongoingConnection?.handleType,
       connectionNodeId: ongoingConnection?.nodeId,
     });
-  }, [ongoingConnection?.handleId, ongoingConnection?.handleType, ongoingConnection?.nodeId, rfStoreApi]);
+  }, [ongoingConnection?.handleId, ongoingConnection?.handleType, ongoingConnection?.nodeId, xyFlowStoreApi]);
 
   return <></>;
 }

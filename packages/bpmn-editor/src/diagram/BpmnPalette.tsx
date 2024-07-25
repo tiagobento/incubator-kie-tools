@@ -32,8 +32,8 @@ import {
   TaskIcon,
   TextAnnotationIcon,
 } from "./nodes/NodeIcons";
-import { BpmnNodeType } from "./BpmnGraphStructure";
-import { NODE_TYPES } from "./nodes/NodeTypes";
+import { BpmnNodeType } from "./BpmnDiagramDomain";
+import { NODE_TYPES } from "./BpmnDiagramDomain";
 
 export const MIME_TYPE_FOR_BPMN_EDITOR_NEW_NODE_FROM_PALETTE = "application/kie-bpmn-editor--new-node-from-palette";
 

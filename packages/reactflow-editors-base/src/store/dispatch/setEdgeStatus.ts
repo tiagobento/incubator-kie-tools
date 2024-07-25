@@ -18,40 +18,32 @@
  */
 
 import {
-  ReactFlowEditorDiagramState,
-  ReactFlowKieEditorDiagramEdgeData,
-  ReactFlowKieEditorDiagramEdgeStatus,
-  ReactFlowKieEditorDiagramNodeData,
+  XyFlowDiagramState,
+  XyFlowKieDiagramEdgeData,
+  XyFlowKieDiagramEdgeStatus,
+  XyFlowKieDiagramNodeData,
 } from "../../store/State";
 
 export function setEdgeStatus<
-  S extends ReactFlowEditorDiagramState<S, N, NData, EData>,
+  S extends XyFlowDiagramState<S, N, NData, EData>,
   N extends string,
-  NData extends ReactFlowKieEditorDiagramNodeData,
-  EData extends ReactFlowKieEditorDiagramEdgeData,
->(
-  edgeId: string,
-  newStatus: Partial<ReactFlowKieEditorDiagramEdgeStatus>,
-  s: ReactFlowEditorDiagramState<S, N, NData, EData>
-) {
+  NData extends XyFlowKieDiagramNodeData<N, NData>,
+  EData extends XyFlowKieDiagramEdgeData,
+>(edgeId: string, newStatus: Partial<XyFlowKieDiagramEdgeStatus>, s: XyFlowDiagramState<S, N, NData, EData>) {
   //selected
   if (newStatus.selected !== undefined) {
     if (newStatus.selected) {
-      s.reactflowKieEditorDiagram._selectedEdges.push(edgeId);
+      s.xyFlowKieDiagram._selectedEdges.push(edgeId);
     } else {
-      s.reactflowKieEditorDiagram._selectedEdges = s.reactflowKieEditorDiagram._selectedEdges.filter(
-        (s) => s !== edgeId
-      );
+      s.xyFlowKieDiagram._selectedEdges = s.xyFlowKieDiagram._selectedEdges.filter((s) => s !== edgeId);
     }
   }
   //dragging
   if (newStatus.draggingWaypoint !== undefined) {
     if (newStatus.draggingWaypoint) {
-      s.reactflowKieEditorDiagram.draggingWaypoints.push(edgeId);
+      s.xyFlowKieDiagram.draggingWaypoints.push(edgeId);
     } else {
-      s.reactflowKieEditorDiagram.draggingWaypoints = s.reactflowKieEditorDiagram.draggingWaypoints.filter(
-        (s) => s !== edgeId
-      );
+      s.xyFlowKieDiagram.draggingWaypoints = s.xyFlowKieDiagram.draggingWaypoints.filter((s) => s !== edgeId);
     }
   }
 }
