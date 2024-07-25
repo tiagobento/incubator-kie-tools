@@ -71,7 +71,7 @@ export function BpmnDiagram({
   container,
   diagramRef,
 }: {
-  diagramRef: React.RefObject<DiagramRef>;
+  diagramRef: React.RefObject<DiagramRef<BpmnNodeType, BpmnDiagramNodeData, BpmnDiagramEdgeData>>;
   container: React.RefObject<HTMLElement>;
 }) {
   const [showEmptyState, setShowEmptyState] = useState(true);

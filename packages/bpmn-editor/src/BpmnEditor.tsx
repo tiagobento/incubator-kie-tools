@@ -63,6 +63,7 @@ import { DiagramRef } from "@kie-tools/reactflow-editors-base/dist/diagram/Diagr
 import { Button, ButtonVariant } from "@patternfly/react-core/dist/js/components/Button";
 import { Form, FormSection } from "@patternfly/react-core/dist/js/components/Form";
 import TimesIcon from "@patternfly/react-icons/dist/js/icons/times-icon";
+import { BpmnDiagramEdgeData, BpmnDiagramNodeData, BpmnNodeElement, BpmnNodeType } from "./diagram/BpmnDiagramDomain";
 
 const ON_MODEL_CHANGE_DEBOUNCE_TIME_IN_MS = 500;
 
@@ -160,7 +161,7 @@ export const BpmnEditorInternal = ({
   const { bpmnModelBeforeEditingRef, bpmnEditorRootElementRef } = useBpmnEditor();
 
   // Refs
-  const diagramRef = useRef<DiagramRef>(null);
+  const diagramRef = useRef<DiagramRef<BpmnNodeType, BpmnDiagramNodeData, BpmnDiagramEdgeData>>(null);
   const diagramContainerRef = useRef<HTMLDivElement>(null);
 
   // Allow imperativelly controlling the Editor.
@@ -172,7 +173,10 @@ export const BpmnEditorInternal = ({
         return state.dispatch(state).reset(normalize(model));
       },
       getDiagramSvg: async () => {
-        const nodes = diagramRef.current?.getReactFlowInstance()?.getNodes();
+        const nodes = diagramRef.current?.getReactFlowInstance()?.getNodes() as  // This casting is required because XYFlow doesn't correctly type the "getNodes()" function with the node types.
+          | undefined
+          | RF.Node<BpmnDiagramNodeData<BpmnNodeElement>, BpmnNodeType>[];
+
         const edges = diagramRef.current?.getReactFlowInstance()?.getEdges();
         if (!nodes || !edges) {
           return undefined;

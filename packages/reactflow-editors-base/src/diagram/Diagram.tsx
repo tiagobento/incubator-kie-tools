@@ -124,7 +124,7 @@ export type Props<
   nodeComponents: RF.NodeTypes;
   edgeComponents: RF.EdgeTypes;
   // infra
-  diagramRef: React.RefObject<DiagramRef>;
+  diagramRef: React.RefObject<DiagramRef<N, NData, EData>>;
   children: React.ReactElement[];
   container: React.RefObject<HTMLElement>;
   // domain
@@ -162,8 +162,12 @@ export const DEFAULT_VIEWPORT = { x: 100, y: 100, zoom: 1 };
 
 const DELETE_NODE_KEY_CODES = ["Backspace", "Delete"];
 
-export type DiagramRef = {
-  getReactFlowInstance: () => RF.ReactFlowInstance | undefined;
+export type DiagramRef<
+  N extends string,
+  NData extends XyFlowKieDiagramNodeData<N, NData>,
+  EData extends XyFlowKieDiagramEdgeData,
+> = {
+  getReactFlowInstance: () => RF.ReactFlowInstance<NData, EData> | undefined;
 };
 
 export function Diagram<
