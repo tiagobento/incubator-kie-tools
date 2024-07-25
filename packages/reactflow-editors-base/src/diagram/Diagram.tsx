@@ -227,7 +227,7 @@ export function Diagram<
 
   const onConnect = useCallback<RF.OnConnect>(
     ({ source, target, sourceHandle, targetHandle }) => {
-      console.debug("BPMN DIAGRAM: `onConnect`: ", { source, target, sourceHandle, targetHandle });
+      console.debug("XYFLOW KIE DIAGRAM: `onConnect`: ", { source, target, sourceHandle, targetHandle });
       const state = xyFlowKieDiagramStoreApi.getState();
       const sourceNode = state.computed(state).getDiagramData().nodesById.get(source!);
       const targetNode = state.computed(state).getDiagramData().nodesById.get(target!);
@@ -243,7 +243,7 @@ export function Diagram<
 
       // --------- This is where we draw the line between the diagram and the model.
 
-      console.log("XYFLOW-DIAGRAM: Edge added");
+      console.log("XYFLOW KIE DIAGRAM: Edge added");
       onEdgeAdded({ sourceNode, targetNode, edgeType: sourceHandle as E });
     },
     [onEdgeAdded, xyFlowKieDiagramStoreApi]
@@ -286,7 +286,7 @@ export function Diagram<
 
   const onDrop = useCallback(
     async (e: React.DragEvent) => {
-      console.log("XYFLOW-DIAGRAM: Node added (standalone)");
+      console.log("XYFLOW KIE DIAGRAM: Node added (standalone)");
       e.preventDefault();
       if (!container.current || !reactFlowInstance) {
         return;
@@ -325,7 +325,7 @@ export function Diagram<
 
   const onConnectStart = useCallback<RF.OnConnectStart>(
     (e, newConnection) => {
-      console.debug("BPMN DIAGRAM: `onConnectStart`");
+      console.debug("XYFLOW KIE DIAGRAM: `onConnectStart`");
       xyFlowKieDiagramStoreApi.setState((state) => {
         state.xyFlowKieDiagram.ongoingConnection = newConnection;
       });
@@ -336,11 +336,11 @@ export function Diagram<
   const onConnectEnd = useCallback<RF.OnConnectEnd>(
     (e) => {
       if (!(e instanceof MouseEvent)) {
-        console.debug("BPMN DIAGRAM: Ignoring `onConnectEnd`. Not MouseEvent.");
+        console.debug("XYFLOW KIE DIAGRAM: Ignoring `onConnectEnd`. Not MouseEvent.");
         return;
       }
 
-      console.debug("BPMN DIAGRAM: `onConnectEnd`");
+      console.debug("XYFLOW KIE DIAGRAM: `onConnectEnd`");
 
       xyFlowKieDiagramStoreApi.setState((state) => {
         const targetIsPane = (e.target as Element | null)?.classList?.contains("react-flow__pane");
@@ -382,12 +382,12 @@ export function Diagram<
 
         const edgeType = getDefaultEdgeTypeBetween(graphStructure, sourceNodeType as N, newNodeType);
         if (!edgeType) {
-          throw new Error(`BPMN DIAGRAM: Invalid structure: ${sourceNodeType} --(any)--> ${newNodeType}`);
+          throw new Error(`XYFLOW KIE DIAGRAM: Invalid structure: ${sourceNodeType} --(any)--> ${newNodeType}`);
         }
 
         // --------- This is where we draw the line between the diagram and the model.
 
-        console.log("XYFLOW-DIAGRAM: Node added (connected)");
+        console.log("XYFLOW KIE DIAGRAM: Node added (connected)");
         onConnectedNodeAdded({
           sourceNode,
           newNodeType,
@@ -446,13 +446,13 @@ export function Diagram<
       for (const change of changes) {
         switch (change.type) {
           case "add":
-            console.debug(`BPMN DIAGRAM: 'onNodesChange' --> add '${change.item.id}'`);
+            console.debug(`XYFLOW KIE DIAGRAM: 'onNodesChange' --> add '${change.item.id}'`);
             xyFlowKieDiagramStoreApi.setState((state) => {
               state.dispatch(state).setNodeStatus(change.item.id, { selected: true });
             });
             break;
           case "dimensions":
-            console.debug(`BPMN DIAGRAM: 'onNodesChange' --> dimensions '${change.id}'`);
+            console.debug(`XYFLOW KIE DIAGRAM: 'onNodesChange' --> dimensions '${change.id}'`);
             xyFlowKieDiagramStoreApi.setState((state) => {
               state.dispatch(state).setNodeStatus(change.id, { resizing: change.resizing });
             });
@@ -468,7 +468,7 @@ export function Diagram<
                 })
               );
               if (snappedShape.width !== change.dimensions.width || snappedShape.height !== change.dimensions.height) {
-                console.log("XYFLOW-DIAGRAM: Node resized");
+                console.log("XYFLOW KIE DIAGRAM: Node resized");
                 onNodeResized({
                   node,
                   newDimensions: { ...change.dimensions },
@@ -477,7 +477,7 @@ export function Diagram<
             }
             break;
           case "position":
-            console.debug(`BPMN DIAGRAM: 'onNodesChange' --> position '${change.id}'`);
+            console.debug(`XYFLOW KIE DIAGRAM: 'onNodesChange' --> position '${change.id}'`);
             xyFlowKieDiagramStoreApi.setState((state) => {
               state.dispatch(state).setNodeStatus(change.id, { dragging: change.dragging });
             });
@@ -487,7 +487,7 @@ export function Diagram<
               if (change.positionAbsolute) {
                 const node = state.computed(state).getDiagramData().nodesById.get(change.id)!;
 
-                console.log("XYFLOW-DIAGRAM: Node repositioned");
+                console.log("XYFLOW KIE DIAGRAM: Node repositioned");
                 onNodeRepositioned({ node, newPosition: change.positionAbsolute });
               }
             }
@@ -496,9 +496,9 @@ export function Diagram<
             {
               const state = xyFlowKieDiagramStoreApi.getState();
 
-              console.debug(`BPMN DIAGRAM: 'onNodesChange' --> remove '${change.id}'`);
+              console.debug(`XYFLOW KIE DIAGRAM: 'onNodesChange' --> remove '${change.id}'`);
               const node = state.computed(state).getDiagramData().nodesById.get(change.id)!;
-              console.log("XYFLOW-DIAGRAM: Node deleted");
+              console.log("XYFLOW KIE DIAGRAM: Node deleted");
               onNodeDeleted({ node });
 
               xyFlowKieDiagramStoreApi.setState((state) => {
@@ -558,7 +558,7 @@ export function Diagram<
     (e, node: RF.Node<NData, N>) => {
       try {
         xyFlowKieDiagramStoreApi.setState((state) => {
-          console.debug("BPMN DIAGRAM: `onNodeDragStop`");
+          console.debug("XYFLOW KIE DIAGRAM: `onNodeDragStop`");
           const nodeBeingDragged = state.computed(state).getDiagramData().nodesById.get(nodeIdBeingDraggedRef.current!);
           nodeIdBeingDraggedRef.current = null;
           if (!nodeBeingDragged) {
@@ -573,9 +573,9 @@ export function Diagram<
             !state.computed(state).isDropTargetNodeValidForSelection
           ) {
             console.debug(
-              `BPMN DIAGRAM: Invalid containment: '${[...state.computed(state).getDiagramData().selectedNodeTypes].join(
-                "', '"
-              )}' inside '${dropTargetNode.type}'. Ignoring nodes dropped.`
+              `XYFLOW KIE DIAGRAM: Invalid containment: '${[
+                ...state.computed(state).getDiagramData().selectedNodeTypes,
+              ].join("', '")}' inside '${dropTargetNode.type}'. Ignoring nodes dropped.`
             );
             resetToBeforeEditingBegan();
             return;
@@ -589,7 +589,7 @@ export function Diagram<
             return;
           }
 
-          console.log("XYFLOW-DIAGRAM: Node parented");
+          console.log("XYFLOW KIE DIAGRAM: Node parented");
           // Un-parent
           if (nodeBeingDragged.data.parentXyFlowNode) {
             const p = state.computed(state).getDiagramData().nodesById.get(nodeBeingDragged.data.parentXyFlowNode.id);
@@ -597,7 +597,7 @@ export function Diagram<
               onNodeUnparented({ exParentNode: p, activeNode: nodeBeingDragged, selectedNodes });
             } else {
               console.debug(
-                `BPMN DIAGRAM: Ignoring '${nodeBeingDragged.type}' with parent '${dropTargetNode?.type}' dropping somewhere..`
+                `XYFLOW KIE DIAGRAM: Ignoring '${nodeBeingDragged.type}' with parent '${dropTargetNode?.type}' dropping somewhere..`
               );
             }
           }
@@ -607,7 +607,7 @@ export function Diagram<
             onNodeParented({ parentNode: dropTargetNode, activeNode: nodeBeingDragged, selectedNodes });
           } else {
             console.debug(
-              `BPMN DIAGRAM: Ignoring '${nodeBeingDragged.type}' dropped on top of '${dropTargetNode?.type}'`
+              `XYFLOW KIE DIAGRAM: Ignoring '${nodeBeingDragged.type}' dropped on top of '${dropTargetNode?.type}'`
             );
           }
         });
@@ -625,16 +625,16 @@ export function Diagram<
         switch (change.type) {
           case "select":
             xyFlowKieDiagramStoreApi.setState((state) => {
-              console.debug(`BPMN DIAGRAM: 'onEdgesChange' --> select '${change.id}'`);
+              console.debug(`XYFLOW KIE DIAGRAM: 'onEdgesChange' --> select '${change.id}'`);
               state.dispatch(state).setEdgeStatus(change.id, { selected: change.selected });
             });
             break;
           case "remove":
-            console.debug(`BPMN DIAGRAM: 'onEdgesChange' --> remove '${change.id}'`);
+            console.debug(`XYFLOW KIE DIAGRAM: 'onEdgesChange' --> remove '${change.id}'`);
             const state = xyFlowKieDiagramStoreApi.getState();
             const edge = state.computed(state).getDiagramData().edgesById.get(change.id);
             if (edge?.data) {
-              console.log("XYFLOW-DIAGRAM: Edge deleted");
+              console.log("XYFLOW KIE DIAGRAM: Edge deleted");
               onEdgeDeleted({ edge });
 
               xyFlowKieDiagramStoreApi.setState((state) => {
@@ -647,7 +647,7 @@ export function Diagram<
             break;
           case "add":
           case "reset":
-            console.debug(`BPMN DIAGRAM: 'onEdgesChange' --> add/reset '${change.item.id}'. Ignoring`);
+            console.debug(`XYFLOW KIE DIAGRAM: 'onEdgesChange' --> add/reset '${change.item.id}'. Ignoring`);
         }
       }
     },
@@ -656,7 +656,7 @@ export function Diagram<
 
   const onEdgeUpdate = useCallback<RF.OnEdgeUpdateFunc<EData>>(
     (oldEdge, newConnection) => {
-      console.debug("BPMN DIAGRAM: `onEdgeUpdate`", oldEdge, newConnection);
+      console.debug("XYFLOW KIE DIAGRAM: `onEdgeUpdate`", oldEdge, newConnection);
 
       const state = xyFlowKieDiagramStoreApi.getState();
       const sourceNode = state.computed(state).getDiagramData().nodesById.get(newConnection.source!);
@@ -680,7 +680,7 @@ export function Diagram<
         ? oldEdge.data!["di:waypoint"]![0]!
         : getDiBoundsCenterPoint(sourceBounds);
 
-      console.log("XYFLOW-DIAGRAM: Edge updated");
+      console.log("XYFLOW KIE DIAGRAM: Edge updated");
       onEdgeUpdated({ sourceNode, targetNode, lastWaypoint, firstWaypoint, edge: oldEdge });
     },
     [onEdgeUpdated, xyFlowKieDiagramStoreApi]
@@ -688,7 +688,7 @@ export function Diagram<
 
   const onEdgeUpdateStart = useCallback(
     (e: React.MouseEvent | React.TouchEvent, edge: RF.Edge, handleType: RF.HandleType) => {
-      console.debug("BPMN DIAGRAM: `onEdgeUpdateStart`");
+      console.debug("XYFLOW KIE DIAGRAM: `onEdgeUpdateStart`");
       xyFlowKieDiagramStoreApi.setState((state) => {
         state.xyFlowKieDiagram.edgeIdBeingUpdated = edge.id;
       });
@@ -698,7 +698,7 @@ export function Diagram<
 
   const onEdgeUpdateEnd = useCallback(
     (e: MouseEvent | TouchEvent, edge: RF.Edge, handleType: RF.HandleType) => {
-      console.debug("BPMN DIAGRAM: `onEdgeUpdateEnd`");
+      console.debug("XYFLOW KIE DIAGRAM: `onEdgeUpdateEnd`");
 
       // Needed for when the edge update operation doesn't change anything.
       xyFlowKieDiagramStoreApi.setState((state) => {
@@ -716,7 +716,7 @@ export function Diagram<
         const s = xyFlowKieDiagramStoreApi.getState();
         if (s.computed(s).isDiagramEditingInProgress() && modelBeforeEditingRef.current) {
           console.debug(
-            "BPMN DIAGRAM: Intercepting Escape pressed and preventing propagation. Reverting BPMN model to what it was before editing began."
+            "XYFLOW KIE DIAGRAM: Intercepting Escape pressed and preventing propagation. Reverting `model` to what it was before editing began."
           );
 
           e.stopPropagation();
@@ -729,7 +729,7 @@ export function Diagram<
               state.computed(state).getDiagramData().selectedNodesById.size > 0 ||
               state.computed(state).getDiagramData().selectedEdgesById.size > 0
             ) {
-              console.debug("BPMN DIAGRAM: Esc pressed. Desselecting everything.");
+              console.debug("XYFLOW KIE DIAGRAM: Esc pressed. Desselecting everything.");
               state.xyFlowKieDiagram._selectedNodes = [];
               state.xyFlowKieDiagram._selectedEdges = [];
               e.preventDefault();
@@ -737,8 +737,8 @@ export function Diagram<
               state.computed(state).getDiagramData().selectedNodesById.size <= 0 &&
               state.computed(state).getDiagramData().selectedEdgesById.size <= 0
             ) {
-              console.debug("BPMN DIAGRAM: Esc pressed. Closing all open panels.");
-              console.log("XYFLOW-DIAGRAM: Esc pressed");
+              console.debug("XYFLOW KIE DIAGRAM: Esc pressed. Closing all open panels.");
+              console.log("XYFLOW KIE DIAGRAM: Esc pressed");
               e.preventDefault();
               onEscPressed();
             } else {

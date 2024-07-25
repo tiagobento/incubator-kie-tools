@@ -99,14 +99,20 @@ export function BpmnDiagram({
 
   // nodes
 
-  const onNodeAdded = useCallback<OnNodeAdded<BpmnNodeType, BpmnDiagramNodeData>>(() => {}, []);
+  const onNodeAdded = useCallback<OnNodeAdded<BpmnNodeType, BpmnDiagramNodeData>>(() => {
+    console.log("BPMN EDITOR DIAGRAM: onNodeAdded");
+  }, []);
 
   const onConnectedNodeAdded = useCallback<
     OnConnectedNodeAdded<BpmnNodeType, BpmnEdgeType, BpmnDiagramNodeData>
-  >(() => {}, []);
+  >(() => {
+    console.log("BPMN EDITOR DIAGRAM: onConnectedNodeAdded");
+  }, []);
 
   const onNodeRepositioned = useCallback<OnNodeRepositioned<BpmnNodeType, BpmnDiagramNodeData>>(
     ({ node, newPosition }) => {
+      console.log("BPMN EDITOR DIAGRAM: onNodeRepositioned");
+
       bpmnEditorStoreApi.setState((s) => {
         const shape = (s.bpmn.model.definitions["bpmndi:BPMNDiagram"] ?? [])
           .flatMap((d) => d["bpmndi:BPMNPlane"]["di:DiagramElement"])
@@ -122,6 +128,8 @@ export function BpmnDiagram({
 
   const onNodeDeleted = useCallback<OnNodeDeleted<BpmnNodeType, BpmnDiagramNodeData>>(
     ({ node }) => {
+      console.log("BPMN EDITOR DIAGRAM: onNodeDeleted");
+
       bpmnEditorStoreApi.setState((s) => {
         const process = s.bpmn.model.definitions.rootElement?.find(
           (s) => s.__$$element === "process"
@@ -141,23 +149,35 @@ export function BpmnDiagram({
     [bpmnEditorStoreApi]
   );
 
-  const onNodeUnparented = useCallback<OnNodeUnparented<BpmnNodeType, BpmnDiagramNodeData>>(() => {}, []);
+  const onNodeUnparented = useCallback<OnNodeUnparented<BpmnNodeType, BpmnDiagramNodeData>>(() => {
+    console.log("BPMN EDITOR DIAGRAM: onNodeUnparented");
+  }, []);
 
-  const onNodeParented = useCallback<OnNodeParented<BpmnNodeType, BpmnDiagramNodeData>>(() => {}, []);
+  const onNodeParented = useCallback<OnNodeParented<BpmnNodeType, BpmnDiagramNodeData>>(() => {
+    console.log("BPMN EDITOR DIAGRAM: onNodeParented");
+  }, []);
 
-  const onNodeResized = useCallback<OnNodeResized<BpmnNodeType, BpmnDiagramNodeData>>(() => {}, []);
+  const onNodeResized = useCallback<OnNodeResized<BpmnNodeType, BpmnDiagramNodeData>>(() => {
+    console.log("BPMN EDITOR DIAGRAM: onNodeResized");
+  }, []);
 
   // edges
 
   const onEdgeAdded = useCallback<
     OnEdgeAdded<BpmnNodeType, BpmnEdgeType, BpmnDiagramNodeData, BpmnDiagramEdgeData>
-  >(() => {}, []);
+  >(() => {
+    console.log("BPMN EDITOR DIAGRAM: onEdgeAdded");
+  }, []);
 
   const onEdgeUpdated = useCallback<
     OnEdgeUpdated<BpmnNodeType, BpmnEdgeType, BpmnDiagramNodeData, BpmnDiagramEdgeData>
-  >(() => {}, []);
+  >(() => {
+    console.log("BPMN EDITOR DIAGRAM: onEdgeUpdated");
+  }, []);
 
-  const onEdgeDeleted = useCallback<OnEdgeDeleted<BpmnEdgeType, BpmnDiagramEdgeData>>(() => {}, []);
+  const onEdgeDeleted = useCallback<OnEdgeDeleted<BpmnEdgeType, BpmnDiagramEdgeData>>(() => {
+    console.log("BPMN EDITOR DIAGRAM: onEdgeDeleted");
+  }, []);
 
   // misc
 
@@ -171,9 +191,17 @@ export function BpmnDiagram({
 
   // waypoints
 
-  const onWaypointAdded = useCallback<OnWaypointAdded>(() => {}, []);
-  const onWaypointRepositioned = useCallback<OnWaypointRepositioned>(() => {}, []);
-  const onWaypointDeleted = useCallback<OnWaypointDeleted>(() => {}, []);
+  const onWaypointAdded = useCallback<OnWaypointAdded>(() => {
+    console.log("BPMN EDITOR DIAGRAM: onWaypointAdded");
+  }, []);
+
+  const onWaypointRepositioned = useCallback<OnWaypointRepositioned>(() => {
+    console.log("BPMN EDITOR DIAGRAM: onWaypointRepositioned");
+  }, []);
+
+  const onWaypointDeleted = useCallback<OnWaypointDeleted>(() => {
+    console.log("BPMN EDITOR DIAGRAM: onWaypointDeleted");
+  }, []);
 
   return (
     <>
@@ -201,6 +229,7 @@ export function BpmnDiagram({
           nodeTypes={NODE_TYPES}
           minNodeSizes={MIN_NODE_SIZES}
           graphStructure={BPMN_GRAPH_STRUCTURE}
+          // actions
           onNodeAdded={onNodeAdded}
           onConnectedNodeAdded={onConnectedNodeAdded}
           onNodeRepositioned={onNodeRepositioned}
