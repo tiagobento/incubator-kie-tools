@@ -102,7 +102,7 @@ export const getDefaultStaticState = (): Omit<State, "bpmn" | "computed" | "disp
     isEditingStyle: false,
   },
   xyFlowKieDiagram: {
-    snapGrid: { isEnabled: true, x: 20, y: 20 },
+    snapGrid: { isEnabled: false, x: 20, y: 20 },
     _selectedNodes: [],
     _selectedEdges: [],
     draggingNodes: [],

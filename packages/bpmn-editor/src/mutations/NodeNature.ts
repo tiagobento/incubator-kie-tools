@@ -40,6 +40,7 @@ export const nodeNatures: Record<BpmnNodeType, NodeNature> = {
   [NODE_TYPES.task]: NodeNature.PROCESS_FLOW_ELEMENT,
   [NODE_TYPES.subProcess]: NodeNature.PROCESS_FLOW_ELEMENT,
   [NODE_TYPES.gateway]: NodeNature.PROCESS_FLOW_ELEMENT,
+  [NODE_TYPES.lane]: NodeNature.PROCESS_FLOW_ELEMENT,
   // [NODE_TYPES.custom]: NodeNature.PROCESS_FLOW_ELEMENT,
 
   // ARTIFACT

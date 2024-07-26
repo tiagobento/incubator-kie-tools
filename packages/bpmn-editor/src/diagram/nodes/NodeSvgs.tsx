@@ -26,6 +26,7 @@ import {
   NodeSvgProps,
   normalize,
 } from "@kie-tools/xyflow-kie-diagram/dist/nodes/NodeSvgs";
+import { containerNodeVisibleRectCssClassName } from "@kie-tools/xyflow-kie-diagram/src/nodes/NodeSvgs";
 
 export function DataObjectNodeSvg(__props: NodeSvgProps & { isIcon: boolean; transform?: string }) {
   const {
@@ -323,47 +324,55 @@ export function GatewayNodeSvg(__props: NodeSvgProps) {
   );
 }
 
-export function LaneNodeSvg(__props: NodeSvgProps) {
+export const LaneNodeSvg = React.forwardRef<SVGRectElement, NodeSvgProps>((__props, ref) => {
+  const { strokeWidth, x, y, width, height, props: _props } = normalize(__props);
   const {
-    x,
-    y,
-    width,
-    height,
-    strokeWidth,
-    props: { ...props },
-  } = normalize(__props);
+    strokeWidth: interactionRectStrokeWidth,
+    x: interactionRectX,
+    y: interactionRectY,
+    width: interactionRectWidth,
+    height: interactionRectHeight,
+    props: _interactionRectProps,
+  } = normalize({ ...__props, strokeWidth: DEFAULT_INTRACTION_WIDTH / 2 });
+
+  const { ...props } = _props;
+
+  const { ...interactionRectProps } = _interactionRectProps;
 
   return (
     <>
       <rect
+        {...props}
         x={x}
         y={y}
-        strokeWidth={strokeWidth}
         width={width}
         height={height}
-        fill={DEFAULT_NODE_FILL}
+        strokeWidth={strokeWidth}
+        fill={"transparent"}
         stroke={DEFAULT_NODE_STROKE_COLOR}
         strokeLinejoin={"round"}
-        rx="0"
-        ry="0"
-        {...props}
+        rx={"3"}
+        ry={"3"}
+        className={containerNodeVisibleRectCssClassName}
       />
       <rect
-        x={x}
-        y={y}
-        strokeWidth={strokeWidth}
-        width={width / 4}
-        height={height}
-        fill={DEFAULT_NODE_FILL}
-        stroke={"black"}
+        {...interactionRectProps}
+        ref={ref}
+        x={interactionRectX}
+        y={interactionRectY}
+        width={interactionRectWidth}
+        height={interactionRectHeight}
+        strokeWidth={interactionRectStrokeWidth}
+        fill={"transparent"}
+        stroke={"transparent"}
         strokeLinejoin={"round"}
-        rx="0"
-        ry="0"
-        {...props}
+        rx={"0"}
+        ry={"0"}
+        className={containerNodeInteractionRectCssClassName}
       />
     </>
   );
-}
+});
 
 export function TextAnnotationNodeSvg(__props: NodeSvgProps & { showPlaceholder?: boolean }) {
   const { strokeWidth, x, y, width, height, props: _props } = normalize(__props);

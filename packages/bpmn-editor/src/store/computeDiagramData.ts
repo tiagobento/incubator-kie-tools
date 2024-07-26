@@ -33,6 +33,7 @@ import {
 } from "../diagram/BpmnDiagramDomain";
 import { MIN_NODE_SIZES } from "../diagram/BpmnDiagramDomain";
 import { BpmnXyFlowDiagramState, State } from "./Store";
+import { NODE_LAYERS } from "@kie-tools/xyflow-kie-diagram/dist/nodes/Hooks";
 
 export function computeDiagramData(
   definitions: State["bpmn"]["model"]["definitions"],
@@ -44,40 +45,45 @@ export function computeDiagramData(
 
   definitions.rootElement
     ?.flatMap((s) => (s.__$$element !== "process" ? [] : s))
-    .flatMap((s) => [...(s.flowElement ?? []), ...(s.artifact ?? [])])
-    .forEach((flowElement) => {
+    .flatMap((s) => [
+      ...(s.flowElement ?? []),
+      ...(s.artifact ?? []),
+      ...(s.laneSet ?? []).flatMap((s) => s.lane ?? []).map((l) => ({ ...l, __$$element: "lane" as const })),
+    ])
+    .forEach((bpmnElement) => {
       // nodes
       if (
-        flowElement?.__$$element === "startEvent" ||
-        flowElement?.__$$element === "intermediateCatchEvent" ||
-        flowElement?.__$$element === "intermediateThrowEvent" ||
-        flowElement?.__$$element === "complexGateway" ||
-        flowElement?.__$$element === "eventBasedGateway" ||
-        flowElement?.__$$element === "exclusiveGateway" ||
-        flowElement?.__$$element === "inclusiveGateway" ||
-        flowElement?.__$$element === "parallelGateway" ||
-        flowElement?.__$$element === "businessRuleTask" ||
-        flowElement?.__$$element === "choreographyTask" ||
-        flowElement?.__$$element === "manualTask" ||
-        flowElement?.__$$element === "receiveTask" ||
-        flowElement?.__$$element === "scriptTask" ||
-        flowElement?.__$$element === "sendTask" ||
-        flowElement?.__$$element === "serviceTask" ||
-        flowElement?.__$$element === "task" ||
-        flowElement?.__$$element === "userTask" ||
-        flowElement?.__$$element === "endEvent" ||
-        flowElement?.__$$element === "group" ||
-        flowElement?.__$$element === "textAnnotation"
+        bpmnElement?.__$$element === "startEvent" ||
+        bpmnElement?.__$$element === "intermediateCatchEvent" ||
+        bpmnElement?.__$$element === "intermediateThrowEvent" ||
+        bpmnElement?.__$$element === "complexGateway" ||
+        bpmnElement?.__$$element === "eventBasedGateway" ||
+        bpmnElement?.__$$element === "exclusiveGateway" ||
+        bpmnElement?.__$$element === "inclusiveGateway" ||
+        bpmnElement?.__$$element === "parallelGateway" ||
+        bpmnElement?.__$$element === "businessRuleTask" ||
+        bpmnElement?.__$$element === "choreographyTask" ||
+        bpmnElement?.__$$element === "manualTask" ||
+        bpmnElement?.__$$element === "receiveTask" ||
+        bpmnElement?.__$$element === "scriptTask" ||
+        bpmnElement?.__$$element === "sendTask" ||
+        bpmnElement?.__$$element === "serviceTask" ||
+        bpmnElement?.__$$element === "task" ||
+        bpmnElement?.__$$element === "userTask" ||
+        bpmnElement?.__$$element === "endEvent" ||
+        bpmnElement?.__$$element === "group" ||
+        bpmnElement?.__$$element === "lane" ||
+        bpmnElement?.__$$element === "textAnnotation"
       ) {
-        nodeBpmnElementsById.set(flowElement["@_id"], flowElement);
+        nodeBpmnElementsById.set(bpmnElement["@_id"], bpmnElement);
       }
 
       // edges
       else if (
-        flowElement?.__$$element === "sequenceFlow" || //
-        flowElement?.__$$element === "association"
+        bpmnElement?.__$$element === "sequenceFlow" || //
+        bpmnElement?.__$$element === "association"
       ) {
-        edgeBpmnElementsById.set(flowElement["@_id"], flowElement);
+        edgeBpmnElementsById.set(bpmnElement["@_id"], bpmnElement);
       }
 
       // other
@@ -120,6 +126,8 @@ export function computeDiagramData(
           shapeIndex: i,
           parentXyFlowNode: undefined,
         },
+        className: bpmnElement.__$$element === "lane" ? "xyflow-kie-diagram--containerNode" : "",
+        zIndex: bpmnElement.__$$element === "lane" ? NODE_LAYERS.GROUP_NODES : NODE_LAYERS.NODES,
         selected: selectedNodes.has(id),
         resizing: resizingNodes.has(id),
         dragging: draggingNodes.has(id),
@@ -221,10 +229,14 @@ export function computeDiagramData(
     new Map<string, RF.Edge<BpmnDiagramEdgeData>>()
   );
 
+  const sortedNodes = [...nodes]
+    .sort((a, b) => Number(b.type === NODE_TYPES.lane) - Number(a.type === NODE_TYPES.lane))
+    .sort((a, b) => Number(b.type === NODE_TYPES.group) - Number(a.type === NODE_TYPES.group));
+
   return {
     graphStructureEdges,
     graphStructureAdjacencyList,
-    nodes,
+    nodes: sortedNodes,
     edges,
     edgesById,
     nodesById,
@@ -236,6 +248,7 @@ export function computeDiagramData(
 
 export const elementToNodeType: Record<NonNullable<BpmnNodeElement>["__$$element"], BpmnNodeType> = {
   // start event
+  lane: NODE_TYPES.lane,
   startEvent: NODE_TYPES.startEvent,
   // intermediate events
   intermediateCatchEvent: NODE_TYPES.intermediateCatchEvent,

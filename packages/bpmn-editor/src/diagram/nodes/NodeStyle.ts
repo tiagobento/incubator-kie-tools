@@ -94,7 +94,6 @@ export function getFontCssProperties(bpmnFontStyle?: BpmnFontStyle): React.CSSPr
 export function getNodeLabelPosition({ nodeType }: { nodeType: BpmnNodeType }): NodeLabelPosition {
   switch (nodeType) {
     case NODE_TYPES.subProcess:
-      // case NODE_TYPES.lane:
       return "top-center";
     case NODE_TYPES.startEvent:
     case NODE_TYPES.intermediateCatchEvent:
@@ -105,6 +104,7 @@ export function getNodeLabelPosition({ nodeType }: { nodeType: BpmnNodeType }): 
       return "center-bottom";
     case NODE_TYPES.group:
     case NODE_TYPES.textAnnotation:
+    case NODE_TYPES.lane:
       return "top-left";
     case NODE_TYPES.task:
     case NODE_TYPES.unknown:

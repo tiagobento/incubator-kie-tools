@@ -28,9 +28,9 @@ import { NodeSizes } from "./NodeSizes";
 import "./Hooks.css";
 
 export const NODE_LAYERS = {
-  GROUP_NODE: 0,
+  GROUP_NODES: 0,
   NODES: 1000, // We need a difference > 1000 here, since ReactFlow will add 1000 to the z-index when a node is selected.
-  CONTAINING_NODS: 2000, // We need a difference > 1000 here, since ReactFlow will add 1000 to the z-index when a node is selected.
+  PARENT_NODES: 2000, // We need a difference > 1000 here, since ReactFlow will add 1000 to the z-index when a node is selected.
   NESTED_NODES: 4000,
 };
 

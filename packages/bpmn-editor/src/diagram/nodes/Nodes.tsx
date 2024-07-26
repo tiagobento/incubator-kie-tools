@@ -27,6 +27,7 @@ import {
   BPMN20__tInclusiveGateway,
   BPMN20__tIntermediateCatchEvent,
   BPMN20__tIntermediateThrowEvent,
+  BPMN20__tLane,
   BPMN20__tParallelGateway,
   BPMN20__tStartEvent,
   BPMN20__tSubProcess,
@@ -50,6 +51,7 @@ import {
   GroupNodeSvg,
   IntermediateCatchEventNodeSvg,
   IntermediateThrowEventNodeSvg,
+  LaneNodeSvg,
   StartEventNodeSvg,
   SubProcessNodeSvg,
   TaskNodeSvg,
@@ -971,6 +973,107 @@ export const GroupNode = React.memo(
               MIN_NODE_SIZES={MIN_NODE_SIZES}
             />
           )}
+        </div>
+      </>
+    );
+  },
+  propsHaveSameValuesDeep
+);
+
+export const LaneNode = React.memo(
+  ({
+    data: { bpmnElement: lane, shape, index, shapeIndex },
+    selected,
+    dragging,
+    zIndex,
+    type,
+    id,
+  }: RF.NodeProps<BpmnDiagramNodeData<Normalized<BPMN20__tLane> & { __$$element: "lane" }>>) => {
+    const renderCount = useRef<number>(0);
+    renderCount.current++;
+
+    const ref = useRef<HTMLDivElement>(null);
+    const interactionRectRef = useRef<SVGRectElement>(null);
+
+    const enableCustomNodeStyles = useBpmnEditorStore((s) => s.diagram.overlays.enableCustomNodeStyles);
+    const isHovered = useIsHovered(ref);
+    const isResizing = useNodeResizing(id);
+    const shouldActLikeHovered = useBpmnEditorStore(
+      (s) => (isHovered || isResizing) && s.xyFlowKieDiagram.draggingNodes.length === 0
+    );
+
+    const { isEditingLabel, setEditingLabel, triggerEditing, triggerEditingIfEnter } = useEditableNodeLabel(id);
+    useHoveredNodeAlwaysOnTop(ref, zIndex, shouldActLikeHovered, dragging, selected, isEditingLabel);
+
+    const bpmnEditorStoreApi = useBpmnEditorStoreApi();
+
+    const { isTargeted, isValidConnectionTarget } = useConnectionTargetStatus(id, shouldActLikeHovered);
+    const className = useNodeClassName(BPMN_CONTAINMENT_MAP, isValidConnectionTarget, id, NODE_TYPES, EDGE_TYPES);
+    const nodeDimensions = useNodeDimensions({ shape, nodeType: type as BpmnNodeType, MIN_NODE_SIZES });
+
+    const setName = useCallback<OnEditableNodeLabelChange>(
+      (newName: string) => {
+        bpmnEditorStoreApi.setState((state) => {
+          // FIXME: Tiago: Mutation (set node name)
+          // renameProcessFlowElement({
+        });
+      },
+      [bpmnEditorStoreApi]
+    );
+
+    const { fontCssProperties } = useNodeStyle({
+      nodeType: type as BpmnNodeType,
+      isEnabled: enableCustomNodeStyles,
+    });
+
+    return (
+      <>
+        <svg className={`xyflow-kie-diagram--node-shape ${className} ${selected ? "selected" : ""}`}>
+          <LaneNodeSvg {...nodeDimensions} x={0} y={0} ref={interactionRectRef} />
+        </svg>
+        <PositionalNodeHandles isTargeted={isTargeted && isValidConnectionTarget} nodeId={id} />
+        <div
+          onDoubleClick={triggerEditing}
+          onKeyDown={triggerEditingIfEnter}
+          className={`kie-bpmn-editor--lane-node ${className} kie-bpmn-editor--selected-lane-node`}
+          ref={ref}
+          tabIndex={-1}
+          data-nodehref={id}
+          data-nodelabel={lane["@_name"]}
+        >
+          {/* {`render count: ${renderCount.current}`}
+          <br /> */}
+          <div className={"xyflow-kie-diagram--node"}>
+            <InfoNodePanel
+              isVisible={!isTargeted && shouldActLikeHovered}
+              onClick={useCallback(() => {
+                bpmnEditorStoreApi.setState((state) => {
+                  state.diagram.propertiesPanel.isOpen = true;
+                });
+              }, [bpmnEditorStoreApi])}
+            />
+
+            {/* FIXME: Tiago */}
+            <span style={{ position: "absolute", top: "20px", left: "20px" }}>{lane["@_name"]}</span>
+
+            <OutgoingStuffNodePanel
+              nodeMapping={bpmnNodesOutgoingStuffNodePanelMapping}
+              edgeMapping={bpmnEdgesOutgoingStuffNodePanelMapping}
+              nodeHref={id}
+              isVisible={!isTargeted && shouldActLikeHovered}
+              nodeTypes={BPMN_OUTGOING_STRUCTURE[NODE_TYPES.lane].nodes}
+              edgeTypes={BPMN_OUTGOING_STRUCTURE[NODE_TYPES.lane].edges}
+            />
+
+            {shouldActLikeHovered && (
+              <NodeResizerHandle
+                nodeType={type as typeof NODE_TYPES.lane}
+                nodeId={id}
+                nodeShapeIndex={shapeIndex}
+                MIN_NODE_SIZES={MIN_NODE_SIZES}
+              />
+            )}
+          </div>
         </div>
       </>
     );

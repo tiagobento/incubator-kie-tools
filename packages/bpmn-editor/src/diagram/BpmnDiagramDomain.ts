@@ -19,6 +19,7 @@
 
 import { ContainmentMap, GraphStructure } from "@kie-tools/xyflow-kie-diagram/dist/graph/graphStructure";
 import {
+  BPMN20__tLane,
   BPMN20__tProcess,
   BPMNDI__BPMNEdge,
   BPMNDI__BPMNShape,
@@ -32,6 +33,7 @@ import {
   GroupNode,
   IntermediateCatchEventNode,
   IntermediateThrowEventNode,
+  LaneNode,
   StartEventNode,
   SubProcessNode,
   TaskNode,
@@ -52,6 +54,7 @@ import {
   SubProcessNodeSvg,
   GatewayNodeSvg,
   TextAnnotationNodeSvg,
+  LaneNodeSvg,
 } from "./nodes/NodeSvgs";
 import { SequenceFlowEdge, AssociationEdge } from "./edges/Edges";
 import { Unpacked } from "@kie-tools/xyflow-kie-diagram/dist/tsExt/tsExt";
@@ -77,7 +80,7 @@ export const NODE_TYPES = {
   textAnnotation: "node_textAnnotation" as const,
   unknown: "node_unknown" as const,
   group: "node_group" as const,
-  // lane: "node_lane" as const,
+  lane: "node_lane" as const,
   // custom: "node_custom" as const,
 };
 
@@ -124,6 +127,7 @@ export const CONNECTION_LINE_NODE_COMPONENT_MAPPING: ConnectionLineNodeMapping<B
   [NODE_TYPES.subProcess]: SubProcessNodeSvg,
   [NODE_TYPES.gateway]: GatewayNodeSvg,
   [NODE_TYPES.textAnnotation]: TextAnnotationNodeSvg,
+  [NODE_TYPES.lane]: LaneNodeSvg,
   // Ignore
   node_dataObject: undefined as any,
   node_unknown: undefined as any,
@@ -141,6 +145,7 @@ export const XY_FLOW_NODE_TYPES: Record<BpmnNodeType, any> = {
   [NODE_TYPES.group]: GroupNode,
   [NODE_TYPES.textAnnotation]: TextAnnotationNode,
   [NODE_TYPES.dataObject]: DataObjectNode,
+  [NODE_TYPES.lane]: LaneNode,
   [NODE_TYPES.unknown]: UnknownNode,
 };
 
@@ -202,6 +207,10 @@ export const BPMN_OUTGOING_STRUCTURE = {
     nodes: [],
     edges: [],
   },
+  [NODE_TYPES.lane]: {
+    nodes: [],
+    edges: [],
+  },
   [NODE_TYPES.textAnnotation]: {
     nodes: [],
     edges: [],
@@ -252,6 +261,10 @@ export const bpmnNodesOutgoingStuffNodePanelMapping: OutgoingStuffNodePanelNodeM
   },
   [NODE_TYPES.textAnnotation]: {
     actionTitle: "Add Text Annotation",
+    icon: undefined as any,
+  },
+  [NODE_TYPES.lane]: {
+    actionTitle: "Add Lane",
     icon: undefined as any,
   },
 };
@@ -326,6 +339,13 @@ export const MIN_NODE_SIZES: NodeSizes<BpmnNodeType> = {
   },
   [NODE_TYPES.textAnnotation]: ({ snapGrid }) => {
     const snappedMinSize = MIN_SIZE_FOR_NODES(snapGrid, 200, 60);
+    return {
+      "@_width": snappedMinSize.width,
+      "@_height": snappedMinSize.height,
+    };
+  },
+  [NODE_TYPES.lane]: ({ snapGrid }) => {
+    const snappedMinSize = MIN_SIZE_FOR_NODES(snapGrid);
     return {
       "@_width": snappedMinSize.width,
       "@_height": snappedMinSize.height,
@@ -411,6 +431,13 @@ export const DEFAULT_NODE_SIZES: NodeSizes<BpmnNodeType> = {
       "@_height": snappedMinSize.height,
     };
   },
+  [NODE_TYPES.lane]: ({ snapGrid }) => {
+    const snappedMinSize = MIN_SIZE_FOR_NODES(snapGrid, 200, 200);
+    return {
+      "@_width": snappedMinSize.width,
+      "@_height": snappedMinSize.height,
+    };
+  },
   [NODE_TYPES.unknown]: ({ snapGrid }) => {
     const snappedMinSize = MIN_SIZE_FOR_NODES(snapGrid);
     return {
@@ -438,6 +465,7 @@ export type BpmnEdgeElement = null | Normalized<
 export type BpmnNodeElement = null | Normalized<
   | ElementExclusion<Unpacked<NonNullable<BPMN20__tProcess["flowElement"]>>, "sequenceFlow">
   | ElementExclusion<Unpacked<NonNullable<BPMN20__tProcess["artifact"]>>, "association">
+  | (BPMN20__tLane & { __$$element: "lane" })
 >;
 
 export function getNodeTypeFromBpmnElement(bpmnElement: BpmnNodeElement) {
@@ -448,6 +476,7 @@ export function getNodeTypeFromBpmnElement(bpmnElement: BpmnNodeElement) {
   const type = switchExpression(bpmnElement.__$$element, {
     dataObject: NODE_TYPES.dataObject,
     task: NODE_TYPES.task,
+    lane: NODE_TYPES.lane,
     textAnnotation: NODE_TYPES.textAnnotation,
     default: undefined,
   });
