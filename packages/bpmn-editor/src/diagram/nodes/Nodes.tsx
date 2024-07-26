@@ -714,7 +714,7 @@ export const GatewayNode = React.memo(
     return (
       <>
         <svg className={`xyflow-kie-diagram--node-shape ${className} ${selected ? "selected" : ""}`}>
-          <GatewayNodeSvg {...nodeDimensions} x={0} y={0} />
+          <GatewayNodeSvg {...nodeDimensions} x={0} y={0} variant={gateway.__$$element} />
         </svg>
         <PositionalNodeHandles isTargeted={isTargeted && isValidConnectionTarget} nodeId={id} />
         <div
@@ -749,7 +749,25 @@ export const GatewayNode = React.memo(
           </div>
           {/* Creates a div element with the node size to push down the <EditableNodeLabel /> */}
           {<div style={{ height: nodeDimensions.height, flexShrink: 0 }} />}
-          {<div>{gateway["@_name"]}</div>}
+          {gateway["@_name"] && (
+            <div
+              style={{
+                fontSize: "0.8em",
+                marginTop: "10px",
+                borderRadius: "5px",
+                padding: "5px",
+                backgroundColor: "rgba(0,0,0,0.05)",
+                border: "1px solid rgba(0,0,0,0.5)",
+                boxShadow: "rgba(0, 0, 0, 0.4) 2px 2px 6px",
+                backdropFilter: "blur(4px)",
+                textAlign: "center",
+                width: "140%",
+                marginLeft: "-20%",
+              }}
+            >
+              {gateway["@_name"]}
+            </div>
+          )}
         </div>
       </>
     );

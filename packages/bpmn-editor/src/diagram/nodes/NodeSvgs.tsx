@@ -27,6 +27,7 @@ import {
   normalize,
 } from "@kie-tools/xyflow-kie-diagram/dist/nodes/NodeSvgs";
 import { containerNodeVisibleRectCssClassName } from "@kie-tools/xyflow-kie-diagram/src/nodes/NodeSvgs";
+import { GatewayVariant } from "../BpmnDiagramDomain";
 
 export function DataObjectNodeSvg(__props: NodeSvgProps & { isIcon: boolean; transform?: string }) {
   const {
@@ -294,15 +295,17 @@ export function SubProcessNodeSvg(__props: NodeSvgProps) {
   );
 }
 
-export function GatewayNodeSvg(__props: NodeSvgProps) {
+export function GatewayNodeSvg(__props: NodeSvgProps & { variant: GatewayVariant | "none" }) {
   const {
     x,
     y,
     width,
     height,
     strokeWidth,
-    props: { ...props },
+    props: { ..._props },
   } = normalize(__props);
+
+  const { variant, ...props } = { ..._props };
 
   return (
     <>
@@ -320,6 +323,70 @@ export function GatewayNodeSvg(__props: NodeSvgProps) {
         ry="5"
         {...props}
       />
+      {variant === "parallelGateway" && (
+        <>
+          <line
+            strokeLinecap={"round"}
+            x1="18"
+            y1={1 + height / 2}
+            x2={width - 16}
+            y2={1 + height / 2}
+            stroke="#ec7b08"
+            strokeWidth="6"
+          />
+          <line
+            strokeLinecap={"round"}
+            x1={1 + width / 2}
+            y1="18"
+            x2={1 + width / 2}
+            y2={height - 16}
+            stroke="#ec7b08"
+            strokeWidth="6"
+          />
+        </>
+      )}
+      {variant === "exclusiveGateway" && (
+        <>
+          <g transform={`rotate(45,${x + width / 2},${y + height / 2})`}>
+            <line
+              strokeLinecap={"round"}
+              x1="18"
+              y1={1 + height / 2}
+              x2={width - 16}
+              y2={1 + height / 2}
+              stroke="#ec7b08"
+              strokeWidth="6"
+            />
+            <line
+              strokeLinecap={"round"}
+              x1={1 + width / 2}
+              y1="18"
+              x2={1 + width / 2}
+              y2={height - 16}
+              stroke="#ec7b08"
+              strokeWidth="6"
+            />
+          </g>
+        </>
+      )}
+      {variant === "inclusiveGateway" && (
+        <>
+          <circle
+            cx={x + width / 2}
+            cy={y + height / 2}
+            strokeWidth={6}
+            width={width / 2}
+            height={height / 2}
+            stroke={"#ec7b08"}
+            strokeLinejoin={"round"}
+            fill="transparent"
+            r={width / 5}
+            {...props}
+          />
+        </>
+      )}
+      {variant === "eventBasedGateway" && <></>}
+      {variant === "complexGateway" && <></>}
     </>
   );
 }

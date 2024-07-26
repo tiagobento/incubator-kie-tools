@@ -99,7 +99,7 @@ export function SubProcessIcon() {
 export function GatewayIcon() {
   return (
     <RoundSvg>
-      <GatewayNodeSvg {...nodeSvgProps} width={200} height={200} />
+      <GatewayNodeSvg {...nodeSvgProps} width={200} height={200} variant={"none"} />
     </RoundSvg>
   );
 }

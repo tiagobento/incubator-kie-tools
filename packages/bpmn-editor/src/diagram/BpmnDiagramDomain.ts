@@ -483,3 +483,8 @@ export function getNodeTypeFromBpmnElement(bpmnElement: BpmnNodeElement) {
 
   return type;
 }
+
+export type GatewayVariant = ElementFilter<
+  Unpacked<NonNullable<BPMN20__tProcess["flowElement"]>>,
+  "complexGateway" | "eventBasedGateway" | "exclusiveGateway" | "inclusiveGateway" | "parallelGateway"
+>["__$$element"];
