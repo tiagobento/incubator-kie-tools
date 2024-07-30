@@ -19,6 +19,8 @@
 
 import { ContainmentMap, GraphStructure } from "@kie-tools/xyflow-kie-diagram/dist/graph/graphStructure";
 import {
+  BPMN20__tEndEvent,
+  BPMN20__tIntermediateCatchEvent,
   BPMN20__tLane,
   BPMN20__tProcess,
   BPMNDI__BPMNEdge,
@@ -487,4 +489,18 @@ export function getNodeTypeFromBpmnElement(bpmnElement: BpmnNodeElement) {
 export type GatewayVariant = ElementFilter<
   Unpacked<NonNullable<BPMN20__tProcess["flowElement"]>>,
   "complexGateway" | "eventBasedGateway" | "exclusiveGateway" | "inclusiveGateway" | "parallelGateway"
+>["__$$element"];
+
+export type EventVariant = ElementFilter<
+  Unpacked<NonNullable<BPMN20__tIntermediateCatchEvent["eventDefinition"]>>,
+  | "cancelEventDefinition"
+  | "compensateEventDefinition"
+  | "conditionalEventDefinition"
+  | "errorEventDefinition"
+  | "escalationEventDefinition"
+  | "linkEventDefinition"
+  | "messageEventDefinition"
+  | "signalEventDefinition"
+  | "terminateEventDefinition"
+  | "timerEventDefinition"
 >["__$$element"];

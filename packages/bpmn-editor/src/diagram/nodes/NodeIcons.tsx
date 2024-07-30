@@ -51,7 +51,7 @@ export function NodeIcon({ nodeType }: { nodeType: BpmnNodeType }) {
 export function StartEventIcon() {
   return (
     <RoundSvg>
-      <StartEventNodeSvg {...nodeSvgProps} />
+      <StartEventNodeSvg {...nodeSvgProps} variant={"none"} />
     </RoundSvg>
   );
 }
@@ -59,7 +59,7 @@ export function StartEventIcon() {
 export function IntermediateCatchEventIcon() {
   return (
     <RoundSvg>
-      <IntermediateCatchEventNodeSvg {...nodeSvgProps} rimWidth={40} />
+      <IntermediateCatchEventNodeSvg {...nodeSvgProps} rimWidth={40} variant={"none"} />
     </RoundSvg>
   );
 }
@@ -67,7 +67,7 @@ export function IntermediateCatchEventIcon() {
 export function IntermediateThrowEventIcon() {
   return (
     <RoundSvg>
-      <IntermediateThrowEventNodeSvg {...nodeSvgProps} rimWidth={40} />
+      <IntermediateThrowEventNodeSvg {...nodeSvgProps} rimWidth={40} variant={"none"} />
     </RoundSvg>
   );
 }
@@ -75,7 +75,7 @@ export function IntermediateThrowEventIcon() {
 export function EndEventIcon() {
   return (
     <RoundSvg>
-      <EndEventNodeSvg {...nodeSvgProps} />
+      <EndEventNodeSvg {...nodeSvgProps} variant={"none"} />
     </RoundSvg>
   );
 }

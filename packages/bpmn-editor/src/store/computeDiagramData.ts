@@ -53,6 +53,7 @@ export function computeDiagramData(
     .forEach((bpmnElement) => {
       // nodes
       if (
+        bpmnElement?.__$$element === "boundaryEvent" ||
         bpmnElement?.__$$element === "startEvent" ||
         bpmnElement?.__$$element === "intermediateCatchEvent" ||
         bpmnElement?.__$$element === "intermediateThrowEvent" ||
@@ -127,7 +128,12 @@ export function computeDiagramData(
           parentXyFlowNode: undefined,
         },
         className: bpmnElement.__$$element === "lane" ? "xyflow-kie-diagram--containerNode" : "",
-        zIndex: bpmnElement.__$$element === "lane" ? NODE_LAYERS.GROUP_NODES : NODE_LAYERS.NODES,
+        zIndex:
+          bpmnElement.__$$element === "lane"
+            ? NODE_LAYERS.GROUP_NODES
+            : bpmnElement.__$$element === "boundaryEvent"
+              ? NODE_LAYERS.NESTED_NODES
+              : NODE_LAYERS.NODES,
         selected: selectedNodes.has(id),
         resizing: resizingNodes.has(id),
         dragging: draggingNodes.has(id),
@@ -251,6 +257,7 @@ export const elementToNodeType: Record<NonNullable<BpmnNodeElement>["__$$element
   lane: NODE_TYPES.lane,
   startEvent: NODE_TYPES.startEvent,
   // intermediate events
+  boundaryEvent: NODE_TYPES.intermediateCatchEvent,
   intermediateCatchEvent: NODE_TYPES.intermediateCatchEvent,
   intermediateThrowEvent: NODE_TYPES.intermediateThrowEvent,
   // tasks
@@ -280,7 +287,6 @@ export const elementToNodeType: Record<NonNullable<BpmnNodeElement>["__$$element
   // unknown
   //
   adHocSubProcess: NODE_TYPES.unknown,
-  boundaryEvent: NODE_TYPES.unknown,
   callActivity: NODE_TYPES.unknown,
   callChoreography: NODE_TYPES.unknown,
   event: NODE_TYPES.unknown,

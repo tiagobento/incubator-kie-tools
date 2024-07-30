@@ -130,7 +130,12 @@ export const StartEventNode = React.memo(
     return (
       <>
         <svg className={`xyflow-kie-diagram--node-shape ${className} ${selected ? "selected" : ""}`}>
-          <StartEventNodeSvg {...nodeDimensions} x={0} y={0} />
+          <StartEventNodeSvg
+            {...nodeDimensions}
+            x={0}
+            y={0}
+            variant={startEvent.eventDefinition?.[0]?.__$$element ?? "none"}
+          />
         </svg>
         <PositionalNodeHandles isTargeted={isTargeted && isValidConnectionTarget} nodeId={id} />
         <div
@@ -223,7 +228,12 @@ export const IntermediateCatchEventNode = React.memo(
     return (
       <>
         <svg className={`xyflow-kie-diagram--node-shape ${className} ${selected ? "selected" : ""}`}>
-          <IntermediateCatchEventNodeSvg {...nodeDimensions} x={0} y={0} />
+          <IntermediateCatchEventNodeSvg
+            {...nodeDimensions}
+            x={0}
+            y={0}
+            variant={intermediateCatchEvent.eventDefinition?.[0].__$$element ?? "none"}
+          />
         </svg>
         <PositionalNodeHandles isTargeted={isTargeted && isValidConnectionTarget} nodeId={id} />
         <div
@@ -316,7 +326,12 @@ export const IntermediateThrowEventNode = React.memo(
     return (
       <>
         <svg className={`xyflow-kie-diagram--node-shape ${className} ${selected ? "selected" : ""}`}>
-          <IntermediateThrowEventNodeSvg {...nodeDimensions} x={0} y={0} />
+          <IntermediateThrowEventNodeSvg
+            {...nodeDimensions}
+            x={0}
+            y={0}
+            variant={intermediateThrowEvent.eventDefinition?.[0]?.__$$element ?? "none"}
+          />
         </svg>
         <PositionalNodeHandles isTargeted={isTargeted && isValidConnectionTarget} nodeId={id} />
         <div
@@ -407,7 +422,13 @@ export const EndEventNode = React.memo(
     return (
       <>
         <svg className={`xyflow-kie-diagram--node-shape ${className} ${selected ? "selected" : ""}`}>
-          <EndEventNodeSvg {...nodeDimensions} x={0} y={0} />
+          <EndEventNodeSvg
+            {...nodeDimensions}
+            x={0}
+            y={0}
+            variant={endEvent.eventDefinition?.[0]?.__$$element ?? "none"}
+            strokeWidth={6}
+          />
         </svg>
         <PositionalNodeHandles isTargeted={isTargeted && isValidConnectionTarget} nodeId={id} />
         <div
