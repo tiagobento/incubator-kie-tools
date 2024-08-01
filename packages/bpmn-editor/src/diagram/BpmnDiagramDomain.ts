@@ -452,8 +452,8 @@ export const DEFAULT_NODE_SIZES: NodeSizes<BpmnNodeType> = {
   },
 };
 
-export const NODE_MIN_WIDTH = 10;
-export const NODE_MIN_HEIGHT = 5;
+export const NODE_MIN_WIDTH = 100;
+export const NODE_MIN_HEIGHT = 50;
 
 export const MIN_SIZE_FOR_NODES = (grid: SnapGrid, width = NODE_MIN_WIDTH, height = NODE_MIN_HEIGHT) => {
   const snapped = snapPoint(grid, { "@_x": width, "@_y": height }, "ceil");

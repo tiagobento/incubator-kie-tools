@@ -38,3 +38,10 @@ export type DC__Shape = {
   "@_id": string;
   "dc:Bounds": DC__Bounds;
 };
+
+export type DC__Edge = {
+  "@_id"?: string;
+  "di:waypoint": DC__Point[];
+  "@_sourceElement"?: string;
+  "@_targetElement"?: string;
+};

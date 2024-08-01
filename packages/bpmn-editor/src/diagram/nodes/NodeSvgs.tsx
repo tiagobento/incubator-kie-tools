@@ -25,7 +25,7 @@ import {
   NodeSvgProps,
   normalize,
 } from "@kie-tools/xyflow-react-kie-diagram/dist/nodes/NodeSvgs";
-import { containerNodeVisibleRectCssClassName } from "@kie-tools/xyflow-react-kie-diagram/src/nodes/NodeSvgs";
+import { containerNodeVisibleRectCssClassName } from "@kie-tools/xyflow-react-kie-diagram/dist/nodes/NodeSvgs";
 import { EventVariant, GatewayVariant } from "../BpmnDiagramDomain";
 
 export function DataObjectNodeSvg(__props: NodeSvgProps & { isIcon: boolean; transform?: string }) {

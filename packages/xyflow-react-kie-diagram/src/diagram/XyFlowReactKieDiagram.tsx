@@ -34,58 +34,96 @@ import { Draft } from "immer";
 
 // nodes
 
-export type OnNodeAdded<N extends string, NData extends XyFlowReactKieDiagramNodeData<N, NData>> = (args: {
-  type: N;
-  dropPoint: { x: number; y: number };
-}) => void;
-
-export type OnConnectedNodeAdded<
+export type OnNodeAdded<
+  S extends XyFlowDiagramState<S, N, NData, EData>,
   N extends string,
-  E extends string,
-  NData extends XyFlowReactKieDiagramNodeData<N, NData>,
-> = (args: { sourceNode: RF.Node<NData, N>; newNodeType: N; edgeType: E; dropPoint: { x: number; y: number } }) => void;
-
-export type OnNodeUnparented<N extends string, NData extends XyFlowReactKieDiagramNodeData<N, NData>> = (args: {
-  exParentNode: RF.Node<NData, N>;
-  activeNode: RF.Node<NData, N>;
-  selectedNodes: RF.Node<NData, N>[];
-}) => void;
-
-export type OnNodeParented<N extends string, NData extends XyFlowReactKieDiagramNodeData<N, NData>> = (args: {
-  parentNode: RF.Node<NData, N>;
-  activeNode: RF.Node<NData, N>;
-  selectedNodes: RF.Node<NData, N>[];
-}) => void;
-
-export type OnNodeRepositioned<N extends string, NData extends XyFlowReactKieDiagramNodeData<N, NData>> = (args: {
-  node: RF.Node<NData, N>;
-  newPosition: RF.XYPosition;
-}) => void;
-
-export type OnNodeDeleted<N extends string, NData extends XyFlowReactKieDiagramNodeData<N, NData>> = (args: {
-  node: RF.Node<NData, N>;
-}) => void;
-
-export type OnNodeResized<N extends string, NData extends XyFlowReactKieDiagramNodeData<N, NData>> = (args: {
-  node: RF.Node<NData, N>;
-  newDimensions: { width: number; height: number };
-}) => void;
-
-// edges
-
-export type OnEdgeAdded<
-  N extends string,
-  E extends string,
   NData extends XyFlowReactKieDiagramNodeData<N, NData>,
   EData extends XyFlowReactKieDiagramEdgeData,
-> = (args: { sourceNode: RF.Node<NData>; targetNode: RF.Node<NData>; edgeType: E }) => void;
+> = (args: { state: Draft<S>; type: N; dropPoint: { x: number; y: number } }) => void;
 
-export type OnEdgeUpdated<
+export type OnConnectedNodeAdded<
+  S extends XyFlowDiagramState<S, N, NData, EData>,
   N extends string,
   E extends string,
   NData extends XyFlowReactKieDiagramNodeData<N, NData>,
   EData extends XyFlowReactKieDiagramEdgeData,
 > = (args: {
+  state: Draft<S>;
+  sourceNode: RF.Node<NData, N>;
+  newNodeType: N;
+  edgeType: E;
+  dropPoint: { x: number; y: number };
+}) => void;
+
+export type OnNodeUnparented<
+  S extends XyFlowDiagramState<S, N, NData, EData>,
+  N extends string,
+  NData extends XyFlowReactKieDiagramNodeData<N, NData>,
+  EData extends XyFlowReactKieDiagramEdgeData,
+> = (args: {
+  state: Draft<S>;
+  exParentNode: RF.Node<NData, N>;
+  activeNode: RF.Node<NData, N>;
+  selectedNodes: RF.Node<NData, N>[];
+}) => void;
+
+export type OnNodeParented<
+  S extends XyFlowDiagramState<S, N, NData, EData>,
+  N extends string,
+  NData extends XyFlowReactKieDiagramNodeData<N, NData>,
+  EData extends XyFlowReactKieDiagramEdgeData,
+> = (args: {
+  state: Draft<S>;
+  parentNode: RF.Node<NData, N>;
+  activeNode: RF.Node<NData, N>;
+  selectedNodes: RF.Node<NData, N>[];
+}) => void;
+
+export type OnNodeRepositioned<
+  S extends XyFlowDiagramState<S, N, NData, EData>,
+  N extends string,
+  NData extends XyFlowReactKieDiagramNodeData<N, NData>,
+  EData extends XyFlowReactKieDiagramEdgeData,
+> = (args: {
+  state: Draft<S>;
+  /** Set of waypoint indexes by Edge index */
+  controlWaypointsByEdge: Map<number, Set<number>>;
+  node: RF.Node<NData, N>;
+  newPosition: RF.XYPosition;
+}) => void;
+
+export type OnNodeDeleted<
+  S extends XyFlowDiagramState<S, N, NData, EData>,
+  N extends string,
+  NData extends XyFlowReactKieDiagramNodeData<N, NData>,
+  EData extends XyFlowReactKieDiagramEdgeData,
+> = (args: { state: Draft<S>; node: RF.Node<NData, N> }) => void;
+
+export type OnNodeResized<
+  S extends XyFlowDiagramState<S, N, NData, EData>,
+  N extends string,
+  NData extends XyFlowReactKieDiagramNodeData<N, NData>,
+  EData extends XyFlowReactKieDiagramEdgeData,
+> = (args: { state: Draft<S>; node: RF.Node<NData, N>; newDimensions: { width: number; height: number } }) => void;
+
+// edges
+
+export type OnEdgeAdded<
+  S extends XyFlowDiagramState<S, N, NData, EData>,
+  N extends string,
+  E extends string,
+  NData extends XyFlowReactKieDiagramNodeData<N, NData>,
+  EData extends XyFlowReactKieDiagramEdgeData,
+> = (args: { state: Draft<S>; sourceNode: RF.Node<NData>; targetNode: RF.Node<NData>; edgeType: E }) => void;
+
+export type OnEdgeUpdated<
+  S extends XyFlowDiagramState<S, N, NData, EData>,
+  N extends string,
+  E extends string,
+  NData extends XyFlowReactKieDiagramNodeData<N, NData>,
+  EData extends XyFlowReactKieDiagramEdgeData,
+> = (args: {
+  state: Draft<S>;
   sourceNode: RF.Node<NData>;
   targetNode: RF.Node<NData>;
   edge: RF.Edge<EData>;
@@ -93,9 +131,13 @@ export type OnEdgeUpdated<
   lastWaypoint: DC__Point;
 }) => void;
 
-export type OnEdgeDeleted<E extends string, EData extends XyFlowReactKieDiagramEdgeData> = (args: {
-  edge: RF.Edge<EData>;
-}) => void;
+export type OnEdgeDeleted<
+  S extends XyFlowDiagramState<S, N, NData, EData>,
+  N extends string,
+  E extends string,
+  NData extends XyFlowReactKieDiagramNodeData<N, NData>,
+  EData extends XyFlowReactKieDiagramEdgeData,
+> = (args: { state: Draft<S>; edge: RF.Edge<EData> }) => void;
 
 // waypoints
 
@@ -110,6 +152,7 @@ export type OnEscPressed = () => void;
 //
 
 export type Props<
+  S extends XyFlowDiagramState<S, N, NData, EData>,
   N extends string,
   E extends string,
   NData extends XyFlowReactKieDiagramNodeData<N, NData>,
@@ -134,16 +177,16 @@ export type Props<
   minNodeSizes: NodeSizes<N>;
   graphStructure: GraphStructure<N, E>;
   // actions
-  onNodeRepositioned: OnNodeRepositioned<N, NData>;
-  onNodeDeleted: OnNodeDeleted<N, NData>;
-  onNodeAdded: OnNodeAdded<N, NData>;
-  onNodeUnparented: OnNodeUnparented<N, NData>;
-  onNodeParented: OnNodeParented<N, NData>;
-  onConnectedNodeAdded: OnConnectedNodeAdded<N, E, NData>;
-  onNodeResized: OnNodeResized<N, NData>;
-  onEdgeAdded: OnEdgeAdded<N, E, NData, EData>;
-  onEdgeUpdated: OnEdgeUpdated<N, E, NData, EData>;
-  onEdgeDeleted: OnEdgeDeleted<E, EData>;
+  onNodeRepositioned: OnNodeRepositioned<S, N, NData, EData>;
+  onNodeDeleted: OnNodeDeleted<S, N, NData, EData>;
+  onNodeAdded: OnNodeAdded<S, N, NData, EData>;
+  onNodeUnparented: OnNodeUnparented<S, N, NData, EData>;
+  onNodeParented: OnNodeParented<S, N, NData, EData>;
+  onConnectedNodeAdded: OnConnectedNodeAdded<S, N, E, NData, EData>;
+  onNodeResized: OnNodeResized<S, N, NData, EData>;
+  onEdgeAdded: OnEdgeAdded<S, N, E, NData, EData>;
+  onEdgeUpdated: OnEdgeUpdated<S, N, E, NData, EData>;
+  onEdgeDeleted: OnEdgeDeleted<S, N, E, NData, EData>;
   onEscPressed: OnEscPressed;
   onWaypointAdded: OnWaypointAdded;
   onWaypointRepositioned: OnWaypointRepositioned;
@@ -207,7 +250,7 @@ export function XyFlowReactKieDiagram<
   onEdgeUpdated,
   onEdgeDeleted,
   onEscPressed,
-}: Props<N, E, NData, EData>) {
+}: Props<S, N, E, NData, EData>) {
   // Contexts
   const xyFlowReactKieDiagramStoreApi = useXyFlowReactKieDiagramStoreApi<S, N, NData, EData>();
   const snapGrid = useXyFlowReactKieDiagramStore((s) => s.xyFlowReactKieDiagram.snapGrid);
@@ -248,7 +291,9 @@ export function XyFlowReactKieDiagram<
       // --------- This is where we draw the line between the diagram and the model.
 
       console.log("XYFLOW KIE DIAGRAM: Edge added");
-      onEdgeAdded({ sourceNode, targetNode, edgeType: sourceHandle as E });
+      xyFlowReactKieDiagramStoreApi.setState((state) => {
+        onEdgeAdded({ state, sourceNode, targetNode, edgeType: sourceHandle as E });
+      });
     },
     [onEdgeAdded, xyFlowReactKieDiagramStoreApi]
   );
@@ -306,13 +351,16 @@ export function XyFlowReactKieDiagram<
 
         // --------- This is where we draw the line between the diagram and the model.
 
-        onNodeAdded({
-          dropPoint,
-          type: typeOfNode,
+        xyFlowReactKieDiagramStoreApi.setState((state) => {
+          onNodeAdded({
+            state,
+            dropPoint,
+            type: typeOfNode,
+          });
         });
       }
     },
-    [container, newNodeMimeType, onNodeAdded, reactFlowInstance]
+    [container, newNodeMimeType, onNodeAdded, reactFlowInstance, xyFlowReactKieDiagramStoreApi]
   );
 
   const ongoingConnection = useXyFlowReactKieDiagramStore((s) => s.xyFlowReactKieDiagram.ongoingConnection);
@@ -398,6 +446,7 @@ export function XyFlowReactKieDiagram<
 
         console.log("XYFLOW KIE DIAGRAM: Node added (connected)");
         onConnectedNodeAdded({
+          state,
           sourceNode,
           newNodeType,
           edgeType,
@@ -452,85 +501,71 @@ export function XyFlowReactKieDiagram<
 
       const controlWaypointsByEdge = new Map<number, Set<number>>();
 
-      for (const change of changes) {
-        switch (change.type) {
-          case "add":
-            console.debug(`XYFLOW KIE DIAGRAM: 'onNodesChange' --> add '${change.item.id}'`);
-            xyFlowReactKieDiagramStoreApi.setState((state) => {
+      xyFlowReactKieDiagramStoreApi.setState((state) => {
+        for (const change of changes) {
+          switch (change.type) {
+            case "add":
+              console.debug(`XYFLOW KIE DIAGRAM: 'onNodesChange' --> add '${change.item.id}'`);
               state.dispatch(state).setNodeStatus(change.item.id, { selected: true });
-            });
-            break;
-          case "dimensions":
-            console.debug(`XYFLOW KIE DIAGRAM: 'onNodesChange' --> dimensions '${change.id}'`);
-            xyFlowReactKieDiagramStoreApi.setState((state) => {
+              break;
+            case "dimensions":
+              console.debug(`XYFLOW KIE DIAGRAM: 'onNodesChange' --> dimensions '${change.id}'`);
               state.dispatch(state).setNodeStatus(change.id, { resizing: change.resizing });
-            });
-            const state = xyFlowReactKieDiagramStoreApi.getState();
-            if (change.dimensions) {
-              const node = state.computed(state).getDiagramData().nodesById.get(change.id)!;
-              // We only need to resize the node if its snapped dimensions change, as snapping is non-destructive.
-              const snappedShape = snapShapeDimensions(
-                state.xyFlowReactKieDiagram.snapGrid,
-                node.data.shape,
-                minNodeSizes[node.type as N]({
-                  snapGrid: state.xyFlowReactKieDiagram.snapGrid,
-                })
-              );
-              if (snappedShape.width !== change.dimensions.width || snappedShape.height !== change.dimensions.height) {
-                console.log("XYFLOW KIE DIAGRAM: Node resized");
-                onNodeResized({
-                  node,
-                  newDimensions: { ...change.dimensions },
-                });
+              if (change.dimensions) {
+                const node = state.computed(state).getDiagramData().nodesById.get(change.id)!;
+                // We only need to resize the node if its snapped dimensions change, as snapping is non-destructive.
+                const snappedShape = snapShapeDimensions(
+                  state.xyFlowReactKieDiagram.snapGrid,
+                  node.data.shape,
+                  minNodeSizes[node.type as N]({
+                    snapGrid: state.xyFlowReactKieDiagram.snapGrid,
+                  })
+                );
+                if (
+                  snappedShape.width !== change.dimensions.width ||
+                  snappedShape.height !== change.dimensions.height
+                ) {
+                  console.log("XYFLOW KIE DIAGRAM: Node resized");
+                  onNodeResized({
+                    state,
+                    node,
+                    newDimensions: { ...change.dimensions },
+                  });
+                }
               }
-            }
-            break;
-          case "position":
-            console.debug(`XYFLOW KIE DIAGRAM: 'onNodesChange' --> position '${change.id}'`);
-            xyFlowReactKieDiagramStoreApi.setState((state) => {
+              break;
+            case "position":
+              console.debug(`XYFLOW KIE DIAGRAM: 'onNodesChange' --> position '${change.id}'`);
               state.dispatch(state).setNodeStatus(change.id, { dragging: change.dragging });
-            });
 
-            {
-              const state = xyFlowReactKieDiagramStoreApi.getState();
               if (change.positionAbsolute) {
                 const node = state.computed(state).getDiagramData().nodesById.get(change.id)!;
 
                 console.log("XYFLOW KIE DIAGRAM: Node repositioned");
-                onNodeRepositioned({ node, newPosition: change.positionAbsolute });
+                onNodeRepositioned({ state, controlWaypointsByEdge, node, newPosition: change.positionAbsolute });
               }
-            }
-            break;
-          case "remove":
-            {
-              const state = xyFlowReactKieDiagramStoreApi.getState();
-
+              break;
+            case "remove":
               console.debug(`XYFLOW KIE DIAGRAM: 'onNodesChange' --> remove '${change.id}'`);
               const node = state.computed(state).getDiagramData().nodesById.get(change.id)!;
               console.log("XYFLOW KIE DIAGRAM: Node deleted");
-              onNodeDeleted({ node });
+              onNodeDeleted({ state, node });
 
-              xyFlowReactKieDiagramStoreApi.setState((state) => {
-                state.dispatch(state).setNodeStatus(node.id, { selected: false, dragging: false, resizing: false });
-              });
-            }
-            break;
-          case "reset":
-            xyFlowReactKieDiagramStoreApi.setState((state) => {
+              state.dispatch(state).setNodeStatus(node.id, { selected: false, dragging: false, resizing: false });
+              break;
+            case "reset":
               state.dispatch(state).setNodeStatus(change.item.id, {
                 selected: false,
                 dragging: false,
                 resizing: false,
               });
-            });
-            break;
-          case "select":
-            xyFlowReactKieDiagramStoreApi.setState((state) => {
+              break;
+            case "select":
               state.dispatch(state).setNodeStatus(change.id, { selected: change.selected });
-            });
-            break;
+              break;
+          }
         }
-      }
+      });
     },
     [minNodeSizes, onNodeDeleted, onNodeRepositioned, onNodeResized, reactFlowInstance, xyFlowReactKieDiagramStoreApi]
   );
@@ -603,7 +638,7 @@ export function XyFlowReactKieDiagram<
           if (nodeBeingDragged.data.parentXyFlowNode) {
             const p = state.computed(state).getDiagramData().nodesById.get(nodeBeingDragged.data.parentXyFlowNode.id);
             if (p?.type && nodeBeingDragged.type && containmentMap.get(nodeBeingDragged.type)?.has(p.type)) {
-              onNodeUnparented({ exParentNode: p, activeNode: nodeBeingDragged, selectedNodes });
+              onNodeUnparented({ state, exParentNode: p, activeNode: nodeBeingDragged, selectedNodes });
             } else {
               console.debug(
                 `XYFLOW KIE DIAGRAM: Ignoring '${nodeBeingDragged.type}' with parent '${dropTargetNode?.type}' dropping somewhere..`
@@ -613,7 +648,7 @@ export function XyFlowReactKieDiagram<
 
           // // Parent
           if (dropTargetNode?.type && containmentMap.get(dropTargetNode.type)) {
-            onNodeParented({ parentNode: dropTargetNode, activeNode: nodeBeingDragged, selectedNodes });
+            onNodeParented({ state, parentNode: dropTargetNode, activeNode: nodeBeingDragged, selectedNodes });
           } else {
             console.debug(
               `XYFLOW KIE DIAGRAM: Ignoring '${nodeBeingDragged.type}' dropped on top of '${dropTargetNode?.type}'`
@@ -630,35 +665,32 @@ export function XyFlowReactKieDiagram<
 
   const onEdgesChange = useCallback<RF.OnEdgesChange>(
     (changes) => {
-      for (const change of changes) {
-        switch (change.type) {
-          case "select":
-            xyFlowReactKieDiagramStoreApi.setState((state) => {
+      xyFlowReactKieDiagramStoreApi.setState((state) => {
+        for (const change of changes) {
+          switch (change.type) {
+            case "select":
               console.debug(`XYFLOW KIE DIAGRAM: 'onEdgesChange' --> select '${change.id}'`);
               state.dispatch(state).setEdgeStatus(change.id, { selected: change.selected });
-            });
-            break;
-          case "remove":
-            console.debug(`XYFLOW KIE DIAGRAM: 'onEdgesChange' --> remove '${change.id}'`);
-            const state = xyFlowReactKieDiagramStoreApi.getState();
-            const edge = state.computed(state).getDiagramData().edgesById.get(change.id);
-            if (edge?.data) {
-              console.log("XYFLOW KIE DIAGRAM: Edge deleted");
-              onEdgeDeleted({ edge });
+              break;
+            case "remove":
+              console.debug(`XYFLOW KIE DIAGRAM: 'onEdgesChange' --> remove '${change.id}'`);
+              const edge = state.computed(state).getDiagramData().edgesById.get(change.id);
+              if (edge?.data) {
+                console.log("XYFLOW KIE DIAGRAM: Edge deleted");
+                onEdgeDeleted({ state, edge });
 
-              xyFlowReactKieDiagramStoreApi.setState((state) => {
                 state.dispatch(state).setEdgeStatus(change.id, {
                   selected: false,
                   draggingWaypoint: false,
                 });
-              });
-            }
-            break;
-          case "add":
-          case "reset":
-            console.debug(`XYFLOW KIE DIAGRAM: 'onEdgesChange' --> add/reset '${change.item.id}'. Ignoring`);
+              }
+              break;
+            case "add":
+            case "reset":
+              console.debug(`XYFLOW KIE DIAGRAM: 'onEdgesChange' --> add/reset '${change.item.id}'. Ignoring`);
+          }
         }
-      }
+      });
     },
     [onEdgeDeleted, xyFlowReactKieDiagramStoreApi]
   );
@@ -690,7 +722,9 @@ export function XyFlowReactKieDiagram<
         : getDiBoundsCenterPoint(sourceBounds);
 
       console.log("XYFLOW KIE DIAGRAM: Edge updated");
-      onEdgeUpdated({ sourceNode, targetNode, lastWaypoint, firstWaypoint, edge: oldEdge });
+      xyFlowReactKieDiagramStoreApi.setState((state) => {
+        onEdgeUpdated({ state, sourceNode, targetNode, lastWaypoint, firstWaypoint, edge: oldEdge });
+      });
     },
     [onEdgeUpdated, xyFlowReactKieDiagramStoreApi]
   );

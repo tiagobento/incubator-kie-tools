@@ -19,7 +19,6 @@
 
 import { BPMN20__tProcess, BPMNDI__BPMNShape } from "@kie-tools/bpmn-marshaller/dist/schemas/bpmn-2_0/ts-gen/types";
 import {
-  XyFlowReactKieDiagram,
   DiagramRef,
   OnConnectedNodeAdded,
   OnEdgeAdded,
@@ -35,6 +34,7 @@ import {
   OnWaypointAdded,
   OnWaypointDeleted,
   OnWaypointRepositioned,
+  XyFlowReactKieDiagram,
 } from "@kie-tools/xyflow-react-kie-diagram/dist/diagram/XyFlowReactKieDiagram";
 import { ConnectionLine as ReactFlowDiagramConnectionLine } from "@kie-tools/xyflow-react-kie-diagram/dist/edges/ConnectionLine";
 import { EdgeMarkers } from "@kie-tools/xyflow-react-kie-diagram/dist/edges/EdgeMarkers";
@@ -43,29 +43,32 @@ import { useCallback, useState } from "react";
 import * as RF from "reactflow";
 import { useBpmnEditor } from "../BpmnEditorContext";
 import { normalize } from "../normalization/normalize";
+import { BpmnDiagramLhsPanel, State } from "../store/Store";
 import { useBpmnEditorStore, useBpmnEditorStoreApi } from "../store/StoreContext";
 import { BpmnDiagramCommands } from "./BpmnDiagramCommands";
-import { BpmnDiagramEmptyState } from "./BpmnDiagramEmptyState";
-import { TopRightCornerPanels } from "./BpmnDiagramTopRightPanels";
 import {
   BPMN_CONTAINMENT_MAP,
+  BPMN_GRAPH_STRUCTURE,
+  BpmnDiagramEdgeData,
+  BpmnDiagramNodeData,
+  BpmnEdgeType,
+  BpmnNodeType,
   CONNECTION_LINE_EDGE_COMPONENTS_MAPPING,
   CONNECTION_LINE_NODE_COMPONENT_MAPPING,
+  DEFAULT_NODE_SIZES,
+  MIN_NODE_SIZES,
+  NODE_TYPES,
   XY_FLOW_EDGE_TYPES,
   XY_FLOW_NODE_TYPES,
 } from "./BpmnDiagramDomain";
-import { BpmnEdgeType } from "./BpmnDiagramDomain";
-import { BpmnNodeType } from "./BpmnDiagramDomain";
-import { BPMN_GRAPH_STRUCTURE } from "./BpmnDiagramDomain";
+import { BpmnDiagramEmptyState } from "./BpmnDiagramEmptyState";
+import { TopRightCornerPanels } from "./BpmnDiagramTopRightPanels";
 import { BpmnPalette, MIME_TYPE_FOR_BPMN_EDITOR_NEW_NODE_FROM_PALETTE } from "./BpmnPalette";
 import { DiagramContainerContextProvider } from "./DiagramContainerContext";
-import { BpmnDiagramEdgeData } from "./BpmnDiagramDomain";
-import { DEFAULT_NODE_SIZES } from "./BpmnDiagramDomain";
-import { MIN_NODE_SIZES } from "./BpmnDiagramDomain";
-import { NODE_TYPES } from "./BpmnDiagramDomain";
-import { BpmnNodeElement } from "./BpmnDiagramDomain";
-import { BpmnDiagramNodeData } from "./BpmnDiagramDomain";
-import { BpmnDiagramLhsPanel } from "../store/Store";
+import { repositionNode } from "../mutations/repositionNode";
+import { deleteNode } from "../mutations/deleteNode";
+import { nodeNatures } from "../mutations/NodeNature";
+import { addConnectedNode } from "../mutations/addConnectedNode";
 
 export function BpmnDiagram({
   container,
@@ -99,95 +102,118 @@ export function BpmnDiagram({
 
   // nodes
 
-  const onNodeAdded = useCallback<OnNodeAdded<BpmnNodeType, BpmnDiagramNodeData>>(() => {
-    console.log("BPMN EDITOR DIAGRAM: onNodeAdded");
-  }, []);
+  const onNodeAdded = useCallback<OnNodeAdded<State, BpmnNodeType, BpmnDiagramNodeData, BpmnDiagramEdgeData>>(
+    ({ state }) => {
+      console.log("BPMN EDITOR DIAGRAM: onNodeAdded");
+    },
+    []
+  );
 
   const onConnectedNodeAdded = useCallback<
-    OnConnectedNodeAdded<BpmnNodeType, BpmnEdgeType, BpmnDiagramNodeData>
-  >(() => {
+    OnConnectedNodeAdded<State, BpmnNodeType, BpmnEdgeType, BpmnDiagramNodeData, BpmnDiagramEdgeData>
+  >(({ state, sourceNode, newNodeType, edgeType, dropPoint }) => {
     console.log("BPMN EDITOR DIAGRAM: onConnectedNodeAdded");
+    addConnectedNode({
+      definitions: state.bpmn.model.definitions,
+      __readonly_newNode: {
+        bounds: {
+          "@_x": dropPoint.x,
+          "@_y": dropPoint.y,
+          "@_width": DEFAULT_NODE_SIZES[newNodeType]({ snapGrid: state.xyFlowReactKieDiagram.snapGrid })["@_width"],
+          "@_height": DEFAULT_NODE_SIZES[newNodeType]({ snapGrid: state.xyFlowReactKieDiagram.snapGrid })["@_height"],
+        },
+        type: newNodeType,
+      },
+      __readonly_sourceNode: {
+        bounds: sourceNode.data.shape["dc:Bounds"],
+        id: sourceNode.id,
+        shapeId: sourceNode.data.shape["@_id"],
+        type: sourceNode.type as BpmnNodeType,
+      },
+    });
   }, []);
 
-  const onNodeRepositioned = useCallback<OnNodeRepositioned<BpmnNodeType, BpmnDiagramNodeData>>(
-    ({ node, newPosition }) => {
-      console.log("BPMN EDITOR DIAGRAM: onNodeRepositioned");
+  const onNodeRepositioned = useCallback<
+    OnNodeRepositioned<State, BpmnNodeType, BpmnDiagramNodeData, BpmnDiagramEdgeData>
+  >(({ state, node, controlWaypointsByEdge, newPosition }) => {
+    console.log("BPMN EDITOR DIAGRAM: onNodeRepositioned");
+    repositionNode({
+      definitions: state.bpmn.model.definitions,
+      controlWaypointsByEdge,
+      __readonly_change: {
+        type: "absolute",
+        nodeType: node.type as BpmnNodeType,
+        selectedEdges: [...state.computed(state).getDiagramData().selectedEdgesById.keys()],
+        shapeIndex: node.data.shapeIndex,
+        sourceEdgeIndexes: state
+          .computed(state)
+          .getDiagramData()
+          .edges.flatMap((e) => (e.source === node.id && e.data?.bpmnEdge ? [e.data.bpmnEdgeIndex] : [])),
+        targetEdgeIndexes: state
+          .computed(state)
+          .getDiagramData()
+          .edges.flatMap((e) => (e.target === node.id && e.data?.bpmnEdge ? [e.data.bpmnEdgeIndex] : [])),
+        position: newPosition,
+      },
+    });
+  }, []);
 
-      bpmnEditorStoreApi.setState((s) => {
-        const shape = (s.bpmn.model.definitions["bpmndi:BPMNDiagram"] ?? [])
-          .flatMap((d) => d["bpmndi:BPMNPlane"]["di:DiagramElement"])
-          .filter((bpmnElement) => bpmnElement?.__$$element === "bpmndi:BPMNShape")
-          .filter((bpmnShape) => bpmnShape?.["@_bpmnElement"] === node.id)?.[0] as BPMNDI__BPMNShape;
-
-        shape["dc:Bounds"]["@_x"] = newPosition.x;
-        shape["dc:Bounds"]["@_y"] = newPosition.y;
-      });
-    },
-    [bpmnEditorStoreApi]
-  );
-
-  const onNodeDeleted = useCallback<OnNodeDeleted<BpmnNodeType, BpmnDiagramNodeData>>(
-    ({ node }) => {
+  const onNodeDeleted = useCallback<OnNodeDeleted<State, BpmnNodeType, BpmnDiagramNodeData, BpmnDiagramEdgeData>>(
+    ({ state, node }) => {
       console.log("BPMN EDITOR DIAGRAM: onNodeDeleted");
-
-      bpmnEditorStoreApi.setState((s) => {
-        const process = s.bpmn.model.definitions.rootElement?.find(
-          (s) => s.__$$element === "process"
-        ) as BPMN20__tProcess;
-
-        if (process) {
-          process.artifact = process.artifact?.filter((s) => s["@_id"] !== node.id);
-          process.flowElement = process.flowElement?.filter((s) => s["@_id"] !== node.id);
-        }
-
-        const plane = s.bpmn.model.definitions["bpmndi:BPMNDiagram"]?.[0]?.["bpmndi:BPMNPlane"];
-        if (plane) {
-          plane["di:DiagramElement"] = plane["di:DiagramElement"]?.filter((s) => s["@_bpmnElement"] !== node.id);
-        }
+      deleteNode({
+        definitions: state.bpmn.model.definitions,
+        __readonly_bpmnElementId: node.data.bpmnElement?.["@_id"],
+        __readonly_nodeNature: nodeNatures[node.type as BpmnNodeType],
+        __readonly_bpmnEdgeData: state
+          .computed(state)
+          .getDiagramData()
+          .edges.map((e) => e.data!),
       });
     },
-    [bpmnEditorStoreApi]
+    []
   );
 
-  const onNodeUnparented = useCallback<OnNodeUnparented<BpmnNodeType, BpmnDiagramNodeData>>(() => {
-    console.log("BPMN EDITOR DIAGRAM: onNodeUnparented");
-  }, []);
+  const onNodeUnparented = useCallback<OnNodeUnparented<State, BpmnNodeType, BpmnDiagramNodeData, BpmnDiagramEdgeData>>(
+    ({ state }) => {
+      console.log("BPMN EDITOR DIAGRAM: onNodeUnparented");
+    },
+    []
+  );
 
-  const onNodeParented = useCallback<OnNodeParented<BpmnNodeType, BpmnDiagramNodeData>>(() => {
-    console.log("BPMN EDITOR DIAGRAM: onNodeParented");
-  }, []);
+  const onNodeParented = useCallback<OnNodeParented<State, BpmnNodeType, BpmnDiagramNodeData, BpmnDiagramEdgeData>>(
+    ({ state }) => {
+      console.log("BPMN EDITOR DIAGRAM: onNodeParented");
+    },
+    []
+  );
 
-  const onNodeResized = useCallback<OnNodeResized<BpmnNodeType, BpmnDiagramNodeData>>(() => {
-    console.log("BPMN EDITOR DIAGRAM: onNodeResized");
-  }, []);
+  const onNodeResized = useCallback<OnNodeResized<State, BpmnNodeType, BpmnDiagramNodeData, BpmnDiagramEdgeData>>(
+    ({ state }) => {
+      console.log("BPMN EDITOR DIAGRAM: onNodeResized");
+    },
+    []
+  );
 
   // edges
 
   const onEdgeAdded = useCallback<
-    OnEdgeAdded<BpmnNodeType, BpmnEdgeType, BpmnDiagramNodeData, BpmnDiagramEdgeData>
-  >(() => {
+    OnEdgeAdded<State, BpmnNodeType, BpmnEdgeType, BpmnDiagramNodeData, BpmnDiagramEdgeData>
+  >(({ state }) => {
     console.log("BPMN EDITOR DIAGRAM: onEdgeAdded");
   }, []);
 
   const onEdgeUpdated = useCallback<
-    OnEdgeUpdated<BpmnNodeType, BpmnEdgeType, BpmnDiagramNodeData, BpmnDiagramEdgeData>
-  >(() => {
+    OnEdgeUpdated<State, BpmnNodeType, BpmnEdgeType, BpmnDiagramNodeData, BpmnDiagramEdgeData>
+  >(({ state }) => {
     console.log("BPMN EDITOR DIAGRAM: onEdgeUpdated");
   }, []);
 
-  const onEdgeDeleted = useCallback<OnEdgeDeleted<BpmnEdgeType, BpmnDiagramEdgeData>>(() => {
+  const onEdgeDeleted = useCallback<
+    OnEdgeDeleted<State, BpmnNodeType, BpmnEdgeType, BpmnDiagramNodeData, BpmnDiagramEdgeData>
+  >(({ state }) => {
     console.log("BPMN EDITOR DIAGRAM: onEdgeDeleted");
   }, []);
-
-  // misc
-
-  const onEscPressed = useCallback<OnEscPressed>(() => {
-    bpmnEditorStoreApi.setState((state) => {
-      state.diagram.propertiesPanel.isOpen = false;
-      state.diagram.overlaysPanel.isOpen = false;
-      state.diagram.openLhsPanel = BpmnDiagramLhsPanel.NONE;
-    });
-  }, [bpmnEditorStoreApi]);
 
   // waypoints
 
@@ -202,6 +228,16 @@ export function BpmnDiagram({
   const onWaypointDeleted = useCallback<OnWaypointDeleted>(() => {
     console.log("BPMN EDITOR DIAGRAM: onWaypointDeleted");
   }, []);
+
+  // misc
+
+  const onEscPressed = useCallback<OnEscPressed>(() => {
+    bpmnEditorStoreApi.setState((state) => {
+      state.diagram.propertiesPanel.isOpen = false;
+      state.diagram.overlaysPanel.isOpen = false;
+      state.diagram.openLhsPanel = BpmnDiagramLhsPanel.NONE;
+    });
+  }, [bpmnEditorStoreApi]);
 
   return (
     <>
