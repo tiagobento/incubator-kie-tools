@@ -45,9 +45,6 @@
     "@kie-tools/pmml-editor-marshaller": "workspace:*",
     "@kie-tools/xml-parser-ts": "workspace:*",
     "@kie-tools/xyflow-react-kie-diagram": "workspace:*",
-    "@patternfly/react-core": "^4.276.6",
-    "@patternfly/react-icons": "^4.93.6",
-    "@patternfly/react-styles": "^4.92.6",
     "@visx/text": "^3.3.0",
     "d3-drag": "^3.0.0",
     "d3-selection": "^3.0.0",
@@ -55,7 +52,6 @@
     "fast-deep-equal": "^3.1.3",
     "immer": "^10.0.3",
     "moment": "^2.29.4",
-    "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-error-boundary": "^4.0.11",
     "reactflow": "^11.8.3",
@@ -98,10 +94,16 @@
     "run-script-os": "^1.1.6",
     "start-server-and-test": "^2.0.3",
     "storybook": "^7.3.2",
-    "typescript": "^4.6.2",
+    "typescript": "^5.5.3",
     "webpack": "^5.88.2",
     "webpack-cli": "^4.10.0",
     "webpack-dev-server": "^4.15.1",
     "webpack-merge": "^5.9.0"
+  },
+  "peerDependencies": {
+    "@patternfly/react-core": "^4.276.6",
+    "@patternfly/react-icons": "^4.93.6",
+    "@patternfly/react-styles": "^4.92.6",
+    "react": "^17.0.2"
   }
 }
