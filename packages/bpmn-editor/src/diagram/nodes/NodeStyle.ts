@@ -22,7 +22,7 @@ import { BpmnNodeType } from "../BpmnDiagramDomain";
 import { NODE_TYPES } from "../BpmnDiagramDomain";
 import { Normalized } from "../../normalization/normalize";
 import { DC__Font } from "@kie-tools/bpmn-marshaller/dist/schemas/bpmn-2_0/ts-gen/types";
-import { NodeLabelPosition } from "@kie-tools/xyflow-kie-diagram/dist/nodes/NodeSvgs";
+import { NodeLabelPosition } from "@kie-tools/xyflow-react-kie-diagram/dist/nodes/NodeSvgs";
 
 export interface NodeStyle {
   fontCssProperties: React.CSSProperties;

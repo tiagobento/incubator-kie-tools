@@ -17,20 +17,20 @@
  * under the License.
  */
 
-import { Cache } from "@kie-tools/xyflow-react-kie-diagram/dist/store/ComputedStateCache";
-import { State } from "./Store";
-
-export const INITIAL_COMPUTED_CACHE: Cache<ReturnType<State["computed"]>> = {
-  isDiagramEditingInProgress: {
-    value: undefined,
-    dependencies: [],
-  },
-  getDiagramData: {
-    value: undefined,
-    dependencies: [],
-  },
-  isDropTargetNodeValidForSelection: {
-    value: undefined,
-    dependencies: [],
-  },
-};
+circle.xyflow-react-kie-diagram--diagram-edge-waypoint {
+  fill: black;
+  stroke-width: 8;
+  stroke: #006ba4;
+}
+circle.xyflow-react-kie-diagram--diagram-edge-waypoint:active,
+circle.xyflow-react-kie-diagram--diagram-edge-waypoint:hover {
+  stroke-width: 16;
+  cursor: grab;
+}
+.react-flow__edge.selected .xyflow-react-kie-diagram--edge-waypoint-potential,
+.react-flow__edge:not(.selected) .xyflow-react-kie-diagram--edge-waypoint-potential {
+  fill: #4d809b96;
+}
+.xyflow-react-kie-diagram--edge-waypoint-potential {
+  pointer-events: none;
+}

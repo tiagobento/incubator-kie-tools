@@ -72,7 +72,7 @@
       { "id": "@kie-tools-core/react-hooks" },
       { "id": "@kie-tools/bpmn-marshaller" },
       { "id": "@kie-tools/pmml-editor-marshaller" },
-      { "id": "@kie-tools/xyflow-kie-diagram" },
+      { "id": "@kie-tools/xyflow-react-kie-diagram" },
       { "id": "@kie-tools/xml-parser-ts-codegen" },
       { "id": "@kie-tools-core/switch-expression-ts" },
       { "id": "@kie-tools/xml-parser-ts" },
@@ -864,7 +864,7 @@
       },
       {
         "source": "@kie-tools/bpmn-editor",
-        "target": "@kie-tools/xyflow-kie-diagram",
+        "target": "@kie-tools/xyflow-react-kie-diagram",
         "weight": 1
       },
       {
@@ -903,12 +903,12 @@
         "weight": 1
       },
       {
-        "source": "@kie-tools/xyflow-kie-diagram",
+        "source": "@kie-tools/xyflow-react-kie-diagram",
         "target": "@kie-tools-core/switch-expression-ts",
         "weight": 1
       },
       {
-        "source": "@kie-tools/xyflow-kie-diagram",
+        "source": "@kie-tools/xyflow-react-kie-diagram",
         "target": "@kie-tools/xml-parser-ts",
         "weight": 1
       },
@@ -2614,7 +2614,7 @@
     ["@kie-tools-core/workspaces-git-fs", "packages/workspaces-git-fs"],
     ["@kie-tools/xml-parser-ts", "packages/xml-parser-ts"],
     ["@kie-tools/xml-parser-ts-codegen", "packages/xml-parser-ts-codegen"],
-    ["@kie-tools/xyflow-kie-diagram", "packages/xyflow-kie-diagram"],
+    ["@kie-tools/xyflow-react-kie-diagram", "packages/xyflow-react-kie-diagram"],
     ["@kie-tools/yaml-language-server", "packages/yaml-language-server"],
     ["@kie-tools/yard-editor", "packages/yard-editor"],
     ["@kie-tools/yard-language-service", "packages/yard-language-service"],

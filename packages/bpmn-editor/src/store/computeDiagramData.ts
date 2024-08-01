@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { GraphStructureAdjacencyList, GraphStructureEdge } from "@kie-tools/xyflow-kie-diagram/dist/graph/graph";
-import { snapShapeDimensions } from "@kie-tools/xyflow-kie-diagram/dist/snapgrid/SnapGrid";
-import { XyFlowDiagramData } from "@kie-tools/xyflow-kie-diagram/dist/store/State";
+import { GraphStructureAdjacencyList, GraphStructureEdge } from "@kie-tools/xyflow-react-kie-diagram/dist/graph/graph";
+import { snapShapeDimensions } from "@kie-tools/xyflow-react-kie-diagram/dist/snapgrid/SnapGrid";
+import { XyFlowDiagramData } from "@kie-tools/xyflow-react-kie-diagram/dist/store/State";
 import * as RF from "reactflow";
 import {
   BpmnDiagramEdgeData,
@@ -33,12 +33,12 @@ import {
 } from "../diagram/BpmnDiagramDomain";
 import { MIN_NODE_SIZES } from "../diagram/BpmnDiagramDomain";
 import { BpmnXyFlowDiagramState, State } from "./Store";
-import { NODE_LAYERS } from "@kie-tools/xyflow-kie-diagram/dist/nodes/Hooks";
+import { NODE_LAYERS } from "@kie-tools/xyflow-react-kie-diagram/dist/nodes/Hooks";
 
 export function computeDiagramData(
   definitions: State["bpmn"]["model"]["definitions"],
-  xyFlowKieDiagram: BpmnXyFlowDiagramState["xyFlowKieDiagram"],
-  snapGrid: BpmnXyFlowDiagramState["xyFlowKieDiagram"]["snapGrid"]
+  xyFlowReactKieDiagram: BpmnXyFlowDiagramState["xyFlowReactKieDiagram"],
+  snapGrid: BpmnXyFlowDiagramState["xyFlowReactKieDiagram"]["snapGrid"]
 ): XyFlowDiagramData<BpmnNodeType, BpmnDiagramNodeData, BpmnDiagramEdgeData> {
   const nodeBpmnElementsById = new Map<string, BpmnNodeElement>();
   const edgeBpmnElementsById = new Map<string, BpmnEdgeElement>();
@@ -94,10 +94,10 @@ export function computeDiagramData(
     }, new Map<string, BpmnNodeElement>()) ?? new Map<string, BpmnNodeElement>();
 
   const { selectedNodes, draggingNodes, resizingNodes, selectedEdges } = {
-    selectedNodes: new Set(xyFlowKieDiagram._selectedNodes),
-    draggingNodes: new Set(xyFlowKieDiagram.draggingNodes),
-    resizingNodes: new Set(xyFlowKieDiagram.resizingNodes),
-    selectedEdges: new Set(xyFlowKieDiagram._selectedEdges),
+    selectedNodes: new Set(xyFlowReactKieDiagram._selectedNodes),
+    draggingNodes: new Set(xyFlowReactKieDiagram.draggingNodes),
+    resizingNodes: new Set(xyFlowReactKieDiagram.resizingNodes),
+    selectedEdges: new Set(xyFlowReactKieDiagram._selectedEdges),
   };
 
   const nodes: RF.Node<BpmnDiagramNodeData, BpmnNodeType>[] = (definitions["bpmndi:BPMNDiagram"] ?? [])
@@ -127,7 +127,7 @@ export function computeDiagramData(
           shapeIndex: i,
           parentXyFlowNode: undefined,
         },
-        className: bpmnElement.__$$element === "lane" ? "xyflow-kie-diagram--containerNode" : "",
+        className: bpmnElement.__$$element === "lane" ? "xyflow-react-kie-diagram--containerNode" : "",
         zIndex:
           bpmnElement.__$$element === "lane"
             ? NODE_LAYERS.GROUP_NODES
@@ -151,12 +151,12 @@ export function computeDiagramData(
     new Map<string, RF.Node<BpmnDiagramNodeData, BpmnNodeType>>()
   );
 
-  const selectedNodesById = xyFlowKieDiagram._selectedNodes.reduce(
+  const selectedNodesById = xyFlowReactKieDiagram._selectedNodes.reduce(
     (acc, s) => acc.set(s, nodesById.get(s)!),
     new Map<string, RF.Node<BpmnDiagramNodeData, BpmnNodeType>>()
   );
 
-  const selectedNodeTypes = xyFlowKieDiagram._selectedNodes.reduce(
+  const selectedNodeTypes = xyFlowReactKieDiagram._selectedNodes.reduce(
     (acc, s) => acc.add(nodesById.get(s)!.type as BpmnNodeType),
     new Set<BpmnNodeType>()
   );
@@ -230,7 +230,7 @@ export function computeDiagramData(
 
   const edgesById = edges.reduce((acc, e) => acc.set(e.id, e), new Map<string, RF.Edge<BpmnDiagramEdgeData>>());
 
-  const selectedEdgesById = xyFlowKieDiagram._selectedEdges.reduce(
+  const selectedEdgesById = xyFlowReactKieDiagram._selectedEdges.reduce(
     (acc, s) => acc.set(s, edgesById.get(s)!),
     new Map<string, RF.Edge<BpmnDiagramEdgeData>>()
   );

@@ -17,20 +17,7 @@
  * under the License.
  */
 
-import { Cache } from "@kie-tools/xyflow-react-kie-diagram/dist/store/ComputedStateCache";
-import { State } from "./Store";
-
-export const INITIAL_COMPUTED_CACHE: Cache<ReturnType<State["computed"]>> = {
-  isDiagramEditingInProgress: {
-    value: undefined,
-    dependencies: [],
-  },
-  getDiagramData: {
-    value: undefined,
-    dependencies: [],
-  },
-  isDropTargetNodeValidForSelection: {
-    value: undefined,
-    dependencies: [],
-  },
-};
+.xyflow-react-kie-diagram--edge.dimmed {
+  opacity: 0.3;
+  pointer-events: none;
+}

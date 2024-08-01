@@ -17,14 +17,14 @@
  * under the License.
  */
 
-import { useEdgeClassName } from "@kie-tools/xyflow-kie-diagram/dist/edges/Hooks";
-import { PotentialWaypoint, Waypoints } from "@kie-tools/xyflow-kie-diagram/dist/edges/Waypoints";
-import { useAlwaysVisibleEdgeUpdatersAtNodeBorders } from "@kie-tools/xyflow-kie-diagram/dist/edges/useAlwaysVisibleEdgeUpdatersAtNodeBorders";
-import { usePathForEdgeWithWaypoints } from "@kie-tools/xyflow-kie-diagram/dist/edges/usePathForEdgeWithWaypoints";
-import { usePotentialWaypointControls } from "@kie-tools/xyflow-kie-diagram/dist/edges/usePotentialWaypointControls";
-import { DEFAULT_INTRACTION_WIDTH } from "@kie-tools/xyflow-kie-diagram/dist/maths/DcMaths";
-import { propsHaveSameValuesDeep } from "@kie-tools/xyflow-kie-diagram/dist/memoization/memoization";
-import { useIsHovered } from "@kie-tools/xyflow-kie-diagram/dist/reactExt/useIsHovered";
+import { useEdgeClassName } from "@kie-tools/xyflow-react-kie-diagram/dist/edges/Hooks";
+import { PotentialWaypoint, Waypoints } from "@kie-tools/xyflow-react-kie-diagram/dist/edges/Waypoints";
+import { useAlwaysVisibleEdgeUpdatersAtNodeBorders } from "@kie-tools/xyflow-react-kie-diagram/dist/edges/useAlwaysVisibleEdgeUpdatersAtNodeBorders";
+import { usePathForEdgeWithWaypoints } from "@kie-tools/xyflow-react-kie-diagram/dist/edges/usePathForEdgeWithWaypoints";
+import { usePotentialWaypointControls } from "@kie-tools/xyflow-react-kie-diagram/dist/edges/usePotentialWaypointControls";
+import { DEFAULT_INTRACTION_WIDTH } from "@kie-tools/xyflow-react-kie-diagram/dist/maths/DcMaths";
+import { propsHaveSameValuesDeep } from "@kie-tools/xyflow-react-kie-diagram/dist/memoization/memoization";
+import { useIsHovered } from "@kie-tools/xyflow-react-kie-diagram/dist/reactExt/useIsHovered";
 import * as React from "react";
 import { useRef } from "react";
 import * as RF from "reactflow";
@@ -79,7 +79,7 @@ export const SequenceFlowEdge = React.memo((props: RF.EdgeProps<BpmnDiagramEdgeD
         onDoubleClick={onDoubleClickEdge}
         data-edgetype={"information-requirement"}
       />
-      <SequenceFlowPath d={path} className={`xyflow-kie-diagram--edge ${className}`} />
+      <SequenceFlowPath d={path} className={`xyflow-react-kie-diagram--edge ${className}`} />
 
       {props.selected && !isConnecting && props.data?.bpmnEdge && (
         <Waypoints

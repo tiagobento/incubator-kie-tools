@@ -25,7 +25,7 @@ import {
 import * as RF from "reactflow";
 import { Normalized } from "../normalization/normalize";
 import { State } from "../store/Store";
-import { Unpacked } from "@kie-tools/xyflow-kie-diagram/dist/tsExt/tsExt";
+import { Unpacked } from "@kie-tools/xyflow-react-kie-diagram/dist/tsExt/tsExt";
 
 export const BPMN_EDITOR_DIAGRAM_CLIPBOARD_MIME_TYPE = "application/json+kie-bpmn-editor--diagram" as const;
 

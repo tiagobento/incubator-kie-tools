@@ -19,7 +19,7 @@
 
 import { BPMN20__tProcess, BPMNDI__BPMNShape } from "@kie-tools/bpmn-marshaller/dist/schemas/bpmn-2_0/ts-gen/types";
 import {
-  Diagram,
+  XyFlowReactKieDiagram,
   DiagramRef,
   OnConnectedNodeAdded,
   OnEdgeAdded,
@@ -35,9 +35,9 @@ import {
   OnWaypointAdded,
   OnWaypointDeleted,
   OnWaypointRepositioned,
-} from "@kie-tools/xyflow-kie-diagram/dist/diagram/Diagram";
-import { ConnectionLine as ReactFlowDiagramConnectionLine } from "@kie-tools/xyflow-kie-diagram/dist/edges/ConnectionLine";
-import { EdgeMarkers } from "@kie-tools/xyflow-kie-diagram/dist/edges/EdgeMarkers";
+} from "@kie-tools/xyflow-react-kie-diagram/dist/diagram/XyFlowReactKieDiagram";
+import { ConnectionLine as ReactFlowDiagramConnectionLine } from "@kie-tools/xyflow-react-kie-diagram/dist/edges/ConnectionLine";
+import { EdgeMarkers } from "@kie-tools/xyflow-react-kie-diagram/dist/edges/EdgeMarkers";
 import * as React from "react";
 import { useCallback, useState } from "react";
 import * as RF from "reactflow";
@@ -85,11 +85,11 @@ export function BpmnDiagram({
   const resetToBeforeEditingBegan = useCallback(() => {
     bpmnEditorStoreApi.setState((state) => {
       state.bpmn.model = normalize(bpmnModelBeforeEditingRef.current);
-      state.xyFlowKieDiagram.draggingNodes = [];
-      state.xyFlowKieDiagram.draggingWaypoints = [];
-      state.xyFlowKieDiagram.resizingNodes = [];
-      state.xyFlowKieDiagram.dropTargetNode = undefined;
-      state.xyFlowKieDiagram.edgeIdBeingUpdated = undefined;
+      state.xyFlowReactKieDiagram.draggingNodes = [];
+      state.xyFlowReactKieDiagram.draggingWaypoints = [];
+      state.xyFlowReactKieDiagram.resizingNodes = [];
+      state.xyFlowReactKieDiagram.dropTargetNode = undefined;
+      state.xyFlowReactKieDiagram.edgeIdBeingUpdated = undefined;
     });
   }, [bpmnEditorStoreApi, bpmnModelBeforeEditingRef]);
 
@@ -211,7 +211,7 @@ export function BpmnDiagram({
           <EdgeMarkers />
         </svg>
 
-        <Diagram
+        <XyFlowReactKieDiagram
           // infra
           diagramRef={diagramRef}
           container={container}
@@ -248,7 +248,7 @@ export function BpmnDiagram({
           <BpmnPalette pulse={isEmptyStateShowing} />
           <TopRightCornerPanels availableHeight={container.current?.offsetHeight} />
           <BpmnDiagramCommands />
-        </Diagram>
+        </XyFlowReactKieDiagram>
       </DiagramContainerContextProvider>
     </>
   );

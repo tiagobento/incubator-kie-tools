@@ -17,20 +17,28 @@
  * under the License.
  */
 
-import { Cache } from "@kie-tools/xyflow-react-kie-diagram/dist/store/ComputedStateCache";
-import { State } from "./Store";
-
-export const INITIAL_COMPUTED_CACHE: Cache<ReturnType<State["computed"]>> = {
-  isDiagramEditingInProgress: {
-    value: undefined,
-    dependencies: [],
-  },
-  getDiagramData: {
-    value: undefined,
-    dependencies: [],
-  },
-  isDropTargetNodeValidForSelection: {
-    value: undefined,
-    dependencies: [],
-  },
-};
+.xyflow-react-kie-diagram--info-node-panel {
+  position: absolute;
+  top: 0;
+  right: calc(100% + 4px - 21px);
+  padding-right: 21px;
+  height: max(25%, 40px);
+}
+.xyflow-react-kie-diagram--info-label {
+  padding: 4px 5px;
+  height: 19px;
+  cursor: pointer;
+  background: white;
+  color: black;
+  font-weight: bold;
+  box-shadow: 4px 4px 2px 0px rgb(127 127 127);
+}
+.xyflow-react-kie-diagram--info-label > .pf-c-label__content::before {
+  border: 1px solid black;
+}
+.xyflow-react-kie-diagram--info-label:hover {
+  filter: brightness(95%);
+}
+.xyflow-react-kie-diagram--info-label:active {
+  filter: brightness(90%);
+}

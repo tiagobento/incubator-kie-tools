@@ -28,9 +28,9 @@ import {
 } from "../clipboard/Clipboard";
 import { useCommands } from "../commands/CommandsContextProvider";
 import { useBpmnEditorStoreApi } from "../store/StoreContext";
-import { DEFAULT_VIEWPORT } from "@kie-tools/xyflow-kie-diagram/dist/diagram/Diagram";
+import { DEFAULT_VIEWPORT } from "@kie-tools/xyflow-react-kie-diagram/dist/diagram/XyFlowReactKieDiagram";
 import { BpmnDiagramEdgeData } from "./BpmnDiagramDomain";
-import { getBounds } from "@kie-tools/xyflow-kie-diagram/dist/maths/DcMaths";
+import { getBounds } from "@kie-tools/xyflow-react-kie-diagram/dist/maths/DcMaths";
 import { BpmnDiagramNodeData } from "./BpmnDiagramDomain";
 
 export function BpmnDiagramCommands(props: {}) {
@@ -50,7 +50,7 @@ export function BpmnDiagramCommands(props: {}) {
         if (xyFlowState.connectionNodeId) {
           xyFlowState.cancelConnection();
           bpmnEditorStoreApi.setState((state) => {
-            state.xyFlowKieDiagram.ongoingConnection = undefined;
+            state.xyFlowReactKieDiagram.ongoingConnection = undefined;
           });
         } else {
           (document.activeElement as any)?.blur?.();
@@ -166,18 +166,18 @@ export function BpmnDiagramCommands(props: {}) {
       const allEdgeIds = xyFlowStoreApi.getState().edges.map((s) => s.id);
 
       bpmnEditorStoreApi.setState((state) => {
-        const allSelectedNodesSet = new Set(state.xyFlowKieDiagram._selectedNodes);
-        const allSelectedEdgesSet = new Set(state.xyFlowKieDiagram._selectedEdges);
+        const allSelectedNodesSet = new Set(state.xyFlowReactKieDiagram._selectedNodes);
+        const allSelectedEdgesSet = new Set(state.xyFlowReactKieDiagram._selectedEdges);
 
         // If everything is selected, deselect everything.
         if (
           allNodeIds.every((id) => allSelectedNodesSet.has(id) && allEdgeIds.every((id) => allSelectedEdgesSet.has(id)))
         ) {
-          state.xyFlowKieDiagram._selectedNodes = [];
-          state.xyFlowKieDiagram._selectedEdges = [];
+          state.xyFlowReactKieDiagram._selectedNodes = [];
+          state.xyFlowReactKieDiagram._selectedEdges = [];
         } else {
-          state.xyFlowKieDiagram._selectedNodes = allNodeIds;
-          state.xyFlowKieDiagram._selectedEdges = allEdgeIds;
+          state.xyFlowReactKieDiagram._selectedNodes = allNodeIds;
+          state.xyFlowReactKieDiagram._selectedEdges = allEdgeIds;
         }
       });
     };

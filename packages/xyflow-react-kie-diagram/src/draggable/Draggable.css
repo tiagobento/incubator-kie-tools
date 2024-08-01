@@ -17,20 +17,37 @@
  * under the License.
  */
 
-import { Cache } from "@kie-tools/xyflow-react-kie-diagram/dist/store/ComputedStateCache";
-import { State } from "./Store";
+.xyflow-react-kie-diagram--draggable-row {
+  display: flex;
+  flex-direction: row;
+  background-color: transparent;
+}
 
-export const INITIAL_COMPUTED_CACHE: Cache<ReturnType<State["computed"]>> = {
-  isDiagramEditingInProgress: {
-    value: undefined,
-    dependencies: [],
-  },
-  getDiagramData: {
-    value: undefined,
-    dependencies: [],
-  },
-  isDropTargetNodeValidForSelection: {
-    value: undefined,
-    dependencies: [],
-  },
-};
+.xyflow-react-kie-diagram--draggable-row-hovered {
+  background-color: rgb(220, 220, 220);
+}
+
+.xyflow-react-kie-diagram--draggable-row-is-dragging {
+  opacity: 0;
+}
+
+.xyflow-react-kie-diagram--draggable-icon {
+  align-self: center;
+  cursor: grab;
+}
+
+.xyflow-react-kie-diagram--draggable-icon:active {
+  cursor: grabbing;
+}
+
+.xyflow-react-kie-diagram--draggable-icon-handler {
+  color: transparent;
+}
+
+.xyflow-react-kie-diagram--draggable-icon-handler-hovered {
+  color: gray;
+}
+
+.xyflow-react-kie-diagram--draggable-children {
+  flex-grow: 1;
+}

@@ -59,13 +59,13 @@ import {
   UnknownNodeSvg,
 } from "./NodeSvgs";
 
-import { getContainmentRelationship } from "@kie-tools/xyflow-kie-diagram/dist/maths/DcMaths";
-import { propsHaveSameValuesDeep } from "@kie-tools/xyflow-kie-diagram/dist/memoization/memoization";
+import { getContainmentRelationship } from "@kie-tools/xyflow-react-kie-diagram/dist/maths/DcMaths";
+import { propsHaveSameValuesDeep } from "@kie-tools/xyflow-react-kie-diagram/dist/memoization/memoization";
 import {
   EditableNodeLabel,
   OnEditableNodeLabelChange,
   useEditableNodeLabel,
-} from "@kie-tools/xyflow-kie-diagram/dist/nodes/EditableNodeLabel";
+} from "@kie-tools/xyflow-react-kie-diagram/dist/nodes/EditableNodeLabel";
 import {
   NodeResizerHandle,
   useConnectionTargetStatus,
@@ -73,11 +73,11 @@ import {
   useNodeClassName,
   useNodeDimensions,
   useNodeResizing,
-} from "@kie-tools/xyflow-kie-diagram/dist/nodes/Hooks";
-import { InfoNodePanel } from "@kie-tools/xyflow-kie-diagram/dist/nodes/InfoNodePanel";
-import { OutgoingStuffNodePanel } from "@kie-tools/xyflow-kie-diagram/dist/nodes/OutgoingStuffNodePanel";
-import { PositionalNodeHandles } from "@kie-tools/xyflow-kie-diagram/dist/nodes/PositionalNodeHandles";
-import { useIsHovered } from "@kie-tools/xyflow-kie-diagram/dist/reactExt/useIsHovered";
+} from "@kie-tools/xyflow-react-kie-diagram/dist/nodes/Hooks";
+import { InfoNodePanel } from "@kie-tools/xyflow-react-kie-diagram/dist/nodes/InfoNodePanel";
+import { OutgoingStuffNodePanel } from "@kie-tools/xyflow-react-kie-diagram/dist/nodes/OutgoingStuffNodePanel";
+import { PositionalNodeHandles } from "@kie-tools/xyflow-react-kie-diagram/dist/nodes/PositionalNodeHandles";
+import { useIsHovered } from "@kie-tools/xyflow-react-kie-diagram/dist/reactExt/useIsHovered";
 import { BpmnDiagramEdgeData } from "../BpmnDiagramDomain";
 import { bpmnNodesOutgoingStuffNodePanelMapping } from "../BpmnDiagramDomain";
 import { bpmnEdgesOutgoingStuffNodePanelMapping } from "../BpmnDiagramDomain";
@@ -100,7 +100,7 @@ export const StartEventNode = React.memo(
     const isHovered = useIsHovered(ref);
     const isResizing = useNodeResizing(id);
     const shouldActLikeHovered = useBpmnEditorStore(
-      (s) => (isHovered || isResizing) && s.xyFlowKieDiagram.draggingNodes.length === 0
+      (s) => (isHovered || isResizing) && s.xyFlowReactKieDiagram.draggingNodes.length === 0
     );
 
     const { isEditingLabel, setEditingLabel, triggerEditing, triggerEditingIfEnter } = useEditableNodeLabel(id);
@@ -129,7 +129,7 @@ export const StartEventNode = React.memo(
 
     return (
       <>
-        <svg className={`xyflow-kie-diagram--node-shape ${className} ${selected ? "selected" : ""}`}>
+        <svg className={`xyflow-react-kie-diagram--node-shape ${className} ${selected ? "selected" : ""}`}>
           <StartEventNodeSvg
             {...nodeDimensions}
             x={0}
@@ -149,7 +149,7 @@ export const StartEventNode = React.memo(
         >
           {/* {`render count: ${renderCount.current}`}
           <br /> */}
-          <div className={"xyflow-kie-diagram--node"}>
+          <div className={"xyflow-react-kie-diagram--node"}>
             <InfoNodePanel
               isVisible={!isTargeted && shouldActLikeHovered}
               onClick={useCallback(() => {
@@ -198,7 +198,7 @@ export const IntermediateCatchEventNode = React.memo(
     const isHovered = useIsHovered(ref);
     const isResizing = useNodeResizing(id);
     const shouldActLikeHovered = useBpmnEditorStore(
-      (s) => (isHovered || isResizing) && s.xyFlowKieDiagram.draggingNodes.length === 0
+      (s) => (isHovered || isResizing) && s.xyFlowReactKieDiagram.draggingNodes.length === 0
     );
 
     const { isEditingLabel, setEditingLabel, triggerEditing, triggerEditingIfEnter } = useEditableNodeLabel(id);
@@ -227,7 +227,7 @@ export const IntermediateCatchEventNode = React.memo(
 
     return (
       <>
-        <svg className={`xyflow-kie-diagram--node-shape ${className} ${selected ? "selected" : ""}`}>
+        <svg className={`xyflow-react-kie-diagram--node-shape ${className} ${selected ? "selected" : ""}`}>
           <IntermediateCatchEventNodeSvg
             {...nodeDimensions}
             x={0}
@@ -247,7 +247,7 @@ export const IntermediateCatchEventNode = React.memo(
         >
           {/* {`render count: ${renderCount.current}`}
           <br /> */}
-          <div className={"xyflow-kie-diagram--node"}>
+          <div className={"xyflow-react-kie-diagram--node"}>
             <InfoNodePanel
               isVisible={!isTargeted && shouldActLikeHovered}
               onClick={useCallback(() => {
@@ -296,7 +296,7 @@ export const IntermediateThrowEventNode = React.memo(
     const isHovered = useIsHovered(ref);
     const isResizing = useNodeResizing(id);
     const shouldActLikeHovered = useBpmnEditorStore(
-      (s) => (isHovered || isResizing) && s.xyFlowKieDiagram.draggingNodes.length === 0
+      (s) => (isHovered || isResizing) && s.xyFlowReactKieDiagram.draggingNodes.length === 0
     );
 
     const { isEditingLabel, setEditingLabel, triggerEditing, triggerEditingIfEnter } = useEditableNodeLabel(id);
@@ -325,7 +325,7 @@ export const IntermediateThrowEventNode = React.memo(
 
     return (
       <>
-        <svg className={`xyflow-kie-diagram--node-shape ${className} ${selected ? "selected" : ""}`}>
+        <svg className={`xyflow-react-kie-diagram--node-shape ${className} ${selected ? "selected" : ""}`}>
           <IntermediateThrowEventNodeSvg
             {...nodeDimensions}
             x={0}
@@ -345,7 +345,7 @@ export const IntermediateThrowEventNode = React.memo(
         >
           {/* {`render count: ${renderCount.current}`}
           <br /> */}
-          <div className={"xyflow-kie-diagram--node"}>
+          <div className={"xyflow-react-kie-diagram--node"}>
             <InfoNodePanel
               isVisible={!isTargeted && shouldActLikeHovered}
               onClick={useCallback(() => {
@@ -392,7 +392,7 @@ export const EndEventNode = React.memo(
     const isHovered = useIsHovered(ref);
     const isResizing = useNodeResizing(id);
     const shouldActLikeHovered = useBpmnEditorStore(
-      (s) => (isHovered || isResizing) && s.xyFlowKieDiagram.draggingNodes.length === 0
+      (s) => (isHovered || isResizing) && s.xyFlowReactKieDiagram.draggingNodes.length === 0
     );
 
     const { isEditingLabel, setEditingLabel, triggerEditing, triggerEditingIfEnter } = useEditableNodeLabel(id);
@@ -421,7 +421,7 @@ export const EndEventNode = React.memo(
 
     return (
       <>
-        <svg className={`xyflow-kie-diagram--node-shape ${className} ${selected ? "selected" : ""}`}>
+        <svg className={`xyflow-react-kie-diagram--node-shape ${className} ${selected ? "selected" : ""}`}>
           <EndEventNodeSvg
             {...nodeDimensions}
             x={0}
@@ -442,7 +442,7 @@ export const EndEventNode = React.memo(
         >
           {/* {`render count: ${renderCount.current}`}
           <br /> */}
-          <div className={"xyflow-kie-diagram--node"}>
+          <div className={"xyflow-react-kie-diagram--node"}>
             <InfoNodePanel
               isVisible={!isTargeted && shouldActLikeHovered}
               onClick={useCallback(() => {
@@ -489,7 +489,7 @@ export const TaskNode = React.memo(
     const isHovered = useIsHovered(ref);
     const isResizing = useNodeResizing(id);
     const shouldActLikeHovered = useBpmnEditorStore(
-      (s) => (isHovered || isResizing) && s.xyFlowKieDiagram.draggingNodes.length === 0
+      (s) => (isHovered || isResizing) && s.xyFlowReactKieDiagram.draggingNodes.length === 0
     );
 
     const { isEditingLabel, setEditingLabel, triggerEditing, triggerEditingIfEnter } = useEditableNodeLabel(id);
@@ -518,7 +518,7 @@ export const TaskNode = React.memo(
 
     return (
       <>
-        <svg className={`xyflow-kie-diagram--node-shape ${className} ${selected ? "selected" : ""}`}>
+        <svg className={`xyflow-react-kie-diagram--node-shape ${className} ${selected ? "selected" : ""}`}>
           <TaskNodeSvg {...nodeDimensions} x={0} y={0} />
         </svg>
         <PositionalNodeHandles isTargeted={isTargeted && isValidConnectionTarget} nodeId={id} />
@@ -533,7 +533,7 @@ export const TaskNode = React.memo(
         >
           {/* {`render count: ${renderCount.current}`}
           <br /> */}
-          <div className={"xyflow-kie-diagram--node"}>
+          <div className={"xyflow-react-kie-diagram--node"}>
             <InfoNodePanel
               isVisible={!isTargeted && shouldActLikeHovered}
               onClick={useCallback(() => {
@@ -588,7 +588,7 @@ export const SubProcessNode = React.memo(
     const isHovered = useIsHovered(ref);
     const isResizing = useNodeResizing(id);
     const shouldActLikeHovered = useBpmnEditorStore(
-      (s) => (isHovered || isResizing) && s.xyFlowKieDiagram.draggingNodes.length === 0
+      (s) => (isHovered || isResizing) && s.xyFlowReactKieDiagram.draggingNodes.length === 0
     );
 
     const { isEditingLabel, setEditingLabel, triggerEditing, triggerEditingIfEnter } = useEditableNodeLabel(id);
@@ -617,7 +617,7 @@ export const SubProcessNode = React.memo(
 
     return (
       <>
-        <svg className={`xyflow-kie-diagram--node-shape ${className} ${selected ? "selected" : ""}`}>
+        <svg className={`xyflow-react-kie-diagram--node-shape ${className} ${selected ? "selected" : ""}`}>
           <SubProcessNodeSvg {...nodeDimensions} x={0} y={0} />
         </svg>
         <PositionalNodeHandles isTargeted={isTargeted && isValidConnectionTarget} nodeId={id} />
@@ -632,7 +632,7 @@ export const SubProcessNode = React.memo(
         >
           {/* {`render count: ${renderCount.current}`}
           <br /> */}
-          <div className={"xyflow-kie-diagram--node"}>
+          <div className={"xyflow-react-kie-diagram--node"}>
             <InfoNodePanel
               isVisible={!isTargeted && shouldActLikeHovered}
               onClick={useCallback(() => {
@@ -705,7 +705,7 @@ export const GatewayNode = React.memo(
     const isHovered = useIsHovered(ref);
     const isResizing = useNodeResizing(id);
     const shouldActLikeHovered = useBpmnEditorStore(
-      (s) => (isHovered || isResizing) && s.xyFlowKieDiagram.draggingNodes.length === 0
+      (s) => (isHovered || isResizing) && s.xyFlowReactKieDiagram.draggingNodes.length === 0
     );
 
     const { isEditingLabel, setEditingLabel, triggerEditing, triggerEditingIfEnter } = useEditableNodeLabel(id);
@@ -734,7 +734,7 @@ export const GatewayNode = React.memo(
 
     return (
       <>
-        <svg className={`xyflow-kie-diagram--node-shape ${className} ${selected ? "selected" : ""}`}>
+        <svg className={`xyflow-react-kie-diagram--node-shape ${className} ${selected ? "selected" : ""}`}>
           <GatewayNodeSvg {...nodeDimensions} x={0} y={0} variant={gateway.__$$element} />
         </svg>
         <PositionalNodeHandles isTargeted={isTargeted && isValidConnectionTarget} nodeId={id} />
@@ -749,7 +749,7 @@ export const GatewayNode = React.memo(
         >
           {/* {`render count: ${renderCount.current}`}
           <br /> */}
-          <div className={"xyflow-kie-diagram--node"}>
+          <div className={"xyflow-react-kie-diagram--node"}>
             <InfoNodePanel
               isVisible={!isTargeted && shouldActLikeHovered}
               onClick={useCallback(() => {
@@ -814,7 +814,7 @@ export const DataObjectNode = React.memo(
     const isHovered = useIsHovered(ref);
     const isResizing = useNodeResizing(id);
     const shouldActLikeHovered = useBpmnEditorStore(
-      (s) => (isHovered || isResizing) && s.xyFlowKieDiagram.draggingNodes.length === 0
+      (s) => (isHovered || isResizing) && s.xyFlowReactKieDiagram.draggingNodes.length === 0
     );
 
     const { isEditingLabel, setEditingLabel, triggerEditing, triggerEditingIfEnter } = useEditableNodeLabel(id);
@@ -857,7 +857,7 @@ export const DataObjectNode = React.memo(
 
     return (
       <>
-        <svg className={`xyflow-kie-diagram--node-shape ${className} ${selected ? "selected" : ""}`}>
+        <svg className={`xyflow-react-kie-diagram--node-shape ${className} ${selected ? "selected" : ""}`}>
           <DataObjectNodeSvg {...nodeDimensions} x={0} y={0} isIcon={false} />
         </svg>
         <PositionalNodeHandles isTargeted={isTargeted && isValidConnectionTarget} nodeId={id} />
@@ -873,7 +873,7 @@ export const DataObjectNode = React.memo(
         >
           {/* {`render count: ${renderCount.current}`}
           <br /> */}
-          <div className={"xyflow-kie-diagram--node"}>
+          <div className={"xyflow-react-kie-diagram--node"}>
             <InfoNodePanel
               isVisible={!isTargeted && shouldActLikeHovered}
               onClick={useCallback(() => {
@@ -925,12 +925,12 @@ export const GroupNode = React.memo(
 
     const ref = useRef<SVGRectElement>(null);
 
-    const snapGrid = useBpmnEditorStore((s) => s.xyFlowKieDiagram.snapGrid);
+    const snapGrid = useBpmnEditorStore((s) => s.xyFlowReactKieDiagram.snapGrid);
     const enableCustomNodeStyles = useBpmnEditorStore((s) => s.diagram.overlays.enableCustomNodeStyles);
     const isHovered = useIsHovered(ref);
     const isResizing = useNodeResizing(id);
     const shouldActLikeHovered = useBpmnEditorStore(
-      (s) => (isHovered || isResizing) && s.xyFlowKieDiagram.draggingNodes.length === 0
+      (s) => (isHovered || isResizing) && s.xyFlowReactKieDiagram.draggingNodes.length === 0
     );
     const bpmnEditorStoreApi = useBpmnEditorStoreApi();
     const reactFlow = RF.useReactFlow<BpmnDiagramNodeData, BpmnDiagramEdgeData>();
@@ -953,11 +953,11 @@ export const GroupNode = React.memo(
     useEffect(() => {
       const onDoubleClick = () => {
         bpmnEditorStoreApi.setState((state) => {
-          state.xyFlowKieDiagram._selectedNodes = reactFlow.getNodes().flatMap((n) =>
+          state.xyFlowReactKieDiagram._selectedNodes = reactFlow.getNodes().flatMap((n) =>
             getContainmentRelationship({
               bounds: n.data.shape["dc:Bounds"]!,
               container: shape["dc:Bounds"]!,
-              snapGrid: state.xyFlowKieDiagram.snapGrid,
+              snapGrid: state.xyFlowReactKieDiagram.snapGrid,
               containerMinSizes: MIN_NODE_SIZES[NODE_TYPES.group],
               boundsMinSizes: MIN_NODE_SIZES[n.type as BpmnNodeType],
             }).isInside
@@ -981,12 +981,12 @@ export const GroupNode = React.memo(
 
     return (
       <>
-        <svg className={`xyflow-kie-diagram--node-shape ${className}`}>
+        <svg className={`xyflow-react-kie-diagram--node-shape ${className}`}>
           <GroupNodeSvg ref={ref} {...nodeDimensions} x={0} y={0} strokeWidth={3} />
         </svg>
 
         <div
-          className={`xyflow-kie-diagram--node kie-bpmn-editor--group-node ${className}`}
+          className={`xyflow-react-kie-diagram--node kie-bpmn-editor--group-node ${className}`}
           tabIndex={-1}
           onDoubleClick={triggerEditing}
           onKeyDown={triggerEditingIfEnter}
@@ -1038,7 +1038,7 @@ export const LaneNode = React.memo(
     const isHovered = useIsHovered(ref);
     const isResizing = useNodeResizing(id);
     const shouldActLikeHovered = useBpmnEditorStore(
-      (s) => (isHovered || isResizing) && s.xyFlowKieDiagram.draggingNodes.length === 0
+      (s) => (isHovered || isResizing) && s.xyFlowReactKieDiagram.draggingNodes.length === 0
     );
 
     const { isEditingLabel, setEditingLabel, triggerEditing, triggerEditingIfEnter } = useEditableNodeLabel(id);
@@ -1067,7 +1067,7 @@ export const LaneNode = React.memo(
 
     return (
       <>
-        <svg className={`xyflow-kie-diagram--node-shape ${className} ${selected ? "selected" : ""}`}>
+        <svg className={`xyflow-react-kie-diagram--node-shape ${className} ${selected ? "selected" : ""}`}>
           <LaneNodeSvg {...nodeDimensions} x={0} y={0} ref={interactionRectRef} />
         </svg>
         <PositionalNodeHandles isTargeted={isTargeted && isValidConnectionTarget} nodeId={id} />
@@ -1082,7 +1082,7 @@ export const LaneNode = React.memo(
         >
           {/* {`render count: ${renderCount.current}`}
           <br /> */}
-          <div className={"xyflow-kie-diagram--node"}>
+          <div className={"xyflow-react-kie-diagram--node"}>
             <InfoNodePanel
               isVisible={!isTargeted && shouldActLikeHovered}
               onClick={useCallback(() => {
@@ -1138,7 +1138,7 @@ export const TextAnnotationNode = React.memo(
     const isHovered = useIsHovered(ref);
     const isResizing = useNodeResizing(id);
     const shouldActLikeHovered = useBpmnEditorStore(
-      (s) => (isHovered || isResizing) && s.xyFlowKieDiagram.draggingNodes.length === 0
+      (s) => (isHovered || isResizing) && s.xyFlowReactKieDiagram.draggingNodes.length === 0
     );
 
     const { isEditingLabel, setEditingLabel, triggerEditing, triggerEditingIfEnter } = useEditableNodeLabel(id);
@@ -1170,7 +1170,7 @@ export const TextAnnotationNode = React.memo(
 
     return (
       <>
-        <svg className={`xyflow-kie-diagram--node-shape ${className}`}>
+        <svg className={`xyflow-react-kie-diagram--node-shape ${className}`}>
           <TextAnnotationNodeSvg {...nodeDimensions} x={0} y={0} />
         </svg>
 
@@ -1178,7 +1178,7 @@ export const TextAnnotationNode = React.memo(
 
         <div
           ref={ref}
-          className={`xyflow-kie-diagram--node kie-bpmn-editor--text-annotation-node ${className}`}
+          className={`xyflow-react-kie-diagram--node kie-bpmn-editor--text-annotation-node ${className}`}
           tabIndex={-1}
           onDoubleClick={triggerEditing}
           onKeyDown={triggerEditingIfEnter}
@@ -1229,7 +1229,7 @@ export const UnknownNode = React.memo(
     const isHovered = useIsHovered(ref);
     const isResizing = useNodeResizing(id);
     const shouldActLikeHovered = useBpmnEditorStore(
-      (s) => (isHovered || isResizing) && s.xyFlowKieDiagram.draggingNodes.length === 0
+      (s) => (isHovered || isResizing) && s.xyFlowReactKieDiagram.draggingNodes.length === 0
     );
 
     const bpmnEditorStoreApi = useBpmnEditorStoreApi();
@@ -1244,7 +1244,7 @@ export const UnknownNode = React.memo(
 
     return (
       <>
-        <svg className={`xyflow-kie-diagram--node-shape ${className}`}>
+        <svg className={`xyflow-react-kie-diagram--node-shape ${className}`}>
           <UnknownNodeSvg {...nodeDimensions} x={0} y={0} />
         </svg>
 
@@ -1252,7 +1252,7 @@ export const UnknownNode = React.memo(
 
         <div
           ref={ref}
-          className={`xyflow-kie-diagram--node kie-bpmn-editor--unknown-node ${className}`}
+          className={`xyflow-react-kie-diagram--node kie-bpmn-editor--unknown-node ${className}`}
           tabIndex={-1}
           data-nodehref={id}
         >

@@ -1,0 +1,32 @@
+.xyflow-react-kie-diagram--node-containerNode-interactionRect {
+  pointer-events: stroke !important;
+  opacity: 0;
+  /* ⬇ Uncomment for debugging purposes:*/
+  /* stroke: purple;
+    opacity: 0.2; */
+}
+.xyflow-react-kie-diagram--node-containerNode-visibleRect {
+  pointer-events: none;
+}
+
+/* (begin) containerNodes */
+/* CONTAINER NODES HAVE A SPECIFIC SELECTION MECHANISM TO ALLOW EDITING EDGES INSIDE THEM */
+.react-flow__node.xyflow-react-kie-diagram--containerNode {
+  pointer-events: none !important;
+  background: transparent;
+  box-shadow: none !important;
+}
+.react-flow__node.xyflow-react-kie-diagram--containerNode:not(.selected) .xyflow-react-kie-diagram--node-shape {
+  filter: none !important;
+}
+.react-flow__node.xyflow-react-kie-diagram--containerNode .xyflow-react-kie-diagram--outgoing-stuff-node-panel,
+.react-flow__node.xyflow-react-kie-diagram--containerNode .xyflow-react-kie-diagram--editable-node-name-input span,
+.react-flow__node.xyflow-react-kie-diagram--containerNode .xyflow-react-kie-diagram--info-node-panel,
+.react-flow__node.xyflow-react-kie-diagram--containerNode .xyflow-react-kie-diagram--data-type-node-panel,
+.react-flow__node.xyflow-react-kie-diagram--containerNode .react-flow__resize-control div {
+  pointer-events: all !important;
+}
+.xyflow-react-kie-diagram--decision-service-node {
+  position: relative;
+}
+/* (end) containerNodes */

@@ -18,16 +18,16 @@
  */
 
 import { BpmnLatestModel } from "@kie-tools/bpmn-marshaller";
-import { ComputedStateCache } from "@kie-tools/xyflow-kie-diagram/dist/store/ComputedStateCache";
+import { ComputedStateCache } from "@kie-tools/xyflow-react-kie-diagram/dist/store/ComputedStateCache";
 import {
   XyFlowDiagramState,
-  XyFlowKieDiagramEdgeStatus,
-  XyFlowKieDiagramNodeStatus,
-} from "@kie-tools/xyflow-kie-diagram/dist/store/State";
-import { computeIsDiagramEditingInProgress } from "@kie-tools/xyflow-kie-diagram/dist/store/computed/computeIsDiagramEditingInProgress";
-import { computeIsDropTargetNodeValidForSelection } from "@kie-tools/xyflow-kie-diagram/dist/store/computed/computeIsDropTargetNodeValidForSelection";
-import { setNodeStatus } from "@kie-tools/xyflow-kie-diagram/dist/store/dispatch/setNodeStatus";
-import { setEdgeStatus } from "@kie-tools/xyflow-kie-diagram/dist/store/dispatch/setEdgeStatus";
+  XyFlowReactKieDiagramEdgeStatus,
+  XyFlowReactKieDiagramNodeStatus,
+} from "@kie-tools/xyflow-react-kie-diagram/dist/store/State";
+import { computeIsDiagramEditingInProgress } from "@kie-tools/xyflow-react-kie-diagram/dist/store/computed/computeIsDiagramEditingInProgress";
+import { computeIsDropTargetNodeValidForSelection } from "@kie-tools/xyflow-react-kie-diagram/dist/store/computed/computeIsDropTargetNodeValidForSelection";
+import { setNodeStatus } from "@kie-tools/xyflow-react-kie-diagram/dist/store/dispatch/setNodeStatus";
+import { setEdgeStatus } from "@kie-tools/xyflow-react-kie-diagram/dist/store/dispatch/setEdgeStatus";
 import { enableMapSet } from "immer";
 import { create } from "zustand";
 import { immer } from "zustand/middleware/immer";
@@ -55,8 +55,8 @@ export interface State extends BpmnXyFlowDiagramState {
     isDiagramEditingInProgress(): boolean;
   };
   dispatch: (s: State) => {
-    setNodeStatus: (nodeId: string, status: Partial<XyFlowKieDiagramNodeStatus>) => any;
-    setEdgeStatus: (edgeId: string, status: Partial<XyFlowKieDiagramEdgeStatus>) => any;
+    setNodeStatus: (nodeId: string, status: Partial<XyFlowReactKieDiagramNodeStatus>) => any;
+    setEdgeStatus: (edgeId: string, status: Partial<XyFlowReactKieDiagramEdgeStatus>) => any;
     reset(model: Normalized<BpmnLatestModel>): void;
   };
   bpmn: {
@@ -101,7 +101,7 @@ export const getDefaultStaticState = (): Omit<State, "bpmn" | "computed" | "disp
     },
     isEditingStyle: false,
   },
-  xyFlowKieDiagram: {
+  xyFlowReactKieDiagram: {
     snapGrid: { isEnabled: false, x: 20, y: 20 },
     _selectedNodes: [],
     _selectedEdges: [],
@@ -127,9 +127,9 @@ export function createBpmnEditorStore(
       dispatch: (s) => ({
         reset: (model) => {
           s.bpmn.model = model;
-          s.xyFlowKieDiagram._selectedNodes = [];
-          s.xyFlowKieDiagram.draggingNodes = [];
-          s.xyFlowKieDiagram.resizingNodes = [];
+          s.xyFlowReactKieDiagram._selectedNodes = [];
+          s.xyFlowReactKieDiagram.draggingNodes = [];
+          s.xyFlowReactKieDiagram.resizingNodes = [];
         },
         setNodeStatus: (nodeId, newStatus) => setNodeStatus(nodeId, newStatus, s),
         setEdgeStatus: (edgeId, newStatus) => setEdgeStatus(edgeId, newStatus, s),
@@ -147,16 +147,16 @@ export function createBpmnEditorStore(
               computeIsDiagramEditingInProgress(draggingNodesCount, resizingNodesCount, draggingWaypointsCount) ||
               isisEditingStyle,
             [
-              s.xyFlowKieDiagram.draggingNodes.length,
-              s.xyFlowKieDiagram.resizingNodes.length,
-              s.xyFlowKieDiagram.draggingWaypoints.length,
+              s.xyFlowReactKieDiagram.draggingNodes.length,
+              s.xyFlowReactKieDiagram.resizingNodes.length,
+              s.xyFlowReactKieDiagram.draggingWaypoints.length,
               s.diagram.isEditingStyle,
             ]
           ),
 
         isDropTargetNodeValidForSelection: () =>
           computedCache.cached("isDropTargetNodeValidForSelection", computeIsDropTargetNodeValidForSelection, [
-            s.xyFlowKieDiagram.dropTargetNode,
+            s.xyFlowReactKieDiagram.dropTargetNode,
             s.computed(s).getDiagramData(),
             BPMN_CONTAINMENT_MAP,
           ]),
@@ -164,8 +164,8 @@ export function createBpmnEditorStore(
         getDiagramData: () =>
           computedCache.cached("getDiagramData", computeDiagramData, [
             s.bpmn.model.definitions,
-            s.xyFlowKieDiagram,
-            s.xyFlowKieDiagram.snapGrid,
+            s.xyFlowReactKieDiagram,
+            s.xyFlowReactKieDiagram.snapGrid,
           ]),
       }),
     }))

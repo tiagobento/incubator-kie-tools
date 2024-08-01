@@ -18,14 +18,14 @@
  */
 
 import * as React from "react";
-import { DEFAULT_INTRACTION_WIDTH } from "@kie-tools/xyflow-kie-diagram/dist/maths/DcMaths";
+import { DEFAULT_INTRACTION_WIDTH } from "@kie-tools/xyflow-react-kie-diagram/dist/maths/DcMaths";
 import { DEFAULT_NODE_FILL, DEFAULT_NODE_STROKE_COLOR } from "./NodeStyle";
 import {
   containerNodeInteractionRectCssClassName,
   NodeSvgProps,
   normalize,
-} from "@kie-tools/xyflow-kie-diagram/dist/nodes/NodeSvgs";
-import { containerNodeVisibleRectCssClassName } from "@kie-tools/xyflow-kie-diagram/src/nodes/NodeSvgs";
+} from "@kie-tools/xyflow-react-kie-diagram/dist/nodes/NodeSvgs";
+import { containerNodeVisibleRectCssClassName } from "@kie-tools/xyflow-react-kie-diagram/src/nodes/NodeSvgs";
 import { EventVariant, GatewayVariant } from "../BpmnDiagramDomain";
 
 export function DataObjectNodeSvg(__props: NodeSvgProps & { isIcon: boolean; transform?: string }) {

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { ContainmentMap, GraphStructure } from "@kie-tools/xyflow-kie-diagram/dist/graph/graphStructure";
+import { ContainmentMap, GraphStructure } from "@kie-tools/xyflow-react-kie-diagram/dist/graph/graphStructure";
 import {
   BPMN20__tEndEvent,
   BPMN20__tIntermediateCatchEvent,
@@ -26,7 +26,10 @@ import {
   BPMNDI__BPMNEdge,
   BPMNDI__BPMNShape,
 } from "@kie-tools/bpmn-marshaller/dist/schemas/bpmn-2_0/ts-gen/types";
-import { XyFlowKieDiagramEdgeData, XyFlowKieDiagramNodeData } from "@kie-tools/xyflow-kie-diagram/dist/store/State";
+import {
+  XyFlowReactKieDiagramEdgeData,
+  XyFlowReactKieDiagramNodeData,
+} from "@kie-tools/xyflow-react-kie-diagram/dist/store/State";
 import { Normalized } from "../normalization/normalize";
 import {
   DataObjectNode,
@@ -45,7 +48,7 @@ import {
 import {
   ConnectionLineEdgeMapping,
   ConnectionLineNodeMapping,
-} from "@kie-tools/xyflow-kie-diagram/dist/edges/ConnectionLine";
+} from "@kie-tools/xyflow-react-kie-diagram/dist/edges/ConnectionLine";
 import { SequenceFlowPath, AssociationPath } from "./edges/EdgeSvgs";
 import {
   StartEventNodeSvg,
@@ -59,16 +62,16 @@ import {
   LaneNodeSvg,
 } from "./nodes/NodeSvgs";
 import { SequenceFlowEdge, AssociationEdge } from "./edges/Edges";
-import { Unpacked } from "@kie-tools/xyflow-kie-diagram/dist/tsExt/tsExt";
+import { Unpacked } from "@kie-tools/xyflow-react-kie-diagram/dist/tsExt/tsExt";
 import { ElementExclusion, ElementFilter } from "@kie-tools/xml-parser-ts/dist/elementFilter";
 import { switchExpression } from "@kie-tools-core/switch-expression-ts";
 import {
   OutgoingStuffNodePanelEdgeMapping,
   OutgoingStuffNodePanelNodeMapping,
-} from "@kie-tools/xyflow-kie-diagram/dist/nodes/OutgoingStuffNodePanel";
-import { CONTAINER_NODES_DESIRABLE_PADDING } from "@kie-tools/xyflow-kie-diagram/dist/maths/DcMaths";
-import { NodeSizes } from "@kie-tools/xyflow-kie-diagram/dist/nodes/NodeSizes";
-import { SnapGrid, snapPoint } from "@kie-tools/xyflow-kie-diagram/dist/snapgrid/SnapGrid";
+} from "@kie-tools/xyflow-react-kie-diagram/dist/nodes/OutgoingStuffNodePanel";
+import { CONTAINER_NODES_DESIRABLE_PADDING } from "@kie-tools/xyflow-react-kie-diagram/dist/maths/DcMaths";
+import { NodeSizes } from "@kie-tools/xyflow-react-kie-diagram/dist/nodes/NodeSizes";
+import { SnapGrid, snapPoint } from "@kie-tools/xyflow-react-kie-diagram/dist/snapgrid/SnapGrid";
 
 export const NODE_TYPES = {
   startEvent: "node_startEvent" as const,
@@ -157,14 +160,14 @@ export const XY_FLOW_EDGE_TYPES: Record<BpmnEdgeType, any> = {
 };
 
 export interface BpmnDiagramNodeData<T extends BpmnNodeElement = BpmnNodeElement>
-  extends XyFlowKieDiagramNodeData<BpmnNodeType, BpmnDiagramNodeData> {
+  extends XyFlowReactKieDiagramNodeData<BpmnNodeType, BpmnDiagramNodeData> {
   bpmnElement: T;
   shape: Normalized<BPMNDI__BPMNShape>;
   shapeIndex: number;
   index: number;
 }
 
-export interface BpmnDiagramEdgeData extends XyFlowKieDiagramEdgeData {
+export interface BpmnDiagramEdgeData extends XyFlowReactKieDiagramEdgeData {
   bpmnEdge: Normalized<BPMNDI__BPMNEdge> | undefined;
   bpmnEdgeIndex: number;
   bpmnElement: BpmnEdgeElement;
@@ -273,28 +276,28 @@ export const bpmnNodesOutgoingStuffNodePanelMapping: OutgoingStuffNodePanelNodeM
 
 export const MIN_NODE_SIZES: NodeSizes<BpmnNodeType> = {
   [NODE_TYPES.startEvent]: ({ snapGrid }) => {
-    const snappedMinSize = MIN_SIZE_FOR_NODES(snapGrid, 50, 50);
+    const snappedMinSize = MIN_SIZE_FOR_NODES(snapGrid, 10, 10);
     return {
       "@_width": snappedMinSize.width,
       "@_height": snappedMinSize.height,
     };
   },
   [NODE_TYPES.intermediateCatchEvent]: ({ snapGrid }) => {
-    const snappedMinSize = MIN_SIZE_FOR_NODES(snapGrid, 50, 50);
+    const snappedMinSize = MIN_SIZE_FOR_NODES(snapGrid, 10, 10);
     return {
       "@_width": snappedMinSize.width,
       "@_height": snappedMinSize.height,
     };
   },
   [NODE_TYPES.intermediateThrowEvent]: ({ snapGrid }) => {
-    const snappedMinSize = MIN_SIZE_FOR_NODES(snapGrid, 50, 50);
+    const snappedMinSize = MIN_SIZE_FOR_NODES(snapGrid, 10, 10);
     return {
       "@_width": snappedMinSize.width,
       "@_height": snappedMinSize.height,
     };
   },
   [NODE_TYPES.endEvent]: ({ snapGrid }) => {
-    const snappedMinSize = MIN_SIZE_FOR_NODES(snapGrid, 50, 50);
+    const snappedMinSize = MIN_SIZE_FOR_NODES(snapGrid, 10, 10);
     return {
       "@_width": snappedMinSize.width,
       "@_height": snappedMinSize.height,
@@ -315,7 +318,7 @@ export const MIN_NODE_SIZES: NodeSizes<BpmnNodeType> = {
     };
   },
   [NODE_TYPES.gateway]: ({ snapGrid }) => {
-    const snappedMinSize = MIN_SIZE_FOR_NODES(snapGrid, 50, 50);
+    const snappedMinSize = MIN_SIZE_FOR_NODES(snapGrid, 10, 10);
     return {
       "@_width": snappedMinSize.width,
       "@_height": snappedMinSize.height,
@@ -449,8 +452,8 @@ export const DEFAULT_NODE_SIZES: NodeSizes<BpmnNodeType> = {
   },
 };
 
-export const NODE_MIN_WIDTH = 160;
-export const NODE_MIN_HEIGHT = 80;
+export const NODE_MIN_WIDTH = 10;
+export const NODE_MIN_HEIGHT = 5;
 
 export const MIN_SIZE_FOR_NODES = (grid: SnapGrid, width = NODE_MIN_WIDTH, height = NODE_MIN_HEIGHT) => {
   const snapped = snapPoint(grid, { "@_x": width, "@_y": height }, "ceil");

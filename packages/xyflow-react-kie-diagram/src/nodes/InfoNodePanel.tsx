@@ -17,20 +17,21 @@
  * under the License.
  */
 
-import { Cache } from "@kie-tools/xyflow-react-kie-diagram/dist/store/ComputedStateCache";
-import { State } from "./Store";
+import * as React from "react";
+import { Label } from "@patternfly/react-core/dist/js/components/Label";
+import { InfoIcon } from "@patternfly/react-icons/dist/js/icons/info-icon";
+import "./InfoNodePanel.css";
 
-export const INITIAL_COMPUTED_CACHE: Cache<ReturnType<State["computed"]>> = {
-  isDiagramEditingInProgress: {
-    value: undefined,
-    dependencies: [],
-  },
-  getDiagramData: {
-    value: undefined,
-    dependencies: [],
-  },
-  isDropTargetNodeValidForSelection: {
-    value: undefined,
-    dependencies: [],
-  },
-};
+export function InfoNodePanel({ isVisible, onClick }: { isVisible: boolean; onClick: (e: React.MouseEvent) => void }) {
+  return (
+    <>
+      {isVisible && (
+        <div className={"xyflow-react-kie-diagram--info-node-panel"}>
+          <Label onClick={onClick} className={"xyflow-react-kie-diagram--info-label"}>
+            <InfoIcon style={{ width: "0.7em", height: "0.7em" }} />
+          </Label>
+        </div>
+      )}
+    </>
+  );
+}
