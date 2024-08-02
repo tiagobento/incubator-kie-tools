@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { generateUuid } from "@kie-tools/boxed-expression-component/dist/api";
+import { generateUuid } from "@kie-tools/xyflow-react-kie-diagram/dist/uuid/uuid";
 import {
   elements as bpmn20elements,
   meta as bpmn20meta,

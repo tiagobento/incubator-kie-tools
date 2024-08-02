@@ -18,20 +18,23 @@
  */
 
 import * as React from "react";
-import * as RF from "reactflow";
-import { SnapGrid, snapShapeDimensions } from "../snapgrid/SnapGrid";
-import { DC__Shape } from "../maths/model";
 import { useLayoutEffect, useMemo } from "react";
+import * as RF from "reactflow";
 import { ContainmentMap } from "../graph/graphStructure";
+import { DC__Shape } from "../maths/model";
+import { snapShapeDimensions } from "../snapgrid/SnapGrid";
 import { useXyFlowReactKieDiagramStore } from "../store/Store";
 import { NodeSizes } from "./NodeSizes";
+
+// CSS always last
 import "./Hooks.css";
 
 export const NODE_LAYERS = {
   GROUP_NODES: 0,
-  NODES: 1000, // We need a difference > 1000 here, since ReactFlow will add 1000 to the z-index when a node is selected.
-  PARENT_NODES: 2000, // We need a difference > 1000 here, since ReactFlow will add 1000 to the z-index when a node is selected.
-  NESTED_NODES: 4000,
+  CONTAINER_NODES: 1000,
+  NODES: 2000, // We need a difference > 1000 here, since ReactFlow will add 1000 to the z-index when a node is selected.
+  PARENT_NODES: 3000, // We need a difference > 1000 here, since ReactFlow will add 1000 to the z-index when a node is selected.
+  NESTED_NODES: 5000,
 };
 
 export const resizerControlStyle = {

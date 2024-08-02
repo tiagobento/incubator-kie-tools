@@ -456,14 +456,16 @@ export function GatewayNodeSvg(__props: NodeSvgProps & { variant: GatewayVariant
           />
         </>
       )}
-      {variant === "eventBasedGateway" && <></>}
-      {variant === "complexGateway" && <></>}
+      {variant === "eventBasedGateway" && <>{/* TODO: Tiago */}</>}
+      {variant === "complexGateway" && <>{/* TODO: Tiago */}</>}
     </>
   );
 }
 
-export const LaneNodeSvg = React.forwardRef<SVGRectElement, NodeSvgProps>((__props, ref) => {
-  const { strokeWidth, x, y, width, height, props: _props } = normalize(__props);
+export const LaneNodeSvg = React.forwardRef<SVGRectElement, NodeSvgProps & { gutterWidth?: number }>((__props, ref) => {
+  const { gutterWidth: _gutterWidth, ..._props } = { ...__props };
+  const { x, y, width, height, strokeWidth, props } = normalize(_props);
+
   const {
     strokeWidth: interactionRectStrokeWidth,
     x: interactionRectX,
@@ -471,11 +473,11 @@ export const LaneNodeSvg = React.forwardRef<SVGRectElement, NodeSvgProps>((__pro
     width: interactionRectWidth,
     height: interactionRectHeight,
     props: _interactionRectProps,
-  } = normalize({ ...__props, strokeWidth: DEFAULT_INTRACTION_WIDTH / 2 });
-
-  const { ...props } = _props;
+  } = normalize({ ..._props, strokeWidth: DEFAULT_INTRACTION_WIDTH / 2 });
 
   const { ...interactionRectProps } = _interactionRectProps;
+
+  const gutterWidth = _gutterWidth ?? 40;
 
   return (
     <>
@@ -493,6 +495,85 @@ export const LaneNodeSvg = React.forwardRef<SVGRectElement, NodeSvgProps>((__pro
         ry={"3"}
         className={containerNodeVisibleRectCssClassName}
       />
+      <line
+        x1={x + gutterWidth}
+        y1={y}
+        x2={x + gutterWidth}
+        y2={y + height}
+        stroke={DEFAULT_NODE_STROKE_COLOR}
+        strokeWidth={strokeWidth}
+      />
+      <rect
+        {...interactionRectProps}
+        ref={ref}
+        x={interactionRectX}
+        y={interactionRectY}
+        width={interactionRectWidth}
+        height={interactionRectHeight}
+        strokeWidth={interactionRectStrokeWidth}
+        fill={"transparent"}
+        stroke={"transparent"}
+        strokeLinejoin={"round"}
+        rx={"0"}
+        ry={"0"}
+        className={containerNodeInteractionRectCssClassName}
+      />
+    </>
+  );
+});
+
+export const TransactionNodeSvg = React.forwardRef<
+  SVGRectElement,
+  NodeSvgProps & { borderRadius?: number; rimWidth?: number }
+>((__props, ref) => {
+  const { rimWidth: _rimWidth, borderRadius: _borderRadius, ..._props } = { ...__props };
+  const { x, y, width, height, strokeWidth, props } = normalize(_props);
+
+  const {
+    strokeWidth: interactionRectStrokeWidth,
+    x: interactionRectX,
+    y: interactionRectY,
+    width: interactionRectWidth,
+    height: interactionRectHeight,
+    props: _interactionRectProps,
+  } = normalize({ ..._props, strokeWidth: DEFAULT_INTRACTION_WIDTH / 2 });
+
+  const { ...interactionRectProps } = _interactionRectProps;
+
+  const rimWidth = _rimWidth ?? 5;
+  const borderRadius = _borderRadius ?? 10;
+
+  return (
+    <>
+      <rect
+        {...props}
+        x={x + rimWidth}
+        y={y + rimWidth}
+        width={width - rimWidth * 2}
+        height={height - rimWidth * 2}
+        strokeWidth={strokeWidth}
+        fill={"transparent"}
+        stroke={DEFAULT_NODE_STROKE_COLOR}
+        strokeLinejoin={"round"}
+        rx={borderRadius - rimWidth}
+        ry={borderRadius - rimWidth}
+        className={containerNodeVisibleRectCssClassName}
+      />
+      <rect
+        {...props}
+        x={x}
+        y={y}
+        width={width}
+        height={height}
+        strokeWidth={strokeWidth}
+        fill={"transparent"}
+        stroke={DEFAULT_NODE_STROKE_COLOR}
+        strokeLinejoin={"round"}
+        rx={borderRadius}
+        ry={borderRadius}
+        className={containerNodeVisibleRectCssClassName}
+      />
+      {/* ↓ interaction rect */}
       <rect
         {...interactionRectProps}
         ref={ref}

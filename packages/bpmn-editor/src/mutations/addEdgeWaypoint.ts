@@ -24,27 +24,27 @@ import { addOrGetProcessAndDiagramElements } from "./addOrGetProcessAndDiagramEl
 
 export function addEdgeWaypoint({
   definitions,
-  edgeIndex,
-  beforeIndex,
-  waypoint,
+  __readonly_edgeIndex,
+  __readonly_beforeIndex,
+  __readonly_waypoint,
 }: {
   definitions: Normalized<BPMN20__tDefinitions>;
-  edgeIndex: number;
-  beforeIndex: number;
-  waypoint: DC__Point;
+  __readonly_edgeIndex: number;
+  __readonly_beforeIndex: number;
+  __readonly_waypoint: DC__Point;
 }) {
   const { diagramElements } = addOrGetProcessAndDiagramElements({ definitions });
 
-  const diagramElement = diagramElements[edgeIndex];
+  const diagramElement = diagramElements[__readonly_edgeIndex];
   if (diagramElement.__$$element !== "bpmndi:BPMNEdge") {
     throw new Error("DMN MUTATION: Can't remove a waypoint from an element that is not a DMNEdge.");
   }
 
-  if (beforeIndex > (diagramElement["di:waypoint"]?.length ?? 0) - 1) {
+  if (__readonly_beforeIndex > (diagramElement["di:waypoint"]?.length ?? 0) - 1) {
     throw new Error(
-      `DMN MUTATION: Can't add waypoint before index '${beforeIndex}' to DMNEdge '${diagramElement["@_id"]}' because the waypoint array is smaller than 'beforeIndex' requires.`
+      `DMN MUTATION: Can't add waypoint before index '${__readonly_beforeIndex}' to DMNEdge '${diagramElement["@_id"]}' because the waypoint array is smaller than 'beforeIndex' requires.`
     );
   }
 
-  diagramElement["di:waypoint"]!.splice(beforeIndex, 0, waypoint);
+  diagramElement["di:waypoint"]!.splice(__readonly_beforeIndex, 0, __readonly_waypoint);
 }

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { generateUuid } from "@kie-tools/boxed-expression-component/dist/api";
+import { generateUuid } from "@kie-tools/xyflow-react-kie-diagram/dist/uuid/uuid";
 import { BPMN20__tDefinitions, BPMNDI__BPMNPlane } from "@kie-tools/bpmn-marshaller/dist/schemas/bpmn-2_0/ts-gen/types";
 import { ElementFilter } from "@kie-tools/xml-parser-ts/dist/elementFilter";
 import { Unpacked } from "@kie-tools/xyflow-react-kie-diagram/dist/tsExt/tsExt";

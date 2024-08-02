@@ -30,6 +30,7 @@ import {
   SubProcessNodeSvg,
   TaskNodeSvg,
   TextAnnotationNodeSvg,
+  TransactionNodeSvg,
 } from "./NodeSvgs";
 import { switchExpression } from "@kie-tools-core/switch-expression-ts";
 import { BpmnNodeType } from "../BpmnDiagramDomain";
@@ -108,6 +109,14 @@ export function LaneIcon() {
   return (
     <RoundSvg>
       <LaneNodeSvg {...nodeSvgProps} />
+    </RoundSvg>
+  );
+}
+
+export function TransactionIcon() {
+  return (
+    <RoundSvg>
+      <TransactionNodeSvg {...nodeSvgProps} strokeWidth={10} rimWidth={20} borderRadius={20} />
     </RoundSvg>
   );
 }

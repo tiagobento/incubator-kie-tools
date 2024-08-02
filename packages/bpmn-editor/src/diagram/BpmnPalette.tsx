@@ -31,6 +31,7 @@ import {
   SubProcessIcon,
   TaskIcon,
   TextAnnotationIcon,
+  TransactionIcon,
 } from "./nodes/NodeIcons";
 import { BpmnNodeType } from "./BpmnDiagramDomain";
 import { NODE_TYPES } from "./BpmnDiagramDomain";
@@ -51,7 +52,7 @@ export function BpmnPalette({ pulse }: { pulse: boolean }) {
         <div ref={nodesPalletePopoverRef} style={{ position: "absolute", left: 0, height: 0, zIndex: -1 }} />
         <aside className={`kie-bpmn-editor--palette ${pulse ? "pulse" : ""}`}>
           <div
-            title={"StartEvent"}
+            title={"Start Event"}
             className={"kie-bpmn-editor--palette-button dndnode start-event"}
             onDragStart={(event) => onDragStart(event, NODE_TYPES.startEvent)}
             draggable={true}
@@ -59,7 +60,7 @@ export function BpmnPalette({ pulse }: { pulse: boolean }) {
             <StartEventIcon />
           </div>
           <div
-            title={"IntermediateCatchEvent"}
+            title={"Intermediate Catch Event"}
             className={"kie-bpmn-editor--palette-button dndnode intermediate-catch-event"}
             onDragStart={(event) => onDragStart(event, NODE_TYPES.intermediateCatchEvent)}
             draggable={true}
@@ -67,7 +68,7 @@ export function BpmnPalette({ pulse }: { pulse: boolean }) {
             <IntermediateCatchEventIcon />
           </div>
           <div
-            title={"EndEvent"}
+            title={"End Event"}
             className={"kie-bpmn-editor--palette-button dndnode end-event"}
             onDragStart={(event) => onDragStart(event, NODE_TYPES.endEvent)}
             draggable={true}
@@ -83,7 +84,7 @@ export function BpmnPalette({ pulse }: { pulse: boolean }) {
             <TaskIcon />
           </div>
           <div
-            title={"SubProcess"}
+            title={"Sub-process"}
             className={"kie-bpmn-editor--palette-button dndnode subProcess"}
             onDragStart={(event) => onDragStart(event, NODE_TYPES.subProcess)}
             draggable={true}
@@ -101,10 +102,18 @@ export function BpmnPalette({ pulse }: { pulse: boolean }) {
           <div
             title={"Lane"}
             className={"kie-bpmn-editor--palette-button dndnode lane"}
-            onDragStart={(event) => onDragStart(event, NODE_TYPES.gateway)}
+            onDragStart={(event) => onDragStart(event, NODE_TYPES.lane)}
             draggable={true}
           >
             <LaneIcon />
+          </div>
+          <div
+            title={"Transaction"}
+            className={"kie-bpmn-editor--palette-button dndnode transaction"}
+            onDragStart={(event) => onDragStart(event, NODE_TYPES.transaction)}
+            draggable={true}
+          >
+            <TransactionIcon />
           </div>
         </aside>
         <br />

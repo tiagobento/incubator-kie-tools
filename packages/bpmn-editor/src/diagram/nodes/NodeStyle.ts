@@ -105,6 +105,7 @@ export function getNodeLabelPosition({ nodeType }: { nodeType: BpmnNodeType }): 
     case NODE_TYPES.group:
     case NODE_TYPES.textAnnotation:
     case NODE_TYPES.lane:
+    case NODE_TYPES.transaction:
       return "top-left";
     case NODE_TYPES.task:
     case NODE_TYPES.unknown:

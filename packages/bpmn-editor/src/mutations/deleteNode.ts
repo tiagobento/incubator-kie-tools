@@ -20,7 +20,7 @@
 import { BPMN20__tDefinitions, BPMNDI__BPMNShape } from "@kie-tools/bpmn-marshaller/dist/schemas/bpmn-2_0/ts-gen/types";
 import { ElementFilter } from "@kie-tools/xml-parser-ts/dist/elementFilter";
 import { Unpacked } from "@kie-tools/xyflow-react-kie-diagram/dist/tsExt/tsExt";
-import { BpmnDiagramEdgeData } from "../diagram/BpmnDiagramDomain";
+import { BpmnDiagramEdgeData, BpmnNodeElement } from "../diagram/BpmnDiagramDomain";
 import { Normalized } from "../normalization/normalize";
 import { NodeNature } from "./NodeNature";
 import { addOrGetProcessAndDiagramElements } from "./addOrGetProcessAndDiagramElements";
@@ -37,9 +37,7 @@ export function deleteNode({
   __readonly_nodeNature: NodeNature;
   __readonly_bpmnElementId: string | undefined;
 }): {
-  deletedBpmnElement:
-    | ElementFilter<Unpacked<Normalized<BPMN20__tDefinitions["rootElement"]>>, "process">["flowElement" | "artifact"]
-    | undefined;
+  deletedBpmnElement: BpmnNodeElement | undefined;
   deletedBpmnShape: Normalized<BPMNDI__BPMNShape> | undefined;
 } {
   const { process, diagramElements } = addOrGetProcessAndDiagramElements({ definitions });
@@ -53,7 +51,7 @@ export function deleteNode({
     if (drgEdge.bpmnEdge?.["@_sourceElement"] === nodeId || drgEdge.bpmnEdge?.["@_targetElement"] === nodeId) {
       deleteEdge({
         definitions,
-        edge: {
+        __readonly_edge: {
           id: drgEdge["@_id"],
           bpmnElement: drgEdge.bpmnElement,
         },
@@ -61,17 +59,22 @@ export function deleteNode({
     }
   }
 
-  let deletedBpmnElement:
-    | ElementFilter<Unpacked<Normalized<BPMN20__tDefinitions["rootElement"]>>, "process">["flowElement" | "artifact"]
-    | undefined = undefined;
+  let deletedBpmnElement: BpmnNodeElement | undefined = undefined;
 
   // Delete the bpmnElement itself
   if (__readonly_nodeNature === NodeNature.ARTIFACT) {
     const nodeIndex = (process.artifact ?? []).findIndex((a) => a["@_id"] === __readonly_bpmnElementId);
     deletedBpmnElement = process.artifact?.splice(nodeIndex, 1)?.[0] as typeof deletedBpmnElement;
-  } else if (__readonly_nodeNature === NodeNature.PROCESS_FLOW_ELEMENT) {
+  } else if (
+    __readonly_nodeNature === NodeNature.PROCESS_FLOW_ELEMENT ||
+    __readonly_nodeNature == NodeNature.CONTAINER
+  ) {
     const nodeIndex = (process.flowElement ?? []).findIndex((d) => d["@_id"] === __readonly_bpmnElementId);
     deletedBpmnElement = process.flowElement?.splice(nodeIndex, 1)?.[0] as typeof deletedBpmnElement;
+  } else if (__readonly_nodeNature === NodeNature.LANE) {
+    const nodeIndex = (process.laneSet?.[0].lane ?? []).findIndex((d) => d["@_id"] === __readonly_bpmnElementId);
+    const deletedLane = (process.laneSet?.[0].lane ?? [])?.splice(nodeIndex, 1)?.[0];
+    deletedBpmnElement = deletedLane ? { ...deletedLane, __$$element: "lane" } : undefined;
   } else if (__readonly_nodeNature === NodeNature.UNKNOWN) {
     // Ignore. There's no bpmnElement here.
   } else {

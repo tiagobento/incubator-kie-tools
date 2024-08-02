@@ -17,9 +17,9 @@
  * under the License.
  */
 
+import * as React from "react";
 import { ContainmentMap, GraphStructure } from "@kie-tools/xyflow-react-kie-diagram/dist/graph/graphStructure";
 import {
-  BPMN20__tEndEvent,
   BPMN20__tIntermediateCatchEvent,
   BPMN20__tLane,
   BPMN20__tProcess,
@@ -43,6 +43,7 @@ import {
   SubProcessNode,
   TaskNode,
   TextAnnotationNode,
+  TransactionNode,
   UnknownNode,
 } from "./nodes/Nodes";
 import {
@@ -60,6 +61,7 @@ import {
   GatewayNodeSvg,
   TextAnnotationNodeSvg,
   LaneNodeSvg,
+  TransactionNodeSvg,
 } from "./nodes/NodeSvgs";
 import { SequenceFlowEdge, AssociationEdge } from "./edges/Edges";
 import { Unpacked } from "@kie-tools/xyflow-react-kie-diagram/dist/tsExt/tsExt";
@@ -86,6 +88,7 @@ export const NODE_TYPES = {
   unknown: "node_unknown" as const,
   group: "node_group" as const,
   lane: "node_lane" as const,
+  transaction: "node_transaction" as const,
   // custom: "node_custom" as const,
 };
 
@@ -102,16 +105,101 @@ export const BPMN_GRAPH_STRUCTURE: GraphStructure<BpmnNodeType, BpmnEdgeType> = 
   [
     NODE_TYPES.startEvent,
     new Map<BpmnEdgeType, Set<BpmnNodeType>>([
-      [EDGE_TYPES.sequenceFlow, new Set([NODE_TYPES.task])],
+      [
+        EDGE_TYPES.sequenceFlow,
+        new Set([
+          NODE_TYPES.task,
+          NODE_TYPES.intermediateCatchEvent,
+          NODE_TYPES.intermediateThrowEvent,
+          NODE_TYPES.gateway,
+        ]),
+      ],
       [EDGE_TYPES.association, new Set([NODE_TYPES.textAnnotation])],
     ]),
   ],
   [
     NODE_TYPES.task,
     new Map<BpmnEdgeType, Set<BpmnNodeType>>([
-      [EDGE_TYPES.sequenceFlow, new Set([NODE_TYPES.task, NODE_TYPES.endEvent])],
+      [
+        EDGE_TYPES.sequenceFlow,
+        new Set([
+          NODE_TYPES.task,
+          NODE_TYPES.gateway,
+          NODE_TYPES.intermediateCatchEvent,
+          NODE_TYPES.intermediateThrowEvent,
+          NODE_TYPES.endEvent,
+        ]),
+      ],
       [EDGE_TYPES.association, new Set([NODE_TYPES.textAnnotation])],
     ]),
+  ],
+  [
+    NODE_TYPES.intermediateCatchEvent,
+    new Map<BpmnEdgeType, Set<BpmnNodeType>>([
+      [
+        EDGE_TYPES.sequenceFlow,
+        new Set([
+          NODE_TYPES.task,
+          NODE_TYPES.gateway,
+          NODE_TYPES.intermediateCatchEvent,
+          NODE_TYPES.intermediateThrowEvent,
+          NODE_TYPES.endEvent,
+        ]),
+      ],
+      [EDGE_TYPES.association, new Set([NODE_TYPES.textAnnotation])],
+    ]),
+  ],
+  [
+    NODE_TYPES.intermediateThrowEvent,
+    new Map<BpmnEdgeType, Set<BpmnNodeType>>([
+      [
+        EDGE_TYPES.sequenceFlow,
+        new Set([
+          NODE_TYPES.task,
+          NODE_TYPES.gateway,
+          NODE_TYPES.intermediateCatchEvent,
+          NODE_TYPES.intermediateThrowEvent,
+          NODE_TYPES.endEvent,
+        ]),
+      ],
+      [EDGE_TYPES.association, new Set([NODE_TYPES.textAnnotation])],
+    ]),
+  ],
+  [
+    NODE_TYPES.gateway,
+    new Map<BpmnEdgeType, Set<BpmnNodeType>>([
+      [
+        EDGE_TYPES.sequenceFlow,
+        new Set([
+          NODE_TYPES.task,
+          NODE_TYPES.gateway,
+          NODE_TYPES.intermediateCatchEvent,
+          NODE_TYPES.intermediateThrowEvent,
+          NODE_TYPES.endEvent,
+        ]),
+      ],
+      [EDGE_TYPES.association, new Set([NODE_TYPES.textAnnotation])],
+    ]),
+  ],
+  [
+    NODE_TYPES.endEvent,
+    new Map<BpmnEdgeType, Set<BpmnNodeType>>([[EDGE_TYPES.association, new Set([NODE_TYPES.textAnnotation])]]),
+  ],
+  [
+    NODE_TYPES.dataObject,
+    new Map<BpmnEdgeType, Set<BpmnNodeType>>([[EDGE_TYPES.association, new Set([NODE_TYPES.textAnnotation])]]),
+  ],
+  [
+    NODE_TYPES.group,
+    new Map<BpmnEdgeType, Set<BpmnNodeType>>([[EDGE_TYPES.association, new Set([NODE_TYPES.textAnnotation])]]),
+  ],
+  [
+    NODE_TYPES.lane,
+    new Map<BpmnEdgeType, Set<BpmnNodeType>>([[EDGE_TYPES.association, new Set([NODE_TYPES.textAnnotation])]]),
+  ],
+  [
+    NODE_TYPES.transaction,
+    new Map<BpmnEdgeType, Set<BpmnNodeType>>([[EDGE_TYPES.association, new Set([NODE_TYPES.textAnnotation])]]),
   ],
   [NODE_TYPES.textAnnotation, new Map([])],
 ]);
@@ -133,6 +221,7 @@ export const CONNECTION_LINE_NODE_COMPONENT_MAPPING: ConnectionLineNodeMapping<B
   [NODE_TYPES.gateway]: GatewayNodeSvg,
   [NODE_TYPES.textAnnotation]: TextAnnotationNodeSvg,
   [NODE_TYPES.lane]: LaneNodeSvg,
+  [NODE_TYPES.transaction]: TransactionNodeSvg,
   // Ignore
   node_dataObject: undefined as any,
   node_unknown: undefined as any,
@@ -151,6 +240,7 @@ export const XY_FLOW_NODE_TYPES: Record<BpmnNodeType, any> = {
   [NODE_TYPES.textAnnotation]: TextAnnotationNode,
   [NODE_TYPES.dataObject]: DataObjectNode,
   [NODE_TYPES.lane]: LaneNode,
+  [NODE_TYPES.transaction]: TransactionNode,
   [NODE_TYPES.unknown]: UnknownNode,
 };
 
@@ -177,100 +267,157 @@ export interface BpmnDiagramEdgeData extends XyFlowReactKieDiagramEdgeData {
 
 export const BPMN_OUTGOING_STRUCTURE = {
   [NODE_TYPES.startEvent]: {
-    nodes: [NODE_TYPES.task],
-    edges: [EDGE_TYPES.sequenceFlow],
+    nodes: [
+      NODE_TYPES.task,
+      NODE_TYPES.gateway,
+      NODE_TYPES.intermediateCatchEvent,
+      NODE_TYPES.intermediateThrowEvent,
+      NODE_TYPES.endEvent,
+      NODE_TYPES.textAnnotation,
+    ],
+    edges: [EDGE_TYPES.sequenceFlow, EDGE_TYPES.association],
   },
   [NODE_TYPES.intermediateCatchEvent]: {
-    nodes: [],
-    edges: [],
+    nodes: [
+      NODE_TYPES.task,
+      NODE_TYPES.gateway,
+      NODE_TYPES.intermediateCatchEvent,
+      NODE_TYPES.intermediateThrowEvent,
+      NODE_TYPES.endEvent,
+      NODE_TYPES.textAnnotation,
+    ],
+    edges: [EDGE_TYPES.sequenceFlow, EDGE_TYPES.association],
   },
   [NODE_TYPES.intermediateThrowEvent]: {
-    nodes: [],
-    edges: [],
+    nodes: [
+      NODE_TYPES.task,
+      NODE_TYPES.gateway,
+      NODE_TYPES.intermediateCatchEvent,
+      NODE_TYPES.intermediateThrowEvent,
+      NODE_TYPES.endEvent,
+      NODE_TYPES.textAnnotation,
+    ],
+    edges: [EDGE_TYPES.sequenceFlow, EDGE_TYPES.association],
   },
   [NODE_TYPES.endEvent]: {
-    nodes: [],
-    edges: [],
+    nodes: [NODE_TYPES.textAnnotation],
+    edges: [EDGE_TYPES.association],
   },
   [NODE_TYPES.task]: {
-    nodes: [NODE_TYPES.task, NODE_TYPES.endEvent, NODE_TYPES.textAnnotation],
-    edges: [EDGE_TYPES.sequenceFlow],
+    nodes: [
+      NODE_TYPES.task,
+      NODE_TYPES.gateway,
+      NODE_TYPES.intermediateCatchEvent,
+      NODE_TYPES.intermediateThrowEvent,
+      NODE_TYPES.endEvent,
+      NODE_TYPES.textAnnotation,
+    ],
+    edges: [EDGE_TYPES.sequenceFlow, EDGE_TYPES.association],
   },
   [NODE_TYPES.subProcess]: {
-    nodes: [],
-    edges: [],
+    nodes: [
+      NODE_TYPES.task,
+      NODE_TYPES.gateway,
+      NODE_TYPES.intermediateCatchEvent,
+      NODE_TYPES.intermediateThrowEvent,
+      NODE_TYPES.endEvent,
+      NODE_TYPES.textAnnotation,
+    ],
+    edges: [EDGE_TYPES.sequenceFlow, EDGE_TYPES.association],
   },
   [NODE_TYPES.gateway]: {
-    nodes: [],
-    edges: [],
+    nodes: [
+      NODE_TYPES.task,
+      NODE_TYPES.gateway,
+      NODE_TYPES.intermediateCatchEvent,
+      NODE_TYPES.intermediateThrowEvent,
+      NODE_TYPES.endEvent,
+      NODE_TYPES.textAnnotation,
+    ],
+    edges: [EDGE_TYPES.sequenceFlow, EDGE_TYPES.association],
   },
   [NODE_TYPES.dataObject]: {
-    nodes: [],
-    edges: [],
+    nodes: [NODE_TYPES.textAnnotation],
+    edges: [EDGE_TYPES.association],
   },
   [NODE_TYPES.group]: {
-    nodes: [],
-    edges: [],
+    nodes: [NODE_TYPES.textAnnotation],
+    edges: [EDGE_TYPES.association],
   },
   [NODE_TYPES.lane]: {
-    nodes: [],
-    edges: [],
+    nodes: [NODE_TYPES.textAnnotation],
+    edges: [EDGE_TYPES.association],
+  },
+  [NODE_TYPES.transaction]: {
+    nodes: [NODE_TYPES.textAnnotation],
+    edges: [EDGE_TYPES.association],
   },
   [NODE_TYPES.textAnnotation]: {
     nodes: [],
-    edges: [],
+    edges: [EDGE_TYPES.association],
   },
 };
 
 export const bpmnEdgesOutgoingStuffNodePanelMapping: OutgoingStuffNodePanelEdgeMapping<BpmnEdgeType> = {
   [EDGE_TYPES.sequenceFlow]: {
     actionTitle: "Add Sequence Flow",
-    icon: undefined as any,
+    icon: ({ viewboxSize }) => <SequenceFlowPath d={`M2,${viewboxSize - 2} L${viewboxSize - 2},0`} />,
   },
   [EDGE_TYPES.association]: {
     actionTitle: "Add Association",
-    icon: undefined as any,
+    icon: ({ viewboxSize }) => <AssociationPath d={`M2,${viewboxSize - 2} L${viewboxSize},0`} strokeWidth={2} />,
   },
 };
 
 export const bpmnNodesOutgoingStuffNodePanelMapping: OutgoingStuffNodePanelNodeMapping<
-  Exclude<BpmnNodeType, typeof NODE_TYPES.dataObject | typeof NODE_TYPES.unknown | typeof NODE_TYPES.group>
+  Exclude<
+    BpmnNodeType,
+    | typeof NODE_TYPES.dataObject
+    | typeof NODE_TYPES.unknown
+    | typeof NODE_TYPES.group
+    | typeof NODE_TYPES.lane
+    | typeof NODE_TYPES.transaction
+  >
 > = {
   [NODE_TYPES.startEvent]: {
     actionTitle: "Add Start Event",
-    icon: undefined as any,
+    icon: (nodeSvgProps) => <StartEventNodeSvg {...nodeSvgProps} variant={"none"} />,
   },
   [NODE_TYPES.intermediateCatchEvent]: {
     actionTitle: "Add Intermediate Catch Event",
-    icon: undefined as any,
+    icon: (nodeSvgProps) => <IntermediateCatchEventNodeSvg {...nodeSvgProps} variant={"none"} />,
   },
   [NODE_TYPES.intermediateThrowEvent]: {
     actionTitle: "Add Intermediate Throw Event",
-    icon: undefined as any,
+    icon: (nodeSvgProps) => <IntermediateThrowEventNodeSvg {...nodeSvgProps} variant={"none"} />,
   },
   [NODE_TYPES.endEvent]: {
     actionTitle: "Add End Event",
-    icon: undefined as any,
+    icon: (nodeSvgProps) => <EndEventNodeSvg {...nodeSvgProps} variant={"none"} />,
   },
   [NODE_TYPES.task]: {
     actionTitle: "Add Task",
-    icon: undefined as any,
+    icon: (nodeSvgProps) => <TaskNodeSvg {...nodeSvgProps} />,
   },
   [NODE_TYPES.subProcess]: {
     actionTitle: "Add Sub-Process",
-    icon: undefined as any,
+    icon: (nodeSvgProps) => <SubProcessNodeSvg {...nodeSvgProps} />,
   },
   [NODE_TYPES.gateway]: {
     actionTitle: "Add Gateway",
-    icon: undefined as any,
+    icon: (nodeSvgProps) => (
+      <GatewayNodeSvg
+        {...nodeSvgProps}
+        height={nodeSvgProps.width}
+        variant={"none"}
+        x={nodeSvgProps.x}
+        y={nodeSvgProps.y - 8}
+      />
+    ),
   },
   [NODE_TYPES.textAnnotation]: {
     actionTitle: "Add Text Annotation",
-    icon: undefined as any,
-  },
-  [NODE_TYPES.lane]: {
-    actionTitle: "Add Lane",
-    icon: undefined as any,
+    icon: (nodeSvgProps) => <TextAnnotationNodeSvg {...nodeSvgProps} />,
   },
 };
 
@@ -356,6 +503,13 @@ export const MIN_NODE_SIZES: NodeSizes<BpmnNodeType> = {
       "@_height": snappedMinSize.height,
     };
   },
+  [NODE_TYPES.transaction]: ({ snapGrid }) => {
+    const snappedMinSize = MIN_SIZE_FOR_NODES(snapGrid);
+    return {
+      "@_width": snappedMinSize.width,
+      "@_height": snappedMinSize.height,
+    };
+  },
   [NODE_TYPES.unknown]: ({ snapGrid }) => {
     const snappedMinSize = MIN_SIZE_FOR_NODES(snapGrid);
     return {
@@ -367,49 +521,49 @@ export const MIN_NODE_SIZES: NodeSizes<BpmnNodeType> = {
 
 export const DEFAULT_NODE_SIZES: NodeSizes<BpmnNodeType> = {
   [NODE_TYPES.startEvent]: ({ snapGrid }) => {
-    const snappedMinSize = MIN_SIZE_FOR_NODES(snapGrid, 50, 50);
+    const snappedMinSize = MIN_SIZE_FOR_NODES(snapGrid, 60, 60);
     return {
       "@_width": snappedMinSize.width,
       "@_height": snappedMinSize.height,
     };
   },
   [NODE_TYPES.intermediateCatchEvent]: ({ snapGrid }) => {
-    const snappedMinSize = MIN_SIZE_FOR_NODES(snapGrid, 50, 50);
+    const snappedMinSize = MIN_SIZE_FOR_NODES(snapGrid, 60, 60);
     return {
       "@_width": snappedMinSize.width,
       "@_height": snappedMinSize.height,
     };
   },
   [NODE_TYPES.intermediateThrowEvent]: ({ snapGrid }) => {
-    const snappedMinSize = MIN_SIZE_FOR_NODES(snapGrid, 50, 50);
+    const snappedMinSize = MIN_SIZE_FOR_NODES(snapGrid, 60, 60);
     return {
       "@_width": snappedMinSize.width,
       "@_height": snappedMinSize.height,
     };
   },
   [NODE_TYPES.endEvent]: ({ snapGrid }) => {
-    const snappedMinSize = MIN_SIZE_FOR_NODES(snapGrid, 50, 50);
+    const snappedMinSize = MIN_SIZE_FOR_NODES(snapGrid, 60, 60);
     return {
       "@_width": snappedMinSize.width,
       "@_height": snappedMinSize.height,
     };
   },
   [NODE_TYPES.task]: ({ snapGrid }) => {
-    const snappedMinSize = MIN_SIZE_FOR_NODES(snapGrid);
+    const snappedMinSize = MIN_SIZE_FOR_NODES(snapGrid, 180, 90);
     return {
       "@_width": snappedMinSize.width,
       "@_height": snappedMinSize.height,
     };
   },
   [NODE_TYPES.subProcess]: ({ snapGrid }) => {
-    const snappedMinSize = MIN_SIZE_FOR_NODES(snapGrid);
+    const snappedMinSize = MIN_SIZE_FOR_NODES(snapGrid, 180, 90);
     return {
       "@_width": snappedMinSize.width,
       "@_height": snappedMinSize.height,
     };
   },
   [NODE_TYPES.gateway]: ({ snapGrid }) => {
-    const snappedMinSize = MIN_SIZE_FOR_NODES(snapGrid, 50, 50);
+    const snappedMinSize = MIN_SIZE_FOR_NODES(snapGrid, 60, 60);
     return {
       "@_width": snappedMinSize.width,
       "@_height": snappedMinSize.height,
@@ -430,14 +584,21 @@ export const DEFAULT_NODE_SIZES: NodeSizes<BpmnNodeType> = {
     };
   },
   [NODE_TYPES.textAnnotation]: ({ snapGrid }) => {
-    const snappedMinSize = MIN_SIZE_FOR_NODES(snapGrid, 200, 200);
+    const snappedMinSize = MIN_SIZE_FOR_NODES(snapGrid, 180, 180);
     return {
       "@_width": snappedMinSize.width,
       "@_height": snappedMinSize.height,
     };
   },
   [NODE_TYPES.lane]: ({ snapGrid }) => {
-    const snappedMinSize = MIN_SIZE_FOR_NODES(snapGrid, 200, 200);
+    const snappedMinSize = MIN_SIZE_FOR_NODES(snapGrid, 360, 180);
+    return {
+      "@_width": snappedMinSize.width,
+      "@_height": snappedMinSize.height,
+    };
+  },
+  [NODE_TYPES.transaction]: ({ snapGrid }) => {
+    const snappedMinSize = MIN_SIZE_FOR_NODES(snapGrid, 360, 180);
     return {
       "@_width": snappedMinSize.width,
       "@_height": snappedMinSize.height,
@@ -452,8 +613,8 @@ export const DEFAULT_NODE_SIZES: NodeSizes<BpmnNodeType> = {
   },
 };
 
-export const NODE_MIN_WIDTH = 100;
-export const NODE_MIN_HEIGHT = 50;
+export const NODE_MIN_WIDTH = 120;
+export const NODE_MIN_HEIGHT = 60;
 
 export const MIN_SIZE_FOR_NODES = (grid: SnapGrid, width = NODE_MIN_WIDTH, height = NODE_MIN_HEIGHT) => {
   const snapped = snapPoint(grid, { "@_x": width, "@_y": height }, "ceil");

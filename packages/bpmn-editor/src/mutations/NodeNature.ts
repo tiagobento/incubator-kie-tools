@@ -21,16 +21,19 @@ import { BpmnNodeType } from "../diagram/BpmnDiagramDomain";
 import { NODE_TYPES } from "../diagram/BpmnDiagramDomain";
 
 export enum NodeNature {
-  TOP_LEVEL = "TOP_LEVEL",
+  LANE = "LANE",
+  CONTAINER = "CONTAINER",
   PROCESS_FLOW_ELEMENT = "PROCESS_FLOW_ELEMENT",
   ARTIFACT = "ARTIFACT",
   UNKNOWN = "UNKNOWN",
 }
 
 export const nodeNatures: Record<BpmnNodeType, NodeNature> = {
-  // TOP_LEVEL
-  [NODE_TYPES.dataObject]: NodeNature.TOP_LEVEL,
-  // [NODE_TYPES.lane]: NodeNature.TOP_LEVEL,
+  // LANE
+  [NODE_TYPES.lane]: NodeNature.LANE,
+
+  // CONTAINER
+  [NODE_TYPES.transaction]: NodeNature.CONTAINER,
 
   // PROCESS_FLOW_ELELEMENT
   [NODE_TYPES.startEvent]: NodeNature.PROCESS_FLOW_ELEMENT,
@@ -40,7 +43,7 @@ export const nodeNatures: Record<BpmnNodeType, NodeNature> = {
   [NODE_TYPES.task]: NodeNature.PROCESS_FLOW_ELEMENT,
   [NODE_TYPES.subProcess]: NodeNature.PROCESS_FLOW_ELEMENT,
   [NODE_TYPES.gateway]: NodeNature.PROCESS_FLOW_ELEMENT,
-  [NODE_TYPES.lane]: NodeNature.PROCESS_FLOW_ELEMENT,
+  [NODE_TYPES.dataObject]: NodeNature.PROCESS_FLOW_ELEMENT,
   // [NODE_TYPES.custom]: NodeNature.PROCESS_FLOW_ELEMENT,
 
   // ARTIFACT

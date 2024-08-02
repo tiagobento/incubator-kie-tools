@@ -31,6 +31,7 @@ import { NodeSizes } from "../nodes/NodeSizes";
 import { SelectionStatusLabel } from "./SelectionStatusLabel";
 import { XyFlowDiagramState, XyFlowReactKieDiagramEdgeData, XyFlowReactKieDiagramNodeData } from "../store/State";
 import { Draft } from "immer";
+import { PositionalNodeHandleId } from "../nodes/PositionalNodeHandles";
 
 // nodes
 
@@ -39,7 +40,7 @@ export type OnNodeAdded<
   N extends string,
   NData extends XyFlowReactKieDiagramNodeData<N, NData>,
   EData extends XyFlowReactKieDiagramEdgeData,
-> = (args: { state: Draft<S>; type: N; dropPoint: { x: number; y: number } }) => void;
+> = (args: { state: Draft<S>; type: N; dropPoint: { x: number; y: number } }) => { newNodeId: string };
 
 export type OnConnectedNodeAdded<
   S extends XyFlowDiagramState<S, N, NData, EData>,
@@ -53,7 +54,7 @@ export type OnConnectedNodeAdded<
   newNodeType: N;
   edgeType: E;
   dropPoint: { x: number; y: number };
-}) => void;
+}) => { newNodeId: string };
 
 export type OnNodeUnparented<
   S extends XyFlowDiagramState<S, N, NData, EData>,
@@ -114,7 +115,14 @@ export type OnEdgeAdded<
   E extends string,
   NData extends XyFlowReactKieDiagramNodeData<N, NData>,
   EData extends XyFlowReactKieDiagramEdgeData,
-> = (args: { state: Draft<S>; sourceNode: RF.Node<NData>; targetNode: RF.Node<NData>; edgeType: E }) => void;
+> = (args: {
+  state: Draft<S>;
+  sourceNode: RF.Node<NData, N>;
+  targetNode: RF.Node<NData, N>;
+  edgeType: E;
+  sourceHandle: PositionalNodeHandleId;
+  targetHandle: PositionalNodeHandleId;
+}) => void;
 
 export type OnEdgeUpdated<
   S extends XyFlowDiagramState<S, N, NData, EData>,
@@ -124,9 +132,11 @@ export type OnEdgeUpdated<
   EData extends XyFlowReactKieDiagramEdgeData,
 > = (args: {
   state: Draft<S>;
-  sourceNode: RF.Node<NData>;
-  targetNode: RF.Node<NData>;
+  sourceNode: RF.Node<NData, N>;
+  targetNode: RF.Node<NData, N>;
   edge: RF.Edge<EData>;
+  targetHandle: PositionalNodeHandleId;
+  sourceHandle: PositionalNodeHandleId;
   firstWaypoint: DC__Point;
   lastWaypoint: DC__Point;
 }) => void;
@@ -292,7 +302,14 @@ export function XyFlowReactKieDiagram<
 
       console.log("XYFLOW KIE DIAGRAM: Edge added");
       xyFlowReactKieDiagramStoreApi.setState((state) => {
-        onEdgeAdded({ state, sourceNode, targetNode, edgeType: sourceHandle as E });
+        onEdgeAdded({
+          state,
+          sourceNode,
+          targetNode,
+          edgeType: sourceHandle as E,
+          targetHandle: targetHandle as PositionalNodeHandleId,
+          sourceHandle: sourceHandle as PositionalNodeHandleId,
+        });
       });
     },
     [onEdgeAdded, xyFlowReactKieDiagramStoreApi]
@@ -352,11 +369,12 @@ export function XyFlowReactKieDiagram<
         // --------- This is where we draw the line between the diagram and the model.
 
         xyFlowReactKieDiagramStoreApi.setState((state) => {
-          onNodeAdded({
+          const { newNodeId } = onNodeAdded({
             state,
             dropPoint,
             type: typeOfNode,
           });
+          state.xyFlowReactKieDiagram._selectedNodes = [newNodeId];
         });
       }
     },
@@ -445,13 +463,15 @@ export function XyFlowReactKieDiagram<
         // --------- This is where we draw the line between the diagram and the model.
 
         console.log("XYFLOW KIE DIAGRAM: Node added (connected)");
-        onConnectedNodeAdded({
+        const { newNodeId } = onConnectedNodeAdded({
           state,
           sourceNode,
           newNodeType,
           edgeType,
           dropPoint,
         });
+
+        state.xyFlowReactKieDiagram._selectedNodes = [newNodeId];
       });
 
       // Indepdent of what happens in the state mutation above, we always need to reset the `ongoingConnection` at the end here.
@@ -723,7 +743,16 @@ export function XyFlowReactKieDiagram<
 
       console.log("XYFLOW KIE DIAGRAM: Edge updated");
       xyFlowReactKieDiagramStoreApi.setState((state) => {
-        onEdgeUpdated({ state, sourceNode, targetNode, lastWaypoint, firstWaypoint, edge: oldEdge });
+        onEdgeUpdated({
+          state,
+          sourceNode,
+          targetNode,
+          sourceHandle: newConnection.sourceHandle as PositionalNodeHandleId,
+          targetHandle: newConnection.targetHandle as PositionalNodeHandleId,
+          lastWaypoint,
+          firstWaypoint,
+          edge: oldEdge,
+        });
       });
     },
     [onEdgeUpdated, xyFlowReactKieDiagramStoreApi]

@@ -18,122 +18,120 @@
  */
 
 import { switchExpression } from "@kie-tools-core/switch-expression-ts";
-import { DmnBuiltInDataType, generateUuid } from "@kie-tools/boxed-expression-component/dist/api";
-import { DC__Bounds, DMN15__tDefinitions } from "@kie-tools/dmn-marshaller/dist/schemas/dmn-1_5/ts-gen/types";
-import { NodeType } from "../diagram/connections/graphStructure";
-import { NODE_TYPES } from "../diagram/nodes/NodeTypes";
-import { NodeNature, nodeNatures } from "./NodeNature";
-import { addOrGetDrd as getDefaultDiagram } from "./addOrGetDrd";
-import { getCentralizedDecisionServiceDividerLine } from "./updateDecisionServiceDividerLine";
-import { repopulateInputDataAndDecisionsOnAllDecisionServices } from "./repopulateInputDataAndDecisionsOnDecisionService";
-import { buildXmlHref } from "../xml/xmlHrefs";
+import { generateUuid } from "@kie-tools/xyflow-react-kie-diagram/dist/uuid/uuid";
 import { Normalized } from "../normalization/normalize";
+import { BPMN20__tDefinitions } from "@kie-tools/bpmn-marshaller/dist/schemas/bpmn-2_0/ts-gen/types";
+import { BpmnNodeType, NODE_TYPES } from "../diagram/BpmnDiagramDomain";
+import { DC__Bounds } from "@kie-tools/xyflow-react-kie-diagram/dist/maths/model";
+import { NodeNature, nodeNatures } from "./NodeNature";
+import { addOrGetProcessAndDiagramElements } from "./addOrGetProcessAndDiagramElements";
 
 export function addStandaloneNode({
   definitions,
-  drdIndex,
-  newNode,
+  __readonly_newNode: __readonly_newNode,
 }: {
-  definitions: Normalized<DMN15__tDefinitions>;
-  drdIndex: number;
-  newNode: { type: NodeType; bounds: DC__Bounds };
+  definitions: Normalized<BPMN20__tDefinitions>;
+  __readonly_newNode: { type: BpmnNodeType; bounds: DC__Bounds };
 }) {
-  const newNodeId = generateUuid();
-  const nature = nodeNatures[newNode.type];
+  const newBpmnElementId = generateUuid();
+  const nature = nodeNatures[__readonly_newNode.type];
 
-  if (nature === NodeNature.DRG_ELEMENT) {
-    definitions.drgElement ??= [];
-    const variableBase = {
-      "@_id": generateUuid(),
-      "@_typeRef": undefined,
-    };
-    definitions.drgElement?.push(
-      switchExpression(newNode.type as Exclude<NodeType, "node_group" | "node_textAnnotation" | "node_unknown">, {
-        [NODE_TYPES.bkm]: {
-          __$$element: "businessKnowledgeModel",
-          "@_name": "New BKM",
-          "@_id": newNodeId,
-          variable: {
-            "@_name": "New BKM",
-            ...variableBase,
+  const { process, diagramElements } = addOrGetProcessAndDiagramElements({ definitions });
+
+  if (nature === NodeNature.PROCESS_FLOW_ELEMENT) {
+    process.flowElement ??= [];
+    process.flowElement?.push(
+      switchExpression(
+        __readonly_newNode.type as Exclude<
+          BpmnNodeType,
+          "node_group" | "node_textAnnotation" | "node_unknown" | "node_lane" | "node_transaction"
+        >,
+        {
+          [NODE_TYPES.task]: {
+            "@_id": newBpmnElementId,
+            "@_name": "New Task",
+            __$$element: "task",
           },
-        },
-        [NODE_TYPES.decision]: {
-          __$$element: "decision",
-          "@_name": "New Decision",
-          "@_id": newNodeId,
-          variable: {
-            "@_name": "New Decision",
-            ...variableBase,
+          [NODE_TYPES.startEvent]: {
+            "@_id": newBpmnElementId,
+            __$$element: "startEvent",
           },
-        },
-        [NODE_TYPES.decisionService]: {
-          __$$element: "decisionService",
-          "@_name": "New Decision Service",
-          "@_id": newNodeId,
-          variable: {
-            "@_name": "New Decision Service",
-            ...variableBase,
+          [NODE_TYPES.intermediateCatchEvent]: {
+            "@_id": newBpmnElementId,
+            __$$element: "intermediateCatchEvent",
           },
-        },
-        [NODE_TYPES.inputData]: {
-          __$$element: "inputData",
-          "@_name": "New Input Data",
-          "@_id": newNodeId,
-          variable: {
-            "@_name": "New Input Data",
-            ...variableBase,
+          [NODE_TYPES.intermediateThrowEvent]: {
+            "@_id": newBpmnElementId,
+            __$$element: "intermediateThrowEvent",
           },
-        },
-        [NODE_TYPES.knowledgeSource]: {
-          __$$element: "knowledgeSource",
-          "@_name": "New Knowledge Source",
-          "@_id": newNodeId,
-        },
-      })
+          [NODE_TYPES.endEvent]: {
+            "@_id": newBpmnElementId,
+            __$$element: "endEvent",
+          },
+          [NODE_TYPES.subProcess]: {
+            "@_id": newBpmnElementId,
+            "@_name": "New Sub-Process",
+            __$$element: "subProcess",
+          },
+          [NODE_TYPES.gateway]: {
+            "@_id": newBpmnElementId,
+            __$$element: "exclusiveGateway",
+          },
+          [NODE_TYPES.dataObject]: {
+            "@_id": newBpmnElementId,
+            "@_name": "New Data Object",
+            __$$element: "dataObject",
+          },
+        }
+      )
     );
   } else if (nature === NodeNature.ARTIFACT) {
-    definitions.artifact ??= [];
-    definitions.artifact?.push(
-      ...switchExpression(newNode.type as Extract<NodeType, "node_group" | "node_textAnnotation">, {
+    process.artifact ??= [];
+    process.artifact?.push(
+      ...switchExpression(__readonly_newNode.type as Extract<BpmnNodeType, "node_group" | "node_textAnnotation">, {
         [NODE_TYPES.textAnnotation]: [
           {
-            "@_id": newNodeId,
+            "@_id": newBpmnElementId,
             __$$element: "textAnnotation" as const,
-            text: { __$$text: "New text annotation" },
+            text: "New text annotation" as any,
           },
         ],
         [NODE_TYPES.group]: [
           {
-            "@_id": newNodeId,
+            "@_id": newBpmnElementId,
             __$$element: "group" as const,
             "@_name": "New group",
           },
         ],
       })
     );
-  } else {
-    throw new Error(`Unknown node usage '${nature}'.`);
+  } else if (nature === NodeNature.CONTAINER) {
+    process.flowElement ??= [];
+    process.flowElement.push({
+      __$$element: "transaction",
+      "@_id": newBpmnElementId,
+    });
+  } else if (nature === NodeNature.LANE) {
+    process.laneSet ??= [{ "@_id": generateUuid() }];
+    process.laneSet[0].lane ??= [];
+    process.laneSet[0].lane.push({
+      "@_id": newBpmnElementId,
+      "@_name": "New Lane",
+    });
+  }
+  //
+  else {
+    throw new Error(`Unknown node nature '${nature}'.`);
   }
 
   // Add the new node shape
-  const { diagramElements } = getDefaultDiagram({ definitions, drdIndex });
   const shapeId = generateUuid();
   diagramElements?.push({
-    __$$element: "dmndi:DMNShape",
-    "@_id": shapeId, // FIXME: Tiago --> This should break if removed.
-    "@_dmnElementRef": newNodeId,
-    "@_isCollapsed": false,
-    "@_isListedInputData": false,
-    "dc:Bounds": newNode.bounds,
-    ...(newNode.type === NODE_TYPES.decisionService
-      ? {
-          "dmndi:DMNDecisionServiceDividerLine": getCentralizedDecisionServiceDividerLine(newNode.bounds),
-        }
-      : {}),
+    __$$element: "bpmndi:BPMNShape",
+    "@_id": shapeId,
+    "@_bpmnElement": newBpmnElementId,
+    "dc:Bounds": __readonly_newNode.bounds,
   });
 
-  repopulateInputDataAndDecisionsOnAllDecisionServices({ definitions });
-
-  return { id: newNodeId, href: buildXmlHref({ id: newNodeId }), shapeId };
+  return { id: newBpmnElementId, shapeId };
 }

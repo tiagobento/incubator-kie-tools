@@ -17,205 +17,170 @@
  * under the License.
  */
 
-import { generateUuid } from "@kie-tools/boxed-expression-component/dist/api";
-import {
-  DC__Bounds,
-  DMN15__tAssociation,
-  DMN15__tAuthorityRequirement,
-  DMN15__tDecision,
-  DMN15__tDefinitions,
-  DMN15__tInformationRequirement,
-  DMN15__tKnowledgeRequirement,
-  DMNDI15__DMNEdge,
-  DMNDI15__DMNShape,
-} from "@kie-tools/dmn-marshaller/dist/schemas/dmn-1_5/ts-gen/types";
-import { PositionalNodeHandleId } from "../diagram/connections/PositionalNodeHandles";
-import { EdgeType, NodeType } from "../diagram/connections/graphStructure";
-import { _checkIsValidConnection } from "../diagram/connections/isValidConnection";
-import { EDGE_TYPES } from "../diagram/edges/EdgeTypes";
-import { getDiscreteAutoPositioningEdgeIdMarker, getPointForHandle } from "../diagram/maths/DmnMaths";
-import { getRequirementsFromEdge } from "./addConnectedNode";
-import { addOrGetDrd } from "./addOrGetDrd";
-import { Unpacked } from "../tsExt/tsExt";
-import { repopulateInputDataAndDecisionsOnAllDecisionServices } from "./repopulateInputDataAndDecisionsOnDecisionService";
-import { DmnDiagramNodeData } from "../diagram/nodes/Nodes";
-import { AutoPositionedEdgeMarker } from "../diagram/edges/AutoPositionedEdgeMarker";
+import { generateUuid } from "@kie-tools/xyflow-react-kie-diagram/dist/uuid/uuid";
+
 import { Normalized } from "../normalization/normalize";
+import {
+  BPMN20__tAssociation,
+  BPMN20__tDefinitions,
+  BPMN20__tSequenceFlow,
+  BPMNDI__BPMNEdge,
+} from "@kie-tools/bpmn-marshaller/dist/schemas/bpmn-2_0/ts-gen/types";
+import {
+  BPMN_GRAPH_STRUCTURE,
+  BpmnDiagramNodeData,
+  BpmnEdgeType,
+  BpmnNodeType,
+  EDGE_TYPES,
+} from "../diagram/BpmnDiagramDomain";
+import { DC__Bounds } from "@kie-tools/xyflow-react-kie-diagram/dist/maths/model";
+import { PositionalNodeHandleId } from "@kie-tools/xyflow-react-kie-diagram/dist/nodes/PositionalNodeHandles";
+import { AutoPositionedEdgeMarker } from "@kie-tools/xyflow-react-kie-diagram/dist/edges/AutoPositionedEdgeMarker";
+import { _checkIsValidConnection } from "@kie-tools/xyflow-react-kie-diagram/dist/graph/isValidConnection";
+import { addOrGetProcessAndDiagramElements } from "./addOrGetProcessAndDiagramElements";
+import {
+  getDiscreteAutoPositioningEdgeIdMarker,
+  getPointForHandle,
+} from "@kie-tools/xyflow-react-kie-diagram/dist/maths/DcMaths";
+import { Unpacked } from "@kie-tools/xyflow-react-kie-diagram/dist/tsExt/tsExt";
 
 export function addEdge({
   definitions,
-  drdIndex,
-  sourceNode,
-  targetNode,
-  edge,
-  keepWaypoints,
+  __readonly_sourceNode,
+  __readonly_targetNode,
+  __readonly_edge,
+  __readonly_keepWaypoints,
 }: {
-  definitions: Normalized<DMN15__tDefinitions>;
-  drdIndex: number;
-  sourceNode: {
-    type: NodeType;
-    data: DmnDiagramNodeData;
+  definitions: Normalized<BPMN20__tDefinitions>;
+  __readonly_sourceNode: {
+    type: BpmnNodeType;
+    data: BpmnDiagramNodeData;
     href: string;
     bounds: DC__Bounds;
     shapeId: string | undefined;
   };
-  targetNode: {
-    type: NodeType;
-    data: DmnDiagramNodeData;
+  __readonly_targetNode: {
+    type: BpmnNodeType;
+    data: BpmnDiagramNodeData;
     href: string;
     bounds: DC__Bounds;
     shapeId: string | undefined;
     index: number;
   };
-  edge: {
-    type: EdgeType;
+  __readonly_edge: {
+    type: BpmnEdgeType;
     targetHandle: PositionalNodeHandleId;
     sourceHandle: PositionalNodeHandleId;
     autoPositionedEdgeMarker: AutoPositionedEdgeMarker | undefined;
   };
-  keepWaypoints: boolean;
+  __readonly_keepWaypoints: boolean;
 }) {
-  if (!_checkIsValidConnection(sourceNode, targetNode, edge.type)) {
-    throw new Error(`DMN MUTATION: Invalid structure: (${sourceNode.type}) --${edge.type}--> (${targetNode.type}) `);
+  if (
+    !_checkIsValidConnection(BPMN_GRAPH_STRUCTURE, __readonly_sourceNode, __readonly_targetNode, __readonly_edge.type)
+  ) {
+    throw new Error(
+      `BPMN MUTATION: Invalid structure: (${__readonly_sourceNode.type}) --${__readonly_edge.type}--> (${__readonly_targetNode.type}) `
+    );
   }
 
   const newEdgeId = generateUuid();
 
+  const { process, diagramElements } = addOrGetProcessAndDiagramElements({ definitions });
+
   let existingEdgeId: string | undefined = undefined;
 
   // Associations
-  if (edge.type === EDGE_TYPES.association) {
-    definitions.artifact ??= [];
+  if (__readonly_edge.type === EDGE_TYPES.association) {
+    process.artifact ??= [];
 
-    const newAssociation: Normalized<DMN15__tAssociation> = {
+    const newAssociation: Normalized<BPMN20__tAssociation> = {
       "@_id": newEdgeId,
       "@_associationDirection": "Both",
-      sourceRef: { "@_href": `${sourceNode.href}` },
-      targetRef: { "@_href": `${targetNode.href}` },
+      "@_sourceRef": __readonly_sourceNode.href,
+      "@_targetRef": __readonly_targetNode.href,
     };
 
     // Remove previously existing association
     const removed = removeFirstMatchIfPresent(
-      definitions.artifact,
-      (a) => a.__$$element === "association" && areAssociationsEquivalent(a, newAssociation)
+      process.artifact,
+      (a) => a.__$$element === "association" && areEdgesEquivalent(a, newAssociation)
     );
     existingEdgeId = removed?.["@_id"];
 
     // Replace with the new one.
-    definitions.artifact?.push({
+    process.artifact?.push({
       __$$element: "association",
       ...newAssociation,
       "@_id": tryKeepingEdgeId(existingEdgeId, newEdgeId),
     });
   }
-  // Requirements
+
+  // Sequence Flows
   else {
-    const requirements = getRequirementsFromEdge(sourceNode, newEdgeId, edge.type);
-    const drgElement = definitions.drgElement![targetNode.index] as Normalized<DMN15__tDecision>; // We cast to tDecision here because it has all three types of requirement.
-    if (requirements?.informationRequirement) {
-      drgElement.informationRequirement ??= [];
-      const removed = removeFirstMatchIfPresent(drgElement.informationRequirement, (ir) =>
-        doesInformationRequirementsPointTo(ir, sourceNode.href)
-      );
-      existingEdgeId = removed?.["@_id"];
-      drgElement.informationRequirement?.push(
-        ...requirements.informationRequirement.map((s) => ({
-          ...s,
-          "@_id": tryKeepingEdgeId(existingEdgeId, newEdgeId),
-        }))
-      );
-    }
-    //
-    else if (requirements?.knowledgeRequirement) {
-      drgElement.knowledgeRequirement ??= [];
-      const removed = removeFirstMatchIfPresent(drgElement.knowledgeRequirement, (kr) =>
-        doesKnowledgeRequirementsPointTo(kr, sourceNode.href)
-      );
-      existingEdgeId = removed?.["@_id"];
-      drgElement.knowledgeRequirement?.push(
-        ...requirements.knowledgeRequirement.map((s) => ({
-          ...s,
-          "@_id": tryKeepingEdgeId(existingEdgeId, newEdgeId),
-        }))
-      );
-    }
-    //
-    else if (requirements?.authorityRequirement) {
-      drgElement.authorityRequirement ??= [];
-      const removed = removeFirstMatchIfPresent(drgElement.authorityRequirement, (ar) =>
-        doesAuthorityRequirementsPointTo(ar, sourceNode.href)
-      );
-      existingEdgeId = removed?.["@_id"];
-      drgElement.authorityRequirement?.push(
-        ...requirements.authorityRequirement.map((s) => ({
-          ...s,
-          "@_id": tryKeepingEdgeId(existingEdgeId, newEdgeId),
-        }))
-      );
-    }
+    process.flowElement ??= [];
+
+    const newSequenceFlow: Normalized<BPMN20__tSequenceFlow> = {
+      "@_id": newEdgeId,
+      "@_sourceRef": __readonly_sourceNode.href,
+      "@_targetRef": __readonly_targetNode.href,
+    };
+
+    // Remove previously existing association
+    const removed = removeFirstMatchIfPresent(
+      process.flowElement,
+      (a) => a.__$$element === "sequenceFlow" && areEdgesEquivalent(a, newSequenceFlow)
+    );
+    existingEdgeId = removed?.["@_id"];
+
+    // Replace with the new one.
+    process.flowElement?.push({
+      __$$element: "sequenceFlow",
+      ...newSequenceFlow,
+      "@_id": tryKeepingEdgeId(existingEdgeId, newEdgeId),
+    });
   }
 
-  const { diagramElements } = addOrGetDrd({ definitions, drdIndex });
-
   // Remove existing
-  const removedDmnEdge = removeFirstMatchIfPresent(
+  const removedBpmnEdge = removeFirstMatchIfPresent(
     diagramElements,
-    (e) => e.__$$element === "dmndi:DMNEdge" && e["@_dmnElementRef"] === existingEdgeId
-  ) as Normalized<DMNDI15__DMNEdge> | undefined;
+    (e) => e.__$$element === "bpmndi:BPMNEdge" && e["@_bpmnElement"] === existingEdgeId
+  ) as Normalized<BPMNDI__BPMNEdge> | undefined;
 
-  const newWaypoints = keepWaypoints
+  const newWaypoints = __readonly_keepWaypoints
     ? [
-        getPointForHandle({ bounds: sourceNode.bounds, handle: edge.sourceHandle }),
-        ...(removedDmnEdge?.["di:waypoint"] ?? []).slice(1, -1), // Slicing an empty array will always return an empty array, so it's ok.
-        getPointForHandle({ bounds: targetNode.bounds, handle: edge.targetHandle }),
+        getPointForHandle({ bounds: __readonly_sourceNode.bounds, handle: __readonly_edge.sourceHandle }),
+        ...(removedBpmnEdge?.["di:waypoint"] ?? []).slice(1, -1), // Slicing an empty array will always return an empty array, so it's ok.
+        getPointForHandle({ bounds: __readonly_targetNode.bounds, handle: __readonly_edge.targetHandle }),
       ]
     : [
-        getPointForHandle({ bounds: sourceNode.bounds, handle: edge.sourceHandle }),
-        getPointForHandle({ bounds: targetNode.bounds, handle: edge.targetHandle }),
+        getPointForHandle({ bounds: __readonly_sourceNode.bounds, handle: __readonly_edge.sourceHandle }),
+        getPointForHandle({ bounds: __readonly_targetNode.bounds, handle: __readonly_edge.targetHandle }),
       ];
 
-  const newDmnEdge: Unpacked<typeof diagramElements> = {
-    __$$element: "dmndi:DMNEdge",
+  const newBpmnEdge: Unpacked<typeof diagramElements> = {
+    __$$element: "bpmndi:BPMNEdge",
     "@_id":
-      withoutDiscreteAutoPosinitioningMarker(removedDmnEdge?.["@_id"] ?? generateUuid()) +
-      (edge.autoPositionedEdgeMarker ?? ""),
-    "@_dmnElementRef": existingEdgeId ?? newEdgeId,
-    "@_sourceElement": sourceNode.shapeId,
-    "@_targetElement": targetNode.shapeId,
+      withoutDiscreteAutoPosinitioningMarker(removedBpmnEdge?.["@_id"] ?? generateUuid()) +
+      (__readonly_edge.autoPositionedEdgeMarker ?? ""),
+    "@_bpmnElement": existingEdgeId ?? newEdgeId,
+    "@_sourceElement": __readonly_sourceNode.shapeId,
+    "@_targetElement": __readonly_targetNode.shapeId,
     "di:waypoint": newWaypoints,
   };
 
   // Replace with the new one.
-  diagramElements.push(newDmnEdge);
+  diagramElements.push(newBpmnEdge);
 
-  repopulateInputDataAndDecisionsOnAllDecisionServices({ definitions });
-
-  return { newDmnEdge };
+  return { newBpmnEdge };
 }
 
-function doesInformationRequirementsPointTo(a: Normalized<DMN15__tInformationRequirement>, nodeId: string) {
+function areEdgesEquivalent(
+  a: Normalized<BPMN20__tAssociation | BPMN20__tSequenceFlow>,
+  b: Normalized<BPMN20__tAssociation | BPMN20__tSequenceFlow>
+) {
   return (
-    a.requiredInput?.["@_href"] === `${nodeId}` || //
-    a.requiredDecision?.["@_href"] === `${nodeId}`
-  );
-}
-
-function doesKnowledgeRequirementsPointTo(a: Normalized<DMN15__tKnowledgeRequirement>, nodeId: string) {
-  return a.requiredKnowledge?.["@_href"] === `${nodeId}`;
-}
-
-function doesAuthorityRequirementsPointTo(a: Normalized<DMN15__tAuthorityRequirement>, nodeId: string) {
-  return (
-    a.requiredInput?.["@_href"] === `${nodeId}` ||
-    a.requiredDecision?.["@_href"] === `${nodeId}` ||
-    a.requiredAuthority?.["@_href"] === `${nodeId}`
-  );
-}
-
-function areAssociationsEquivalent(a: Normalized<DMN15__tAssociation>, b: Normalized<DMN15__tAssociation>) {
-  return (
-    (a.sourceRef["@_href"] === b.sourceRef["@_href"] && a.targetRef["@_href"] === b.targetRef["@_href"]) ||
-    (a.sourceRef["@_href"] === b.targetRef["@_href"] && a.targetRef["@_href"] === b.sourceRef["@_href"])
+    (a["@_sourceRef"] === b["@_sourceRef"] && a["@_targetRef"] === b["@_targetRef"]) ||
+    (a["@_sourceRef"] === b["@_targetRef"] && a["@_targetRef"] === b["@_sourceRef"])
   );
 }
 
@@ -229,6 +194,7 @@ function removeFirstMatchIfPresent<T>(arr: T[], predicate: Parameters<Array<T>["
 function tryKeepingEdgeId(existingEdgeId: string | undefined, newEdgeId: string) {
   return existingEdgeId ?? newEdgeId;
 }
+
 function withoutDiscreteAutoPosinitioningMarker(edgeId: string) {
   const marker = getDiscreteAutoPositioningEdgeIdMarker(edgeId);
   return marker ? edgeId.replace(`${marker}`, "") : edgeId;

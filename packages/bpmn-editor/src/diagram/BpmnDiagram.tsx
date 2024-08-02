@@ -69,6 +69,12 @@ import { repositionNode } from "../mutations/repositionNode";
 import { deleteNode } from "../mutations/deleteNode";
 import { nodeNatures } from "../mutations/NodeNature";
 import { addConnectedNode } from "../mutations/addConnectedNode";
+import { addEdge } from "../mutations/addEdge";
+import { PositionalNodeHandleId } from "@kie-tools/xyflow-react-kie-diagram/dist/nodes/PositionalNodeHandles";
+import { getHandlePosition } from "@kie-tools/xyflow-react-kie-diagram/dist/maths/DcMaths";
+import { deleteEdge } from "../mutations/deleteEdge";
+import { addStandaloneNode } from "../mutations/addStandaloneNode";
+import { resizeNode } from "../mutations/resizeNode";
 
 export function BpmnDiagram({
   container,
@@ -103,8 +109,22 @@ export function BpmnDiagram({
   // nodes
 
   const onNodeAdded = useCallback<OnNodeAdded<State, BpmnNodeType, BpmnDiagramNodeData, BpmnDiagramEdgeData>>(
-    ({ state }) => {
+    ({ state, type, dropPoint }) => {
       console.log("BPMN EDITOR DIAGRAM: onNodeAdded");
+      const { id } = addStandaloneNode({
+        definitions: state.bpmn.model.definitions,
+        __readonly_newNode: {
+          type,
+          bounds: {
+            "@_x": dropPoint.x,
+            "@_y": dropPoint.y,
+            "@_width": DEFAULT_NODE_SIZES[type]({ snapGrid: state.xyFlowReactKieDiagram.snapGrid })["@_width"],
+            "@_height": DEFAULT_NODE_SIZES[type]({ snapGrid: state.xyFlowReactKieDiagram.snapGrid })["@_height"],
+          },
+        },
+      });
+
+      return { newNodeId: id };
     },
     []
   );
@@ -113,24 +133,25 @@ export function BpmnDiagram({
     OnConnectedNodeAdded<State, BpmnNodeType, BpmnEdgeType, BpmnDiagramNodeData, BpmnDiagramEdgeData>
   >(({ state, sourceNode, newNodeType, edgeType, dropPoint }) => {
     console.log("BPMN EDITOR DIAGRAM: onConnectedNodeAdded");
-    addConnectedNode({
+    const { id } = addConnectedNode({
       definitions: state.bpmn.model.definitions,
-      __readonly_newNode: {
-        bounds: {
-          "@_x": dropPoint.x,
-          "@_y": dropPoint.y,
-          "@_width": DEFAULT_NODE_SIZES[newNodeType]({ snapGrid: state.xyFlowReactKieDiagram.snapGrid })["@_width"],
-          "@_height": DEFAULT_NODE_SIZES[newNodeType]({ snapGrid: state.xyFlowReactKieDiagram.snapGrid })["@_height"],
-        },
-        type: newNodeType,
-      },
       __readonly_sourceNode: {
         bounds: sourceNode.data.shape["dc:Bounds"],
         id: sourceNode.id,
         shapeId: sourceNode.data.shape["@_id"],
         type: sourceNode.type as BpmnNodeType,
       },
+      __readonly_newNode: {
+        type: newNodeType,
+        bounds: {
+          "@_x": dropPoint.x,
+          "@_y": dropPoint.y,
+          "@_width": DEFAULT_NODE_SIZES[newNodeType]({ snapGrid: state.xyFlowReactKieDiagram.snapGrid })["@_width"],
+          "@_height": DEFAULT_NODE_SIZES[newNodeType]({ snapGrid: state.xyFlowReactKieDiagram.snapGrid })["@_height"],
+        },
+      },
     });
+    return { newNodeId: id };
   }, []);
 
   const onNodeRepositioned = useCallback<
@@ -189,8 +210,28 @@ export function BpmnDiagram({
   );
 
   const onNodeResized = useCallback<OnNodeResized<State, BpmnNodeType, BpmnDiagramNodeData, BpmnDiagramEdgeData>>(
-    ({ state }) => {
+    ({ state, node, newDimensions }) => {
       console.log("BPMN EDITOR DIAGRAM: onNodeResized");
+      resizeNode({
+        definitions: state.bpmn.model.definitions,
+        __readonly_snapGrid: state.xyFlowReactKieDiagram.snapGrid,
+        __readonly_change: {
+          nodeType: node.type!,
+          shapeIndex: node.data.shapeIndex,
+          sourceEdgeIndexes: state
+            .computed(state)
+            .getDiagramData()
+            .edges.flatMap((e) => (e.source === node.id && e.data?.bpmnEdge ? [e.data.bpmnEdgeIndex] : [])),
+          targetEdgeIndexes: state
+            .computed(state)
+            .getDiagramData()
+            .edges.flatMap((e) => (e.target === node.id && e.data?.bpmnEdge ? [e.data.bpmnEdgeIndex] : [])),
+          dimension: {
+            "@_width": newDimensions.width,
+            "@_height": newDimensions.height,
+          },
+        },
+      });
     },
     []
   );
@@ -199,20 +240,99 @@ export function BpmnDiagram({
 
   const onEdgeAdded = useCallback<
     OnEdgeAdded<State, BpmnNodeType, BpmnEdgeType, BpmnDiagramNodeData, BpmnDiagramEdgeData>
-  >(({ state }) => {
+  >(({ state, edgeType, sourceNode, targetNode, targetHandle }) => {
     console.log("BPMN EDITOR DIAGRAM: onEdgeAdded");
+    addEdge({
+      definitions: state.bpmn.model.definitions,
+      __readonly_edge: {
+        type: edgeType as BpmnEdgeType,
+        targetHandle: targetHandle,
+        sourceHandle: PositionalNodeHandleId.Center,
+        autoPositionedEdgeMarker: undefined,
+      },
+      __readonly_sourceNode: {
+        type: sourceNode.type as BpmnNodeType,
+        data: sourceNode.data,
+        href: sourceNode.id,
+        bounds: sourceNode.data.shape["dc:Bounds"],
+        shapeId: sourceNode.data.shape["@_id"],
+      },
+      __readonly_targetNode: {
+        type: targetNode.type as BpmnNodeType,
+        href: targetNode.id,
+        data: targetNode.data,
+        bounds: targetNode.data.shape["dc:Bounds"],
+        index: targetNode.data.index,
+        shapeId: targetNode.data.shape["@_id"],
+      },
+      __readonly_keepWaypoints: false,
+    });
   }, []);
 
   const onEdgeUpdated = useCallback<
     OnEdgeUpdated<State, BpmnNodeType, BpmnEdgeType, BpmnDiagramNodeData, BpmnDiagramEdgeData>
-  >(({ state }) => {
+  >(({ state, edge, targetNode, sourceNode, targetHandle, sourceHandle, firstWaypoint, lastWaypoint }) => {
     console.log("BPMN EDITOR DIAGRAM: onEdgeUpdated");
+    const { newBpmnEdge } = addEdge({
+      definitions: state.bpmn.model.definitions,
+      __readonly_edge: {
+        autoPositionedEdgeMarker: undefined,
+        type: edge.type as BpmnEdgeType,
+        targetHandle: ((targetHandle as PositionalNodeHandleId) ??
+          getHandlePosition({ shapeBounds: targetNode.data.shape["dc:Bounds"], waypoint: lastWaypoint })
+            .handlePosition) as PositionalNodeHandleId,
+        sourceHandle: ((sourceHandle as PositionalNodeHandleId) ??
+          getHandlePosition({ shapeBounds: sourceNode.data.shape["dc:Bounds"], waypoint: firstWaypoint })
+            .handlePosition) as PositionalNodeHandleId,
+      },
+      __readonly_sourceNode: {
+        type: sourceNode.type!,
+        href: sourceNode.id,
+        data: sourceNode.data,
+        bounds: sourceNode.data.shape["dc:Bounds"],
+        shapeId: sourceNode.data.shape["@_id"],
+      },
+      __readonly_targetNode: {
+        type: targetNode.type!,
+        href: targetNode.id,
+        data: targetNode.data,
+        bounds: targetNode.data.shape["dc:Bounds"],
+        index: targetNode.data.index,
+        shapeId: targetNode.data.shape["@_id"],
+      },
+      __readonly_keepWaypoints: true,
+    });
+
+    // The BPMN Edge changed nodes, so we need to delete the old one, but keep the waypoints.
+    if (newBpmnEdge["@_bpmnElement"] !== edge.id) {
+      const { deletedBpmnEdge } = deleteEdge({
+        definitions: state.bpmn.model.definitions,
+        __readonly_edge: { id: edge.id, bpmnElement: edge.data!.bpmnElement },
+      });
+
+      const deletedWaypoints = deletedBpmnEdge?.["di:waypoint"];
+
+      if (edge.source !== sourceNode.id && deletedWaypoints) {
+        newBpmnEdge["di:waypoint"] = [newBpmnEdge["di:waypoint"]![0], ...deletedWaypoints.slice(1)];
+      }
+
+      if (edge.target !== targetNode.id && deletedWaypoints) {
+        newBpmnEdge["di:waypoint"] = [
+          ...deletedWaypoints.slice(0, deletedWaypoints.length - 1),
+          newBpmnEdge["di:waypoint"]![newBpmnEdge["di:waypoint"]!.length - 1],
+        ];
+      }
+    }
   }, []);
 
   const onEdgeDeleted = useCallback<
     OnEdgeDeleted<State, BpmnNodeType, BpmnEdgeType, BpmnDiagramNodeData, BpmnDiagramEdgeData>
-  >(({ state }) => {
+  >(({ state, edge }) => {
     console.log("BPMN EDITOR DIAGRAM: onEdgeDeleted");
+    deleteEdge({
+      definitions: state.bpmn.model.definitions,
+      __readonly_edge: { id: edge.id, bpmnElement: edge.data!.bpmnElement },
+    });
   }, []);
 
   // waypoints

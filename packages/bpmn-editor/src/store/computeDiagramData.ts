@@ -74,6 +74,7 @@ export function computeDiagramData(
         bpmnElement?.__$$element === "endEvent" ||
         bpmnElement?.__$$element === "group" ||
         bpmnElement?.__$$element === "lane" ||
+        bpmnElement?.__$$element === "transaction" ||
         bpmnElement?.__$$element === "textAnnotation"
       ) {
         nodeBpmnElementsById.set(bpmnElement["@_id"], bpmnElement);
@@ -127,13 +128,18 @@ export function computeDiagramData(
           shapeIndex: i,
           parentXyFlowNode: undefined,
         },
-        className: bpmnElement.__$$element === "lane" ? "xyflow-react-kie-diagram--containerNode" : "",
+        className:
+          bpmnElement.__$$element === "lane" || bpmnElement.__$$element === "transaction"
+            ? "xyflow-react-kie-diagram--containerNode"
+            : "",
         zIndex:
           bpmnElement.__$$element === "lane"
             ? NODE_LAYERS.GROUP_NODES
-            : bpmnElement.__$$element === "boundaryEvent"
-              ? NODE_LAYERS.NESTED_NODES
-              : NODE_LAYERS.NODES,
+            : bpmnElement.__$$element === "transaction"
+              ? NODE_LAYERS.CONTAINER_NODES
+              : bpmnElement.__$$element === "boundaryEvent"
+                ? NODE_LAYERS.NESTED_NODES
+                : NODE_LAYERS.NODES,
         selected: selectedNodes.has(id),
         resizing: resizingNodes.has(id),
         dragging: draggingNodes.has(id),
@@ -236,6 +242,7 @@ export function computeDiagramData(
   );
 
   const sortedNodes = [...nodes]
+    .sort((a, b) => Number(b.type === NODE_TYPES.transaction) - Number(a.type === NODE_TYPES.transaction))
     .sort((a, b) => Number(b.type === NODE_TYPES.lane) - Number(a.type === NODE_TYPES.lane))
     .sort((a, b) => Number(b.type === NODE_TYPES.group) - Number(a.type === NODE_TYPES.group));
 
@@ -253,8 +260,11 @@ export function computeDiagramData(
 }
 
 export const elementToNodeType: Record<NonNullable<BpmnNodeElement>["__$$element"], BpmnNodeType> = {
-  // start event
+  // lane
   lane: NODE_TYPES.lane,
+  // transaction
+  transaction: NODE_TYPES.transaction,
+  // start event
   startEvent: NODE_TYPES.startEvent,
   // intermediate events
   boundaryEvent: NODE_TYPES.intermediateCatchEvent,
@@ -262,15 +272,16 @@ export const elementToNodeType: Record<NonNullable<BpmnNodeElement>["__$$element
   intermediateThrowEvent: NODE_TYPES.intermediateThrowEvent,
   // tasks
   businessRuleTask: NODE_TYPES.task,
-  choreographyTask: NODE_TYPES.task,
   task: NODE_TYPES.task,
   userTask: NODE_TYPES.task,
   manualTask: NODE_TYPES.task,
   scriptTask: NODE_TYPES.task,
   sendTask: NODE_TYPES.task,
+  receiveTask: NODE_TYPES.task,
   serviceTask: NODE_TYPES.task,
   // subprocess
   subProcess: NODE_TYPES.subProcess,
+  adHocSubProcess: NODE_TYPES.subProcess,
   // end event
   endEvent: NODE_TYPES.endEvent,
   // gateway
@@ -281,19 +292,18 @@ export const elementToNodeType: Record<NonNullable<BpmnNodeElement>["__$$element
   parallelGateway: NODE_TYPES.gateway,
   // misc
   dataObject: NODE_TYPES.dataObject,
+  // artifacts
   group: NODE_TYPES.group,
   textAnnotation: NODE_TYPES.textAnnotation,
   //
   // unknown
   //
-  adHocSubProcess: NODE_TYPES.unknown,
   callActivity: NODE_TYPES.unknown,
   callChoreography: NODE_TYPES.unknown,
+  choreographyTask: NODE_TYPES.unknown,
   event: NODE_TYPES.unknown,
   implicitThrowEvent: NODE_TYPES.unknown,
-  receiveTask: NODE_TYPES.unknown,
   subChoreography: NODE_TYPES.unknown,
-  transaction: NODE_TYPES.unknown,
   // edges (ignore)
   dataObjectReference: NODE_TYPES.unknown,
   dataStoreReference: NODE_TYPES.unknown,

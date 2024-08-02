@@ -18,7 +18,7 @@
  */
 
 import { switchExpression } from "@kie-tools-core/switch-expression-ts";
-import { generateUuid } from "@kie-tools/boxed-expression-component/dist/api";
+import { generateUuid } from "@kie-tools/xyflow-react-kie-diagram/dist/uuid/uuid";
 import { BPMN20__tDefinitions } from "@kie-tools/bpmn-marshaller/dist/schemas/bpmn-2_0/ts-gen/types";
 import { AutoPositionedEdgeMarker } from "@kie-tools/xyflow-react-kie-diagram/dist/edges/AutoPositionedEdgeMarker";
 import { getDiBoundsCenterPoint } from "@kie-tools/xyflow-react-kie-diagram/dist/maths/DcMaths";
@@ -53,18 +53,41 @@ export function addConnectedNode({
     });
     process.flowElement?.push(
       switchExpression(
-        __readonly_newNode.type as Exclude<BpmnNodeType, "node_group" | "node_textAnnotation" | "node_unknown">,
+        __readonly_newNode.type as Exclude<
+          BpmnNodeType,
+          "node_group" | "node_textAnnotation" | "node_unknown" | "node_lane" | "node_dataObject" | "node_transaction"
+        >,
         {
           [NODE_TYPES.task]: {
             "@_id": newBpmnElementId,
+            "@_name": "New Task",
             __$$element: "task",
+          },
+          [NODE_TYPES.startEvent]: {
+            "@_id": newBpmnElementId,
+            __$$element: "startEvent",
+          },
+          [NODE_TYPES.intermediateCatchEvent]: {
+            "@_id": newBpmnElementId,
+            __$$element: "intermediateCatchEvent",
+          },
+          [NODE_TYPES.intermediateThrowEvent]: {
+            "@_id": newBpmnElementId,
+            __$$element: "intermediateThrowEvent",
           },
           [NODE_TYPES.endEvent]: {
             "@_id": newBpmnElementId,
             __$$element: "endEvent",
           },
-          //FIXME: Tiago: implement other types.
-          default: undefined as any,
+          [NODE_TYPES.subProcess]: {
+            "@_id": newBpmnElementId,
+            "@_name": "New Sub-Process",
+            __$$element: "subProcess",
+          },
+          [NODE_TYPES.gateway]: {
+            "@_id": newBpmnElementId,
+            __$$element: "exclusiveGateway",
+          },
         }
       )
     );

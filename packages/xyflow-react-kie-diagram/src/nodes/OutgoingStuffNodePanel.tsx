@@ -21,6 +21,8 @@ import * as React from "react";
 import * as RF from "reactflow";
 import { Flex, FlexItem } from "@patternfly/react-core/dist/js/layouts/Flex";
 import "./OutgoingStuffNodePanel.css";
+import { useState } from "react";
+import { useXyFlowReactKieDiagramStore } from "../store/Store";
 
 const handleButtonSize = 34; // That's the size of the button. This is a "magic number", as it was obtained from the rendered page.
 const svgViewboxPadding = Math.sqrt(Math.pow(handleButtonSize, 2) / 2) - handleButtonSize / 2; // This lets us create a square that will perfectly fit inside the button circle.
@@ -40,7 +42,7 @@ export type OutgoingStuffNodePanelNodeMapping<N extends string> = Record<
   N,
   {
     actionTitle: string;
-    icon: React.ReactElement;
+    icon: React.ComponentType<typeof nodeSvgProps>;
   }
 >;
 
@@ -48,7 +50,7 @@ export type OutgoingStuffNodePanelEdgeMapping<E extends string> = Record<
   E,
   {
     actionTitle: string;
-    icon: React.ReactElement;
+    icon: React.ComponentType<{ viewboxSize: number }>;
   }
 >;
 
@@ -60,11 +62,12 @@ export function OutgoingStuffNodePanel<N extends string, E extends string>(props
   nodeMapping: OutgoingStuffNodePanelNodeMapping<N>;
   edgeMapping: OutgoingStuffNodePanelEdgeMapping<E>;
 }) {
+  const dragging = useXyFlowReactKieDiagramStore((s) => !!s.xyFlowReactKieDiagram.ongoingConnection);
   const style: React.CSSProperties = React.useMemo(
     () => ({
-      visibility: props.isVisible ? undefined : "hidden",
+      visibility: props.isVisible && !dragging ? undefined : "hidden",
     }),
-    [props.isVisible]
+    [dragging, props.isVisible]
   );
 
   return (
@@ -84,57 +87,65 @@ export function OutgoingStuffNodePanel<N extends string, E extends string>(props
           />
         </>
       )}
-      <Flex className={"xyflow-react-kie-diagram--outgoing-stuff-node-panel"} style={style}>
-        {props.edgeTypes.length > 0 && (
-          <FlexItem>
-            {props.edgeTypes.map((edgeType) => (
-              <RF.Handle
-                key={edgeType}
-                id={edgeType}
-                isConnectableEnd={false}
-                type={"source"}
-                style={handleStyle}
-                position={RF.Position.Top}
-                title={props.edgeMapping[edgeType].actionTitle}
-                data-testid={`${props.nodeHref}-add-${edgeType}`}
-              >
-                <svg
-                  className={"xyflow-react-kie-diagram--round-svg-container"}
-                  viewBox={`0 0 ${edgeSvgViewboxSize} ${edgeSvgViewboxSize}`}
-                  style={{ padding: `${svgViewboxPadding}px` }}
-                >
-                  {/* // FIXME: Tiago: Render edge components */}
-                </svg>
-              </RF.Handle>
-            ))}
-          </FlexItem>
-        )}
+      <>
+        <Flex className={"xyflow-react-kie-diagram--outgoing-stuff-node-panel"} style={style}>
+          {props.edgeTypes.length > 0 && (
+            <FlexItem>
+              {props.edgeTypes.map((edgeType) => {
+                const Icon = props.edgeMapping[edgeType].icon;
+                return (
+                  <RF.Handle
+                    key={edgeType}
+                    id={edgeType}
+                    isConnectableEnd={false}
+                    type={"source"}
+                    style={handleStyle}
+                    position={RF.Position.Top}
+                    title={props.edgeMapping[edgeType].actionTitle}
+                    data-testid={`${props.nodeHref}-add-${edgeType}`}
+                  >
+                    <svg
+                      className={"xyflow-react-kie-diagram--round-svg-container"}
+                      viewBox={`0 0 ${edgeSvgViewboxSize} ${edgeSvgViewboxSize}`}
+                      style={{ padding: `${svgViewboxPadding}px` }}
+                    >
+                      <Icon viewboxSize={edgeSvgViewboxSize} />
+                    </svg>
+                  </RF.Handle>
+                );
+              })}
+            </FlexItem>
+          )}
 
-        {props.nodeTypes.length > 0 && (
-          <FlexItem>
-            {props.nodeTypes.map((nodeType) => (
-              <RF.Handle
-                key={nodeType}
-                id={nodeType}
-                isConnectableEnd={false}
-                type={"source"}
-                style={handleStyle}
-                position={RF.Position.Top}
-                title={props.nodeMapping[nodeType].actionTitle}
-                data-testid={`${props.nodeHref}-add-${nodeType}`}
-              >
-                <svg
-                  className={"xyflow-react-kie-diagram--round-svg-container"}
-                  viewBox={`0 0 ${nodeSvgViewboxSize} ${nodeSvgViewboxSize}`}
-                  style={{ padding: `${svgViewboxPadding}px` }}
-                >
-                  {/* // FIXME: Tiago: Render node components */}
-                </svg>
-              </RF.Handle>
-            ))}
-          </FlexItem>
-        )}
-      </Flex>
+          {props.nodeTypes.length > 0 && (
+            <FlexItem>
+              {props.nodeTypes.map((nodeType) => {
+                const Icon = props.nodeMapping[nodeType].icon;
+                return (
+                  <RF.Handle
+                    key={nodeType}
+                    id={nodeType}
+                    isConnectableEnd={false}
+                    type={"source"}
+                    style={handleStyle}
+                    position={RF.Position.Top}
+                    title={props.nodeMapping[nodeType].actionTitle}
+                    data-testid={`${props.nodeHref}-add-${nodeType}`}
+                  >
+                    <svg
+                      className={"xyflow-react-kie-diagram--round-svg-container"}
+                      viewBox={`0 0 ${nodeSvgViewboxSize} ${nodeSvgViewboxSize}`}
+                      style={{ padding: `${svgViewboxPadding}px` }}
+                    >
+                      <Icon {...nodeSvgProps} />
+                    </svg>
+                  </RF.Handle>
+                );
+              })}
+            </FlexItem>
+          )}
+        </Flex>
+      </>
     </>
   );
 }

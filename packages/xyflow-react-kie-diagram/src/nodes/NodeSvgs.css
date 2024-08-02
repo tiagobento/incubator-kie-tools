@@ -26,7 +26,5 @@
 .react-flow__node.xyflow-react-kie-diagram--containerNode .react-flow__resize-control div {
   pointer-events: all !important;
 }
-.xyflow-react-kie-diagram--decision-service-node {
-  position: relative;
-}
+
 /* (end) containerNodes */

@@ -33,6 +33,7 @@ import {
   BPMN20__tSubProcess,
   BPMN20__tTask,
   BPMN20__tTextAnnotation,
+  BPMN20__tTransaction,
 } from "@kie-tools/bpmn-marshaller/dist/schemas/bpmn-2_0/ts-gen/types";
 
 import * as React from "react";
@@ -56,6 +57,7 @@ import {
   SubProcessNodeSvg,
   TaskNodeSvg,
   TextAnnotationNodeSvg,
+  TransactionNodeSvg,
   UnknownNodeSvg,
 } from "./NodeSvgs";
 
@@ -1031,8 +1033,7 @@ export const LaneNode = React.memo(
     const renderCount = useRef<number>(0);
     renderCount.current++;
 
-    const ref = useRef<HTMLDivElement>(null);
-    const interactionRectRef = useRef<SVGRectElement>(null);
+    const ref = useRef<SVGRectElement>(null);
 
     const enableCustomNodeStyles = useBpmnEditorStore((s) => s.diagram.overlays.enableCustomNodeStyles);
     const isHovered = useIsHovered(ref);
@@ -1068,14 +1069,13 @@ export const LaneNode = React.memo(
     return (
       <>
         <svg className={`xyflow-react-kie-diagram--node-shape ${className} ${selected ? "selected" : ""}`}>
-          <LaneNodeSvg {...nodeDimensions} x={0} y={0} ref={interactionRectRef} />
+          <LaneNodeSvg {...nodeDimensions} x={0} y={0} ref={ref} />
         </svg>
         <PositionalNodeHandles isTargeted={isTargeted && isValidConnectionTarget} nodeId={id} />
         <div
           onDoubleClick={triggerEditing}
           onKeyDown={triggerEditingIfEnter}
           className={`kie-bpmn-editor--lane-node ${className} kie-bpmn-editor--selected-lane-node`}
-          ref={ref}
           tabIndex={-1}
           data-nodehref={id}
           data-nodelabel={lane["@_name"]}
@@ -1104,14 +1104,113 @@ export const LaneNode = React.memo(
               edgeTypes={BPMN_OUTGOING_STRUCTURE[NODE_TYPES.lane].edges}
             />
 
-            {shouldActLikeHovered && (
+            {/* {shouldActLikeHovered && (
               <NodeResizerHandle
                 nodeType={type as typeof NODE_TYPES.lane}
                 nodeId={id}
                 nodeShapeIndex={shapeIndex}
                 MIN_NODE_SIZES={MIN_NODE_SIZES}
               />
-            )}
+            )} */}
+          </div>
+        </div>
+      </>
+    );
+  },
+  propsHaveSameValuesDeep
+);
+
+export const TransactionNode = React.memo(
+  ({
+    data: { bpmnElement: transaction, shape, index, shapeIndex },
+    selected,
+    dragging,
+    zIndex,
+    type,
+    id,
+  }: RF.NodeProps<BpmnDiagramNodeData<Normalized<BPMN20__tTransaction> & { __$$element: "transaction" }>>) => {
+    const renderCount = useRef<number>(0);
+    renderCount.current++;
+
+    const ref = useRef<SVGRectElement>(null);
+
+    const enableCustomNodeStyles = useBpmnEditorStore((s) => s.diagram.overlays.enableCustomNodeStyles);
+    const isHovered = useIsHovered(ref);
+    const isResizing = useNodeResizing(id);
+    const shouldActLikeHovered = useBpmnEditorStore(
+      (s) => (isHovered || isResizing) && s.xyFlowReactKieDiagram.draggingNodes.length === 0
+    );
+
+    const { isEditingLabel, setEditingLabel, triggerEditing, triggerEditingIfEnter } = useEditableNodeLabel(id);
+    useHoveredNodeAlwaysOnTop(ref, zIndex, shouldActLikeHovered, dragging, selected, isEditingLabel);
+
+    const bpmnEditorStoreApi = useBpmnEditorStoreApi();
+
+    const { isTargeted, isValidConnectionTarget } = useConnectionTargetStatus(id, shouldActLikeHovered);
+    const className = useNodeClassName(BPMN_CONTAINMENT_MAP, isValidConnectionTarget, id, NODE_TYPES, EDGE_TYPES);
+    const nodeDimensions = useNodeDimensions({ shape, nodeType: type as BpmnNodeType, MIN_NODE_SIZES });
+
+    const setName = useCallback<OnEditableNodeLabelChange>(
+      (newName: string) => {
+        bpmnEditorStoreApi.setState((state) => {
+          // FIXME: Tiago: Mutation (set node name)
+          // renameProcessFlowElement({
+        });
+      },
+      [bpmnEditorStoreApi]
+    );
+
+    const { fontCssProperties } = useNodeStyle({
+      nodeType: type as BpmnNodeType,
+      isEnabled: enableCustomNodeStyles,
+    });
+
+    return (
+      <>
+        <svg className={`xyflow-react-kie-diagram--node-shape ${className} ${selected ? "selected" : ""}`}>
+          <TransactionNodeSvg {...nodeDimensions} x={0} y={0} ref={ref} />
+        </svg>
+        <PositionalNodeHandles isTargeted={isTargeted && isValidConnectionTarget} nodeId={id} />
+        <div
+          onDoubleClick={triggerEditing}
+          onKeyDown={triggerEditingIfEnter}
+          className={`kie-bpmn-editor--transaction-node ${className} kie-bpmn-editor--selected-transaction-node`}
+          tabIndex={-1}
+          data-nodehref={id}
+          data-nodelabel={transaction["@_name"]}
+        >
+          {/* {`render count: ${renderCount.current}`}
+          <br /> */}
+          <div className={"xyflow-react-kie-diagram--node"}>
+            <InfoNodePanel
+              isVisible={!isTargeted && shouldActLikeHovered}
+              onClick={useCallback(() => {
+                bpmnEditorStoreApi.setState((state) => {
+                  state.diagram.propertiesPanel.isOpen = true;
+                });
+              }, [bpmnEditorStoreApi])}
+            />
+
+            {/* FIXME: Tiago */}
+            <span style={{ position: "absolute", top: "20px", left: "20px" }}>{transaction["@_name"]}</span>
+
+            <OutgoingStuffNodePanel
+              nodeMapping={bpmnNodesOutgoingStuffNodePanelMapping}
+              edgeMapping={bpmnEdgesOutgoingStuffNodePanelMapping}
+              nodeHref={id}
+              isVisible={!isTargeted && shouldActLikeHovered}
+              nodeTypes={BPMN_OUTGOING_STRUCTURE[NODE_TYPES.transaction].nodes}
+              edgeTypes={BPMN_OUTGOING_STRUCTURE[NODE_TYPES.transaction].edges}
+            />
+
+            {/* {shouldActLikeHovered && (
+              <NodeResizerHandle
+                nodeType={type as typeof NODE_TYPES.transaction}
+                nodeId={id}
+                nodeShapeIndex={shapeIndex}
+                MIN_NODE_SIZES={MIN_NODE_SIZES}
+              />
+            )} */}
           </div>
         </div>
       </>
