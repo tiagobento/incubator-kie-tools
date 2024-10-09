@@ -210,6 +210,7 @@ export function getNodeLabelSvgTextAlignmentProps(
         width: clWidth,
       } as const;
 
+    case "center-left-vertical":
     case "top-left":
       const tlTx = n.position.x! + SVG_NODE_LABEL_TEXT_PADDING_ALL + SVG_NODE_LABEL_TEXT_ADDITIONAL_PADDING_TOP_LEFT;
       const tlTy = n.position.y! + SVG_NODE_LABEL_TEXT_PADDING_ALL + SVG_NODE_LABEL_TEXT_ADDITIONAL_PADDING_TOP_LEFT;

@@ -46,6 +46,11 @@
   align-items: center;
   text-align: left;
 }
+.xyflow-react-kie-diagram--editable-node-name-input.center-left-vertical {
+  justify-content: center;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+}
 .xyflow-react-kie-diagram--editable-node-name-input.top-center input,
 .xyflow-react-kie-diagram--editable-node-name-input.center-bottom input,
 .xyflow-react-kie-diagram--editable-node-name-input.center-center input {
@@ -59,6 +64,12 @@
   margin: 0;
   background: transparent;
   pointer-events: all !important;
+}
+
+.xyflow-react-kie-diagram--editable-node-name-input.center-left-vertical input {
+  justify-content: center;
+  text-align: center;
+  width: fit-content;
 }
 
 .xyflow-react-kie-diagram--editable-node-name-input input:focus {
