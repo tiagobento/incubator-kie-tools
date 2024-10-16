@@ -159,14 +159,15 @@ export function StartEventNodeSvg(__props: NodeSvgProps & { variant: EventVarian
       />
       <EventVariantSymbolSvg
         variant={variant}
-        fill={false}
+        fill={NODE_COLORS.startEvent.background}
+        filled={false}
         stroke={NODE_COLORS.startEvent.foreground}
         x={x}
         y={y}
         cx={cx}
         cy={cy}
         innerCircleRadius={r - 5}
-        outerCirculeRadius={r}
+        outerCircleRadius={r}
       />
     </>
   );
@@ -185,8 +186,8 @@ export function IntermediateCatchEventNodeSvg(
 
   const { rimWidth, variant, ...props } = { ..._props };
 
-  const outerCirculeRadius = width / 2;
-  const innerCircleRadius = outerCirculeRadius - (rimWidth ?? 5);
+  const outerCircleRadius = width / 2;
+  const innerCircleRadius = outerCircleRadius - (rimWidth ?? 5);
 
   const cx = x + width / 2;
   const cy = y + height / 2;
@@ -202,7 +203,7 @@ export function IntermediateCatchEventNodeSvg(
         fill={NODE_COLORS.intermediateCatchEvent.background}
         stroke={NODE_COLORS.intermediateCatchEvent.foreground}
         strokeLinejoin={"round"}
-        r={outerCirculeRadius}
+        r={outerCircleRadius}
         {...props}
       />
       <circle
@@ -219,14 +220,15 @@ export function IntermediateCatchEventNodeSvg(
       />
       <EventVariantSymbolSvg
         variant={variant}
-        fill={false}
+        fill={NODE_COLORS.intermediateCatchEvent.background}
+        filled={false}
         stroke={NODE_COLORS.intermediateCatchEvent.foreground}
         x={x}
         y={y}
         cx={cx}
         cy={cy}
         innerCircleRadius={innerCircleRadius}
-        outerCirculeRadius={outerCirculeRadius}
+        outerCircleRadius={outerCircleRadius}
       />
     </>
   );
@@ -245,8 +247,8 @@ export function IntermediateThrowEventNodeSvg(
 
   const { rimWidth, variant, ...props } = { ..._props };
 
-  const outerCirculeRadius = width / 2;
-  const innerCircleRadius = outerCirculeRadius - (rimWidth ?? 5);
+  const outerCircleRadius = width / 2;
+  const innerCircleRadius = outerCircleRadius - (rimWidth ?? 5);
 
   const cx = x + width / 2;
   const cy = y + height / 2;
@@ -262,7 +264,7 @@ export function IntermediateThrowEventNodeSvg(
         fill={NODE_COLORS.intermediateThrowEvent.background}
         stroke={NODE_COLORS.intermediateThrowEvent.foreground}
         strokeLinejoin={"round"}
-        r={outerCirculeRadius}
+        r={outerCircleRadius}
         {...props}
       />
       <circle
@@ -279,14 +281,15 @@ export function IntermediateThrowEventNodeSvg(
       />
       <EventVariantSymbolSvg
         variant={variant}
-        fill={true}
+        fill={NODE_COLORS.intermediateThrowEvent.background}
+        filled={true}
         stroke={NODE_COLORS.intermediateThrowEvent.foreground}
         x={x}
         y={y}
         cx={cx}
         cy={cy}
         innerCircleRadius={innerCircleRadius}
-        outerCirculeRadius={outerCirculeRadius}
+        outerCircleRadius={outerCircleRadius}
       />
     </>
   );
@@ -324,14 +327,15 @@ export function EndEventNodeSvg(__props: NodeSvgProps & { variant: EventVariant 
       />
       <EventVariantSymbolSvg
         variant={variant}
-        fill={true}
+        fill={NODE_COLORS.endEvent.background}
+        filled={true}
         stroke={NODE_COLORS.endEvent.foreground}
         x={x}
         y={y}
         cx={cx}
         cy={cy}
         innerCircleRadius={r - 5}
-        outerCirculeRadius={r}
+        outerCircleRadius={r}
       />
     </>
   );
@@ -749,8 +753,9 @@ export function EventVariantSymbolSvg({
   x,
   y,
   innerCircleRadius,
-  outerCirculeRadius,
+  outerCircleRadius,
   fill,
+  filled,
 }: {
   variant: EventVariant | "none";
   stroke: string;
@@ -760,118 +765,81 @@ export function EventVariantSymbolSvg({
   x: number;
   y: number;
   innerCircleRadius: number;
-  outerCirculeRadius: number;
-  fill: boolean;
+  outerCircleRadius: number;
+  fill?: string;
+  filled: boolean;
 }) {
   return (
     <>
-      {/* FIXME: Tiago: tmp icon */}
       {variant === "messageEventDefinition" && (
-        <>
-          <text
-            fontSize={(strokeWidth ?? 2) * 15}
-            transform={`translate(${cx},${cy})`}
-            textAnchor="middle"
-            dominantBaseline={"middle"}
-          >
-            ✉️
-          </text>
-        </>
+        <MessageEventSymbolSvg
+          fill={fill ?? "none"}
+          filled={filled}
+          stroke={stroke}
+          cx={cx}
+          cy={cy}
+          innerCircleRadius={innerCircleRadius}
+        />
       )}
-      {/* FIXME: Tiago: tmp icon */}
       {variant === "timerEventDefinition" && (
-        <>
-          <text
-            fontSize={(strokeWidth ?? 2) * 15}
-            transform={`translate(${cx},${cy})`}
-            textAnchor="middle"
-            dominantBaseline={"middle"}
-          >
-            🕑
-          </text>
-        </>
+        <TimerEventSymbolSvg
+          filled={filled}
+          stroke={stroke}
+          cx={cx}
+          cy={cy}
+          innerCircleRadius={innerCircleRadius}
+          outerCircleRadius={outerCircleRadius}
+        />
       )}
-      {/* FIXME: Tiago: tmp icon */}
       {variant === "errorEventDefinition" && (
-        <>
-          <text
-            fontSize={(strokeWidth ?? 2) * 15}
-            transform={`translate(${cx},${cy})`}
-            textAnchor="middle"
-            dominantBaseline={"middle"}
-          >
-            ⚡️
-          </text>
-        </>
+        <ErrorEventSymbolSvg
+          filled={filled}
+          stroke={stroke}
+          cx={cx}
+          cy={cy}
+          innerCircleRadius={innerCircleRadius}
+          outerCircleRadius={outerCircleRadius}
+        />
       )}
-      {/* FIXME: Tiago: tmp icon */}
       {variant === "escalationEventDefinition" && (
-        <>
-          <text
-            fontSize={(strokeWidth ?? 2) * 15}
-            transform={`translate(${cx},${cy})`}
-            textAnchor="middle"
-            dominantBaseline={"middle"}
-          >
-            ☝️
-          </text>
-        </>
+        <EscalationEventSymbolSvg
+          filled={filled}
+          stroke={stroke}
+          cx={cx}
+          cy={cy}
+          innerCircleRadius={innerCircleRadius}
+        />
       )}
-      {/* FIXME: Tiago: tmp icon */}
       {variant === "cancelEventDefinition" && (
-        <>
-          <text
-            fontSize={(strokeWidth ?? 2) * 15}
-            transform={`translate(${cx},${cy})`}
-            textAnchor="middle"
-            dominantBaseline={"middle"}
-          >
-            ❌
-          </text>
-        </>
+        <CancelEventSymbolSvg filled={filled} stroke={stroke} cx={cx} cy={cy} innerCircleRadius={innerCircleRadius} />
       )}
-      {/* FIXME: Tiago: tmp icon */}
       {variant === "compensateEventDefinition" && (
-        <>
-          <text
-            fontSize={(strokeWidth ?? 2) * 15}
-            transform={`translate(${cx},${cy})`}
-            textAnchor="middle"
-            dominantBaseline={"middle"}
-          >
-            ⏪
-          </text>
-        </>
+        <CompensationEventSymbolSvg
+          filled={filled}
+          stroke={stroke}
+          x={x}
+          y={y}
+          cx={cx}
+          cy={cy}
+          innerCircleRadius={innerCircleRadius}
+          outerCircleRadius={outerCircleRadius}
+        />
       )}
-      {/* FIXME: Tiago: tmp icon */}
       {variant === "conditionalEventDefinition" && (
-        <>
-          <text
-            fontSize={(strokeWidth ?? 2) * 25}
-            transform={`translate(${cx},${cy})`}
-            textAnchor="middle"
-            dominantBaseline={"middle"}
-          >
-            ≣
-          </text>
-        </>
+        <ConditionalEventSymbolSvg
+          filled={filled}
+          stroke={stroke}
+          cx={cx}
+          cy={cy}
+          outerCircleRadius={outerCircleRadius}
+        />
       )}
-      {/* FIXME: Tiago: tmp icon */}
       {variant === "linkEventDefinition" && (
-        <>
-          <text
-            fontSize={(strokeWidth ?? 2) * 15}
-            transform={`translate(${cx},${cy})`}
-            textAnchor="middle"
-            dominantBaseline={"middle"}
-          >
-            ⇨
-          </text>
-        </>
+        <LinkEventSymbolSvg filled={filled} stroke={stroke} cx={cx} cy={cy} innerCircleRadius={innerCircleRadius} />
       )}
       {variant === "signalEventDefinition" && (
         <SignalEventSymbolSvg
-          fill={fill}
+          filled={filled}
           stroke={stroke}
           strokeWidth={strokeWidth}
           x={x}
@@ -879,7 +847,7 @@ export function EventVariantSymbolSvg({
           cx={cx}
           cy={cy}
           innerCircleRadius={innerCircleRadius}
-          outerCirculeRadius={outerCirculeRadius}
+          outerCircleRadius={outerCircleRadius}
         />
       )}
 
@@ -892,12 +860,435 @@ export function EventVariantSymbolSvg({
             fill={NODE_COLORS.endEvent.foreground}
             stroke={NODE_COLORS.endEvent.foreground}
             strokeLinejoin={"round"}
-            r={outerCirculeRadius / 2}
+            r={outerCircleRadius / 2}
           />
         </>
       )}
       {/* multiple */}
       {/* parallel multiple */}
+    </>
+  );
+}
+
+export function MessageEventSymbolSvg({
+  stroke,
+  cx,
+  cy,
+  innerCircleRadius,
+  fill,
+  filled,
+}: {
+  stroke: string;
+  cx: number;
+  cy: number;
+  innerCircleRadius: number;
+  fill: string;
+  filled: boolean;
+}) {
+  const bodyWidth = innerCircleRadius * 1.2;
+  const bodyHeight = innerCircleRadius * 0.8;
+
+  const envelopeBody = {
+    topLeft: { x: cx - bodyWidth / 2, y: cy - bodyHeight / 2 },
+    bottomRight: { x: cx + bodyWidth / 2, y: cy + bodyHeight / 2 },
+  };
+
+  const flapHeight = bodyHeight * 0.5;
+  const envelopeFlap = [
+    { x: envelopeBody.topLeft.x, y: envelopeBody.topLeft.y },
+    { x: envelopeBody.bottomRight.x, y: envelopeBody.topLeft.y },
+    { x: cx, y: envelopeBody.topLeft.y + flapHeight },
+  ];
+
+  return (
+    <>
+      <rect
+        x={envelopeBody.topLeft.x}
+        y={envelopeBody.topLeft.y}
+        width={bodyWidth}
+        height={bodyHeight}
+        strokeWidth={1.5}
+        strokeLinejoin={"round"}
+        fill={filled ? stroke : fill}
+        stroke={stroke}
+      />
+
+      <polygon
+        points={envelopeFlap.map((point) => `${point.x},${point.y}`).join(" ")}
+        strokeWidth={1.5}
+        strokeLinejoin={"round"}
+        fill={filled ? stroke : fill}
+        stroke={stroke}
+      />
+
+      {filled && (
+        <>
+          <line
+            x1={envelopeFlap[0].x}
+            y1={envelopeFlap[0].y}
+            x2={envelopeFlap[2].x}
+            y2={envelopeFlap[2].y}
+            stroke={fill}
+            strokeWidth={1.5}
+          />
+          <line
+            x1={envelopeFlap[1].x}
+            y1={envelopeFlap[1].y}
+            x2={envelopeFlap[2].x}
+            y2={envelopeFlap[2].y}
+            stroke={fill}
+            strokeWidth={1.5}
+          />
+        </>
+      )}
+    </>
+  );
+}
+
+export function TimerEventSymbolSvg({
+  stroke,
+  cx,
+  cy,
+  innerCircleRadius,
+  outerCircleRadius,
+  filled,
+}: {
+  stroke: string;
+  cx: number;
+  cy: number;
+  innerCircleRadius: number;
+  outerCircleRadius: number;
+  filled: boolean;
+}) {
+  const padding = 1.2 * (outerCircleRadius - innerCircleRadius);
+  const clockRadius = innerCircleRadius - padding;
+
+  const shortHandLength = clockRadius * 0.5;
+  const longHandLength = clockRadius * 0.9;
+
+  const hourHandAngle = Math.PI / 12;
+  const minuteHandAngle = (-5 * Math.PI) / 12;
+
+  const hourHand = {
+    x: cx + shortHandLength * Math.cos(hourHandAngle),
+    y: cy + shortHandLength * Math.sin(hourHandAngle),
+  };
+
+  const minuteHand = {
+    x: cx + longHandLength * Math.cos(minuteHandAngle),
+    y: cy + longHandLength * Math.sin(minuteHandAngle),
+  };
+
+  return (
+    <>
+      <circle
+        cx={cx}
+        cy={cy}
+        r={clockRadius}
+        stroke={stroke}
+        strokeWidth={1.5}
+        fill={filled ? stroke : "transparent"}
+      />
+
+      <line
+        x1={cx}
+        y1={cy}
+        x2={hourHand.x}
+        y2={hourHand.y}
+        stroke={filled ? "transparent" : stroke}
+        strokeWidth={1.5}
+      />
+
+      <line
+        x1={cx}
+        y1={cy}
+        x2={minuteHand.x}
+        y2={minuteHand.y}
+        stroke={filled ? "transparent" : stroke}
+        strokeWidth={1.5}
+      />
+
+      {Array.from({ length: 12 }, (_, index) => {
+        const angle = (index / 12) * 2 * Math.PI;
+        const x1 = cx + clockRadius * Math.cos(angle);
+        const y1 = cy + clockRadius * Math.sin(angle);
+        const x2 = cx + (clockRadius - padding * 0.5) * Math.cos(angle);
+        const y2 = cy + (clockRadius - padding * 0.5) * Math.sin(angle);
+
+        return <line key={index} x1={x1} y1={y1} x2={x2} y2={y2} stroke={stroke} strokeWidth={1.5} />;
+      })}
+    </>
+  );
+}
+
+export function ErrorEventSymbolSvg({
+  stroke,
+  cx,
+  cy,
+  innerCircleRadius,
+  outerCircleRadius,
+  filled,
+}: {
+  stroke: string;
+  cx: number;
+  cy: number;
+  innerCircleRadius: number;
+  outerCircleRadius: number;
+  filled: boolean;
+}) {
+  const padding = 1.5 * (outerCircleRadius - innerCircleRadius);
+  const hx = innerCircleRadius - padding;
+  const hy = innerCircleRadius - padding;
+
+  const scaleFactor = 20;
+  const shiftLeft = 3.5;
+  const shiftUp = 1;
+
+  const points = [
+    { x: cx - shiftLeft, y: cy },
+    { x: cx - hx * 0.037 * scaleFactor - shiftLeft, y: cy + hy * 0.052 * scaleFactor - shiftUp },
+    { x: cx - hx * 0.003 * scaleFactor - shiftLeft, y: cy - hy * 0.05 * scaleFactor - shiftUp },
+    { x: cx + hx * 0.027 * scaleFactor - shiftLeft, y: cy + hy * 0.016 * scaleFactor - shiftUp },
+    { x: cx + hx * 0.058 * scaleFactor - shiftLeft, y: cy - hy * 0.046 * scaleFactor - shiftUp },
+    { x: cx + hx * 0.029 * scaleFactor - shiftLeft, y: cy + hy * 0.066 * scaleFactor - shiftUp },
+    { x: cx - shiftLeft, y: cy },
+  ];
+
+  return (
+    <>
+      <polygon
+        points={points.map((point) => `${point.x},${point.y}`).join(" ")}
+        strokeWidth={1.5}
+        strokeLinejoin={"round"}
+        fill={filled ? stroke : "transparent"}
+        stroke={stroke}
+      />
+    </>
+  );
+}
+
+export function EscalationEventSymbolSvg({
+  stroke,
+  cx,
+  cy,
+  innerCircleRadius,
+  filled,
+}: {
+  stroke: string;
+  cx: number;
+  cy: number;
+  innerCircleRadius: number;
+  filled: boolean;
+}) {
+  const arrowHeight = innerCircleRadius * 1.2;
+  const arrowBaseWidth = innerCircleRadius * 1;
+
+  const arrow = [
+    { x: cx - arrowBaseWidth / 2, y: cy + arrowHeight / 2 }, // left
+    { x: cx, y: cy - arrowHeight / 2 }, // top center
+    { x: cx + arrowBaseWidth / 2, y: cy + arrowHeight / 2 }, // right
+    { x: cx, y: cy + arrowHeight / 20 }, // mid center
+  ] as const;
+
+  return (
+    <>
+      <polygon
+        points={arrow.map((point) => `${point.x},${point.y}`).join(" ")}
+        strokeWidth={1.5}
+        strokeLinejoin={"round"}
+        fill={filled ? stroke : "transparent"}
+        stroke={stroke}
+      />
+    </>
+  );
+}
+
+export function CancelEventSymbolSvg({
+  stroke,
+  cx,
+  cy,
+  innerCircleRadius,
+  filled,
+}: {
+  stroke: string;
+  cx: number;
+  cy: number;
+  innerCircleRadius: number;
+  filled: boolean;
+}) {
+  const farXPoint = 1.3;
+  const closeXPoint = 1.7;
+  const lowYPoint = 9;
+  const highYPoint = 5;
+
+  const cross = [
+    { x: cx - innerCircleRadius / farXPoint, y: cy - innerCircleRadius + lowYPoint }, // upper left point 1
+    { x: cx - innerCircleRadius / closeXPoint, y: cy - innerCircleRadius + highYPoint }, // upper left point 2
+    { x: cx, y: cy - innerCircleRadius / highYPoint }, // upper joiner
+    { x: cx + innerCircleRadius / closeXPoint, y: cy - innerCircleRadius + highYPoint }, // upper right point 2
+    { x: cx + innerCircleRadius / farXPoint, y: cy - innerCircleRadius + lowYPoint }, // upper right point 1
+    { x: cx + innerCircleRadius / highYPoint, y: cy }, // right joiner
+    { x: cx + innerCircleRadius / farXPoint, y: cy + innerCircleRadius - lowYPoint }, // lower right point 2
+    { x: cx + innerCircleRadius / closeXPoint, y: cy + innerCircleRadius - highYPoint }, // lower right point 1
+    { x: cx, y: cy + innerCircleRadius / highYPoint }, // lower joiner
+    { x: cx - innerCircleRadius / closeXPoint, y: cy + innerCircleRadius - highYPoint }, // lower left point 1
+    { x: cx - innerCircleRadius / farXPoint, y: cy + innerCircleRadius - lowYPoint }, // lower left point 2
+    { x: cx - innerCircleRadius / highYPoint, y: cy }, // left joiner
+  ] as const;
+
+  return (
+    <>
+      <polygon
+        points={cross.map((point) => `${point.x},${point.y}`).join(" ")}
+        strokeWidth={1.5}
+        strokeLinejoin={"round"}
+        fill={filled ? stroke : "transparent"}
+        stroke={stroke}
+      />
+    </>
+  );
+}
+
+export function CompensationEventSymbolSvg({
+  stroke,
+  cx,
+  cy,
+  x,
+  y,
+  innerCircleRadius,
+  outerCircleRadius,
+  filled,
+}: {
+  stroke: string;
+  cx: number;
+  cy: number;
+  x: number;
+  y: number;
+  innerCircleRadius: number;
+  outerCircleRadius: number;
+  filled: boolean;
+}) {
+  const padding = 1.5 * (outerCircleRadius - innerCircleRadius);
+
+  const hx = x + innerCircleRadius - padding * 0.6;
+  const hy = y + innerCircleRadius - padding * 0.2;
+
+  const rightOffset = 0.15 * innerCircleRadius;
+
+  const firstTriangle = [
+    { x: cx + hx - rightOffset, y: cy - hy + (outerCircleRadius - innerCircleRadius) },
+    { x: cx - rightOffset, y: cy },
+    { x: cx + hx - rightOffset, y: cy + hy - (outerCircleRadius - innerCircleRadius) },
+  ] as const;
+
+  const secondTriangle = [
+    { x: cx - rightOffset, y: cy - hy + (outerCircleRadius - innerCircleRadius) },
+    { x: cx - hx - rightOffset, y: cy },
+    { x: cx - rightOffset, y: cy + hy - (outerCircleRadius - innerCircleRadius) },
+  ] as const;
+
+  return (
+    <>
+      <polygon
+        points={firstTriangle.map((point) => `${point.x},${point.y}`).join(" ")}
+        strokeWidth={1.5}
+        strokeLinejoin={"round"}
+        fill={filled ? stroke : "transparent"}
+        stroke={stroke}
+      />
+      <polygon
+        points={secondTriangle.map((point) => `${point.x},${point.y}`).join(" ")}
+        strokeWidth={1.5}
+        strokeLinejoin={"round"}
+        fill={filled ? stroke : "transparent"}
+        stroke={stroke}
+      />
+    </>
+  );
+}
+
+export function ConditionalEventSymbolSvg({
+  stroke,
+  cx,
+  cy,
+  outerCircleRadius,
+  filled,
+}: {
+  stroke: string;
+  cx: number;
+  cy: number;
+  outerCircleRadius: number;
+  filled: boolean;
+}) {
+  const squareSize = outerCircleRadius * 1.1;
+  const lineSpacing = squareSize / 5;
+  const lineThickness = 2;
+
+  return (
+    <>
+      <rect
+        x={cx - squareSize / 2}
+        y={cy - squareSize / 2}
+        width={squareSize}
+        height={squareSize}
+        fill={filled ? stroke : "transparent"}
+        stroke={stroke}
+        strokeWidth={1.5}
+      />
+
+      {[...Array(4)].map((_, index) => (
+        <line
+          key={index}
+          x1={cx - squareSize / 2 + 5}
+          y1={cy - squareSize / 2 + lineSpacing * (index + 1)}
+          x2={cx + squareSize / 2 - 5}
+          y2={cy - squareSize / 2 + lineSpacing * (index + 1)}
+          stroke={stroke}
+          strokeWidth={lineThickness}
+        />
+      ))}
+    </>
+  );
+}
+
+export function LinkEventSymbolSvg({
+  stroke,
+  cx,
+  cy,
+  innerCircleRadius,
+  filled,
+}: {
+  stroke: string;
+  cx: number;
+  cy: number;
+  innerCircleRadius: number;
+  filled: boolean;
+}) {
+  const arrowHeight = innerCircleRadius * 1.2;
+  const arrowBaseWidth = innerCircleRadius * 1;
+  const shiftLeft = 7;
+  const rectangleHeight = 5;
+  const arrowPadding = 2;
+
+  const arrow = [
+    { x: cx - arrowBaseWidth / 2 - shiftLeft, y: cy + arrowHeight / 2 - rectangleHeight }, // bottom left rectangle
+    { x: cx - arrowBaseWidth / 2 - shiftLeft, y: cy - arrowHeight / 2 + rectangleHeight }, // top left rectangle
+    { x: cx + arrowBaseWidth / 2, y: cy - arrowHeight / 2 + rectangleHeight }, // top right rectangle
+    { x: cx + arrowBaseWidth / 2, y: cy - arrowHeight / 2 - arrowPadding }, // upper arrow start
+    { x: cx + arrowBaseWidth / 2 + 8, y: cy }, // arrow point
+    { x: cx + arrowBaseWidth / 2, y: cy + arrowHeight / 2 + arrowPadding }, // lower arrow start
+    { x: cx + arrowBaseWidth / 2, y: cy + arrowHeight / 2 - rectangleHeight }, // bottom right rectangle
+  ] as const;
+
+  return (
+    <>
+      <polygon
+        points={arrow.map((point) => `${point.x},${point.y}`).join(" ")}
+        strokeWidth={1.5}
+        strokeLinejoin={"round"}
+        fill={filled ? stroke : "transparent"}
+        stroke={stroke}
+      />
     </>
   );
 }
@@ -910,8 +1301,8 @@ export function SignalEventSymbolSvg({
   x,
   y,
   innerCircleRadius,
-  outerCirculeRadius,
-  fill,
+  outerCircleRadius,
+  filled,
 }: {
   stroke: string;
   strokeWidth?: number;
@@ -920,10 +1311,10 @@ export function SignalEventSymbolSvg({
   x: number;
   y: number;
   innerCircleRadius: number;
-  outerCirculeRadius: number;
-  fill: boolean;
+  outerCircleRadius: number;
+  filled: boolean;
 }) {
-  const padding = 1.5 * (outerCirculeRadius - innerCircleRadius);
+  const padding = 1.5 * (outerCircleRadius - innerCircleRadius);
   const hx = x + innerCircleRadius - padding;
   const hy = y + innerCircleRadius - padding;
   const triangle = [
@@ -935,10 +1326,10 @@ export function SignalEventSymbolSvg({
   return (
     <>
       <polygon
-        points={`${triangle[0].x},${triangle[0].y} ${triangle[1].x},${triangle[1].y} ${triangle[2].x},${triangle[2].y}`}
-        strokeWidth={strokeWidth ?? 2.5}
+        points={triangle.map((point) => `${point.x},${point.y}`).join(" ")}
+        strokeWidth={strokeWidth ?? 1.5}
         strokeLinejoin={"round"}
-        fill={fill ? stroke : "transparent"}
+        fill={filled ? stroke : "transparent"}
         stroke={stroke}
       />
     </>

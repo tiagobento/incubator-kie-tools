@@ -41,7 +41,7 @@ export function useEventNodeMorphingActions(event: Event) {
   const bpmnEditorStoreApi = useBpmnEditorStoreApi();
 
   const foregroundColor = NODE_COLORS[event.__$$element].foreground;
-  const fill = event.__$$element === "intermediateThrowEvent" || event.__$$element === "endEvent";
+  const filled = event.__$$element === "intermediateThrowEvent" || event.__$$element === "endEvent";
 
   const morphEvent = useCallback(
     (eventDefinitionElement: undefined | Unpacked<Event["eventDefinition"]>["__$$element"]) => {
@@ -165,63 +165,63 @@ export function useEventNodeMorphingActions(event: Event) {
         action: () => morphEvent(undefined),
       } as const, // none
       {
-        icon: <EventDefitnitionIcon stroke={foregroundColor} fill={fill} variant={"messageEventDefinition"} />,
+        icon: <EventDefitnitionIcon stroke={foregroundColor} filled={filled} variant={"messageEventDefinition"} />,
         key: "2",
         title: "Message",
         id: "messageEventDefinition",
         action: () => morphEvent("messageEventDefinition"),
       } as const,
       {
-        icon: <EventDefitnitionIcon stroke={foregroundColor} fill={fill} variant={"timerEventDefinition"} />,
+        icon: <EventDefitnitionIcon stroke={foregroundColor} filled={filled} variant={"timerEventDefinition"} />,
         key: "3",
         title: "Timer",
         id: "timerEventDefinition",
         action: () => morphEvent("timerEventDefinition"),
       } as const,
       {
-        icon: <EventDefitnitionIcon stroke={foregroundColor} fill={fill} variant={"errorEventDefinition"} />,
+        icon: <EventDefitnitionIcon stroke={foregroundColor} filled={filled} variant={"errorEventDefinition"} />,
         key: "4",
         title: "Error",
         id: "errorEventDefinition",
         action: () => morphEvent("errorEventDefinition"),
       } as const,
       {
-        icon: <EventDefitnitionIcon stroke={foregroundColor} fill={fill} variant={"escalationEventDefinition"} />,
+        icon: <EventDefitnitionIcon stroke={foregroundColor} filled={filled} variant={"escalationEventDefinition"} />,
         key: "5",
         title: "Escalation",
         id: "escalationEventDefinition",
         action: () => morphEvent("escalationEventDefinition"),
       } as const,
       {
-        icon: <EventDefitnitionIcon stroke={foregroundColor} fill={fill} variant={"cancelEventDefinition"} />,
+        icon: <EventDefitnitionIcon stroke={foregroundColor} filled={filled} variant={"cancelEventDefinition"} />,
         key: "6",
         title: "Cancelation",
         id: "cancelEventDefinition",
         action: () => morphEvent("cancelEventDefinition"),
       } as const,
       {
-        icon: <EventDefitnitionIcon stroke={foregroundColor} fill={fill} variant={"compensateEventDefinition"} />,
+        icon: <EventDefitnitionIcon stroke={foregroundColor} filled={filled} variant={"compensateEventDefinition"} />,
         key: "7",
         title: "Compensation",
         id: "compensateEventDefinition",
         action: () => morphEvent("compensateEventDefinition"),
       } as const,
       {
-        icon: <EventDefitnitionIcon stroke={foregroundColor} fill={fill} variant={"conditionalEventDefinition"} />,
+        icon: <EventDefitnitionIcon stroke={foregroundColor} filled={filled} variant={"conditionalEventDefinition"} />,
         key: "8",
         title: "Conditional",
         id: "conditionalEventDefinition",
         action: () => morphEvent("conditionalEventDefinition"),
       } as const,
       {
-        icon: <EventDefitnitionIcon stroke={foregroundColor} fill={fill} variant={"linkEventDefinition"} />,
+        icon: <EventDefitnitionIcon stroke={foregroundColor} filled={filled} variant={"linkEventDefinition"} />,
         key: "9",
         title: "Link",
         id: "linkEventDefinition",
         action: () => morphEvent("linkEventDefinition"),
       } as const,
       {
-        icon: <EventDefitnitionIcon stroke={foregroundColor} fill={fill} variant={"signalEventDefinition"} />,
+        icon: <EventDefitnitionIcon stroke={foregroundColor} filled={filled} variant={"signalEventDefinition"} />,
         key: "0",
         title: "Signal",
         id: "signalEventDefinition",
@@ -235,7 +235,7 @@ export function useEventNodeMorphingActions(event: Event) {
         action: () => morphEvent("terminateEventDefinition"),
       } as const,
     ];
-  }, [event.__$$element, foregroundColor, fill, morphEvent]);
+  }, [event.__$$element, foregroundColor, filled, morphEvent]);
 
   return morphingActions;
 }
