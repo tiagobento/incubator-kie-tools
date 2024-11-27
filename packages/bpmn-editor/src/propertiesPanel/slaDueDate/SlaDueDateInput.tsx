@@ -78,7 +78,7 @@ export function SlaDueDateInput({ element }: { element: WithSlaDueDate }) {
               } else {
                 visitFlowElementsAndArtifacts(process, ({ element: e }) => {
                   if (e["@_id"] === element["@_id"]) {
-                    setBpmn20Drools10MetaData(element, "customSLADueDate", newSlaDueDate);
+                    setBpmn20Drools10MetaData(process, "customSLADueDate", newSlaDueDate);
                   }
                 });
               }

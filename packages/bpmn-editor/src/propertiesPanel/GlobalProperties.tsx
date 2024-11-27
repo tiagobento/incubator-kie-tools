@@ -71,7 +71,7 @@ export function GlobalProperties() {
   const bpmnEditorStoreApi = useBpmnEditorStoreApi();
 
   const [showRegenerateIdConfirmationModal, setShowRegenerateIdConfirmationModal] = useState(false);
-  const [showCorrelationsnModal, setShowCorrelationsModal] = useState(false);
+  const [showCorrelationsModal, setShowCorrelationsModal] = useState(false);
 
   const closeCorrelationsModal = React.useCallback(() => {
     setShowCorrelationsModal(false);
@@ -468,7 +468,7 @@ export function GlobalProperties() {
         <br />
         <br />
 
-        <Correlations isOpen={showCorrelationsnModal} onClose={closeCorrelationsModal} />
+        <Correlations isOpen={showCorrelationsModal} onClose={closeCorrelationsModal} />
 
         <Modal
           aria-labelledby={"Regenerate ID & Namespace"}

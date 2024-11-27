@@ -29,12 +29,21 @@ import { Divider } from "@patternfly/react-core/dist/js/components/Divider";
 import { CodeInput } from "../codeInput/CodeInput";
 import { AdhocAutostartCheckbox } from "../adhocAutostartCheckbox/AdhocAutostartCheckbox";
 import { AsyncCheckbox } from "../asyncCheckbox/AsyncCheckbox";
+import { useBpmnEditorStoreApi } from "../../store/StoreContext";
+import { visitFlowElementsAndArtifacts } from "../../mutations/_elementVisitor";
+import { addOrGetProcessAndDiagramElements } from "../../mutations/addOrGetProcessAndDiagramElements";
+import {
+  parseBpmn20Drools10MetaData,
+  setBpmn20Drools10MetaData,
+} from "@kie-tools/bpmn-marshaller/dist/drools-extension-metaData";
 
 export function ScriptTaskProperties({
   scriptTask,
 }: {
   scriptTask: Normalized<BPMN20__tScriptTask> & { __$$element: "scriptTask" };
 }) {
+  const bpmnEditorStoreApi = useBpmnEditorStoreApi();
+
   return (
     <>
       <PropertiesPanelHeaderFormSection
@@ -48,9 +57,18 @@ export function ScriptTaskProperties({
         <CodeInput
           label={"Script"}
           languages={["Java"]}
-          value={""} // FIXME: Tiago
+          value={parseBpmn20Drools10MetaData(scriptTask).get("customActivationCondition") ?? ""}
           onChange={(newScript) => {
-            // FIXME: Tiago
+            bpmnEditorStoreApi((s) => {
+              const { process } = addOrGetProcessAndDiagramElements({
+                definitions: s.bpmn.model.definitions,
+              });
+              visitFlowElementsAndArtifacts(process, ({ element: e }) => {
+                if (e["@_id"] === scriptTask["@_id"] && e.__$$element === scriptTask.__$$element) {
+                  setBpmn20Drools10MetaData(e, "customActivationCondition", newScript);
+                }
+              });
+            });
           }}
         />
 

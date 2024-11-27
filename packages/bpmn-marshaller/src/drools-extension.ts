@@ -147,6 +147,12 @@ declare module "./schemas/bpmn-2_0/ts-gen/types" {
   }
 }
 
+  // Message Ref
+  export interface BPMN20__tMsgRef {
+    "@_drools:dtype"?: Namespaced<DROOLS, string>;
+  }
+}
+
 bpmn20ns.set(DROOLS_NS, drools10ns.get("")!);
 bpmn20ns.set(drools10ns.get("")!, DROOLS_NS);
 
@@ -241,6 +247,13 @@ mergeMetas(bpmn20meta, [[DROOLS_NS, drools10meta]]);
   isArray: false,
   xsdType: "xsd:string",
   fromType: "BPMN20__tDataOutput",
+};
+// Message Ref
+(bpmn20meta["BPMN20__tMsgRef"] as any)["@_drools:msgref"] = {
+  type: "string",
+  isArray: false,
+  xsdType: "xsd:string",
+  fromType: "BPMN20__tMsgRef",
 };
 
 class MetaType {

@@ -109,7 +109,6 @@ export function BusinessRuleTaskProperties({
             </FormGroup>
           </>
         )}{" "}
-        <FormSelectOption id={"none"} isPlaceholder={true} label={"-- None --"} />
         {businessRuleTask["@_implementation"] === BUSINESS_RULE_TASK_IMPLEMENTATIONS.dmn && (
           <>
             <FormGroup label="DMN File">

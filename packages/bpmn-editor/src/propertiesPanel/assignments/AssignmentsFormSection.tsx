@@ -284,11 +284,16 @@ export function AssignmentList({
                     style={entryStyle}
                     type="text"
                     placeholder="Name..."
-                    value={""}
-                    onChange={(e) =>
+                    value={element.dataInputAssociation?.[0].assignment?.[0].inputName?.[0]?.__$$text || ""}
+                    onChange={(newInputName) =>
                       bpmnEditorStoreApi.setState((s) => {
                         const { process } = addOrGetProcessAndDiagramElements({
                           definitions: s.bpmn.model.definitions,
+                        });
+                        visitFlowElementsAndArtifacts(process, ({ element: e }) => {
+                          if (e["@_id"] === element["@_id"] && e.__$$element === element.__$$element) {
+                            // e.inputName = newInputName;
+                          }
                         });
                       })
                     }
@@ -299,7 +304,7 @@ export function AssignmentList({
                     style={entryStyle}
                     type="text"
                     placeholder="Data Type..."
-                    value={""}
+                    value={element.dataInputAssociation?.[0].assignment?.[0].inputDataType?.[0]?.__$$text || ""}
                     onChange={(e) =>
                       bpmnEditorStoreApi.setState((s) => {
                         const { process } = addOrGetProcessAndDiagramElements({
@@ -314,7 +319,7 @@ export function AssignmentList({
                     style={entryStyle}
                     type="text"
                     placeholder={`${lastColumnLabel}...`}
-                    value={""}
+                    value={element.dataInputAssociation?.[0].assignment?.[0].inputSource?.[0]?.__$$text || ""}
                     onChange={(e) =>
                       bpmnEditorStoreApi.setState((s) => {
                         const { process } = addOrGetProcessAndDiagramElements({

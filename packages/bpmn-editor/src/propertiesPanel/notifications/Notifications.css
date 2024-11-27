@@ -17,43 +17,42 @@
  * under the License.
  */
 
-.radio-group {
-  margin-bottom: 16px;
+.kie-bpmn-editor--notifications--modal {
+  height: 80%;
+  width: 80%;
+  position: relative;
 }
 
-.timer-options-multiple,
-.timer-options-specific-date {
-  margin-top: 8px;
-}
-
-.timer-input {
-  margin-left: 12px;
-  width: 300px;
-}
-
-.dropdown-group {
+.kie-bpmn-editor--notifications--modal-section {
+  padding-bottom: 16px;
+  overflow-y: scroll;
   display: flex;
+  flex-direction: column;
+}
+
+.kie-bpmn-editor--notifications--empty-state {
+  padding: 4px;
+  margin-top: 8px;
+  background: #eee;
+  border-radius: 10px;
+  text-align: center;
+  flex-grow: 1;
+}
+
+.kie-bpmn-editor--properties-panel--notification-entry {
   align-items: center;
+  border-radius: 10px;
 }
 
-.iso-cron-select {
-  width: 100px;
+.kie-bpmn-editor--properties-panel--notification-entry:hover,
+.kie-bpmn-editor--properties-panel--notification-entry:focus-within {
+  background: #eee;
 }
 
-.datepicker-group {
-  margin-left: 12px;
-  display: inline-block;
-  vertical-align: top;
+.kie-bpmn-editor--properties-panel--notification-entry div > input {
+  border: 0;
 }
 
-.datepicker-group .pf-c-date-picker__input {
-  width: 180px;
-}
-
-.pf-c-radio {
-  margin-bottom: 8px;
-}
-
-.pf-c-radio + .pf-c-radio {
-  margin-left: 30px;
+.kie-bpmn-editor--properties-panel--notification-entry div:not(:nth-last-child(2)) > input {
+  border-right: 1px dotted black;
 }
