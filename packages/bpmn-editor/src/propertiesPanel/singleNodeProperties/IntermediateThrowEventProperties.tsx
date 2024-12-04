@@ -23,20 +23,30 @@ import { Normalized } from "../../normalization/normalize";
 import { NameDocumentationAndId } from "../nameDocumentationAndId/NameDocumentationAndId";
 import { InputOnlyAssociationFormSection } from "../assignments/AssignmentsFormSection";
 import { EventDefinitionProperties } from "../eventDefinition/EventDefinitionProperties";
-import { IntermediateThrowEventIcon } from "../../diagram/nodes/NodeIcons";
+import { EventDefinitionIcon, IntermediateThrowEventIcon } from "../../diagram/nodes/NodeIcons";
 import { PropertiesPanelHeaderFormSection } from "./_PropertiesPanelHeaderFormSection";
 import { Divider } from "@patternfly/react-core/dist/js/components/Divider";
+import { NODE_COLORS } from "../../diagram/nodes/NodeSvgs";
 
 export function IntermediateThrowEventProperties({
   intermediateThrowEvent,
 }: {
   intermediateThrowEvent: Normalized<BPMN20__tIntermediateThrowEvent> & { __$$element: "intermediateThrowEvent" };
 }) {
+  const foregroundColor = NODE_COLORS.intermediateThrowEvent.foreground;
+  const backgroundColor = NODE_COLORS.intermediateThrowEvent.background;
   return (
     <>
       <PropertiesPanelHeaderFormSection
         title={intermediateThrowEvent["@_name"] || "Intermediate throw event"}
-        icon={<IntermediateThrowEventIcon variant={intermediateThrowEvent.eventDefinition?.[0]?.__$$element} />}
+        icon={
+          <EventDefinitionIcon
+            variant={intermediateThrowEvent.eventDefinition?.[0]?.__$$element}
+            filled={true}
+            stroke={foregroundColor}
+            fill={backgroundColor}
+          />
+        }
       >
         <NameDocumentationAndId element={intermediateThrowEvent} />
 

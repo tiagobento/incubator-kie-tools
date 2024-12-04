@@ -54,7 +54,7 @@ export function ServiceTaskProperties({
     <>
       <PropertiesPanelHeaderFormSection
         title={serviceTask["@_name"] || "Service task"}
-        icon={<TaskIcon variant={serviceTask.__$$element} />}
+        icon={<TaskIcon variant={serviceTask.__$$element} isIcon={true} />}
       >
         <NameDocumentationAndId element={serviceTask} />
 

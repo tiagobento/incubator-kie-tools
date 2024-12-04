@@ -68,28 +68,28 @@ export function useTaskNodeMorphingActions(task: Task) {
   const morphingActions = useMemo(() => {
     return [
       {
-        icon: <>U</>,
+        icon: <TaskIcon variant={"userTask"} isIcon={true} />,
         key: "1",
         title: "User task",
         id: "userTask",
         action: () => morphTask("userTask"),
       } as const,
       {
-        icon: <>B</>,
+        icon: <TaskIcon variant={"businessRuleTask"} isIcon={true} />,
         key: "2",
         title: "Business Rule task",
         id: "businessRuleTask",
         action: () => morphTask("businessRuleTask"),
       } as const,
       {
-        icon: <>S</>,
+        icon: <TaskIcon variant={"serviceTask"} isIcon={true} />,
         key: "3",
         title: "Service task",
         id: "serviceTask",
         action: () => morphTask("serviceTask"),
       } as const,
       {
-        icon: <>X</>,
+        icon: <TaskIcon variant={"scriptTask"} isIcon={true} />,
         key: "4",
         title: "Script task",
         id: "scriptTask",

@@ -23,20 +23,28 @@ import { Normalized } from "../../normalization/normalize";
 import { NameDocumentationAndId } from "../nameDocumentationAndId/NameDocumentationAndId";
 import { OutputOnlyAssociationFormSection } from "../assignments/AssignmentsFormSection";
 import { EventDefinitionProperties } from "../eventDefinition/EventDefinitionProperties";
-import { StartEventIcon } from "../../diagram/nodes/NodeIcons";
+import { EventDefinitionIcon, StartEventIcon } from "../../diagram/nodes/NodeIcons";
 import { PropertiesPanelHeaderFormSection } from "./_PropertiesPanelHeaderFormSection";
 import { Divider } from "@patternfly/react-core/dist/js/components/Divider";
+import { NODE_COLORS } from "../../diagram/nodes/NodeSvgs";
 
 export function StartEventProperties({
   startEvent,
 }: {
   startEvent: Normalized<BPMN20__tStartEvent> & { __$$element: "startEvent" };
 }) {
+  const foregroundColor = NODE_COLORS.startEvent.foreground;
   return (
     <>
       <PropertiesPanelHeaderFormSection
         title={startEvent["@_name"] || "Start event"}
-        icon={<StartEventIcon variant={startEvent.eventDefinition?.[0]?.__$$element} />}
+        icon={
+          <EventDefinitionIcon
+            variant={startEvent.eventDefinition?.[0]?.__$$element}
+            filled={false}
+            stroke={foregroundColor}
+          />
+        }
       >
         <NameDocumentationAndId element={startEvent} />
 

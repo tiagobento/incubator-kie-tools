@@ -50,7 +50,10 @@ export function BusinessRuleTaskProperties({
 
   return (
     <>
-      <PropertiesPanelHeaderFormSection title={businessRuleTask["@_name"] || "Business rule task"} icon={<TaskIcon />}>
+      <PropertiesPanelHeaderFormSection
+        title={businessRuleTask["@_name"] || "Business rule task"}
+        icon={<TaskIcon variant={businessRuleTask.__$$element} isIcon={true} />}
+      >
         <NameDocumentationAndId element={businessRuleTask} />
         <Divider inset={{ default: "insetXs" }} />
         <FormGroup

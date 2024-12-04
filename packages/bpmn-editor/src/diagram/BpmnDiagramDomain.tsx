@@ -103,11 +103,11 @@ export type BpmnNodeType = Values<typeof NODE_TYPES>;
 export type BpmnEdgeType = Values<typeof EDGE_TYPES>;
 
 export enum ActivityNodeMarker {
-  Compensation = "Compensation",
+  Collapsed = "Collapsed",
   MultiInstanceParallel = "MultiInstanceParallel",
   MultiInstanceSequential = "MultiInstanceSequential",
-  Collapsed = "Collapsed",
   Loop = "Loop",
+  Compensation = "Compensation",
   AdHocSubProcess = "AdHocSubProcess",
 }
 

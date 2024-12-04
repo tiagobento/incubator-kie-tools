@@ -25,7 +25,7 @@ import { visitFlowElementsAndArtifacts } from "../../../mutations/_elementVisito
 import { addOrGetProcessAndDiagramElements } from "../../../mutations/addOrGetProcessAndDiagramElements";
 import { Normalized } from "../../../normalization/normalize";
 import { useBpmnEditorStoreApi } from "../../../store/StoreContext";
-import { EndEventIcon, EventDefitnitionIcon, IntermediateThrowEventIcon, StartEventIcon } from "../NodeIcons";
+import { EndEventIcon, EventDefinitionIcon, IntermediateThrowEventIcon, StartEventIcon } from "../NodeIcons";
 import { BPMN20__tProcess } from "@kie-tools/bpmn-marshaller/src/schemas/bpmn-2_0/ts-gen/types";
 import { ElementFilter } from "@kie-tools/xml-parser-ts/dist/elementFilter";
 import { NODE_COLORS } from "../NodeSvgs";
@@ -41,6 +41,8 @@ export function useEventNodeMorphingActions(event: Event) {
   const bpmnEditorStoreApi = useBpmnEditorStoreApi();
 
   const foregroundColor = NODE_COLORS[event.__$$element].foreground;
+  const backgroundColor = NODE_COLORS[event.__$$element].background;
+
   const filled = event.__$$element === "intermediateThrowEvent" || event.__$$element === "endEvent";
 
   const morphEvent = useCallback(
@@ -165,63 +167,70 @@ export function useEventNodeMorphingActions(event: Event) {
         action: () => morphEvent(undefined),
       } as const, // none
       {
-        icon: <EventDefitnitionIcon stroke={foregroundColor} filled={filled} variant={"messageEventDefinition"} />,
+        icon: (
+          <EventDefinitionIcon
+            stroke={foregroundColor}
+            filled={filled}
+            fill={backgroundColor}
+            variant={"messageEventDefinition"}
+          />
+        ),
         key: "2",
         title: "Message",
         id: "messageEventDefinition",
         action: () => morphEvent("messageEventDefinition"),
       } as const,
       {
-        icon: <EventDefitnitionIcon stroke={foregroundColor} filled={filled} variant={"timerEventDefinition"} />,
+        icon: <EventDefinitionIcon stroke={foregroundColor} filled={filled} variant={"timerEventDefinition"} />,
         key: "3",
         title: "Timer",
         id: "timerEventDefinition",
         action: () => morphEvent("timerEventDefinition"),
       } as const,
       {
-        icon: <EventDefitnitionIcon stroke={foregroundColor} filled={filled} variant={"errorEventDefinition"} />,
+        icon: <EventDefinitionIcon stroke={foregroundColor} filled={filled} variant={"errorEventDefinition"} />,
         key: "4",
         title: "Error",
         id: "errorEventDefinition",
         action: () => morphEvent("errorEventDefinition"),
       } as const,
       {
-        icon: <EventDefitnitionIcon stroke={foregroundColor} filled={filled} variant={"escalationEventDefinition"} />,
+        icon: <EventDefinitionIcon stroke={foregroundColor} filled={filled} variant={"escalationEventDefinition"} />,
         key: "5",
         title: "Escalation",
         id: "escalationEventDefinition",
         action: () => morphEvent("escalationEventDefinition"),
       } as const,
       {
-        icon: <EventDefitnitionIcon stroke={foregroundColor} filled={filled} variant={"cancelEventDefinition"} />,
+        icon: <EventDefinitionIcon stroke={foregroundColor} filled={filled} variant={"cancelEventDefinition"} />,
         key: "6",
         title: "Cancelation",
         id: "cancelEventDefinition",
         action: () => morphEvent("cancelEventDefinition"),
       } as const,
       {
-        icon: <EventDefitnitionIcon stroke={foregroundColor} filled={filled} variant={"compensateEventDefinition"} />,
+        icon: <EventDefinitionIcon stroke={foregroundColor} filled={filled} variant={"compensateEventDefinition"} />,
         key: "7",
         title: "Compensation",
         id: "compensateEventDefinition",
         action: () => morphEvent("compensateEventDefinition"),
       } as const,
       {
-        icon: <EventDefitnitionIcon stroke={foregroundColor} filled={filled} variant={"conditionalEventDefinition"} />,
+        icon: <EventDefinitionIcon stroke={foregroundColor} filled={filled} variant={"conditionalEventDefinition"} />,
         key: "8",
         title: "Conditional",
         id: "conditionalEventDefinition",
         action: () => morphEvent("conditionalEventDefinition"),
       } as const,
       {
-        icon: <EventDefitnitionIcon stroke={foregroundColor} filled={filled} variant={"linkEventDefinition"} />,
+        icon: <EventDefinitionIcon stroke={foregroundColor} filled={filled} variant={"linkEventDefinition"} />,
         key: "9",
         title: "Link",
         id: "linkEventDefinition",
         action: () => morphEvent("linkEventDefinition"),
       } as const,
       {
-        icon: <EventDefitnitionIcon stroke={foregroundColor} filled={filled} variant={"signalEventDefinition"} />,
+        icon: <EventDefinitionIcon stroke={foregroundColor} filled={filled} variant={"signalEventDefinition"} />,
         key: "0",
         title: "Signal",
         id: "signalEventDefinition",
