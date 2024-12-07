@@ -1,3 +1,20 @@
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+#
+#  http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
+
 # VERSION defines the project version for the bundle.
 # Update this value when you upgrade the version of your project.
 # To re-generate a bundle for another specific version without changing the standard setup, you can:
@@ -309,19 +326,21 @@ endef
 
 
 .PHONY: bundle
-bundle: manifests kustomize install-operator-sdk ## Generate bundle manifests and metadata, then validate generated files.
+PACKAGE_NAME = "sonataflow-operator"
+bundle: kustomize install-operator-sdk ## Generate bundle manifests and metadata, then validate generated files.
 	@echo "📦 Generating bundle manifests and metadata..."
-	@operator-sdk generate kustomize manifests -q > /dev/null 2>&1
+	@operator-sdk generate kustomize manifests --package=$(PACKAGE_NAME) -q > /dev/null 2>&1
 	@echo "🔧 Setting controller image in Kustomize..."
 	@cd config/manager && $(KUSTOMIZE) edit set image controller=$(IMG) > /dev/null 2>&1
 	@echo "🔨 Building Kustomize and generating bundle..."
-	@$(KUSTOMIZE) build config/manifests | operator-sdk generate bundle $(BUNDLE_GEN_FLAGS) > /dev/null 2>&1
+	@$(KUSTOMIZE) build config/manifests | operator-sdk generate bundle $(BUNDLE_GEN_FLAGS) --package=$(PACKAGE_NAME) > /dev/null 2>&1
 	@echo "🛠️  Validating generated bundle..."
 	@operator-sdk bundle validate ./bundle > /dev/null 2>&1
 
 .PHONY: bundle-build
+BUNDLE_DESCRIPTOR = "images/bundle.yaml"
 bundle-build: ## Build the bundle image
-	cekit -v --descriptor images/bundle.yaml build ${build_options} $(BUILDER) --no-squash --build-arg SOURCE_DATE_EPOCH="$(shell git log -1 --pretty=%ct)"
+	cekit -v --descriptor $(BUNDLE_DESCRIPTOR) build ${build_options} $(BUILDER) --no-squash --build-arg SOURCE_DATE_EPOCH="$(shell git log -1 --pretty=%ct)"
 ifneq ($(ignore_tag),true)
 	$(BUILDER) tag sonataflow-operator-bundle:latest $(BUNDLE_IMG)
 endif
