@@ -20,48 +20,62 @@
 import * as React from "react";
 import { useBpmnEditorStore, useBpmnEditorStoreApi } from "../../store/StoreContext";
 import { FormGroup, FormSection } from "@patternfly/react-core/dist/js/components/Form";
-import { FormSelect, FormSelectOption } from "@patternfly/react-core/dist/js/components/FormSelect";
 import { addOrGetProcessAndDiagramElements } from "../../mutations/addOrGetProcessAndDiagramElements";
 import { visitFlowElementsAndArtifacts } from "../../mutations/_elementVisitor";
 import { Normalized } from "../../normalization/normalize";
 import { BPMN20__tProcess } from "@kie-tools/bpmn-marshaller/dist/schemas/bpmn-2_0/ts-gen/types";
 import { ElementFilter } from "@kie-tools/xml-parser-ts/dist/elementFilter";
 import { Unpacked } from "@kie-tools/xyflow-react-kie-diagram/dist/tsExt/tsExt";
-import "./EscalationCodeSelector.css";
-import { TextArea } from "@patternfly/react-core/dist/js/components/TextArea";
-import { InteractiveDropdown } from "../dropdown/InteractiveDropdown";
+import { CodeInput } from "../codeInput/CodeInput";
+import { generateUuid } from "@kie-tools/xyflow-react-kie-diagram/dist/uuid/uuid";
+import { TextInput } from "@patternfly/react-core/dist/js/components/TextInput/TextInput";
+import { Select } from "@patternfly/react-core/dist/js/components/Select/Select";
 
-export type WithEscalationCode =
+export type WithLinkExpression =
   | undefined
   | Normalized<
       ElementFilter<
         Unpacked<NonNullable<BPMN20__tProcess["flowElement"]>>,
-        "startEvent" | "intermediateCatchEvent" | "intermediateThrowEvent" | "endEvent" | "boundaryEvent"
+        "intermediateThrowEvent" | "intermediateCatchEvent" | "boundaryEvent"
       >
     >;
 
-export function EscalationCodeSelector({ element }: { element: WithEscalationCode }) {
+export function LinkSelector({ element }: { element: WithLinkExpression }) {
   const bpmnEditorStoreApi = useBpmnEditorStoreApi();
   const settings = useBpmnEditorStore((s) => s.settings);
 
   const currentValue =
-    element?.eventDefinition?.find((eventDef) => eventDef.__$$element === "escalationEventDefinition")?.[
-      "@_drools:esccode"
-    ] || "";
+    element?.eventDefinition?.find((eventDef) => eventDef.__$$element === "linkEventDefinition")?.["@_name"] || "";
 
-  const handleValueChange = (newValue: string) => {
+  const links: string[] = [];
+
+  const getDropdownValues = () => {
+    bpmnEditorStoreApi.setState((s) => {
+      const { process } = addOrGetProcessAndDiagramElements({
+        definitions: s.bpmn.model.definitions,
+      });
+      visitFlowElementsAndArtifacts(process, ({ element: e }) => {
+        if (e.__$$element === element?.__$$element) {
+          const linkEventDefinition = e.eventDefinition?.find((event) => event.__$$element === "linkEventDefinition");
+          if (linkEventDefinition) {
+            links.push(linkEventDefinition["@_name"]);
+          }
+        }
+      });
+    });
+  };
+
+  const handleValueChange = (newValue: string | undefined) => {
     bpmnEditorStoreApi.setState((s) => {
       const { process } = addOrGetProcessAndDiagramElements({
         definitions: s.bpmn.model.definitions,
       });
       visitFlowElementsAndArtifacts(process, ({ element: e }) => {
         if (e["@_id"] === element?.["@_id"] && e.__$$element === element.__$$element) {
-          const escalationEventDefinition = e.eventDefinition?.find(
-            (event) => event.__$$element === "escalationEventDefinition"
-          );
-          if (escalationEventDefinition) {
-            escalationEventDefinition["@_drools:esccode"] = newValue;
-            escalationEventDefinition["@_escalationRef"] = e["@_id"];
+          const linkEventDefinition = e.eventDefinition?.find((event) => event.__$$element === "linkEventDefinition");
+          if (linkEventDefinition) {
+            linkEventDefinition["@_name"] = newValue || "";
+            links.push(linkEventDefinition["@_name"]);
           }
         }
       });
@@ -70,13 +84,9 @@ export function EscalationCodeSelector({ element }: { element: WithEscalationCod
 
   return (
     <FormSection>
-      <FormGroup label="Escalation Code">
-        <InteractiveDropdown
-          value={currentValue}
-          onChange={handleValueChange}
-          items={[]}
-          placeholder="Select Escalation Code"
-        />
+      <FormGroup label="Link">
+        <TextInput value={currentValue} onChange={handleValueChange} label={"Link"} />
+        <Select onToggle={() => getDropdownValues}></Select>
       </FormGroup>
     </FormSection>
   );

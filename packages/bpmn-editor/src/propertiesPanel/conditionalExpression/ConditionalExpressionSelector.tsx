@@ -20,65 +20,61 @@
 import * as React from "react";
 import { useBpmnEditorStore, useBpmnEditorStoreApi } from "../../store/StoreContext";
 import { FormGroup, FormSection } from "@patternfly/react-core/dist/js/components/Form";
-import { FormSelect, FormSelectOption } from "@patternfly/react-core/dist/js/components/FormSelect";
 import { addOrGetProcessAndDiagramElements } from "../../mutations/addOrGetProcessAndDiagramElements";
 import { visitFlowElementsAndArtifacts } from "../../mutations/_elementVisitor";
 import { Normalized } from "../../normalization/normalize";
 import { BPMN20__tProcess } from "@kie-tools/bpmn-marshaller/dist/schemas/bpmn-2_0/ts-gen/types";
 import { ElementFilter } from "@kie-tools/xml-parser-ts/dist/elementFilter";
 import { Unpacked } from "@kie-tools/xyflow-react-kie-diagram/dist/tsExt/tsExt";
-import { TextArea } from "@patternfly/react-core/dist/js/components/TextArea";
+import { CodeInput } from "../codeInput/CodeInput";
+import { generateUuid } from "@kie-tools/xyflow-react-kie-diagram/dist/uuid/uuid";
 
-import "./ErrorSelector.css";
-
-export type WithError =
+export type WithConditionalExpression =
   | undefined
   | Normalized<
       ElementFilter<
         Unpacked<NonNullable<BPMN20__tProcess["flowElement"]>>,
-        "startEvent" | "intermediateCatchEvent" | "intermediateThrowEvent" | "endEvent" | "boundaryEvent"
+        "startEvent" | "intermediateCatchEvent" | "boundaryEvent"
       >
     >;
 
-export function ErrorSelector({ element }: { element: WithError }) {
+export function ConditionalEventSelector({ element }: { element: WithConditionalExpression }) {
   const bpmnEditorStoreApi = useBpmnEditorStoreApi();
   const settings = useBpmnEditorStore((s) => s.settings);
 
+  const currentValue =
+    element?.eventDefinition?.find((eventDef) => eventDef.__$$element === "conditionalEventDefinition")?.condition
+      ?.__$$text || "";
+
+  const handleValueChange = (newValue: string | undefined) => {
+    bpmnEditorStoreApi.setState((s) => {
+      const { process } = addOrGetProcessAndDiagramElements({
+        definitions: s.bpmn.model.definitions,
+      });
+      visitFlowElementsAndArtifacts(process, ({ element: e }) => {
+        if (e["@_id"] === element?.["@_id"] && e.__$$element === element.__$$element) {
+          const conditionalEventDefinition = e.eventDefinition?.find(
+            (event) => event.__$$element === "conditionalEventDefinition"
+          );
+          if (conditionalEventDefinition) {
+            conditionalEventDefinition.condition ??= {
+              "@_id": e["@_id"] || generateUuid(),
+            };
+            conditionalEventDefinition.condition.__$$text = newValue;
+          }
+        }
+      });
+    });
+  };
+
   return (
     <FormSection>
-      <FormGroup label="Error">
-        <TextArea
-          aria-label={"Error"}
-          type={"text"}
-          isDisabled={settings.isReadOnly}
-          value={
-            element?.eventDefinition?.find((eventDef) => eventDef.__$$element === "errorEventDefinition")?.[
-              "@_errorRef"
-            ] || ""
-          }
-          onChange={(newError: string | undefined) =>
-            bpmnEditorStoreApi.setState((s) => {
-              const { process } = addOrGetProcessAndDiagramElements({
-                definitions: s.bpmn.model.definitions,
-              });
-              visitFlowElementsAndArtifacts(process, ({ element: e }) => {
-                if (e["@_id"] === element?.["@_id"] && e.__$$element === element.__$$element) {
-                  const errorEventDefinition = e.eventDefinition?.find(
-                    (event) => event.__$$element === "errorEventDefinition"
-                  );
-                  if (errorEventDefinition) {
-                    errorEventDefinition["@_drools:erefname"] = newError;
-                    errorEventDefinition["@_errorRef"] = newError;
-                  }
-                }
-              });
-            })
-          }
-          placeholder={"-- None --"}
-          style={{ resize: "vertical", minHeight: "40px" }}
-          rows={1}
-        />
-      </FormGroup>
+      <CodeInput
+        value={currentValue}
+        onChange={handleValueChange}
+        label={"Conditional Expression"}
+        languages={["drools"]}
+      />
     </FormSection>
   );
 }

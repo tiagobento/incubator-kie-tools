@@ -5,12 +5,17 @@ import { DropdownItem } from "@patternfly/react-core/dist/js/components/Dropdown
 import { CheckIcon } from "@patternfly/react-icons/dist/js/icons/check-icon";
 import { PlusCircleIcon } from "@patternfly/react-icons/dist/js/icons/plus-circle-icon";
 
-const InteractiveDropdown = () => {
+export function InteractiveDropdown(props: {
+  value: string | null;
+  onChange: (value: string) => void;
+  items: string[];
+  placeholder?: string;
+}) {
+  const { value, onChange, items, placeholder } = props;
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedValue, setSelectedValue] = useState<string | null>(null);
-  const [customItems, setCustomItems] = useState<string[]>([]);
   const [isCreatingNew, setIsCreatingNew] = useState(false);
   const [newItemInput, setNewItemInput] = useState("");
+  const [customItems, setCustomItems] = useState<string[]>(items);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -19,22 +24,23 @@ const InteractiveDropdown = () => {
     }
   }, [isCreatingNew]);
 
-  const handleToggle = (shouldOpen: boolean) => {
-    // Only close if not in "create new" mode
+  const toggleDropdown = (open: boolean) => {
     if (!isCreatingNew) {
-      setIsOpen(shouldOpen);
+      setIsOpen(open);
     }
   };
 
-  const handleNewItemInput = (value: string) => {
-    setNewItemInput(value);
+  const handleSelect = (selectedValue: string) => {
+    onChange(selectedValue);
+    setIsOpen(false);
   };
 
   const saveNewItem = () => {
     if (newItemInput.trim()) {
-      const updatedItems = [...customItems, newItemInput.trim()];
+      const newValue = newItemInput.trim();
+      const updatedItems = [...customItems, newValue];
       setCustomItems(updatedItems);
-      setSelectedValue(newItemInput.trim());
+      onChange(newValue);
       setIsCreatingNew(false);
       setNewItemInput("");
     }
@@ -47,51 +53,35 @@ const InteractiveDropdown = () => {
   };
 
   return (
-    <div style={{ width: "200px" }}>
-      <Dropdown
-        isOpen={isOpen}
-        toggle={<DropdownToggle onToggle={handleToggle}>{selectedValue || "Select an option"}</DropdownToggle>}
-        dropdownItems={
-          isCreatingNew
-            ? [
-                <div key="new-item-input" style={{ display: "flex", alignItems: "center", padding: "10px" }}>
-                  <input
-                    ref={inputRef}
-                    type="text"
-                    value={newItemInput}
-                    onChange={(e) => handleNewItemInput(e.target.value)}
-                    onKeyPress={handleKeyPress}
-                    placeholder="Enter new item"
-                    style={{ marginRight: "10px", flexGrow: 1 }}
-                  />
-                  <CheckIcon onClick={saveNewItem} style={{ cursor: "pointer", color: "green" }} />
-                </div>,
-              ]
-            : [
-                <DropdownItem
-                  key="new-option"
-                  icon={<PlusCircleIcon />}
-                  onClick={() => {
-                    setIsCreatingNew(true);
-                  }}
-                >
-                  New
-                </DropdownItem>,
-                ...customItems.map((item, index) => (
-                  <DropdownItem
-                    key={`custom-item-${index}`}
-                    onClick={() => {
-                      setSelectedValue(item);
-                      setIsOpen(false);
-                    }}
-                  >
-                    {item}
-                  </DropdownItem>
-                )),
-              ]
-        }
-      />
-    </div>
+    <Dropdown
+      isOpen={isOpen}
+      toggle={<DropdownToggle onToggle={toggleDropdown}>{value || placeholder || "Select an option"}</DropdownToggle>}
+      dropdownItems={
+        isCreatingNew
+          ? [
+              <div key="new-item-input" style={{ display: "flex", alignItems: "center", padding: "10px" }}>
+                <input
+                  ref={inputRef}
+                  type="text"
+                  value={newItemInput}
+                  onChange={(e) => setNewItemInput(e.target.value)}
+                  onKeyPress={handleKeyPress}
+                  placeholder="Enter new item"
+                />
+                <CheckIcon onClick={saveNewItem} />
+              </div>,
+            ]
+          : [
+              <DropdownItem key="new-option" icon={<PlusCircleIcon />} onClick={() => setIsCreatingNew(true)}>
+                New
+              </DropdownItem>,
+              ...customItems.map((item, index) => (
+                <DropdownItem key={`custom-item-${index}`} onClick={() => handleSelect(item)}>
+                  {item}
+                </DropdownItem>
+              )),
+            ]
+      }
+    />
   );
-};
-export default InteractiveDropdown;
+}

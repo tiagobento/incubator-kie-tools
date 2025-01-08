@@ -32,7 +32,7 @@ export function CodeInput({
 }: {
   label: string;
   languages: string[];
-  value: string;
+  value: string | undefined;
   onChange: (newCode: string) => void;
 }) {
   const isReadOnly = useBpmnEditorStore((s) => s.settings.isReadOnly);

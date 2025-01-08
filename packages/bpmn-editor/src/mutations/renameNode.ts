@@ -19,6 +19,7 @@
 
 import {
   BPMN20__tDefinitions,
+  BPMN20__tItemDefinition,
   BPMN20__tLane,
   BPMN20__tProcess,
   BPMN20__tTextAnnotation,
@@ -110,4 +111,27 @@ export function updateTextAnnotation({
       return false; // Will stop visiting.
     }
   });
+}
+
+export function updateItemDefinition({
+  definitions,
+  newItemDefinition,
+  id,
+}: {
+  definitions: Normalized<BPMN20__tDefinitions>;
+  newItemDefinition: Partial<Normalized<BPMN20__tItemDefinition>>;
+  id: string;
+}) {
+  if (!definitions.rootElement) return;
+
+  for (let i = 0; i < definitions.rootElement.length; i++) {
+    const element = definitions.rootElement[i];
+
+    if (element.__$$element === "itemDefinition" && element["@_id"] === id) {
+      definitions.rootElement[i] = { ...element, ...newItemDefinition };
+      return;
+    }
+  }
+
+  throw new Error(`ItemDefinition with id ${id} not found`);
 }

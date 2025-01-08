@@ -28,7 +28,8 @@ export type Bpmn20KnownMetaDataKey =
   | "customAbortParent" // Used for "Abort parent" flag on Call Activities.
   | "customAsync" // Used for "Async" flag on Call Activities.
   | "customActivationCondition" // Used for "Activation condition" expression on Ad-hoc sub-processes.
-  | "customAutoStart"; // Used for "Ad-hoc auto-start" flag on Ad-hoc sub-processes.
+  | "customAutoStart" // Used for "Ad-hoc auto-start" flag on Ad-hoc sub-processes.
+  | "customScope"; // Used for "Signal Scope" flag on intermediateThrowEvent and endEvent Signal nodes
 
 export type Bpmn20ProcessVariableTags =
   | "internal" // TODO: Used for?

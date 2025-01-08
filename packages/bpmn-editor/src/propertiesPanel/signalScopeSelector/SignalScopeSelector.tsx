@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 import * as React from "react";
 import { useBpmnEditorStore, useBpmnEditorStoreApi } from "../../store/StoreContext";
 import { FormGroup, FormSection } from "@patternfly/react-core/dist/js/components/Form";
@@ -24,52 +23,52 @@ import { FormSelect, FormSelectOption } from "@patternfly/react-core/dist/js/com
 import { addOrGetProcessAndDiagramElements } from "../../mutations/addOrGetProcessAndDiagramElements";
 import { visitFlowElementsAndArtifacts } from "../../mutations/_elementVisitor";
 import { Normalized } from "../../normalization/normalize";
-import { BPMN20__tProcess } from "@kie-tools/bpmn-marshaller/dist/schemas/bpmn-2_0/ts-gen/types";
+import { BPMN20__tProcess, WithMetaData } from "@kie-tools/bpmn-marshaller/dist/schemas/bpmn-2_0/ts-gen/types";
 import { ElementFilter } from "@kie-tools/xml-parser-ts/dist/elementFilter";
 import { Unpacked } from "@kie-tools/xyflow-react-kie-diagram/dist/tsExt/tsExt";
 import { TextArea } from "@patternfly/react-core/dist/js/components/TextArea";
+import "./SignalScopeSelector.css";
+import {
+  parseBpmn20Drools10MetaData,
+  setBpmn20Drools10MetaData,
+} from "@kie-tools/bpmn-marshaller/dist/drools-extension-metaData";
 
-import "./ErrorSelector.css";
-
-export type WithError =
+export type WithSignalScope =
   | undefined
   | Normalized<
       ElementFilter<
         Unpacked<NonNullable<BPMN20__tProcess["flowElement"]>>,
-        "startEvent" | "intermediateCatchEvent" | "intermediateThrowEvent" | "endEvent" | "boundaryEvent"
+        "intermediateThrowEvent" | "endEvent" | "boundaryEvent"
       >
     >;
 
-export function ErrorSelector({ element }: { element: WithError }) {
+const SignalScope = [
+  { value: "default", label: "Default" },
+  { value: "processInstance", label: "Process Instance" },
+  { value: "project", label: "Project" },
+  { value: "external", label: "External" },
+];
+
+export function SignalScopeSelector({ element }: { element: WithSignalScope }) {
   const bpmnEditorStoreApi = useBpmnEditorStoreApi();
   const settings = useBpmnEditorStore((s) => s.settings);
 
   return (
     <FormSection>
-      <FormGroup label="Error">
-        <TextArea
-          aria-label={"Error"}
+      <FormGroup label="Signal Scope">
+        <FormSelect
+          aria-label={"Signal Scope"}
           type={"text"}
           isDisabled={settings.isReadOnly}
-          value={
-            element?.eventDefinition?.find((eventDef) => eventDef.__$$element === "errorEventDefinition")?.[
-              "@_errorRef"
-            ] || ""
-          }
-          onChange={(newError: string | undefined) =>
+          value={parseBpmn20Drools10MetaData(element).get("customScope")}
+          onChange={(newSignalScope) =>
             bpmnEditorStoreApi.setState((s) => {
               const { process } = addOrGetProcessAndDiagramElements({
                 definitions: s.bpmn.model.definitions,
               });
               visitFlowElementsAndArtifacts(process, ({ element: e }) => {
-                if (e["@_id"] === element?.["@_id"] && e.__$$element === element.__$$element) {
-                  const errorEventDefinition = e.eventDefinition?.find(
-                    (event) => event.__$$element === "errorEventDefinition"
-                  );
-                  if (errorEventDefinition) {
-                    errorEventDefinition["@_drools:erefname"] = newError;
-                    errorEventDefinition["@_errorRef"] = newError;
-                  }
+                if (element && e["@_id"] === element["@_id"]) {
+                  setBpmn20Drools10MetaData(e as { extensionElements?: WithMetaData }, "customScope", newSignalScope);
                 }
               });
             })
@@ -77,7 +76,11 @@ export function ErrorSelector({ element }: { element: WithError }) {
           placeholder={"-- None --"}
           style={{ resize: "vertical", minHeight: "40px" }}
           rows={1}
-        />
+        >
+          {SignalScope.map((option) => (
+            <FormSelectOption key={option.label} label={option.label} value={option.value} />
+          ))}
+        </FormSelect>
       </FormGroup>
     </FormSection>
   );

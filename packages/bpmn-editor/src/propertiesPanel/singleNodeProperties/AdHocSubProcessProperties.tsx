@@ -70,7 +70,7 @@ export function AdHocSubProcessProperties({
           languages={["Drools"]}
           value={parseBpmn20Drools10MetaData(adHocSubProcess).get("customActivationCondition") ?? ""}
           onChange={(newCode) => {
-            bpmnEditorStoreApi((s) => {
+            bpmnEditorStoreApi.setState((s) => {
               const { process } = addOrGetProcessAndDiagramElements({
                 definitions: s.bpmn.model.definitions,
               });

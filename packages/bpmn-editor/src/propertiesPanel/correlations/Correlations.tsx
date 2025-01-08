@@ -26,8 +26,9 @@ import { addOrGetProcessAndDiagramElements } from "../../mutations/addOrGetProce
 import { PropertiesPanelListEmptyState } from "../emptyState/PropertiesPanelListEmptyState";
 import { Grid, GridItem } from "@patternfly/react-core/dist/js/layouts/Grid";
 import { PlusCircleIcon } from "@patternfly/react-icons/dist/js/icons/plus-circle-icon";
-import { CubesIcon } from "@patternfly/react-icons/dist/js/icons/cubes-icon";
 import { useMemo, useState } from "react";
+import { CubesIcon } from "@patternfly/react-icons/dist/js/icons/cubes-icon";
+
 import { TimesIcon } from "@patternfly/react-icons/dist/js/icons/times-icon";
 import { Normalized } from "../../normalization/normalize";
 import { Title } from "@patternfly/react-core/dist/js/components/Title";

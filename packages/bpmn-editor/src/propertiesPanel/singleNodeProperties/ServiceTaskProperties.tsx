@@ -125,8 +125,8 @@ export function ServiceTaskProperties({
                   definitions: s.bpmn.model.definitions,
                 });
                 visitFlowElementsAndArtifacts(process, ({ element: e }) => {
-                  if (e["@_id"] === serviceTask["@_id"]) {
-                    serviceTask["@_drools:serviceinterface"] = newInterface;
+                  if (e["@_id"] === serviceTask["@_id"] && e.__$$element === serviceTask.__$$element) {
+                    e["@_drools:serviceinterface"] = newInterface;
                   }
                 });
               })
@@ -147,8 +147,8 @@ export function ServiceTaskProperties({
                   definitions: s.bpmn.model.definitions,
                 });
                 visitFlowElementsAndArtifacts(process, ({ element: e }) => {
-                  if (e["@_id"] === serviceTask["@_id"]) {
-                    serviceTask["@_drools:serviceoperation"] = newOperation;
+                  if (e["@_id"] === serviceTask["@_id"] && e.__$$element === serviceTask.__$$element) {
+                    e["@_drools:serviceoperation"] = newOperation;
                   }
                 });
               })

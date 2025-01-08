@@ -9,9 +9,8 @@ import { Bullseye } from "@patternfly/react-core/dist/js/layouts/Bullseye";
 import { EmptyState, EmptyStateBody, EmptyStateIcon } from "@patternfly/react-core/dist/js/components/EmptyState";
 import { Title } from "@patternfly/react-core/dist/js/components/Title";
 import { Dropdown, DropdownItem, DropdownToggle } from "@patternfly/react-core/dist/js/components/Dropdown";
-import { CubesIcon } from "@patternfly/react-icons/dist/js/icons/cubes-icon";
+// import CubesIcon from "@patternfly/react-icons/dist/js/icons/cubes-icon";
 import "./Reassignments.css";
-import InteractiveDropdown from "../dropdown/InteractiveDropdown";
 
 function DropdownWithAdd({ items, setItems }: { items: string[]; setItems: (items: string[]) => void }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -138,9 +137,7 @@ export function Reassignments({ isOpen, onClose }: { isOpen: boolean; onClose: (
               onMouseLeave={() => setHoveredIndex(undefined)}
               style={{ padding: "0 8px" }}
             >
-              <GridItem span={3}>
-                <InteractiveDropdown />
-              </GridItem>
+              <GridItem span={3}></GridItem>
               <GridItem span={3}>
                 <DropdownWithAdd items={groups} setItems={setGroups} />
               </GridItem>
@@ -215,7 +212,7 @@ export function Reassignments({ isOpen, onClose }: { isOpen: boolean; onClose: (
         <div className="kie-bpmn-editor--reassignments--empty-state">
           <Bullseye>
             <EmptyState>
-              <EmptyStateIcon icon={CubesIcon} />
+              {/* <EmptyStateIcon icon={CubesIcon} /> */}
               <Title headingLevel="h4">No reassignments yet</Title>
               <EmptyStateBody>
                 {"This represents the empty state for reassignments. You can add reassignments to get started."}

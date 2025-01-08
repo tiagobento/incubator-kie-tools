@@ -30,6 +30,9 @@ import { EscalationCodeSelector } from "../escalationCodeSelector/EscalationCode
 import { SignalSelector } from "../signalSelector/SignalSelector";
 import { TimerOptions } from "../timerOptions/TimerOptions";
 import { ActivitySelector } from "../activitySelector/ActivitySelector";
+import { SignalScopeSelector } from "../signalScopeSelector/SignalScopeSelector";
+import { ConditionalEventSelector } from "../conditionalExpression/ConditionalExpressionSelector";
+import { LinkSelector } from "../linkSelector/LinkSelector";
 
 export type Event = Normalized<
   ElementFilter<
@@ -62,13 +65,18 @@ export function EventDefinitionProperties({ event }: { event: Event }) {
 
         {/* all */}
         {eventDefinition?.__$$element === "signalEventDefinition" && ( //
-          <SignalSelector element={event} />
+          <>
+            <SignalSelector element={event} />
+            {(event.__$$element === "intermediateThrowEvent" || event.__$$element === "endEvent") && (
+              <SignalScopeSelector element={event} />
+            )}
+          </>
         )}
 
         {eventDefinition?.__$$element === "linkEventDefinition" &&
           (event.__$$element === "intermediateCatchEvent" || //
             event.__$$element === "intermediateThrowEvent") && ( //
-            <>{/* nothing */}</>
+            <LinkSelector element={event} />
           )}
 
         {eventDefinition?.__$$element === "errorEventDefinition" && //
@@ -91,15 +99,8 @@ export function EventDefinitionProperties({ event }: { event: Event }) {
         {eventDefinition?.__$$element === "conditionalEventDefinition" &&
           (event.__$$element === "startEvent" ||
             event.__$$element === "intermediateCatchEvent" ||
-            event.__$$element === "boundaryEvent") && (
-            <CodeInput
-              label={"Condition"}
-              languages={["Drools"]}
-              value={""}
-              onChange={(newCode) => {
-                // TODO: Tiago
-              }}
-            />
+            event.__$$element === "boundaryEvent") && ( //
+            <ConditionalEventSelector element={event} />
           )}
 
         {eventDefinition?.__$$element === "timerEventDefinition" &&

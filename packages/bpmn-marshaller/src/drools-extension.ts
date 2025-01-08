@@ -145,11 +145,20 @@ declare module "./schemas/bpmn-2_0/ts-gen/types" {
   export interface BPMN20__tDataOutput {
     "@_drools:dtype"?: Namespaced<DROOLS, string>;
   }
-}
 
-  // Message Ref
-  export interface BPMN20__tMsgRef {
-    "@_drools:dtype"?: Namespaced<DROOLS, string>;
+  // Message Event Definition
+  export interface BPMN20__tMessageEventDefinition {
+    "@_drools:msgref"?: Namespaced<DROOLS, string>;
+  }
+
+  // Escalation Event Definition
+  export interface BPMN20__tEscalationEventDefinition {
+    "@_drools:esccode"?: Namespaced<DROOLS, string>;
+  }
+
+  // Error Event Definition
+  export interface BPMN20__tErrorEventDefinition {
+    "@_drools:erefname"?: Namespaced<DROOLS, string>;
   }
 }
 
@@ -248,12 +257,29 @@ mergeMetas(bpmn20meta, [[DROOLS_NS, drools10meta]]);
   xsdType: "xsd:string",
   fromType: "BPMN20__tDataOutput",
 };
-// Message Ref
-(bpmn20meta["BPMN20__tMsgRef"] as any)["@_drools:msgref"] = {
+
+// Message Event Definition
+(bpmn20meta["BPMN20__tMessageEventDefinition"] as any)["@_drools:msgref"] = {
   type: "string",
   isArray: false,
   xsdType: "xsd:string",
-  fromType: "BPMN20__tMsgRef",
+  fromType: "BPMN20__tMessageEventDefinition",
+};
+
+// Escalation Event Definition
+(bpmn20meta["BPMN20__tEscalationEventDefinition"] as any)["@_drools:esccode"] = {
+  type: "string",
+  isArray: false,
+  xsdType: "xsd:string",
+  fromType: "BPMN20__tEscalationEventDefinition",
+};
+
+// Error Event Definition
+(bpmn20meta["BPMN20__tErrorEventDefinition"] as any)["@_drools:erefname"] = {
+  type: "string",
+  isArray: false,
+  xsdType: "xsd:string",
+  fromType: "BPMN20__tErrorEventDefinition",
 };
 
 class MetaType {

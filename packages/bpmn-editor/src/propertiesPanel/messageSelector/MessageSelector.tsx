@@ -72,7 +72,7 @@ export function MessageSelector({ element }: { element: WithMessage }) {
                   const messageEventDefinition = e.eventDefinition?.find(
                     (event) => event.__$$element === "messageEventDefinition"
                   );
-                  if (messageEventDefinition !== undefined) {
+                  if (messageEventDefinition) {
                     messageEventDefinition["@_drools:msgref"] = newMessage;
                     messageEventDefinition["@_messageRef"] = e["@_id"];
                   }
@@ -82,7 +82,7 @@ export function MessageSelector({ element }: { element: WithMessage }) {
           }
           placeholder={"Enter message..."}
           style={{ resize: "vertical", minHeight: "40px" }}
-          rows={3}
+          rows={1}
         />
       </FormGroup>
     </FormSection>

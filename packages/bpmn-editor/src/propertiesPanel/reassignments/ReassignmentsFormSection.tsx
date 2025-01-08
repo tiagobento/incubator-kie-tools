@@ -28,11 +28,12 @@ import {
   BPMN20__tDataInputAssociation,
   BPMN20__tDataOutputAssociation,
   BPMN20__tProcess,
+  BPMN20__tUserTask,
 } from "@kie-tools/bpmn-marshaller/dist/schemas/bpmn-2_0/ts-gen/types";
 import { Modal, ModalVariant } from "@patternfly/react-core/dist/js/components/Modal/Modal";
 import { generateUuid } from "@kie-tools/xyflow-react-kie-diagram/dist/uuid/uuid";
-import "./AssignmentsFormSection.css";
-import { EmptyState, EmptyStateIcon, EmptyStateBody } from "@patternfly/react-core/dist/js/components/EmptyState";
+import "./ReassignmentsFormSection.css";
+import { EmptyState, EmptyStateBody } from "@patternfly/react-core/dist/js/components/EmptyState";
 import { Title } from "@patternfly/react-core/dist/js/components/Title";
 import { Bullseye } from "@patternfly/react-core/dist/js/layouts/Bullseye";
 import { Grid, GridItem } from "@patternfly/react-core/dist/js/layouts/Grid";
@@ -41,35 +42,20 @@ import { EyeIcon } from "@patternfly/react-icons/dist/js/icons/eye-icon";
 import { addOrGetProcessAndDiagramElements } from "../../mutations/addOrGetProcessAndDiagramElements";
 import { PlusCircleIcon } from "@patternfly/react-icons/dist/js/icons/plus-circle-icon";
 import { visitFlowElementsAndArtifacts } from "../../mutations/_elementVisitor";
-import { ElementFilter } from "@kie-tools/xml-parser-ts/dist/elementFilter";
-import { Unpacked } from "@kie-tools/xyflow-react-kie-diagram/dist/tsExt/tsExt";
 import { Normalized } from "../../normalization/normalize";
 import { Divider } from "@patternfly/react-core/dist/js/components/Divider";
 import { setBpmn20Drools10MetaData } from "@kie-tools/bpmn-marshaller/dist/drools-extension-metaData";
 import { TextArea } from "@patternfly/react-core/dist/js/components/TextArea/TextArea";
 
-export type WithAssignments = Normalized<
-  ElementFilter<
-    Unpacked<NonNullable<BPMN20__tProcess["flowElement"]>>,
-    "callActivity" | "businessRuleTask" | "userTask" | "serviceTask" | "scriptTask"
-  >
->;
+export type WithReassignments = Normalized<BPMN20__tUserTask> & { __$$element: "userTask" };
 
-export type WithOutputAssignments = Normalized<
-  ElementFilter<
-    Unpacked<NonNullable<BPMN20__tProcess["flowElement"]>>,
-    "startEvent" | "intermediateCatchEvent" | "boundaryEvent"
-  >
->;
-
-export type WithInputAssignments = Normalized<
-  ElementFilter<Unpacked<NonNullable<BPMN20__tProcess["flowElement"]>>, "endEvent" | "intermediateThrowEvent">
->;
-
-export function AssignmentsFormSection({ sectionLabel, children }: React.PropsWithChildren<{ sectionLabel: string }>) {
+export function ReassignmentsFormSection({
+  sectionLabel,
+  children,
+}: React.PropsWithChildren<{ sectionLabel: string }>) {
   const isReadOnly = useBpmnEditorStore((s) => s.settings.isReadOnly);
 
-  const [showAssignmentsModal, setShowAssignmentsModal] = useState(false);
+  const [showReassignmentsModal, setShowReassignmentsModal] = useState(false);
 
   return (
     <>
@@ -78,13 +64,13 @@ export function AssignmentsFormSection({ sectionLabel, children }: React.PropsWi
           <SectionHeader
             expands={"modal"}
             icon={<div style={{ marginLeft: "12px", width: "16px", height: "36px", lineHeight: "36px" }}>{"⇆"}</div>}
-            title={"Assignments" + sectionLabel}
-            toogleSectionExpanded={() => setShowAssignmentsModal(true)}
+            title={"Reassignments" + sectionLabel}
+            toogleSectionExpanded={() => setShowReassignmentsModal(true)}
             action={
               <Button
                 title={"Manage"}
                 variant={ButtonVariant.plain}
-                onClick={() => setShowAssignmentsModal(true)}
+                onClick={() => setShowReassignmentsModal(true)}
                 // style={{ paddingBottom: 0, paddingTop: 0 }}
               >
                 {isReadOnly ? <EyeIcon /> : <EditIcon />}
@@ -94,12 +80,12 @@ export function AssignmentsFormSection({ sectionLabel, children }: React.PropsWi
         }
       />
       <Modal
-        title="Assignments"
-        className={"kie-bpmn-editor--assignments--modal"}
-        aria-labelledby={"Assignments"}
+        title="Reassignments"
+        className={"kie-bpmn-editor--reassignments--modal"}
+        aria-labelledby={"Reassignments"}
         variant={ModalVariant.large}
-        isOpen={showAssignmentsModal}
-        onClose={() => setShowAssignmentsModal(false)}
+        isOpen={showReassignmentsModal}
+        onClose={() => setShowReassignmentsModal(false)}
       >
         {children}
       </Modal>
@@ -107,7 +93,7 @@ export function AssignmentsFormSection({ sectionLabel, children }: React.PropsWi
   );
 }
 
-export function BidirectionalAssignmentsFormSection({ element }: { element: WithAssignments }) {
+export function BidirectionalReassignmentsFormSection({ element }: { element: WithReassignments }) {
   const inputCount = element.dataInputAssociation?.length ?? 0;
   const outputCount = element.dataOutputAssociation?.length ?? 0;
   const sectionLabel = useMemo(() => {
@@ -123,67 +109,22 @@ export function BidirectionalAssignmentsFormSection({ element }: { element: With
   }, [inputCount, outputCount]);
 
   return (
-    <AssignmentsFormSection sectionLabel={sectionLabel}>
-      <div className="kie-bpmn-editor--assignments--modal-section" style={{ height: "50%" }}>
-        <AssignmentList section={"input"} element={element} />
+    <ReassignmentsFormSection sectionLabel={sectionLabel}>
+      <div className="kie-bpmn-editor--reassignments--modal-section" style={{ height: "50%" }}>
+        <ReassignmentList userTask={element} />
       </div>
-      <div className="kie-bpmn-editor--assignments--modal-section" style={{ height: "50%" }}>
-        <AssignmentList section={"output"} element={element} />
+      <div className="kie-bpmn-editor--reassignments--modal-section" style={{ height: "50%" }}>
+        <ReassignmentList userTask={element} />
       </div>
-    </AssignmentsFormSection>
+    </ReassignmentsFormSection>
   );
 }
 
-export function InputOnlyAssociationFormSection({ element }: { element: WithInputAssignments }) {
-  const inputCount = element.dataInputAssociation?.length ?? 0;
-  const sectionLabel = useMemo(() => {
-    if (inputCount > 0) {
-      return ` (in: ${inputCount})`;
-    } else {
-      return ` (in: -)`;
-    }
-  }, [inputCount]);
-
-  return (
-    <AssignmentsFormSection sectionLabel={sectionLabel}>
-      <div className="kie-bpmn-editor--assignments--modal-section" style={{ height: "100%" }}>
-        <AssignmentList section={"input"} element={element} />
-      </div>
-    </AssignmentsFormSection>
-  );
-}
-
-export function OutputOnlyAssociationFormSection({ element }: { element: WithOutputAssignments }) {
-  const outputCount = element.dataOutputAssociation?.length ?? 0;
-  const sectionLabel = useMemo(() => {
-    if (outputCount > 0) {
-      return ` (out: ${outputCount})`;
-    } else {
-      return ` (out: -)`;
-    }
-  }, [outputCount]);
-
-  return (
-    <AssignmentsFormSection sectionLabel={sectionLabel}>
-      <div className="kie-bpmn-editor--assignments--modal-section" style={{ height: "100%" }}>
-        <AssignmentList section={"output"} element={element} />
-      </div>
-    </AssignmentsFormSection>
-  );
-}
-
-export function AssignmentList({
-  section,
-  element,
-}:
-  | {
-      section: "input";
-      element: WithAssignments | (WithInputAssignments & { dataOutputAssociation?: BPMN20__tDataOutputAssociation[] });
-    }
-  | {
-      section: "output";
-      element: WithAssignments | (WithOutputAssignments & { dataInputAssociation?: BPMN20__tDataInputAssociation[] });
-    }) {
+export function ReassignmentList({
+  userTask,
+}: {
+  userTask: Normalized<BPMN20__tUserTask> & { __$$element: "userTask" };
+}) {
   const bpmnEditorStoreApi = useBpmnEditorStoreApi();
 
   const isReadOnly = useBpmnEditorStore((s) => s.settings.isReadOnly);
@@ -195,7 +136,7 @@ export function AssignmentList({
       });
 
       visitFlowElementsAndArtifacts(process, ({ element: e }) => {
-        if (e["@_id"] === element?.["@_id"] && e.__$$element === element.__$$element) {
+        if (e["@_id"] === userTask?.["@_id"] && e.__$$element === userTask.__$$element) {
           setBpmn20Drools10MetaData(e, "elementname", e["@_name"] || "");
           if ("ioSpecification" in e) {
             e.ioSpecification ??= {
@@ -239,7 +180,7 @@ export function AssignmentList({
                 targetRef: { __$$text: `${e["@_id"]}_${fieldName}InputX` },
                 assignment: [
                   {
-                    "@_id": `${e["@_id"]}_assignment_${fieldName}`,
+                    "@_id": `${e["@_id"]}_reassignment_${fieldName}`,
                     from: {
                       "@_id": `${e["@_id"]}`,
                       __$$text: valueAsString,
@@ -263,7 +204,7 @@ export function AssignmentList({
 
   function setValue(fieldName: string) {
     return (
-      element?.dataInputAssociation
+      userTask?.dataInputAssociation
         ?.find((association) =>
           association.assignment?.some((a) => a.from.__$$text && association.targetRef.__$$text.includes(fieldName))
         )
@@ -273,39 +214,30 @@ export function AssignmentList({
 
   const [hoveredIndex, setHoveredIndex] = useState<number | undefined>(undefined);
   const { title, associationsPropName, lastColumnLabel, entryTitle } = useMemo(() => {
-    if (section === "input") {
-      return {
-        title: "Inputs",
-        entryTitle: "Input",
-        associationsPropName: "dataInputAssociation",
-        lastColumnLabel: "Source",
-      } as const;
-    } else {
-      return {
-        title: "Outputs",
-        entryTitle: "Output",
-        associationsPropName: "dataOutputAssociation",
-        lastColumnLabel: "Target",
-      } as const;
-    }
-  }, [section]);
+    return {
+      title: "Outputs",
+      entryTitle: "Output",
+      associationsPropName: "dataOutputAssociation",
+      lastColumnLabel: "Target",
+    } as const;
+  }, []);
 
-  const count = element[associationsPropName]?.length ?? 0;
+  const count = userTask[associationsPropName]?.length ?? 0;
 
   const addAtEnd = React.useCallback(() => {
     bpmnEditorStoreApi.setState((s) => {
       const { process } = addOrGetProcessAndDiagramElements({ definitions: s.bpmn.model.definitions });
       visitFlowElementsAndArtifacts(process, ({ element: e }) => {
-        if (e["@_id"] === element["@_id"] && e.__$$element === element.__$$element) {
-          (e as typeof element)[associationsPropName] ??= [];
-          (e as typeof element)[associationsPropName]?.push({
+        if (e["@_id"] === userTask["@_id"] && e.__$$element === userTask.__$$element) {
+          (e as typeof userTask)[associationsPropName] ??= [];
+          (e as typeof userTask)[associationsPropName]?.push({
             "@_id": generateUuid(),
             targetRef: { __$$text: "" },
           });
         }
       });
     });
-  }, [associationsPropName, bpmnEditorStoreApi, element]);
+  }, [associationsPropName, bpmnEditorStoreApi, userTask]);
 
   const addButton = useMemo(
     () => (
@@ -354,11 +286,11 @@ export function AssignmentList({
               </Grid>
             </div>
           </div>
-          {element[associationsPropName]?.map((entry, i) => (
+          {userTask[associationsPropName]?.map((entry, i) => (
             <div key={i} style={{ padding: "0 8px" }}>
               <Grid
                 md={6}
-                className={"kie-bpmn-editor--properties-panel--assignment-entry"}
+                className={"kie-bpmn-editor--properties-panel--reassignment-entry"}
                 onMouseEnter={() => setHoveredIndex(i)}
                 onMouseLeave={() => setHoveredIndex(undefined)}
               >
@@ -402,8 +334,8 @@ export function AssignmentList({
                             definitions: s.bpmn.model.definitions,
                           });
                           visitFlowElementsAndArtifacts(process, ({ element: e }) => {
-                            if (e["@_id"] === element["@_id"] && e.__$$element === element.__$$element) {
-                              (e as typeof element)[associationsPropName]?.splice(i, 1);
+                            if (e["@_id"] === userTask["@_id"] && e.__$$element === userTask.__$$element) {
+                              (e as typeof userTask)[associationsPropName]?.splice(i, 1);
                             }
                           });
                         });
@@ -420,17 +352,17 @@ export function AssignmentList({
       )) || (
         <>
           {titleComponent}
-          <div className={"kie-bpmn-editor--assignments--empty-state"}>
+          <div className={"kie-bpmn-editor--reassignments--empty-state"}>
             <Bullseye>
               <EmptyState>
                 <Title headingLevel="h4">
-                  {isReadOnly ? `No ${entryTitle} assignments` : `No ${entryTitle} assignments yet`}
+                  {isReadOnly ? `No ${entryTitle} reassignments` : `No ${entryTitle} reassignments yet`}
                 </Title>
                 <EmptyStateBody style={{ padding: "0 25%" }}>
                   {`This represents an the empty state pattern in Patternfly 4. Hopefully it's simple enough to use but flexible.`}
                 </EmptyStateBody>
                 <Button variant="primary" onClick={addAtEnd}>
-                  {`Add ${entryTitle} assignment`}
+                  {`Add ${entryTitle} reassignment`}
                 </Button>
               </EmptyState>
             </Bullseye>

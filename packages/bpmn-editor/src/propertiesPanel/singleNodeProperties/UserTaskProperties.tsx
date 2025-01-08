@@ -17,7 +17,11 @@
  * under the License.
  */
 
-import { BPMN20__tDefinitions, BPMN20__tUserTask } from "@kie-tools/bpmn-marshaller/dist/schemas/bpmn-2_0/ts-gen/types";
+import {
+  BPMN20__tDefinitions,
+  BPMN20__tUserTask,
+  WithMetaData,
+} from "@kie-tools/bpmn-marshaller/dist/schemas/bpmn-2_0/ts-gen/types";
 import * as React from "react";
 import { Normalized } from "../../normalization/normalize";
 import { NameDocumentationAndId } from "../nameDocumentationAndId/NameDocumentationAndId";
@@ -36,10 +40,14 @@ import { TextArea } from "@patternfly/react-core/dist/js/components/TextArea/Tex
 import { useBpmnEditorStore, useBpmnEditorStoreApi } from "../../store/StoreContext";
 import { Reassignments } from "../reassignments/Reassignments";
 import { Notifications } from "../notifications/Notifications";
-
+import {
+  parseBpmn20Drools10MetaData,
+  setBpmn20Drools10MetaData,
+} from "@kie-tools/bpmn-marshaller/dist/drools-extension-metaData";
 import { useState } from "react";
 import { SectionHeader } from "@kie-tools/xyflow-react-kie-diagram/dist/propertiesPanel/SectionHeader";
-import ExternalLinkAltIcon from "@patternfly/react-icons/dist/js/icons/external-link-alt-icon";
+import RedoIcon from "@patternfly/react-icons/dist/js/icons/redo-icon";
+import BellIcon from "@patternfly/react-icons/dist/js/icons/bell-icon";
 import { Button, ButtonVariant } from "@patternfly/react-core/dist/js/components/Button";
 import EditIcon from "@patternfly/react-icons/dist/js/icons/edit-icon";
 import { visitFlowElementsAndArtifacts } from "../../mutations/_elementVisitor";
@@ -47,6 +55,11 @@ import { generateUuid } from "@kie-tools/xyflow-react-kie-diagram/dist/uuid/uuid
 import { addOrGetProcessAndDiagramElements } from "../../mutations/addOrGetProcessAndDiagramElements";
 import { UserTaskStuff } from "../nameDocumentationAndId/UserTaskStuff";
 import { Checkbox } from "@patternfly/react-core/dist/js/components/Checkbox/Checkbox";
+import { abort } from "process";
+import {
+  BidirectionalReassignmentsFormSection,
+  ReassignmentsFormSection,
+} from "../reassignments/ReassignmentsFormSection";
 
 export function UserTaskProperties({
   userTask,
@@ -63,6 +76,95 @@ export function UserTaskProperties({
   const closeNotificationsModal = React.useCallback(() => {
     setShowNotificationsModal(false);
   }, []);
+  const priorityInputX = "PriorityInputX";
+  const contentInputX = "ContentInputX";
+  const subjectInputX = "SubjectInputX";
+  const taskNameInputX = "TaskNameInputX";
+  const descriptionInputX = "DescriptionInputX";
+  const skippableInputX = "SkippableInputX";
+
+  const item = "Item";
+
+  const handleChange = (fieldName: string, newValue: string | boolean) => {
+    const valueAsString = String(newValue);
+    bpmnEditorStoreApi.setState((s) => {
+      const { process } = addOrGetProcessAndDiagramElements({
+        definitions: s.bpmn.model.definitions,
+      });
+
+      visitFlowElementsAndArtifacts(process, ({ element: e }) => {
+        if (e["@_id"] === userTask?.["@_id"] && e.__$$element === userTask.__$$element) {
+          setBpmn20Drools10MetaData(e, "elementname", e["@_name"] || "");
+          e.ioSpecification ??= {
+            "@_id": "",
+            inputSet: [],
+            outputSet: [],
+            dataInput: [],
+          };
+
+          e.ioSpecification.inputSet[0] ??= {
+            "@_id": "",
+            dataInputRefs: [],
+          };
+
+          e.ioSpecification.dataInput ??= [];
+
+          let dataInput = e.ioSpecification.dataInput.find((input) => input["@_name"] === fieldName);
+
+          if (!dataInput) {
+            dataInput = {
+              "@_id": `${e["@_id"]}_${fieldName}InputX`,
+              "@_drools:dtype": "Object",
+              "@_itemSubjectRef": `_${e["@_id"]}_${fieldName}InputXItem`,
+              "@_name": fieldName,
+            };
+            e.ioSpecification.dataInput.push(dataInput);
+          }
+
+          e.ioSpecification.inputSet[0].dataInputRefs = e.ioSpecification.dataInput.map((input) => ({
+            __$$text: input["@_id"],
+          }));
+
+          let dataInputAssociation = e.dataInputAssociation?.find(
+            (association) => association.targetRef.__$$text === dataInput["@_id"]
+          );
+
+          if (!dataInputAssociation) {
+            dataInputAssociation = {
+              "@_id": `${e["@_id"]}_dataInputAssociation_${fieldName}`,
+              targetRef: { __$$text: dataInput["@_id"] },
+              assignment: [
+                {
+                  "@_id": `${e["@_id"]}_assignment_${fieldName}`,
+                  from: {
+                    "@_id": `${e["@_id"]}`,
+                    __$$text: valueAsString,
+                  },
+                  to: { "@_id": e["@_id"], __$$text: `${e["@_id"]}_to_${fieldName}InputXItem` },
+                },
+              ],
+            };
+            e.dataInputAssociation ??= [];
+            e.dataInputAssociation.push(dataInputAssociation);
+          } else {
+            if (dataInputAssociation.assignment?.[0]) {
+              dataInputAssociation.assignment[0].from.__$$text = valueAsString;
+            }
+          }
+        }
+      });
+    });
+  };
+
+  function setValue(fieldName: string) {
+    return (
+      userTask?.dataInputAssociation
+        ?.find((association) =>
+          association.assignment?.some((a) => a.from.__$$text && association.targetRef.__$$text.includes(fieldName))
+        )
+        ?.assignment?.find((a) => a.from.__$$text)?.from.__$$text || ""
+    );
+  }
 
   return (
     <>
@@ -79,19 +181,8 @@ export function UserTaskProperties({
             aria-label={"Task Name"}
             type={"text"}
             isDisabled={settings.isReadOnly}
-            value={userTask.taskName?.__$$text || ""}
-            onChange={(newTaskName) =>
-              bpmnEditorStoreApi.setState((s) => {
-                const { process } = addOrGetProcessAndDiagramElements({
-                  definitions: s.bpmn.model.definitions,
-                });
-                visitFlowElementsAndArtifacts(process, ({ element: e }) => {
-                  if (e["@_id"] === userTask["@_id"] && e.__$$element === userTask.__$$element) {
-                    e.taskName = { __$$text: newTaskName };
-                  }
-                });
-              })
-            }
+            value={setValue(taskNameInputX)}
+            onChange={(newTaskName) => handleChange("TaskName", newTaskName)}
             placeholder={"Enter task name..."}
             style={{ resize: "vertical", minHeight: "40px" }}
             rows={1}
@@ -102,19 +193,8 @@ export function UserTaskProperties({
             aria-label={"Subject"}
             type={"text"}
             isDisabled={settings.isReadOnly}
-            value={userTask.dataInputAssociation?.[0].assignment?.[0].from?.__$$text ?? ""}
-            onChange={(newsubject) =>
-              bpmnEditorStoreApi.setState((s) => {
-                const { process } = addOrGetProcessAndDiagramElements({
-                  definitions: s.bpmn.model.definitions,
-                });
-                visitFlowElementsAndArtifacts(process, ({ element: e }) => {
-                  if (e["@_id"] === userTask["@_id"] && e.__$$element === userTask.__$$element) {
-                    //  newsubject = e.dataInputAssociation?.[0].targetRef?.[0].from?.__$$text ?? '';
-                  }
-                });
-              })
-            }
+            value={setValue(subjectInputX)}
+            onChange={(newSubject) => handleChange("Subject", newSubject)}
             placeholder={"Enter subject..."}
             style={{ resize: "vertical", minHeight: "40px" }}
             rows={1}
@@ -125,50 +205,21 @@ export function UserTaskProperties({
             aria-label={"Content"}
             type={"text"}
             isDisabled={settings.isReadOnly}
-            value={userTask.dataInputAssociation?.[0].assignment?.[0].from.__$$text}
-            onChange={(newContent) =>
-              bpmnEditorStoreApi.setState((s) => {
-                const { process } = addOrGetProcessAndDiagramElements({
-                  definitions: s.bpmn.model.definitions,
-                });
-                visitFlowElementsAndArtifacts(process, ({ element: e }) => {
-                  if (
-                    e["@_id"] === userTask["@_id"] &&
-                    e.__$$element === userTask.__$$element &&
-                    e.dataInputAssociation !== undefined
-                  ) {
-                    if (e.dataInputAssociation[0].assignment?.[0] !== undefined) {
-                      e.dataInputAssociation[0].targetRef = { __$$text: `${e["@_id"]}_ContentInputX` };
-                      e.dataInputAssociation[0].assignment[0].from.__$$text = `![CDATA[${newContent}]]`;
-                      e.dataInputAssociation[0].assignment[0].to.__$$text = `![CDATA[${e["@_id"]}_ContentInputX]]`;
-                    }
-                  }
-                });
-              })
-            }
-            placeholder={"Enter task name..."}
+            value={setValue(contentInputX)}
+            onChange={(newContent) => handleChange("Content", newContent)}
+            placeholder={"Enter content..."}
             style={{ resize: "vertical", minHeight: "40px" }}
             rows={3}
           />
         </FormGroup>
+
         <FormGroup label="Priority">
           <TextArea
-            aria-label={"Task Name"}
+            aria-label={"Priority"}
             type={"text"}
             isDisabled={settings.isReadOnly}
-            value={userTask.priority?.__$$text || ""}
-            onChange={(newpriority) =>
-              bpmnEditorStoreApi.setState((s) => {
-                const { process } = addOrGetProcessAndDiagramElements({
-                  definitions: s.bpmn.model.definitions,
-                });
-                visitFlowElementsAndArtifacts(process, ({ element: e }) => {
-                  if (e["@_id"] === userTask["@_id"] && e.__$$element === userTask.__$$element) {
-                    e.priority = { __$$text: newpriority };
-                  }
-                });
-              })
-            }
+            value={setValue(priorityInputX)}
+            onChange={(newPriority) => handleChange("Priority", newPriority)}
             placeholder={"Enter priority..."}
             style={{ resize: "vertical", minHeight: "40px" }}
             rows={1}
@@ -176,22 +227,11 @@ export function UserTaskProperties({
         </FormGroup>
         <FormGroup label="Description">
           <TextArea
-            aria-label={"Task Name"}
+            aria-label={"Description"}
             type={"text"}
             isDisabled={settings.isReadOnly}
-            value={userTask["@_description"]}
-            onChange={(newDescription) =>
-              bpmnEditorStoreApi.setState((s) => {
-                const { process } = addOrGetProcessAndDiagramElements({
-                  definitions: s.bpmn.model.definitions,
-                });
-                visitFlowElementsAndArtifacts(process, ({ element: e }) => {
-                  if (e["@_id"] === userTask["@_id"] && e.__$$element === userTask.__$$element) {
-                    e["@_description"] = newDescription;
-                  }
-                });
-              })
-            }
+            value={setValue(descriptionInputX)}
+            onChange={(newDescription) => handleChange("Description", newDescription)}
             placeholder={"Enter description..."}
             style={{ resize: "vertical", minHeight: "40px" }}
             rows={3}
@@ -203,19 +243,8 @@ export function UserTaskProperties({
             aria-label={"Skippable"}
             id="kie-bpmn-editor--properties-panel--skippable-checkbox"
             isDisabled={settings.isReadOnly}
-            isChecked={userTask["@_skippable"]}
-            onChange={(checked) =>
-              bpmnEditorStoreApi.setState((s) => {
-                const { process } = addOrGetProcessAndDiagramElements({
-                  definitions: s.bpmn.model.definitions,
-                });
-                visitFlowElementsAndArtifacts(process, ({ element: e }) => {
-                  if (e["@_id"] === userTask["@_id"] && e.__$$element === userTask.__$$element) {
-                    e["@_skippable"] = checked;
-                  }
-                });
-              })
-            }
+            isChecked={setValue(skippableInputX) === "true"}
+            onChange={(newSkippable) => handleChange("Skippable", newSkippable)}
           />
         </FormGroup>
 
@@ -225,52 +254,6 @@ export function UserTaskProperties({
         <FormGroup label={"Groups"}></FormGroup>
         <FormGroup label={"Created by"}></FormGroup>
 
-        <Divider inset={{ default: "insetXs" }} />
-
-        <Reassignments isOpen={showReassignmentsModal} onClose={closeReassignmentsModal} />
-        <FormSection
-          title={
-            <SectionHeader
-              expands={"modal"}
-              icon={<ExternalLinkAltIcon width={16} height={36} style={{ marginLeft: "12px" }} />}
-              title={"Reassignments"}
-              toogleSectionExpanded={() => setShowReassignmentsModal(true)}
-              action={
-                <Button
-                  title={"Manage"}
-                  variant={ButtonVariant.plain}
-                  isDisabled={settings.isReadOnly}
-                  onClick={() => setShowReassignmentsModal(true)}
-                  style={{ paddingBottom: 0, paddingTop: 0 }}
-                >
-                  <EditIcon />
-                </Button>
-              }
-            />
-          }
-        />
-        <Notifications isOpen={showNotificationsModal} onClose={closeNotificationsModal} />
-        <FormSection
-          title={
-            <SectionHeader
-              expands={"modal"}
-              icon={<ExternalLinkAltIcon width={16} height={36} style={{ marginLeft: "12px" }} />}
-              title={"Notifications"}
-              toogleSectionExpanded={() => setShowNotificationsModal(true)}
-              action={
-                <Button
-                  title={"Manage"}
-                  variant={ButtonVariant.plain}
-                  isDisabled={settings.isReadOnly}
-                  onClick={() => setShowNotificationsModal(true)}
-                  style={{ paddingBottom: 0, paddingTop: 0 }}
-                >
-                  <EditIcon />
-                </Button>
-              }
-            />
-          }
-        />
         <Divider inset={{ default: "insetXs" }} />
 
         <SlaDueDateInput element={userTask} />
@@ -286,6 +269,52 @@ export function UserTaskProperties({
       </PropertiesPanelHeaderFormSection>
 
       <BidirectionalAssignmentsFormSection element={userTask} />
+      {/* <ReassignmentsFormSection element={userTask} /> */}
+      <BidirectionalReassignmentsFormSection element={userTask} />
+      <Reassignments isOpen={showReassignmentsModal} onClose={closeReassignmentsModal} />
+      <FormSection
+        title={
+          <SectionHeader
+            expands={"modal"}
+            icon={<RedoIcon width={16} height={36} style={{ marginLeft: "12px" }} />}
+            title={"Reassignments"}
+            toogleSectionExpanded={() => setShowReassignmentsModal(true)}
+            action={
+              <Button
+                title={"Manage"}
+                variant={ButtonVariant.plain}
+                isDisabled={settings.isReadOnly}
+                onClick={() => setShowReassignmentsModal(true)}
+                style={{ paddingBottom: 0, paddingTop: 0 }}
+              >
+                <EditIcon />
+              </Button>
+            }
+          />
+        }
+      />
+      <Notifications isOpen={showNotificationsModal} onClose={closeNotificationsModal} />
+      <FormSection
+        title={
+          <SectionHeader
+            expands={"modal"}
+            icon={<BellIcon width={16} height={36} style={{ marginLeft: "12px" }} />}
+            title={"Notifications"}
+            toogleSectionExpanded={() => setShowNotificationsModal(true)}
+            action={
+              <Button
+                title={"Manage"}
+                variant={ButtonVariant.plain}
+                isDisabled={settings.isReadOnly}
+                onClick={() => setShowNotificationsModal(true)}
+                style={{ paddingBottom: 0, paddingTop: 0 }}
+              >
+                <EditIcon />
+              </Button>
+            }
+          />
+        }
+      />
 
       <OnEntryAndExitScriptsFormSection element={userTask} />
     </>
