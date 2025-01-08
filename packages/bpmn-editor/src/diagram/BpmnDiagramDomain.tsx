@@ -734,7 +734,6 @@ export type GatewayVariant = ElementFilter<
 
 export type EventVariant = ElementFilter<
   Unpacked<NonNullable<BPMN20__tIntermediateCatchEvent["eventDefinition"]>>,
-  | "cancelEventDefinition"
   | "compensateEventDefinition"
   | "conditionalEventDefinition"
   | "errorEventDefinition"

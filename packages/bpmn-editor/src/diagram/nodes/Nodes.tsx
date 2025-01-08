@@ -147,11 +147,10 @@ export const StartEventNode = React.memo(
     const disabledMorphingActionIds = useMemo<Set<Unpacked<typeof morphingActions>["id"]>>(
       () =>
         parentXyFlowNode?.type === NODE_TYPES.subProcess
-          ? new Set(["none", "cancelEventDefinition", "linkEventDefinition", "terminateEventDefinition"])
+          ? new Set(["none", "linkEventDefinition", "terminateEventDefinition"])
           : new Set([
               "errorEventDefinition",
               "escalationEventDefinition",
-              "cancelEventDefinition",
               "compensateEventDefinition",
               "linkEventDefinition",
               "terminateEventDefinition",
@@ -296,7 +295,6 @@ export const IntermediateCatchEventNode = React.memo(
               "errorEventDefinition",
               "escalationEventDefinition",
               "compensateEventDefinition",
-              "cancelEventDefinition",
               "terminateEventDefinition",
             ])
           : intermediateCatchEvent.__$$element === "boundaryEvent"
@@ -436,7 +434,6 @@ export const IntermediateThrowEventNode = React.memo(
         new Set([
           "timerEventDefinition",
           "errorEventDefinition",
-          "cancelEventDefinition",
           "conditionalEventDefinition",
           "terminateEventDefinition",
         ]),
