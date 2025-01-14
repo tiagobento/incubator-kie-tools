@@ -67,35 +67,35 @@ export function useGatewayNodeMorphingActions(gateway: Gateway) {
   const morphingActions = useMemo(() => {
     return [
       {
-        icon: <GatewayIcon variant={"parallelGateway"} />,
+        icon: <GatewayIcon variant={"parallelGateway"} isIcon={true} />,
         key: "1",
         title: "Parallel",
         id: "parallelGateway",
         action: () => morphGateway("parallelGateway"),
       } as const,
       {
-        icon: <GatewayIcon variant={"exclusiveGateway"} />,
+        icon: <GatewayIcon variant={"exclusiveGateway"} isIcon={true} />,
         key: "2",
         title: "Exclusive",
         id: "exclusiveGateway",
         action: () => morphGateway("exclusiveGateway"),
       } as const,
       {
-        icon: <GatewayIcon variant={"inclusiveGateway"} />,
+        icon: <GatewayIcon variant={"inclusiveGateway"} isIcon={true} />,
         key: "3",
         title: "Inclusive",
         id: "inclusiveGateway",
         action: () => morphGateway("inclusiveGateway"),
       } as const,
       {
-        icon: <GatewayIcon variant={"eventBasedGateway"} />,
+        icon: <GatewayIcon variant={"eventBasedGateway"} isIcon={true} />,
         key: "4",
         title: "Event",
         id: "eventBasedGateway",
         action: () => morphGateway("eventBasedGateway"),
       } as const,
       {
-        icon: <GatewayIcon variant={"complexGateway"} />,
+        icon: <GatewayIcon variant={"complexGateway"} isIcon={true} />,
         key: "5",
         title: "Complex",
         id: "complexGateway",

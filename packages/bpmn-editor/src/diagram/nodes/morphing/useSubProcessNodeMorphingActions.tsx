@@ -28,12 +28,10 @@ import { Normalized } from "../../../normalization/normalize";
 import { useBpmnEditorStoreApi } from "../../../store/StoreContext";
 import { SubProcessIcon } from "../NodeIcons";
 import { generateUuid } from "@kie-tools/xyflow-react-kie-diagram/dist/uuid/uuid";
+import { AdHocSubProcessIconSvg, MultiInstanceParallelIconSvg } from "../NodeSvgs";
 
 export type SubProcess = Normalized<
-  ElementFilter<
-    Unpacked<NonNullable<BPMN20__tProcess["flowElement"]>>,
-    "adHocSubProcess" | "subProcess" | "transaction"
-  >
+  ElementFilter<Unpacked<NonNullable<BPMN20__tProcess["flowElement"]>>, "adHocSubProcess" | "subProcess">
 >;
 
 export function useSubProcessNodeMorphingActions(subProcess: SubProcess) {
@@ -44,7 +42,6 @@ export function useSubProcessNodeMorphingActions(subProcess: SubProcess) {
       // 1 - Sub process
       // 2 - Event sub process
       // 3 - Ad-hoc sub-process
-      // 4 - Transaction
       bpmnEditorStoreApi.setState((s) => {
         const { process } = addOrGetProcessAndDiagramElements({
           definitions: s.bpmn.model.definitions,
@@ -100,25 +97,18 @@ export function useSubProcessNodeMorphingActions(subProcess: SubProcess) {
         action: () => morphSubProcess("eventSubProcess"),
       } as const,
       {
-        icon: <>|||</>,
+        icon: <MultiInstanceParallelIconSvg stroke={"black"} strokeWidth={2} size={28} isIcon={true} />,
         key: "3",
         title: "Multi-instance",
         id: "multiInstanceSubProcess",
         action: () => morphSubProcess("multiInstanceSubProcess"),
       } as const,
       {
-        icon: <>~</>,
+        icon: <AdHocSubProcessIconSvg stroke={"black"} size={20} isIcon={true} />,
         key: "4",
         title: "Ad-hoc",
         id: "adHocSubProcess",
         action: () => morphSubProcess("adHocSubProcess"),
-      } as const,
-      {
-        icon: <SubProcessIcon variant={"transaction"} />,
-        key: "5",
-        title: "Transaction",
-        id: "transaction",
-        action: () => morphSubProcess("transaction"),
       } as const,
     ];
   }, [morphSubProcess]);

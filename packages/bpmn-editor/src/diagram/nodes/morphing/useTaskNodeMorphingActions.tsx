@@ -40,12 +40,12 @@ export function useTaskNodeMorphingActions(task: Task) {
 
   const morphTask = useCallback(
     (taskElement: Task["__$$element"]) => {
-      // 1 - User
-      // 2 - Business Rule
-      // 3 - Service
-      // 4 - Script
-      // 5 - Call activity
-      // 6 - Task
+      // 1 - Task
+      // 2 - User
+      // 3 - Business Rule
+      // 4 - Service
+      // 5 - Script
+      // 6 - Call activity
       bpmnEditorStoreApi.setState((s) => {
         const { process } = addOrGetProcessAndDiagramElements({
           definitions: s.bpmn.model.definitions,
@@ -68,46 +68,46 @@ export function useTaskNodeMorphingActions(task: Task) {
   const morphingActions = useMemo(() => {
     return [
       {
-        icon: <>U</>,
+        icon: <TaskIcon />,
         key: "1",
+        title: "Task",
+        id: "task",
+        action: () => morphTask("task"),
+      } as const,
+      {
+        icon: <TaskIcon variant={"userTask"} isIcon={true} />,
+        key: "2",
         title: "User task",
         id: "userTask",
         action: () => morphTask("userTask"),
       } as const,
       {
-        icon: <>B</>,
-        key: "2",
+        icon: <TaskIcon variant={"businessRuleTask"} isIcon={true} />,
+        key: "3",
         title: "Business Rule task",
         id: "businessRuleTask",
         action: () => morphTask("businessRuleTask"),
       } as const,
       {
-        icon: <>S</>,
-        key: "3",
+        icon: <TaskIcon variant={"serviceTask"} isIcon={true} />,
+        key: "4",
         title: "Service task",
         id: "serviceTask",
         action: () => morphTask("serviceTask"),
       } as const,
       {
-        icon: <>X</>,
-        key: "4",
+        icon: <TaskIcon variant={"scriptTask"} isIcon={true} />,
+        key: "5",
         title: "Script task",
         id: "scriptTask",
         action: () => morphTask("scriptTask"),
       } as const,
       {
         icon: <CallActivityIcon />,
-        key: "5",
+        key: "6",
         title: "Call activity",
         id: "callActivity",
         action: () => morphTask("callActivity"),
-      } as const,
-      {
-        icon: <TaskIcon />,
-        key: "5",
-        title: "Task",
-        id: "task",
-        action: () => morphTask("task"),
       } as const,
     ];
   }, [morphTask]);

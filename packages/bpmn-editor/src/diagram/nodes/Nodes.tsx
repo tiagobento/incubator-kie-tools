@@ -147,11 +147,10 @@ export const StartEventNode = React.memo(
     const disabledMorphingActionIds = useMemo<Set<Unpacked<typeof morphingActions>["id"]>>(
       () =>
         parentXyFlowNode?.type === NODE_TYPES.subProcess
-          ? new Set(["none", "cancelEventDefinition", "linkEventDefinition", "terminateEventDefinition"])
+          ? new Set(["none", "linkEventDefinition", "terminateEventDefinition"])
           : new Set([
               "errorEventDefinition",
               "escalationEventDefinition",
-              "cancelEventDefinition",
               "compensateEventDefinition",
               "linkEventDefinition",
               "terminateEventDefinition",
@@ -296,7 +295,6 @@ export const IntermediateCatchEventNode = React.memo(
               "errorEventDefinition",
               "escalationEventDefinition",
               "compensateEventDefinition",
-              "cancelEventDefinition",
               "terminateEventDefinition",
             ])
           : intermediateCatchEvent.__$$element === "boundaryEvent"
@@ -436,7 +434,6 @@ export const IntermediateThrowEventNode = React.memo(
         new Set([
           "timerEventDefinition",
           "errorEventDefinition",
-          "cancelEventDefinition",
           "conditionalEventDefinition",
           "terminateEventDefinition",
         ]),
@@ -726,6 +723,7 @@ export const TaskNode = React.memo(
             y={0}
             strokeWidth={task.__$$element === "callActivity" ? 5 : undefined}
             markers={icons}
+            variant={task.__$$element}
           />
         </svg>
         <PositionalNodeHandles isTargeted={isTargeted && isValidConnectionTarget} nodeId={id} />
@@ -809,9 +807,7 @@ export const SubProcessNode = React.memo(
     type,
     id,
   }: RF.NodeProps<
-    BpmnDiagramNodeData<
-      Normalized<BPMN20__tSubProcess> & { __$$element: "transaction" | "adHocSubProcess" | "subProcess" }
-    >
+    BpmnDiagramNodeData<Normalized<BPMN20__tSubProcess> & { __$$element: "adHocSubProcess" | "subProcess" }>
   >) => {
     const renderCount = useRef<number>(0);
     renderCount.current++;
@@ -873,13 +869,11 @@ export const SubProcessNode = React.memo(
             y={0}
             icons={icons}
             variant={
-              subProcess.__$$element === "transaction"
-                ? "transaction"
-                : subProcess["@_triggeredByEvent"]
-                  ? "event"
-                  : subProcess.loopCharacteristics?.__$$element === "multiInstanceLoopCharacteristics"
-                    ? "multi-instance"
-                    : "other"
+              subProcess["@_triggeredByEvent"]
+                ? "event"
+                : subProcess.loopCharacteristics?.__$$element === "multiInstanceLoopCharacteristics"
+                  ? "multi-instance"
+                  : "other"
             }
           />
         </svg>
@@ -1606,7 +1600,7 @@ export const UnknownNode = React.memo(
 
 export function useActivityIcons(
   activity:
-    | (Normalized<BPMN20__tSubProcess> & { __$$element: "transaction" | "adHocSubProcess" | "subProcess" })
+    | (Normalized<BPMN20__tSubProcess> & { __$$element: "adHocSubProcess" | "subProcess" })
     | (Normalized<BPMN20__tTask> & {
         __$$element: "task" | "serviceTask" | "userTask" | "businessRuleTask" | "scriptTask" | "callActivity";
       })

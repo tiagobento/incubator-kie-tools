@@ -193,13 +193,6 @@
     </xsd:complexContent>
   </xsd:complexType>
 
-  <xsd:element name="cancelEventDefinition" type="tCancelEventDefinition" substitutionGroup="eventDefinition" />
-  <xsd:complexType name="tCancelEventDefinition">
-    <xsd:complexContent>
-      <xsd:extension base="tEventDefinition" />
-    </xsd:complexContent>
-  </xsd:complexType>
-
   <xsd:element name="catchEvent" type="tCatchEvent" />
   <xsd:complexType name="tCatchEvent" abstract="true">
     <xsd:complexContent>

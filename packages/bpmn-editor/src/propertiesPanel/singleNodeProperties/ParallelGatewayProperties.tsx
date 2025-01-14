@@ -33,7 +33,7 @@ export function ParallelGatewayProperties({
   return (
     <PropertiesPanelHeaderFormSection
       title={parallelGateway["@_name"] || "Parallel gateway"}
-      icon={<GatewayIcon variant={parallelGateway.__$$element} />}
+      icon={<GatewayIcon variant={parallelGateway.__$$element} isIcon={true} />}
     >
       <NameDocumentationAndId element={parallelGateway} />
     </PropertiesPanelHeaderFormSection>

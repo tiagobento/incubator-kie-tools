@@ -42,7 +42,7 @@ export function UserTaskProperties({
     <>
       <PropertiesPanelHeaderFormSection
         title={userTask["@_name"] || "User task"}
-        icon={<TaskIcon variant={userTask.__$$element} />}
+        icon={<TaskIcon variant={userTask.__$$element} isIcon={true} />}
       >
         <NameDocumentationAndId element={userTask} />
 

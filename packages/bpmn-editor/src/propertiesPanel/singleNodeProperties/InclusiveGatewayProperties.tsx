@@ -34,7 +34,7 @@ export function InclusiveGatewayProperties({
   return (
     <PropertiesPanelHeaderFormSection
       title={inclusiveGateway["@_name"] || "Inclusive gateway"}
-      icon={<GatewayIcon variant={inclusiveGateway.__$$element} />}
+      icon={<GatewayIcon variant={inclusiveGateway.__$$element} isIcon={true} />}
     >
       <NameDocumentationAndId element={inclusiveGateway} />
 

@@ -50,17 +50,19 @@ export function NodeIcon({ nodeType }: { nodeType: BpmnNodeType }) {
   });
 }
 
-export function EventDefitnitionIcon({
+export function EventDefinitionIcon({
   variant,
   filled,
+  fill,
   stroke,
 }: {
   variant?: EventVariant;
   filled: boolean;
+  fill?: string;
   stroke: string;
 }) {
   const cx = nodeSvgProps.x + nodeSvgProps.width / 2;
-  const cy = nodeSvgProps.y + nodeSvgProps.width / 2;
+  const cy = nodeSvgProps.y + nodeSvgProps.height / 2;
 
   const r = nodeSvgProps.width / 2;
 
@@ -69,13 +71,15 @@ export function EventDefitnitionIcon({
       <EventVariantSymbolSvg
         variant={variant ?? "none"}
         strokeWidth={16}
+        isIcon={true}
         filled={filled}
         stroke={stroke}
+        fill={fill}
         x={nodeSvgProps.x}
         y={nodeSvgProps.x}
         cx={cx}
         cy={cy}
-        innerCircleRadius={r - 5}
+        innerCircleRadius={r - 10}
         outerCircleRadius={r}
       />
     </RoundSvg>
@@ -114,10 +118,10 @@ export function EndEventIcon({ variant }: { variant?: EventVariant }) {
   );
 }
 
-export function TaskIcon({ variant }: { variant?: TaskVariant }) {
+export function TaskIcon({ variant, isIcon }: { variant?: TaskVariant; isIcon?: boolean }) {
   return (
     <RoundSvg>
-      <TaskNodeSvg {...nodeSvgProps} variant={variant ?? "none"} />
+      <TaskNodeSvg {...nodeSvgProps} variant={variant ?? "none"} isIcon={isIcon ?? false} />
     </RoundSvg>
   );
 }
@@ -130,10 +134,10 @@ export function CallActivityIcon() {
   );
 }
 
-export function GatewayIcon({ variant }: { variant?: GatewayVariant }) {
+export function GatewayIcon({ variant, isIcon }: { variant?: GatewayVariant; isIcon?: boolean }) {
   return (
     <RoundSvg>
-      <GatewayNodeSvg {...nodeSvgProps} width={200} height={200} variant={variant ?? "none"} />
+      <GatewayNodeSvg {...nodeSvgProps} width={200} height={200} variant={variant ?? "none"} isIcon={isIcon ?? false} />
     </RoundSvg>
   );
 }

@@ -23,20 +23,29 @@ import { Normalized } from "../../normalization/normalize";
 import { NameDocumentationAndId } from "../nameDocumentationAndId/NameDocumentationAndId";
 import { OutputOnlyAssociationFormSection } from "../assignments/AssignmentsFormSection";
 import { EventDefinitionProperties } from "../eventDefinition/EventDefinitionProperties";
-import { IntermediateCatchEventIcon } from "../../diagram/nodes/NodeIcons";
+import { EventDefinitionIcon, IntermediateCatchEventIcon } from "../../diagram/nodes/NodeIcons";
 import { PropertiesPanelHeaderFormSection } from "./_PropertiesPanelHeaderFormSection";
 import { Divider } from "@patternfly/react-core/dist/js/components/Divider";
+import { NODE_COLORS } from "../../diagram/nodes/NodeSvgs";
 
 export function IntermediateCatchEventProperties({
   intermediateCatchEvent,
 }: {
   intermediateCatchEvent: Normalized<BPMN20__tIntermediateCatchEvent> & { __$$element: "intermediateCatchEvent" };
 }) {
+  const foregroundColor = NODE_COLORS.intermediateCatchEvent.foreground;
+
   return (
     <>
       <PropertiesPanelHeaderFormSection
         title={intermediateCatchEvent["@_name"] || "Intermediate catch event"}
-        icon={<IntermediateCatchEventIcon variant={intermediateCatchEvent.eventDefinition?.[0]?.__$$element} />}
+        icon={
+          <EventDefinitionIcon
+            variant={intermediateCatchEvent.eventDefinition?.[0]?.__$$element}
+            filled={false}
+            stroke={foregroundColor}
+          />
+        }
       >
         <NameDocumentationAndId element={intermediateCatchEvent} />
 

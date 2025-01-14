@@ -115,7 +115,6 @@ export function EventDefinitionProperties({ event }: { event: Event }) {
           )}
 
         {/* unsupported */}
-        {eventDefinition?.__$$element === "cancelEventDefinition" && <>{/* nothing */}</>}
         {(eventDefinition?.__$$element as any) === "multiple" && <>{/* nothing */}</>}
         {(eventDefinition?.__$$element as any) === "parallel multiple" && <>{/* nothing */}</>}
       </>
