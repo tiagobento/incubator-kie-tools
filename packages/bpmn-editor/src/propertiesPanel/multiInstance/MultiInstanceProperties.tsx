@@ -123,7 +123,7 @@ export function MultiInstanceProperties({ element }: { element: WithMultiInstanc
           placeholder={"Enter a Data input..."}
           value={
             element?.loopCharacteristics?.__$$element === "multiInstanceLoopCharacteristics"
-              ? element?.loopCharacteristics["inputDataItem"]?.["@_id"]
+              ? element?.loopCharacteristics["inputDataItem"]?.["@_id"] ?? ""
               : undefined
           }
           onChange={(newDataInput) =>
@@ -203,7 +203,7 @@ export function MultiInstanceProperties({ element }: { element: WithMultiInstanc
           placeholder={"Enter a Data Output..."}
           value={
             element?.loopCharacteristics?.__$$element === "multiInstanceLoopCharacteristics"
-              ? element?.loopCharacteristics["outputDataItem"]?.["@_id"]
+              ? element?.loopCharacteristics["outputDataItem"]?.["@_id"] ?? ""
               : undefined
           }
           onChange={(newDataOutput) =>

@@ -27,10 +27,16 @@ import { CodeIcon } from "@patternfly/react-icons/dist/js/icons/code-icon";
 import { Label } from "@patternfly/react-core/dist/js/components/Label";
 import { CodeInput } from "../codeInput/CodeInput";
 import "./OnEntryAndExitScriptsFormSection.css";
-import { BPMN20__tProcess } from "@kie-tools/bpmn-marshaller/dist/schemas/bpmn-2_0/ts-gen/types";
+import {
+  BPMN20__tProcess,
+  BPMN20__tProcess__extensionElements,
+  WithEntryAndExitScripts,
+} from "@kie-tools/bpmn-marshaller/dist/schemas/bpmn-2_0/ts-gen/types";
 import { ElementFilter } from "@kie-tools/xml-parser-ts/dist/elementFilter";
 import { Unpacked } from "@kie-tools/xyflow-react-kie-diagram/dist/tsExt/tsExt";
 import { Normalized } from "../../normalization/normalize";
+import { addOrGetProcessAndDiagramElements } from "../../mutations/addOrGetProcessAndDiagramElements";
+import { Script } from "vm";
 
 export type WithOnEntryAndExitScripts = Normalized<
   ElementFilter<
@@ -72,18 +78,59 @@ export function OnEntryAndExitScriptsFormSection({ element }: { element: WithOnE
               <CodeInput
                 label={"onEntry"}
                 languages={["Java"]}
-                value={""}
-                onChange={(newCode) => {
-                  // TODO: Tiago
+                value={element.extensionElements?.["drools:onEntry-script"]?.["drools:script"].__$$text}
+                onChange={(newValue) => {
+                  bpmnEditorStoreApi.setState((s) => {
+                    const { process } = addOrGetProcessAndDiagramElements({ definitions: s.bpmn.model.definitions });
+
+                    process.extensionElements ??= {};
+
+                    process.extensionElements["drools:onEntry-script"] ??= {
+                      "@_scriptFormat": "",
+                      "drools:script": {
+                        __$$text: "",
+                      },
+                    };
+
+                    process.extensionElements["drools:onEntry-script"]["@_scriptFormat"] = "";
+                    process.extensionElements["drools:onEntry-script"]["drools:script"].__$$text = newValue;
+                  });
                 }}
               />
               <br />
               <CodeInput
                 label={"onExit"}
                 languages={["Java"]}
-                value={""}
-                onChange={(newCode) => {
-                  // TODO: Tiago
+                value={
+                  element?.loopCharacteristics?.__$$element === "multiInstanceLoopCharacteristics"
+                    ? element?.loopCharacteristics["inputDataItem"]?.["@_id"]
+                    : undefined
+                }
+                value={element.extensionElements?.["drools:onExit-script"]?.["drools:script"]?.__$$text || ""}
+                onChange={(newValue) => {
+                  bpmnEditorStoreApi.setState((s) => {
+                    const { process } = addOrGetProcessAndDiagramElements({ definitions: s.bpmn.model.definitions });
+
+                    console.log("Before Update:", JSON.stringify(process.extensionElements, null, 2)); // Debug log
+
+                    process.extensionElements ??= {};
+                    process.extensionElements["drools:onExit-script"] ??= {
+                      "@_scriptFormat": "",
+                      "drools:script": {
+                        __$$text: "",
+                      },
+                    };
+
+                    if (!process.extensionElements["drools:onExit-script"]["drools:script"]) {
+                      process.extensionElements["drools:onExit-script"]["drools:script"] = { __$$text: "" };
+                    }
+
+                    console.log("After Ensuring Structure:", JSON.stringify(process.extensionElements, null, 2)); // Debug log
+
+                    process.extensionElements["drools:onExit-script"]["drools:script"].__$$text = newValue;
+
+                    console.log("After Update:", JSON.stringify(process.extensionElements, null, 2)); // Debug log
+                  });
                 }}
               />
             </FormSection>

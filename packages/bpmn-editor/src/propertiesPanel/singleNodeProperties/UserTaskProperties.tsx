@@ -19,6 +19,8 @@
 
 import {
   BPMN20__tDefinitions,
+  BPMN20__tFormalExpression,
+  BPMN20__tPotentialOwner,
   BPMN20__tUserTask,
   WithMetaData,
 } from "@kie-tools/bpmn-marshaller/dist/schemas/bpmn-2_0/ts-gen/types";
@@ -78,10 +80,12 @@ export function UserTaskProperties({
   }, []);
   const priorityInputX = "PriorityInputX";
   const contentInputX = "ContentInputX";
-  const subjectInputX = "SubjectInputX";
+  const subjectInputX = "CommentInputX";
   const taskNameInputX = "TaskNameInputX";
   const descriptionInputX = "DescriptionInputX";
   const skippableInputX = "SkippableInputX";
+  const createdByInputX = "CreatedByInputX";
+  const groupIdInputX = "GroupIdInputX";
 
   const item = "Item";
 
@@ -176,7 +180,7 @@ export function UserTaskProperties({
 
         <Divider inset={{ default: "insetXs" }} />
 
-        <FormGroup label="Task">
+        <FormGroup label="Task Name">
           <TextArea
             aria-label={"Task Name"}
             type={"text"}
@@ -194,7 +198,7 @@ export function UserTaskProperties({
             type={"text"}
             isDisabled={settings.isReadOnly}
             value={setValue(subjectInputX)}
-            onChange={(newSubject) => handleChange("Subject", newSubject)}
+            onChange={(newSubject) => handleChange("Comment", newSubject)}
             placeholder={"Enter subject..."}
             style={{ resize: "vertical", minHeight: "40px" }}
             rows={1}
@@ -213,9 +217,9 @@ export function UserTaskProperties({
           />
         </FormGroup>
 
-        <FormGroup label="Priority">
+        <FormGroup label="Task Priority">
           <TextArea
-            aria-label={"Priority"}
+            aria-label={"Task Priority"}
             type={"text"}
             isDisabled={settings.isReadOnly}
             value={setValue(priorityInputX)}
@@ -243,16 +247,80 @@ export function UserTaskProperties({
             aria-label={"Skippable"}
             id="kie-bpmn-editor--properties-panel--skippable-checkbox"
             isDisabled={settings.isReadOnly}
-            isChecked={setValue(skippableInputX) === "true"}
+            isChecked={setValue(skippableInputX) === "true" ? true : false}
             onChange={(newSkippable) => handleChange("Skippable", newSkippable)}
           />
         </FormGroup>
 
         <Divider inset={{ default: "insetXs" }} />
 
-        <FormGroup label={"Actors"}></FormGroup>
-        <FormGroup label={"Groups"}></FormGroup>
-        <FormGroup label={"Created by"}></FormGroup>
+        <FormGroup label={"Actors"}>
+          <TextArea
+            aria-label={"Potential Owner"}
+            type={"text"}
+            isDisabled={settings.isReadOnly}
+            value={
+              userTask?.resourceRole?.find((role) => role.__$$element === "potentialOwner")
+                ?.resourceAssignmentExpression?.expression?.["__$$element"] === "formalExpression"
+                ? userTask.resourceRole.find((role) => role.__$$element === "potentialOwner")
+                    ?.resourceAssignmentExpression?.expression.__$$text ?? ""
+                : undefined
+            }
+            onChange={(newValue) =>
+              bpmnEditorStoreApi.setState((s) => {
+                const { process } = addOrGetProcessAndDiagramElements({
+                  definitions: s.bpmn.model.definitions,
+                });
+
+                visitFlowElementsAndArtifacts(process, ({ element: e }) => {
+                  if (e["@_id"] === userTask?.["@_id"] && e.__$$element === userTask.__$$element) {
+                    e.resourceRole ??= [];
+                    e.resourceRole[0] ??= {
+                      "@_id": generateUuid(),
+                      __$$element: "potentialOwner",
+                    };
+                    e.resourceRole[0].resourceAssignmentExpression ??= {
+                      "@_id": generateUuid(),
+                      expression: {
+                        "@_id": generateUuid(),
+                        __$$element: "formalExpression",
+                      },
+                    };
+                    e.resourceRole[0].resourceAssignmentExpression.expression.__$$text = newValue;
+                  }
+                });
+              })
+            }
+            placeholder={"Enter Actors..."}
+            style={{ resize: "vertical", minHeight: "40px" }}
+            rows={3}
+          />
+        </FormGroup>
+        <FormGroup label={"Groups"}>
+          <TextArea
+            aria-label={"Groups"}
+            type={"text"}
+            isDisabled={settings.isReadOnly}
+            value={setValue(groupIdInputX)}
+            onChange={(newGroups) => handleChange("GroupId", newGroups)}
+            placeholder={"Enter groups..."}
+            style={{ resize: "vertical", minHeight: "40px" }}
+            rows={1}
+          />
+        </FormGroup>
+
+        <FormGroup label={"Created by"}>
+          <TextArea
+            aria-label={"Created by"}
+            type={"text"}
+            isDisabled={settings.isReadOnly}
+            value={setValue(createdByInputX)}
+            onChange={(newCreatedBy) => handleChange("CreatedBy", newCreatedBy)}
+            placeholder={"Enter creator..."}
+            style={{ resize: "vertical", minHeight: "40px" }}
+            rows={1}
+          />
+        </FormGroup>
 
         <Divider inset={{ default: "insetXs" }} />
 
@@ -271,7 +339,7 @@ export function UserTaskProperties({
       <BidirectionalAssignmentsFormSection element={userTask} />
       {/* <ReassignmentsFormSection element={userTask} /> */}
       <BidirectionalReassignmentsFormSection element={userTask} />
-      <Reassignments isOpen={showReassignmentsModal} onClose={closeReassignmentsModal} />
+      <Reassignments isOpen={showReassignmentsModal} onClose={closeReassignmentsModal} element={userTask} />
       <FormSection
         title={
           <SectionHeader

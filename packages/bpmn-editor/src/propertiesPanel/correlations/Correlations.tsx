@@ -251,7 +251,7 @@ export function Correlations({ isOpen, onClose }: { isOpen: boolean; onClose: ()
         <div className={"kie-bpmn-editor--correlations--empty-state"}>
           <Bullseye>
             <EmptyState>
-              <EmptyStateIcon icon={CubesIcon} />
+              <EmptyStateIcon />
               <Title headingLevel="h4">{isReadOnly ? "No correlations" : "No correlations yet"}</Title>
               <EmptyStateBody style={{ padding: "0 25%" }}>
                 {`This represents an the empty state pattern in Patternfly 4. Hopefully it's simple enough to use but flexible enough to meet a variety of needs.`}

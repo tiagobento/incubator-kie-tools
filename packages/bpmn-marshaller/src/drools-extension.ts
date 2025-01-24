@@ -62,7 +62,7 @@ declare module "./schemas/bpmn-2_0/ts-gen/types" {
     "@_drools:adHoc"?: Namespaced<DROOLS, boolean>;
   }
 
-  export interface BPMN20__tProcess__extensionElements extends WithMetaData {
+  export interface BPMN20__tProcess__extensionElements extends WithMetaData, WithEntryAndExitScripts {
     "drools:import"?: Namespaced<DROOLS, drools__GLOBAL__import>[];
     "drools:global"?: Namespaced<DROOLS, drools__GLOBAL__global>[];
   }

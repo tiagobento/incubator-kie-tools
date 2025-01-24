@@ -65,7 +65,6 @@ export function ScriptTaskProperties({
             });
           }}
         />
-        ;
         <AsyncCheckbox element={scriptTask} />
         <AdhocAutostartCheckbox element={scriptTask} />
       </PropertiesPanelHeaderFormSection>

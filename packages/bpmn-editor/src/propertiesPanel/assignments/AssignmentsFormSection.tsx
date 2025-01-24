@@ -423,6 +423,7 @@ export function AssignmentList({
           <div className={"kie-bpmn-editor--assignments--empty-state"}>
             <Bullseye>
               <EmptyState>
+                <EmptyStateIcon />
                 <Title headingLevel="h4">
                   {isReadOnly ? `No ${entryTitle} assignments` : `No ${entryTitle} assignments yet`}
                 </Title>
