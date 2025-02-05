@@ -25,7 +25,7 @@ import { visitFlowElementsAndArtifacts } from "../../../mutations/_elementVisito
 import { addOrGetProcessAndDiagramElements } from "../../../mutations/addOrGetProcessAndDiagramElements";
 import { Normalized } from "../../../normalization/normalize";
 import { useBpmnEditorStoreApi } from "../../../store/StoreContext";
-import { EndEventIcon, EventDefitnitionIcon, IntermediateThrowEventIcon, StartEventIcon } from "../NodeIcons";
+import { EndEventIcon, EventDefinitionIcon, IntermediateThrowEventIcon, StartEventIcon } from "../NodeIcons";
 import { BPMN20__tProcess } from "@kie-tools/bpmn-marshaller/dist/schemas/bpmn-2_0/ts-gen/types";
 import { ElementFilter } from "@kie-tools/xml-parser-ts/dist/elementFilter";
 import { NODE_COLORS } from "../NodeSvgs";

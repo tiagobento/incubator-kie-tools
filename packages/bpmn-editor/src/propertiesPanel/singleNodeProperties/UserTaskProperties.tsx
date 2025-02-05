@@ -58,10 +58,6 @@ import { addOrGetProcessAndDiagramElements } from "../../mutations/addOrGetProce
 import { UserTaskStuff } from "../nameDocumentationAndId/UserTaskStuff";
 import { Checkbox } from "@patternfly/react-core/dist/js/components/Checkbox/Checkbox";
 import { abort } from "process";
-import {
-  BidirectionalReassignmentsFormSection,
-  ReassignmentsFormSection,
-} from "../reassignments/ReassignmentsFormSection";
 
 export function UserTaskProperties({
   userTask,
@@ -337,8 +333,6 @@ export function UserTaskProperties({
       </PropertiesPanelHeaderFormSection>
 
       <BidirectionalAssignmentsFormSection element={userTask} />
-      {/* <ReassignmentsFormSection element={userTask} /> */}
-      <BidirectionalReassignmentsFormSection element={userTask} />
       <Reassignments isOpen={showReassignmentsModal} onClose={closeReassignmentsModal} element={userTask} />
       <FormSection
         title={

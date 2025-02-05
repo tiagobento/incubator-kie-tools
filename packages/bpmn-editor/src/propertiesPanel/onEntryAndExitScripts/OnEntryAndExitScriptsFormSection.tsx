@@ -19,24 +19,18 @@
 
 import * as React from "react";
 import { useBpmnEditorStore, useBpmnEditorStoreApi } from "../../store/StoreContext";
-import { FormGroup, FormSection } from "@patternfly/react-core/dist/js/components/Form";
-import { TextArea } from "@patternfly/react-core/dist/js/components/TextArea";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { SectionHeader } from "@kie-tools/xyflow-react-kie-diagram/dist/propertiesPanel/SectionHeader";
 import { CodeIcon } from "@patternfly/react-icons/dist/js/icons/code-icon";
-import { Label } from "@patternfly/react-core/dist/js/components/Label";
 import { CodeInput } from "../codeInput/CodeInput";
 import "./OnEntryAndExitScriptsFormSection.css";
-import {
-  BPMN20__tProcess,
-  BPMN20__tProcess__extensionElements,
-  WithEntryAndExitScripts,
-} from "@kie-tools/bpmn-marshaller/dist/schemas/bpmn-2_0/ts-gen/types";
+import { BPMN20__tProcess } from "@kie-tools/bpmn-marshaller/dist/schemas/bpmn-2_0/ts-gen/types";
 import { ElementFilter } from "@kie-tools/xml-parser-ts/dist/elementFilter";
 import { Unpacked } from "@kie-tools/xyflow-react-kie-diagram/dist/tsExt/tsExt";
 import { Normalized } from "../../normalization/normalize";
 import { addOrGetProcessAndDiagramElements } from "../../mutations/addOrGetProcessAndDiagramElements";
-import { Script } from "vm";
+import { visitFlowElementsAndArtifacts } from "../../mutations/_elementVisitor";
+import { FormSection } from "@patternfly/react-core/dist/js/components/Form/FormSection";
 
 export type WithOnEntryAndExitScripts = Normalized<
   ElementFilter<
@@ -78,22 +72,22 @@ export function OnEntryAndExitScriptsFormSection({ element }: { element: WithOnE
               <CodeInput
                 label={"onEntry"}
                 languages={["Java"]}
-                value={element.extensionElements?.["drools:onEntry-script"]?.["drools:script"].__$$text}
+                value={element?.extensionElements?.["drools:onEntry-script"]?.["drools:script"]?.__$$text || ""}
                 onChange={(newValue) => {
                   bpmnEditorStoreApi.setState((s) => {
-                    const { process } = addOrGetProcessAndDiagramElements({ definitions: s.bpmn.model.definitions });
-
-                    process.extensionElements ??= {};
-
-                    process.extensionElements["drools:onEntry-script"] ??= {
-                      "@_scriptFormat": "",
-                      "drools:script": {
-                        __$$text: "",
-                      },
-                    };
-
-                    process.extensionElements["drools:onEntry-script"]["@_scriptFormat"] = "";
-                    process.extensionElements["drools:onEntry-script"]["drools:script"].__$$text = newValue;
+                    const { process } = addOrGetProcessAndDiagramElements({
+                      definitions: s.bpmn.model.definitions,
+                    });
+                    visitFlowElementsAndArtifacts(process, ({ element: e }) => {
+                      if (e["@_id"] === element?.["@_id"] && e.__$$element === element.__$$element) {
+                        e.extensionElements ??= {};
+                        e.extensionElements["drools:onEntry-script"] ??= {
+                          "@_scriptFormat": "",
+                          "drools:script": { __$$text: "" },
+                        };
+                        e.extensionElements["drools:onEntry-script"]["drools:script"].__$$text = newValue;
+                      }
+                    });
                   });
                 }}
               />
@@ -101,35 +95,22 @@ export function OnEntryAndExitScriptsFormSection({ element }: { element: WithOnE
               <CodeInput
                 label={"onExit"}
                 languages={["Java"]}
-                value={
-                  element?.loopCharacteristics?.__$$element === "multiInstanceLoopCharacteristics"
-                    ? element?.loopCharacteristics["inputDataItem"]?.["@_id"]
-                    : undefined
-                }
-                value={element.extensionElements?.["drools:onExit-script"]?.["drools:script"]?.__$$text || ""}
+                value={element?.extensionElements?.["drools:onExit-script"]?.["drools:script"]?.__$$text || ""}
                 onChange={(newValue) => {
                   bpmnEditorStoreApi.setState((s) => {
-                    const { process } = addOrGetProcessAndDiagramElements({ definitions: s.bpmn.model.definitions });
-
-                    console.log("Before Update:", JSON.stringify(process.extensionElements, null, 2)); // Debug log
-
-                    process.extensionElements ??= {};
-                    process.extensionElements["drools:onExit-script"] ??= {
-                      "@_scriptFormat": "",
-                      "drools:script": {
-                        __$$text: "",
-                      },
-                    };
-
-                    if (!process.extensionElements["drools:onExit-script"]["drools:script"]) {
-                      process.extensionElements["drools:onExit-script"]["drools:script"] = { __$$text: "" };
-                    }
-
-                    console.log("After Ensuring Structure:", JSON.stringify(process.extensionElements, null, 2)); // Debug log
-
-                    process.extensionElements["drools:onExit-script"]["drools:script"].__$$text = newValue;
-
-                    console.log("After Update:", JSON.stringify(process.extensionElements, null, 2)); // Debug log
+                    const { process } = addOrGetProcessAndDiagramElements({
+                      definitions: s.bpmn.model.definitions,
+                    });
+                    visitFlowElementsAndArtifacts(process, ({ element: e }) => {
+                      if (e["@_id"] === element?.["@_id"] && e.__$$element === element.__$$element) {
+                        e.extensionElements ??= {};
+                        e.extensionElements["drools:onExit-script"] ??= {
+                          "@_scriptFormat": "",
+                          "drools:script": { __$$text: "" },
+                        };
+                        e.extensionElements["drools:onExit-script"]["drools:script"].__$$text = newValue;
+                      }
+                    });
                   });
                 }}
               />

@@ -13,7 +13,7 @@ import "./Notifications.css";
 import { EmptyState } from "@patternfly/react-core/dist/js/components/EmptyState/EmptyState";
 import { Bullseye } from "@patternfly/react-core/dist/js/layouts/Bullseye/Bullseye";
 import { EmptyStateBody } from "@patternfly/react-core/dist/js/components/EmptyState/EmptyStateBody";
-// import CubesIcon from "@patternfly/react-icons/dist/js/icons/cubes-icon";
+import CubesIcon from "@patternfly/react-icons/dist/js/icons/cubes-icon";
 import { EmptyStateIcon } from "@patternfly/react-core/dist/js/components/EmptyState/EmptyStateIcon";
 
 export function Notifications({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
@@ -234,7 +234,7 @@ export function Notifications({ isOpen, onClose }: { isOpen: boolean; onClose: (
         <div className="kie-bpmn-editor--notifications--empty-state">
           <Bullseye>
             <EmptyState>
-              {/* <EmptyStateIcon icon={CubesIcon} /> */}
+              <EmptyStateIcon icon={CubesIcon} />
               <Title headingLevel="h4">No notifications yet</Title>
               <EmptyStateBody>
                 {"This represents the empty state for notifications. You can add notifications to get started."}

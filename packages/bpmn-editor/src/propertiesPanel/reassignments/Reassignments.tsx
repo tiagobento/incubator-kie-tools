@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useBpmnEditorStore, useBpmnEditorStoreApi } from "../../store/StoreContext";
 import { Button, ButtonVariant } from "@patternfly/react-core/dist/js/components/Button/Button";
 import { Modal, ModalVariant } from "@patternfly/react-core/dist/js/components/Modal";
@@ -10,7 +10,6 @@ import { Bullseye } from "@patternfly/react-core/dist/js/layouts/Bullseye";
 import { EmptyState, EmptyStateBody, EmptyStateIcon } from "@patternfly/react-core/dist/js/components/EmptyState";
 import { Title } from "@patternfly/react-core/dist/js/components/Title";
 import { Dropdown, DropdownItem, DropdownToggle } from "@patternfly/react-core/dist/js/components/Dropdown";
-// import CubesIcon from "@patternfly/react-icons/dist/js/icons/cubes-icon";
 import "./Reassignments.css";
 import { visitFlowElementsAndArtifacts } from "../../mutations/_elementVisitor";
 import { setBpmn20Drools10MetaData } from "@kie-tools/bpmn-marshaller/dist/drools-extension-metaData";
@@ -22,6 +21,7 @@ import { FormSelect } from "@patternfly/react-core/dist/js/components/FormSelect
 import { FormSelectOption } from "@patternfly/react-core/dist/js/components/FormSelect/FormSelectOption";
 import { CubesIcon } from "@patternfly/react-icons/dist/js/icons/cubes-icon";
 import { generateUuid } from "@kie-tools/xyflow-react-kie-diagram/dist/uuid/uuid";
+import { Form } from "@patternfly/react-core/dist/js/components/Form/Form";
 
 function DropdownWithAdd({ items, setItems }: { items: string[]; setItems: (items: string[]) => void }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -94,116 +94,139 @@ export function Reassignments({
   const addReassignment = () => {
     setReassignments([
       ...reassignments,
-      { users: "", groups: "", type: "Not Completed", period: "", periodUnit: "minutes" },
+      { users: "", groups: "", type: "NotStartedReassign", period: "", periodUnit: "m" },
     ]);
   };
-
   const typeOptions = [
     { value: "NotStartedReassign", label: "Not Started" },
     { value: "NotCompletedReassign", label: "Not Completed" },
   ];
-
   const periodUnits = [
     { value: "m", label: "minutes" },
     { value: "h", label: "hours" },
     { value: "d", label: "days" },
-    { value: "mo", label: "months" },
+    { value: "M", label: "months" },
     { value: "y", label: "years" },
   ];
-
   const removeReassignment = (index: number) => {
     setReassignments(reassignments.filter((_, i) => i !== index));
   };
+  const handleInputChange = (index: number, field: string, value: string | number) => {
+    setReassignments((prevReassignments) => {
+      const updatedReassignments = [...prevReassignments];
+      updatedReassignments[index] = { ...updatedReassignments[index], [field]: value };
+      return updatedReassignments;
+    });
+  };
+  useEffect(() => {
+    if (isOpen && element) {
+      const extractedReassignments = element?.dataInputAssociation
+        ?.map((association) => {
+          const assignment = association.assignment?.[0];
+          if (assignment) {
+            const reassignmentText = assignment.from.__$$text || "";
+            const usersMatches = [...reassignmentText.matchAll(/users:([^ ]*)/g)];
+            const groupsMatches = [...reassignmentText.matchAll(/groups:([^ ]*)/g)];
+            const periodMatches = [...reassignmentText.matchAll(/(\d+)([mhdMy])/g)];
+            const users = usersMatches.map((match) => match[1]);
+            const groups = groupsMatches.map((match) => match[1]);
+            const periods = periodMatches.map((match) => parseInt(match[1]));
+            const periodUnits = periodMatches.map((match) => match[2]);
+            const reassignments = [];
+            const maxLength = Math.max(users.length, groups.length, periods.length);
+            for (let i = 0; i < maxLength; i++) {
+              reassignments.push({
+                users: users[i] || "",
+                groups: groups[i] || "",
+                type: association.targetRef.__$$text.includes("NotStartedReassign")
+                  ? "NotStartedReassign"
+                  : "NotCompletedReassign",
+                period: periods[i] || "",
+                periodUnit: periodUnits[i] || "m",
+              });
+            }
+            return reassignments;
+          }
+        })
+        .flat()
+        .filter(
+          (item): item is { users: string; groups: string; type: string; period: number | ""; periodUnit: string } =>
+            item !== null
+        );
+      setReassignments(extractedReassignments || []);
+    }
+  }, [isOpen, element]);
   const bpmnEditorStoreApi = useBpmnEditorStoreApi();
-
-  const handleChange = (type: string, newValue: string | boolean) => {
-    const valueAsString = String(newValue);
+  const handleSubmit = () => {
     bpmnEditorStoreApi.setState((s) => {
       const { process } = addOrGetProcessAndDiagramElements({
         definitions: s.bpmn.model.definitions,
       });
-
       visitFlowElementsAndArtifacts(process, ({ element: e }) => {
         if (e["@_id"] === element?.["@_id"] && e.__$$element === element.__$$element) {
           setBpmn20Drools10MetaData(e, "elementname", e["@_name"] || "");
-          e.ioSpecification ??= {
+          e.ioSpecification = {
             "@_id": generateUuid(),
-            inputSet: [],
+            inputSet: [{ "@_id": generateUuid(), dataInputRefs: [] }],
             outputSet: [],
             dataInput: [],
           };
-
-          e.ioSpecification.inputSet[0] ??= {
-            "@_id": generateUuid(),
-            dataInputRefs: [],
-          };
-
-          e.ioSpecification.dataInput ??= [];
-
-          let dataInput = e.ioSpecification.dataInput.find((input) => input["@_name"] === type);
-
-          if (!dataInput) {
-            dataInput = {
-              "@_id": `${e["@_id"]}_${type}InputX`,
-              "@_drools:dtype": "Object",
-              "@_itemSubjectRef": `_${e["@_id"]}_${type}InputXItem`,
-              "@_name": type,
-            };
-            e.ioSpecification.dataInput.push(dataInput);
-          }
-
-          e.ioSpecification.inputSet[0].dataInputRefs = e.ioSpecification.dataInput.map((input) => ({
-            __$$text: input["@_id"],
-          }));
-
-          let dataInputAssociation = e.dataInputAssociation?.find(
-            (association) => association.targetRef.__$$text === dataInput["@_id"]
-          );
-
-          if (!dataInputAssociation) {
-            dataInputAssociation = {
-              "@_id": `${e["@_id"]}_dataInputAssociation_${type}`,
-              targetRef: { __$$text: dataInput["@_id"] },
-              assignment: [
-                {
-                  "@_id": `${e["@_id"]}_assignment_${type}`,
-                  from: {
-                    "@_id": `${e["@_id"]}`,
-                    __$$text: valueAsString,
-                    //get form submit
-                  },
-                  to: { "@_id": e["@_id"], __$$text: `${e["@_id"]}` },
-                },
-              ],
-            };
-            e.dataInputAssociation ??= [];
-            e.dataInputAssociation.push(dataInputAssociation);
-          } else {
-            if (dataInputAssociation.assignment?.[0]) {
-              dataInputAssociation.assignment[0].from.__$$text = valueAsString;
+          e.ioSpecification.dataInput = [];
+          e.dataInputAssociation = [];
+          reassignments.forEach((reassignment) => {
+            let dataInput = e?.ioSpecification?.dataInput?.find((input) => input["@_name"] === reassignment.type);
+            if (!dataInput) {
+              dataInput = {
+                "@_id": `${e["@_id"]}_${reassignment.type}InputX`,
+                "@_drools:dtype": "Object",
+                "@_itemSubjectRef": `_${e["@_id"]}_${reassignment.type}InputX`,
+                "@_name": reassignment.type,
+              };
+              e?.ioSpecification?.dataInput?.push(dataInput);
             }
-          }
+            if (!e?.ioSpecification?.inputSet[0]?.dataInputRefs?.some((ref) => ref.__$$text === dataInput["@_id"])) {
+              e?.ioSpecification?.inputSet[0]?.dataInputRefs?.push({ __$$text: dataInput["@_id"] });
+            }
+            let dataInputAssociation = e.dataInputAssociation?.find(
+              (association) => association.targetRef.__$$text === dataInput["@_id"]
+            );
+            if (!dataInputAssociation) {
+              dataInputAssociation = {
+                "@_id": `${e["@_id"]}_dataInputAssociation_${reassignment.type}`,
+                targetRef: { __$$text: dataInput["@_id"] },
+                assignment: [],
+              };
+              e.dataInputAssociation?.push(dataInputAssociation);
+            }
+            const existingAssignment = dataInputAssociation?.assignment?.find(
+              (assignment) => assignment["@_id"] === `${e["@_id"]}_assignment_${reassignment.type}`
+            );
+            const newEntry = `users:${reassignment.users} groups:${reassignment.groups} ${reassignment.period}${reassignment.periodUnit}`;
+            if (existingAssignment) {
+              const existingValues = new Set(existingAssignment?.from?.__$$text?.split(" "));
+              const newValues = newEntry.split(" ");
+              const uniqueValues = [...existingValues, ...newValues].join(" ");
+              existingAssignment.from.__$$text = uniqueValues;
+            } else {
+              dataInputAssociation?.assignment?.push({
+                "@_id": `${e["@_id"]}_assignment_${reassignment.type}`,
+                from: {
+                  "@_id": `${e["@_id"]}`,
+                  __$$text: newEntry,
+                },
+                to: { "@_id": dataInput["@_id"], __$$text: dataInput["@_id"] },
+              });
+            }
+          });
         }
       });
     });
   };
-
-  function setValue(fieldName: string) {
-    return (
-      element?.dataInputAssociation
-        ?.find((association) =>
-          association.assignment?.some((a) => a.from.__$$text && association.targetRef.__$$text.includes(fieldName))
-        )
-        ?.assignment?.find((a) => a.from.__$$text)?.from.__$$text || ""
-    );
-  }
-
   const entryStyle = {
     padding: "4px",
     margin: "8px",
     width: "calc(100% - 2 * 4px - 2 * 8px)",
   };
-
   return (
     <Modal
       className="kie-bpmn-editor--reassignments--modal"
@@ -214,7 +237,7 @@ export function Reassignments({
       onClose={onClose}
     >
       {reassignments.length > 0 ? (
-        <>
+        <Form>
           <Grid md={12} style={{ padding: "0 8px" }}>
             <GridItem span={3}>
               <div style={entryStyle}>
@@ -252,29 +275,31 @@ export function Reassignments({
               >
                 <GridItem span={3}>
                   <TextArea
+                    aria-label={"users"}
                     autoFocus={true}
                     style={entryStyle}
                     type="text"
                     placeholder="Users..."
-                    value={setValue("usersInputX")}
-                    onChange={(newUsers) => handleChange("users", newUsers)}
+                    value={entry.users}
+                    onChange={(e) => handleInputChange(i, "users", e)}
                   />
                 </GridItem>
                 <GridItem span={3}>
                   <TextArea
+                    aria-label={"groups"}
                     style={entryStyle}
                     type="text"
                     placeholder="Groups..."
-                    value={setValue("groupsInputX")}
-                    onChange={(newGroups) => handleChange("groups", newGroups)}
+                    value={entry.groups}
+                    onChange={(e) => handleInputChange(i, "groups", e)}
                   />
                 </GridItem>
                 <GridItem span={2}>
                   <FormSelect
                     aria-label={"type"}
                     type={"text"}
-                    value={setValue("typeInputX")}
-                    onChange={(newType) => handleChange("type", newType)}
+                    value={entry.type}
+                    onChange={(e) => handleInputChange(i, "type", e)}
                     style={entryStyle}
                     rows={1}
                   >
@@ -286,17 +311,18 @@ export function Reassignments({
                 <GridItem span={2}>
                   <div style={{ display: "flex", gap: "4px", alignItems: "center" }}>
                     <input
+                      aria-label={"period"}
                       style={entryStyle}
                       type="number"
                       placeholder="Enter value"
-                      value={setValue("periodInputX")}
-                      onChange={(newPeriod) => handleChange("period", newPeriod.target.value)}
+                      value={entry.period}
+                      onChange={(e) => handleInputChange(i, "period", e.target.value)}
                     />
                     <FormSelect
-                      aria-label={"unit of time"}
+                      aria-label={"period unit"}
                       type={"text"}
-                      value={setValue("timeUnitInputX")}
-                      onChange={(newTimeUnit) => handleChange("timeUnit", newTimeUnit)}
+                      value={entry.periodUnit}
+                      onChange={(e) => handleInputChange(i, "periodUnit", e)}
                       style={entryStyle}
                       rows={1}
                     >
@@ -321,12 +347,15 @@ export function Reassignments({
               </Grid>
             </div>
           ))}
-        </>
+          <Button onClick={handleSubmit} className="kie-bpmn-editor--properties-panel--reassignment-submit-save-button">
+            Save
+          </Button>
+        </Form>
       ) : (
         <div className="kie-bpmn-editor--reassignments--empty-state">
           <Bullseye>
             <EmptyState>
-              {/* <EmptyStateIcon icon={CubesIcon} /> */}
+              <EmptyStateIcon icon={CubesIcon} />
               <Title headingLevel="h4">No reassignments yet</Title>
               <EmptyStateBody>
                 {"This represents the empty state for reassignments. You can add reassignments to get started."}
