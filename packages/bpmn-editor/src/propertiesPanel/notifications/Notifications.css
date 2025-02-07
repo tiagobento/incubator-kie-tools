@@ -19,29 +19,22 @@
 
 .kie-bpmn-editor--notifications--modal {
   height: 80%;
-  width: 80%;
-  position: relative;
-}
-
-.kie-bpmn-editor--notifications--modal-section {
-  padding-bottom: 16px;
-  overflow-y: scroll;
-  display: flex;
-  flex-direction: column;
+  width: 70%;
+  padding: 16px;
 }
 
 .kie-bpmn-editor--notifications--empty-state {
-  padding: 4px;
-  margin-top: 8px;
+  padding: 10px;
   background: #eee;
   border-radius: 10px;
   text-align: center;
-  flex-grow: 1;
+  height: 100%;
 }
 
 .kie-bpmn-editor--properties-panel--notification-entry {
   align-items: center;
   border-radius: 10px;
+  padding: 4px;
 }
 
 .kie-bpmn-editor--properties-panel--notification-entry:hover,
@@ -55,4 +48,11 @@
 
 .kie-bpmn-editor--properties-panel--notification-entry div:not(:nth-last-child(2)) > input {
   border-right: 1px dotted black;
+}
+
+.kie-bpmn-editor--properties-panel--notification-submit-save-button {
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
+  padding: 8px 16px;
 }

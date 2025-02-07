@@ -41,7 +41,6 @@ import { FormGroup, FormSection } from "@patternfly/react-core/dist/js/component
 import { TextArea } from "@patternfly/react-core/dist/js/components/TextArea/TextArea";
 import { useBpmnEditorStore, useBpmnEditorStoreApi } from "../../store/StoreContext";
 import { Reassignments } from "../reassignments/Reassignments";
-import { Notifications } from "../notifications/Notifications";
 import {
   parseBpmn20Drools10MetaData,
   setBpmn20Drools10MetaData,
@@ -58,6 +57,7 @@ import { addOrGetProcessAndDiagramElements } from "../../mutations/addOrGetProce
 import { UserTaskStuff } from "../nameDocumentationAndId/UserTaskStuff";
 import { Checkbox } from "@patternfly/react-core/dist/js/components/Checkbox/Checkbox";
 import { abort } from "process";
+import { Notifications } from "../notifications/Notifications";
 
 export function UserTaskProperties({
   userTask,
@@ -334,6 +334,8 @@ export function UserTaskProperties({
 
       <BidirectionalAssignmentsFormSection element={userTask} />
       <Reassignments isOpen={showReassignmentsModal} onClose={closeReassignmentsModal} element={userTask} />
+      <Notifications isOpen={showNotificationsModal} onClose={closeNotificationsModal} element={userTask} />
+
       <FormSection
         title={
           <SectionHeader
@@ -355,7 +357,7 @@ export function UserTaskProperties({
           />
         }
       />
-      <Notifications isOpen={showNotificationsModal} onClose={closeNotificationsModal} />
+      {/* <Notifications isOpen={showNotificationsModal} onClose={closeNotificationsModal} /> */}
       <FormSection
         title={
           <SectionHeader
