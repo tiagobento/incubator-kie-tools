@@ -121,19 +121,22 @@ export function Reassignments({
   useEffect(() => {
     if (isOpen && element) {
       const extractedReassignments = element?.dataInputAssociation
+        ?.filter((association) => association.targetRef?.__$$text.includes("Reassign"))
         ?.map((association) => {
           const assignment = association.assignment?.[0];
+
           if (assignment) {
             const reassignmentText = assignment.from.__$$text || "";
-            const usersMatches = [...reassignmentText.matchAll(/users:([^ ]*)/g)];
-            const groupsMatches = [...reassignmentText.matchAll(/groups:([^ ]*)/g)];
+            const usersMatches = [...reassignmentText.matchAll(/users:([^ |]*)/g)];
+            const groupsMatches = [...reassignmentText.matchAll(/groups:([^ \]]*)/g)];
             const periodMatches = [...reassignmentText.matchAll(/(\d+)([mhdMy])/g)];
+
             const users = usersMatches.map((match) => match[1]);
             const groups = groupsMatches.map((match) => match[1]);
             const periods = periodMatches.map((match) => parseInt(match[1]));
             const periodUnits = periodMatches.map((match) => match[2]);
             const reassignments = [];
-            const maxLength = Math.max(users.length, groups.length, periods.length);
+            const maxLength = Math.max(users.length);
             for (let i = 0; i < maxLength; i++) {
               reassignments.push({
                 users: users[i] || "",

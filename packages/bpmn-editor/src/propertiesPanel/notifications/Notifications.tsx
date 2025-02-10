@@ -97,8 +97,7 @@ export function Notifications({
       subject: string;
       body: string;
       type: string;
-      period: number | "";
-      periodUnit: string;
+      expiresAt: string;
     }[]
   >([]);
   const [hoveredIndex, setHoveredIndex] = useState<number | undefined>(undefined);
@@ -114,8 +113,7 @@ export function Notifications({
         subject: "",
         body: "",
         type: "NotStartedNotify",
-        period: "",
-        periodUnit: "m",
+        expiresAt: "",
       },
     ]);
   };
@@ -134,6 +132,7 @@ export function Notifications({
     setNotifications(notifications.filter((_, i) => i !== index));
   };
   const handleInputChange = (index: number, field: string, value: string | number) => {
+    console.log(`Updating field: ${field}, value: ${value}`); // Log to debug
     setNotifications((prevNotifications) => {
       const updatedNotifications = [...prevNotifications];
       updatedNotifications[index] = { ...updatedNotifications[index], [field]: value };
@@ -143,48 +142,47 @@ export function Notifications({
   useEffect(() => {
     if (isOpen && element) {
       const extractedNotifications = element?.dataInputAssociation
+        ?.filter((association) => association.targetRef?.__$$text.includes("Notify"))
         ?.map((association) => {
           const assignment = association.assignment?.[0];
           if (assignment) {
             const notificationText = assignment.from.__$$text || "";
-            const fromMatches = [...notificationText.matchAll(/tousers:([^ ]*)/g)];
-            const bodyMatches = [...notificationText.matchAll(/body:([^ ]*)/g)];
-            const subjectMatches = [...notificationText.matchAll(/subject:([^ ]*)/g)];
-            const toEmailMatches = [...notificationText.matchAll(/toemail:([^ ]*)/g)];
-            const replyToMatches = [...notificationText.matchAll(/replyTo:([^ ]*)/g)];
+            const fromMatches = [...notificationText.matchAll(/from:([^ |]*)/g)];
+            const bodyMatches = [...notificationText.matchAll(/body:([^ @\]]*)/g)];
+            const subjectMatches = [...notificationText.matchAll(/subject:([^ |]*)/g)];
+            const toEmailsMatches = [...notificationText.matchAll(/toemails:([^ |]*)/g)];
+            const replyToMatches = [...notificationText.matchAll(/replyTo:([^ |]*)/g)];
+            const usersMatches = [...notificationText.matchAll(/tousers:([^ |]*)/g)];
+            const groupsMatches = [...notificationText.matchAll(/togroups:([^ |]*)/g)];
+            let expiresAtMatches = [...notificationText.matchAll(/\]@\[([^ |]*)/g)];
+            if (expiresAtMatches.length === 0) {
+              expiresAtMatches = [...notificationText.matchAll(/@([^@]*)$/g)];
+            }
 
-            const usersMatches = [...notificationText.matchAll(/tousers:([^ ]*)/g)];
-            const groupsMatches = [...notificationText.matchAll(/togroups:([^ ]*)/g)];
-            const periodMatches = [...notificationText.matchAll(/(\d+)([mhdMy])/g)];
             const from = fromMatches.map((match) => match[1]);
-
             const tousers = usersMatches.map((match) => match[1]);
             const togroups = groupsMatches.map((match) => match[1]);
-            const toemails = toEmailMatches.map((match) => match[1]);
+            const toemails = toEmailsMatches.map((match) => match[1]);
             const replyTo = replyToMatches.map((match) => match[1]);
             const subject = subjectMatches.map((match) => match[1]);
             const body = bodyMatches.map((match) => match[1]);
+            const expiresAt = expiresAtMatches.map((match) => match[1]);
 
-            const periods = periodMatches.map((match) => parseInt(match[1]));
-            const periodUnits = periodMatches.map((match) => match[2]);
             const notifications = [];
-            const maxLength = Math.max(tousers.length, togroups.length, periods.length);
+            const maxLength = Math.max(tousers.length);
             for (let i = 0; i < maxLength; i++) {
               notifications.push({
                 from: from[i] || "",
-
                 tousers: tousers[i] || "",
                 togroups: togroups[i] || "",
                 toemails: toemails[i] || "",
                 replyTo: replyTo[i] || "",
                 subject: subject[i] || "",
                 body: body[i] || "",
-
+                expiresAt: expiresAt[i] || "",
                 type: association.targetRef.__$$text.includes("NotStartedNotify")
                   ? "NotStartedNotify"
                   : "NotCompletedNotify",
-                period: periods[i] || "",
-                periodUnit: periodUnits[i] || "m",
               });
             }
             return notifications;
@@ -196,6 +194,7 @@ export function Notifications({
             item
           ): item is {
             from: string;
+            expiresAt: string;
             tousers: string;
             togroups: string;
             toemails: string;
@@ -203,8 +202,6 @@ export function Notifications({
             subject: string;
             body: string;
             type: string;
-            period: number | "";
-            periodUnit: string;
           } => item !== null
         );
       setNotifications(extractedNotifications || []);
@@ -255,7 +252,7 @@ export function Notifications({
             const existingAssignment = dataInputAssociation?.assignment?.find(
               (assignment) => assignment["@_id"] === `${e["@_id"]}_assignment_${notification.type}`
             );
-            const newEntry = `from:${notification.from} tousers:${notification.tousers} togroups:${notification.togroups} toemails:${notification.toemails} replyTo:${notification.replyTo} subject:${notification.subject} body:${notification.body}@${notification.period}${notification.periodUnit}`;
+            const newEntry = `from:${notification.from} tousers:${notification.tousers} togroups:${notification.togroups} toemails:${notification.toemails} replyTo:${notification.replyTo} subject:${notification.subject} body:${notification.body}@${notification.expiresAt}`;
 
             if (existingAssignment) {
               const existingValues = new Set(existingAssignment?.from?.__$$text?.split(" "));
@@ -373,8 +370,8 @@ export function Notifications({
                     style={entryStyle}
                     type="text"
                     placeholder="Expires at..."
-                    value={entry.period}
-                    onChange={(e) => handleInputChange(i, "expiresat", e)}
+                    value={entry.expiresAt}
+                    onChange={(e) => handleInputChange(i, "expiresAt", e)}
                   />
                 </GridItem>
                 <GridItem span={1}>

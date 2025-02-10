@@ -66,7 +66,12 @@ export type WithInputAssignments = Normalized<
   ElementFilter<Unpacked<NonNullable<BPMN20__tProcess["flowElement"]>>, "endEvent" | "intermediateThrowEvent">
 >;
 
-export function AssignmentsFormSection({ sectionLabel, children }: React.PropsWithChildren<{ sectionLabel: string }>) {
+export function AssignmentsFormSection({
+  // sectionLabel,
+  children,
+}: React.PropsWithChildren<{
+  // sectionLabel: string
+}>) {
   const isReadOnly = useBpmnEditorStore((s) => s.settings.isReadOnly);
 
   const [showAssignmentsModal, setShowAssignmentsModal] = useState(false);
@@ -78,7 +83,10 @@ export function AssignmentsFormSection({ sectionLabel, children }: React.PropsWi
           <SectionHeader
             expands={"modal"}
             icon={<div style={{ marginLeft: "12px", width: "16px", height: "36px", lineHeight: "36px" }}>{"⇆"}</div>}
-            title={"Assignments" + sectionLabel}
+            title={
+              "Assignments"
+              // + sectionLabel
+            }
             toogleSectionExpanded={() => setShowAssignmentsModal(true)}
             action={
               <Button
@@ -108,22 +116,24 @@ export function AssignmentsFormSection({ sectionLabel, children }: React.PropsWi
 }
 
 export function BidirectionalAssignmentsFormSection({ element }: { element: WithAssignments }) {
-  const inputCount = element.dataInputAssociation?.length ?? 0;
-  const outputCount = element.dataOutputAssociation?.length ?? 0;
-  const sectionLabel = useMemo(() => {
-    if (inputCount > 0 && outputCount > 0) {
-      return ` (in: ${inputCount}, out: ${outputCount})`;
-    } else if (inputCount > 0) {
-      return ` (in: ${inputCount}, out: -)`;
-    } else if (outputCount > 0) {
-      return ` (in: -, out: ${outputCount})`;
-    } else {
-      return "";
-    }
-  }, [inputCount, outputCount]);
+  // const inputCount = element.dataInputAssociation?.length ?? 0;
+  // const outputCount = element.dataOutputAssociation?.length ?? 0;
+  // const sectionLabel = useMemo(() => {
+  //   if (inputCount > 0 && outputCount > 0) {
+  //     return ` (in: ${inputCount}, out: ${outputCount})`;
+  //   } else if (inputCount > 0) {
+  //     return ` (in: ${inputCount}, out: -)`;
+  //   } else if (outputCount > 0) {
+  //     return ` (in: -, out: ${outputCount})`;
+  //   } else {
+  //     return "";
+  //   }
+  // }, [inputCount, outputCount]);
 
   return (
-    <AssignmentsFormSection sectionLabel={sectionLabel}>
+    <AssignmentsFormSection
+    // sectionLabel={sectionLabel}
+    >
       <div className="kie-bpmn-editor--assignments--modal-section" style={{ height: "50%" }}>
         <AssignmentList section={"input"} element={element} />
       </div>
@@ -135,17 +145,19 @@ export function BidirectionalAssignmentsFormSection({ element }: { element: With
 }
 
 export function InputOnlyAssociationFormSection({ element }: { element: WithInputAssignments }) {
-  const inputCount = element.dataInputAssociation?.length ?? 0;
-  const sectionLabel = useMemo(() => {
-    if (inputCount > 0) {
-      return ` (in: ${inputCount})`;
-    } else {
-      return ` (in: -)`;
-    }
-  }, [inputCount]);
+  // const inputCount = element.dataInputAssociation?.length ?? 0;
+  // const sectionLabel = useMemo(() => {
+  //   if (inputCount > 0) {
+  //     return ` (in: ${inputCount})`;
+  //   } else {
+  //     return ` (in: -)`;
+  //   }
+  // }, [inputCount]);
 
   return (
-    <AssignmentsFormSection sectionLabel={sectionLabel}>
+    <AssignmentsFormSection
+    // sectionLabel={sectionLabel}
+    >
       <div className="kie-bpmn-editor--assignments--modal-section" style={{ height: "100%" }}>
         <AssignmentList section={"input"} element={element} />
       </div>
@@ -154,17 +166,19 @@ export function InputOnlyAssociationFormSection({ element }: { element: WithInpu
 }
 
 export function OutputOnlyAssociationFormSection({ element }: { element: WithOutputAssignments }) {
-  const outputCount = element.dataOutputAssociation?.length ?? 0;
-  const sectionLabel = useMemo(() => {
-    if (outputCount > 0) {
-      return ` (out: ${outputCount})`;
-    } else {
-      return ` (out: -)`;
-    }
-  }, [outputCount]);
+  // const outputCount = element.dataOutputAssociation?.length ?? 0;
+  // const sectionLabel = useMemo(() => {
+  //   if (outputCount > 0) {
+  //     return ` (out: ${outputCount})`;
+  //   } else {
+  //     return ` (out: -)`;
+  //   }
+  // }, [outputCount]);
 
   return (
-    <AssignmentsFormSection sectionLabel={sectionLabel}>
+    <AssignmentsFormSection
+    //  sectionLabel={sectionLabel}
+    >
       <div className="kie-bpmn-editor--assignments--modal-section" style={{ height: "100%" }}>
         <AssignmentList section={"output"} element={element} />
       </div>
@@ -423,7 +437,7 @@ export function AssignmentList({
           <div className={"kie-bpmn-editor--assignments--empty-state"}>
             <Bullseye>
               <EmptyState>
-                <EmptyStateIcon />
+                {/* <EmptyStateIcon /> */}
                 <Title headingLevel="h4">
                   {isReadOnly ? `No ${entryTitle} assignments` : `No ${entryTitle} assignments yet`}
                 </Title>
