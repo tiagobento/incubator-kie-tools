@@ -19,64 +19,64 @@ import { Normalized } from "../../normalization/normalize";
 import { TextArea } from "@patternfly/react-core/dist/js/components/TextArea/TextArea";
 import { FormSelect } from "@patternfly/react-core/dist/js/components/FormSelect/FormSelect";
 import { FormSelectOption } from "@patternfly/react-core/dist/js/components/FormSelect/FormSelectOption";
-import { CubesIcon } from "@patternfly/react-icons/dist/js/icons/cubes-icon";
+// import { CubesIcon } from "@patternfly/react-icons/dist/js/icons/cubes-icon";
 import { generateUuid } from "@kie-tools/xyflow-react-kie-diagram/dist/uuid/uuid";
 import { Form } from "@patternfly/react-core/dist/js/components/Form/Form";
 
-function DropdownWithAdd({ items, setItems }: { items: string[]; setItems: (items: string[]) => void }) {
-  const [isOpen, setIsOpen] = useState(false);
-  const [newItem, setNewItem] = useState("");
-  const [selectedItem, setSelectedItem] = useState<string | undefined>(undefined);
+// function DropdownWithAdd({ items, setItems }: { items: string[]; setItems: (items: string[]) => void }) {
+//   const [isOpen, setIsOpen] = useState(false);
+//   const [newItem, setNewItem] = useState("");
+//   const [selectedItem, setSelectedItem] = useState<string | undefined>(undefined);
 
-  const handleAddItem = () => {
-    if (newItem && !items.includes(newItem)) {
-      setItems([...items, newItem]);
-      setSelectedItem(newItem);
-    }
-    setNewItem("");
-    setIsOpen(false);
-  };
+//   const handleAddItem = () => {
+//     if (newItem && !items.includes(newItem)) {
+//       setItems([...items, newItem]);
+//       setSelectedItem(newItem);
+//     }
+//     setNewItem("");
+//     setIsOpen(false);
+//   };
 
-  const handleSelectItem = (item: string) => {
-    setSelectedItem(item);
-    setIsOpen(false);
-  };
+//   const handleSelectItem = (item: string) => {
+//     setSelectedItem(item);
+//     setIsOpen(false);
+//   };
 
-  return (
-    <Dropdown
-      toggle={<DropdownToggle onToggle={() => setIsOpen(!isOpen)}>{selectedItem || "Select or add..."}</DropdownToggle>}
-      isOpen={isOpen}
-      dropdownItems={[
-        ...items.map((item) => (
-          <DropdownItem key={item} onClick={() => handleSelectItem(item)}>
-            {item}
-          </DropdownItem>
-        )),
-        <DropdownItem key="add-new" isDisabled>
-          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-            <input
-              type="text"
-              placeholder="Add new..."
-              value={newItem}
-              onChange={(e) => setNewItem(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") handleAddItem();
-              }}
-              style={{
-                flex: 1,
-                padding: "4px",
-                borderRadius: "4px",
-              }}
-            />
-            <Button variant="link" onClick={handleAddItem} isDisabled={newItem.trim() === ""} aria-label="Add new item">
-              ✓
-            </Button>
-          </div>
-        </DropdownItem>,
-      ]}
-    />
-  );
-}
+//   return (
+//     <Dropdown
+//       toggle={<DropdownToggle onToggle={() => setIsOpen(!isOpen)}>{selectedItem || "Select or add..."}</DropdownToggle>}
+//       isOpen={isOpen}
+//       dropdownItems={[
+//         ...items.map((item) => (
+//           <DropdownItem key={item} onClick={() => handleSelectItem(item)}>
+//             {item}
+//           </DropdownItem>
+//         )),
+//         <DropdownItem key="add-new" isDisabled>
+//           <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+//             <input
+//               type="text"
+//               placeholder="Add new..."
+//               value={newItem}
+//               onChange={(e) => setNewItem(e.target.value)}
+//               onKeyDown={(e) => {
+//                 if (e.key === "Enter") handleAddItem();
+//               }}
+//               style={{
+//                 flex: 1,
+//                 padding: "4px",
+//                 borderRadius: "4px",
+//               }}
+//             />
+//             <Button variant="link" onClick={handleAddItem} isDisabled={newItem.trim() === ""} aria-label="Add new item">
+//               ✓
+//             </Button>
+//           </div>
+//         </DropdownItem>,
+//       ]}
+//     />
+//   );
+// }
 
 export function Notifications({
   isOpen,
@@ -167,10 +167,8 @@ export function Notifications({
             const subject = subjectMatches.map((match) => match[1]);
             const body = bodyMatches.map((match) => match[1]);
             const expiresAt = expiresAtMatches.map((match) => match[1]);
-
             const notifications = [];
-            const maxLength = Math.max(tousers.length);
-            for (let i = 0; i < maxLength; i++) {
+            for (let i = 0; i < from.length; i++) {
               notifications.push({
                 from: from[i] || "",
                 tousers: tousers[i] || "",
@@ -216,6 +214,56 @@ export function Notifications({
       visitFlowElementsAndArtifacts(process, ({ element: e }) => {
         if (e["@_id"] === element?.["@_id"] && e.__$$element === element.__$$element) {
           setBpmn20Drools10MetaData(e, "elementname", e["@_name"] || "");
+          //     if (!e.ioSpecification) {
+          //       e.ioSpecification = {
+          //         "@_id": generateUuid(),
+          //         inputSet: [],
+          //         outputSet: [],
+          //         dataInput: [],
+          //         dataOutput: [],
+          //       };
+          //     }
+
+          //     e.dataInputAssociation ??= [];
+          //     e.dataOutputAssociation ??= [];
+
+          //       notifications.forEach((notification, index) => {
+          //         let dataInput = e.ioSpecification?.dataInput?.[index];
+          //         dataInput = {
+          //           "@_id": `${e["@_id"]}_${notification.type}InputX`,
+          //           "@_drools:dtype": "Object",
+          //           "@_itemSubjectRef": `_${e["@_id"]}_${notification.type}InputXItem`,
+          //           "@_name": notification.type,
+          //         };
+          //         e.ioSpecification?.dataInput?.push(dataInput);
+
+          //         let dataInputAssociation = e.dataInputAssociation?.find(
+          //           (association) => association.targetRef.__$$text === dataInput["@_id"]
+          //         );
+
+          //         if (!dataInputAssociation) {
+          //           dataInputAssociation = {
+          //             "@_id": `${e["@_id"]}_dataInputAssociation_${notification.type}`,
+          //             targetRef: { __$$text: dataInput["@_id"] },
+          //             assignment: [],
+          //           };
+          //           e.dataInputAssociation?.push(dataInputAssociation);
+          //         }
+          //         const newEntry = `from:${notification.from} tousers:${notification.tousers} togroups:${notification.togroups} toemails:${notification.toemails} replyTo:${notification.replyTo} subject:${notification.subject} body:${notification.body}@${notification.expiresAt}`;
+
+          //         dataInputAssociation.assignment = [
+          //           {
+          //             "@_id": `${e["@_id"]}_assignment_${notification.type}`,
+          //             from: { "@_id": `${e["@_id"]}`, __$$text: newEntry },
+          //             to: { "@_id": dataInput["@_id"], __$$text: dataInput["@_id"] },
+          //           },
+          //         ];
+          //       });
+          //     }
+          //   })
+          // })
+          //   }
+
           e.ioSpecification = {
             "@_id": generateUuid(),
             inputSet: [{ "@_id": generateUuid(), dataInputRefs: [] }],
@@ -336,7 +384,7 @@ export function Notifications({
                 <b>Body</b>
               </div>
             </GridItem>
-            <GridItem span={1} style={{ textAlign: "center" }}>
+            <GridItem span={1} style={{ textAlign: "right" }}>
               <Button variant={ButtonVariant.plain} style={{ paddingLeft: 0 }} onClick={addNotification}>
                 <PlusCircleIcon color="var(--pf-c-button--m-primary--BackgroundColor)" />
               </Button>
@@ -467,7 +515,7 @@ export function Notifications({
         <div className="kie-bpmn-editor--notifications--empty-state">
           <Bullseye>
             <EmptyState>
-              <EmptyStateIcon icon={CubesIcon} />
+              {/* <EmptyStateIcon icon={CubesIcon} /> */}
               <Title headingLevel="h4">No notifications yet</Title>
               <EmptyStateBody>
                 {"This represents the empty state for notifications. You can add notifications to get started."}

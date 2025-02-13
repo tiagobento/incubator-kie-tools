@@ -27,7 +27,7 @@ import { PropertiesPanelListEmptyState } from "../emptyState/PropertiesPanelList
 import { Grid, GridItem } from "@patternfly/react-core/dist/js/layouts/Grid";
 import { PlusCircleIcon } from "@patternfly/react-icons/dist/js/icons/plus-circle-icon";
 import { useMemo, useState } from "react";
-import { CubesIcon } from "@patternfly/react-icons/dist/js/icons/cubes-icon";
+// import { CubesIcon } from "@patternfly/react-icons/dist/js/icons/cubes-icon";
 
 import { TimesIcon } from "@patternfly/react-icons/dist/js/icons/times-icon";
 import { Normalized } from "../../normalization/normalize";
@@ -251,7 +251,7 @@ export function Correlations({ isOpen, onClose }: { isOpen: boolean; onClose: ()
         <div className={"kie-bpmn-editor--correlations--empty-state"}>
           <Bullseye>
             <EmptyState>
-              <EmptyStateIcon icon={CubesIcon} />
+              {/* <EmptyStateIcon icon={CubesIcon} /> */}
               <Title headingLevel="h4">{isReadOnly ? "No correlations" : "No correlations yet"}</Title>
               <EmptyStateBody style={{ padding: "0 25%" }}>
                 {`This represents an the empty state pattern in Patternfly 4. Hopefully it's simple enough to use but flexible enough to meet a variety of needs.`}

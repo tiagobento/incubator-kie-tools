@@ -19,7 +19,7 @@ import { Normalized } from "../../normalization/normalize";
 import { TextArea } from "@patternfly/react-core/dist/js/components/TextArea/TextArea";
 import { FormSelect } from "@patternfly/react-core/dist/js/components/FormSelect/FormSelect";
 import { FormSelectOption } from "@patternfly/react-core/dist/js/components/FormSelect/FormSelectOption";
-import { CubesIcon } from "@patternfly/react-icons/dist/js/icons/cubes-icon";
+// import { CubesIcon } from "@patternfly/react-icons/dist/js/icons/cubes-icon";
 import { generateUuid } from "@kie-tools/xyflow-react-kie-diagram/dist/uuid/uuid";
 import { Form } from "@patternfly/react-core/dist/js/components/Form/Form";
 
@@ -136,8 +136,7 @@ export function Reassignments({
             const periods = periodMatches.map((match) => parseInt(match[1]));
             const periodUnits = periodMatches.map((match) => match[2]);
             const reassignments = [];
-            const maxLength = Math.max(users.length);
-            for (let i = 0; i < maxLength; i++) {
+            for (let i = 0; i < users.length; i++) {
               reassignments.push({
                 users: users[i] || "",
                 groups: groups[i] || "",
@@ -262,7 +261,7 @@ export function Reassignments({
                 <b>Period</b>
               </div>
             </GridItem>
-            <GridItem span={1} style={{ textAlign: "center" }}>
+            <GridItem span={1} style={{ textAlign: "right" }}>
               <Button variant={ButtonVariant.plain} style={{ paddingLeft: 0 }} onClick={addReassignment}>
                 <PlusCircleIcon color="var(--pf-c-button--m-primary--BackgroundColor)" />
               </Button>
@@ -358,7 +357,7 @@ export function Reassignments({
         <div className="kie-bpmn-editor--reassignments--empty-state">
           <Bullseye>
             <EmptyState>
-              <EmptyStateIcon icon={CubesIcon} />
+              {/* <EmptyStateIcon icon={CubesIcon} /> */}
               <Title headingLevel="h4">No reassignments yet</Title>
               <EmptyStateBody>
                 {"This represents the empty state for reassignments. You can add reassignments to get started."}
