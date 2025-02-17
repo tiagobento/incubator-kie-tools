@@ -38,6 +38,7 @@ import { ToggleGroupItem } from "@patternfly/react-core/dist/js/components/Toggl
 import { addOrGetProcessAndDiagramElements } from "../../mutations/addOrGetProcessAndDiagramElements";
 import { FormSelect, FormSelectOption } from "@patternfly/react-core/dist/js/components/FormSelect";
 import { TextInput } from "@patternfly/react-core/dist/js/components/TextInput";
+import { TextArea } from "@patternfly/react-core/dist/js/components/TextArea/TextArea";
 
 export function BusinessRuleTaskProperties({
   businessRuleTask,
@@ -102,10 +103,27 @@ export function BusinessRuleTaskProperties({
         {businessRuleTask["@_implementation"] === BUSINESS_RULE_TASK_IMPLEMENTATIONS.drools && (
           <>
             <FormGroup label="Rule flow group">
-              <FormSelect id={"select"} value={undefined} isDisabled={isReadOnly}>
-                <FormSelectOption id={"none"} isPlaceholder={true} label={"-- None --"} />
-                {/* FIXME: Tiago */}
-              </FormSelect>
+              <TextArea
+                aria-label={"Signal"}
+                type={"text"}
+                isDisabled={isReadOnly}
+                value={businessRuleTask["@_drools:ruleFlowGroup"] || ""}
+                onChange={(newRuleFlowGroup: string) => {
+                  bpmnEditorStoreApi.setState((s) => {
+                    const { process } = addOrGetProcessAndDiagramElements({
+                      definitions: s.bpmn.model.definitions,
+                    });
+                    visitFlowElementsAndArtifacts(process, ({ element: e }) => {
+                      if (e["@_id"] === businessRuleTask["@_id"] && e.__$$element === businessRuleTask.__$$element) {
+                        e["@_drools:ruleFlowGroup"] = newRuleFlowGroup;
+                      }
+                    });
+                  });
+                }}
+                placeholder={"-- None --"}
+                style={{ resize: "vertical", minHeight: "40px" }}
+                rows={1}
+              />
             </FormGroup>
           </>
         )}{" "}

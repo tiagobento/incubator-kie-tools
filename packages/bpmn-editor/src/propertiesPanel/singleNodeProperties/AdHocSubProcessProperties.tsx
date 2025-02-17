@@ -17,7 +17,10 @@
  * under the License.
  */
 
-import { BPMN20__tAdHocSubProcess } from "@kie-tools/bpmn-marshaller/dist/schemas/bpmn-2_0/ts-gen/types";
+import {
+  BPMN20__tAdHocOrdering,
+  BPMN20__tAdHocSubProcess,
+} from "@kie-tools/bpmn-marshaller/dist/schemas/bpmn-2_0/ts-gen/types";
 import * as React from "react";
 import { Normalized } from "../../normalization/normalize";
 import { useBpmnEditorStore, useBpmnEditorStoreApi } from "../../store/StoreContext";
@@ -39,6 +42,7 @@ import {
 import { AdhocAutostartCheckbox } from "../adhocAutostartCheckbox/AdhocAutostartCheckbox";
 import { SlaDueDateInput } from "../slaDueDate/SlaDueDateInput";
 import { AsyncCheckbox } from "../asyncCheckbox/AsyncCheckbox";
+import { generateUuid } from "@kie-tools/xyflow-react-kie-diagram/dist/uuid/uuid";
 
 export function AdHocSubProcessProperties({
   adHocSubProcess,
@@ -48,6 +52,11 @@ export function AdHocSubProcessProperties({
   const bpmnEditorStoreApi = useBpmnEditorStoreApi();
 
   const isReadOnly = useBpmnEditorStore((s) => s.settings.isReadOnly);
+
+  const orderingOptions = [
+    { value: "Sequential", label: "Sequential" },
+    { value: "Parallel", label: "Parallel" },
+  ];
 
   return (
     <>
@@ -86,15 +95,45 @@ export function AdHocSubProcessProperties({
         <CodeInput
           label={"Ad-hoc completion condition"}
           languages={["MVEL", "Drools"]}
-          value={""} // FIXME: Tiago
-          onChange={(newCode) => {
-            // FIXME: Tiago
+          value={adHocSubProcess.completionCondition?.__$$text ?? ""}
+          onChange={(newCompletionConnditionValue) => {
+            bpmnEditorStoreApi.setState((s) => {
+              const { process } = addOrGetProcessAndDiagramElements({
+                definitions: s.bpmn.model.definitions,
+              });
+              visitFlowElementsAndArtifacts(process, ({ element: e }) => {
+                if (e["@_id"] === adHocSubProcess["@_id"] && e.__$$element === adHocSubProcess.__$$element) {
+                  e.completionCondition ??= { "@_id": generateUuid(), __$$text: "" };
+                  e.completionCondition.__$$text = newCompletionConnditionValue;
+                }
+              });
+            });
           }}
         />
 
         <FormGroup label="Ad-hoc ordering">
-          <FormSelect id={"select"} value={undefined} isDisabled={isReadOnly}>
-            <FormSelectOption id={"none"} isPlaceholder={true} label={"-- None --"} />
+          <FormSelect
+            id={"select"}
+            type={"text"}
+            isDisabled={isReadOnly}
+            value={adHocSubProcess?.["@_ordering"] ?? "Parallel"}
+            onChange={(newOrderingValue) => {
+              bpmnEditorStoreApi.setState((s) => {
+                const { process } = addOrGetProcessAndDiagramElements({
+                  definitions: s.bpmn.model.definitions,
+                });
+                visitFlowElementsAndArtifacts(process, ({ element: e }) => {
+                  if (e["@_id"] === adHocSubProcess["@_id"] && e.__$$element === adHocSubProcess.__$$element) {
+                    e["@_ordering"] = newOrderingValue as BPMN20__tAdHocOrdering;
+                  }
+                });
+              });
+            }}
+            rows={1}
+          >
+            {orderingOptions.map((option) => (
+              <FormSelectOption key={option.label} label={option.label} value={option.value} />
+            ))}
           </FormSelect>
         </FormGroup>
 
