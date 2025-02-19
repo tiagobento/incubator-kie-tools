@@ -98,6 +98,12 @@ const namesFromOtherTypes = [
   "NotCompletedReassign",
   "NotStartedNotify",
   "NotCompletedNotify",
+  "GroupId",
+  "Comment",
+  "Description",
+  "Priority",
+  "CreatedBy",
+  "Content",
 ];
 
 export function AssignmentsFormSection({
