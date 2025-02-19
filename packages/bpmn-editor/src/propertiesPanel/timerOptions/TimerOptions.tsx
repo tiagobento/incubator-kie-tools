@@ -14,7 +14,6 @@ import { Unpacked } from "@kie-tools/xyflow-react-kie-diagram/dist/tsExt/tsExt";
 import { generateUuid } from "@kie-tools/xyflow-react-kie-diagram/dist/uuid/uuid";
 import "./TimerOptions.css";
 import { DatePicker } from "@patternfly/react-core/dist/js/components/DatePicker";
-import { BPMN20__tFormalExpression } from "@kie-tools/bpmn-marshaller/dist/schemas/bpmn-2_0/ts-gen/types";
 
 export type WithTimer =
   | undefined
@@ -30,24 +29,42 @@ export function TimerOptions({ element }: { element: WithTimer }) {
   const [selectedOption, setSelectedOption] = useState<string | undefined>(undefined);
   const [isoCronType, setIsoCronType] = useState<string | undefined>("ISO");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [inputValue, setInputValue] = useState("");
-  const [selectedDate, setSelectedDate] = useState<string>("");
+  // const [selectedDate, setSelectedDate] = useState<string>("");
 
   const handleOptionChange = (value: string) => {
     setSelectedOption(value);
-    setInputValue("");
     setIsoCronType(undefined);
+    bpmnEditorStoreApi.setState((s) => {
+      const { process } = addOrGetProcessAndDiagramElements({
+        definitions: s.bpmn.model.definitions,
+      });
+      visitFlowElementsAndArtifacts(process, ({ element: e }) => {
+        if (e["@_id"] === element?.["@_id"] && e.__$$element === element.__$$element) {
+          let timerEventDefinition = e.eventDefinition?.find((event) => event.__$$element === "timerEventDefinition");
+          if (!timerEventDefinition) {
+            timerEventDefinition = {
+              "@_id": generateUuid(),
+              __$$element: "timerEventDefinition",
+            };
+            e.eventDefinition = e.eventDefinition || [];
+            e.eventDefinition.push(timerEventDefinition);
+          }
+          timerEventDefinition.timeCycle = undefined;
+          timerEventDefinition.timeDate = undefined;
+          timerEventDefinition.timeDuration = undefined;
+        }
+      });
+    });
   };
 
   const handleDropdownToggle = () => {
     setIsDropdownOpen(!isDropdownOpen);
   };
 
-  const handleDateChange = (event: React.FormEvent<HTMLInputElement>, value: string, date?: Date) => {
-    setSelectedDate(value);
-  };
+  // const handleDateChange = (event: React.FormEvent<HTMLInputElement>, value: string, date?: Date) => {
+  //   setSelectedDate(value);
+  // };
   const bpmnEditorStoreApi = useBpmnEditorStoreApi();
-  const settings = useBpmnEditorStore((s) => s.settings);
 
   return (
     <FormGroup label="Timer options" fieldId="timer-options">
@@ -65,7 +82,9 @@ export function TimerOptions({ element }: { element: WithTimer }) {
           onChange={() => handleOptionChange("fire-once")}
           isDisabled={isReadOnly}
         />
-        {selectedOption === "fire-once" && (
+        {(selectedOption === "fire-once" ||
+          !!element?.eventDefinition?.find((eventDef) => eventDef.__$$element === "timerEventDefinition")?.timeDuration
+            ?.__$$text) && (
           <TextInput
             id="fire-once-input"
             value={
@@ -86,11 +105,10 @@ export function TimerOptions({ element }: { element: WithTimer }) {
                       "@_id": generateUuid(),
                       __$$element: "timerEventDefinition",
                     };
-
-                    e.eventDefinition ??= [];
-                    e.eventDefinition.push(timerEventDefinition);
-
-                    timerEventDefinition.timeDuration = timerEventDefinition.timeDuration || { "@_id": generateUuid() };
+                    timerEventDefinition.timeDuration ??= {
+                      "@_id": generateUuid(),
+                      __$$text: newTimeDuration || "",
+                    };
                     timerEventDefinition.timeDuration.__$$text = newTimeDuration;
                   }
                 });
@@ -118,7 +136,9 @@ export function TimerOptions({ element }: { element: WithTimer }) {
           onChange={() => handleOptionChange("fire-multiple")}
           isDisabled={isReadOnly}
         />
-        {selectedOption === "fire-multiple" && (
+        {(selectedOption === "fire-multiple" ||
+          !!element?.eventDefinition?.find((eventDef) => eventDef.__$$element === "timerEventDefinition")?.timeCycle
+            ?.__$$text) && (
           <div className="timer-options-multiple">
             <div className="dropdown-group">
               <Select
@@ -156,11 +176,10 @@ export function TimerOptions({ element }: { element: WithTimer }) {
                           "@_id": generateUuid(),
                           __$$element: "timerEventDefinition",
                         };
-
-                        e.eventDefinition ??= [];
-                        e.eventDefinition.push(timerEventDefinition);
-
-                        timerEventDefinition.timeCycle = timerEventDefinition.timeCycle || { "@_id": generateUuid() };
+                        timerEventDefinition.timeCycle ??= {
+                          "@_id": generateUuid(),
+                          __$$text: newTimeCycle || "",
+                        };
                         timerEventDefinition.timeCycle.__$$text = newTimeCycle;
                       }
                     });
@@ -190,7 +209,9 @@ export function TimerOptions({ element }: { element: WithTimer }) {
           onChange={() => handleOptionChange("fire-specific-date")}
           isDisabled={isReadOnly}
         />
-        {selectedOption === "fire-specific-date" && (
+        {(selectedOption === "fire-specific-date" ||
+          !!element?.eventDefinition?.find((eventDef) => eventDef.__$$element === "timerEventDefinition")?.timeDate
+            ?.__$$text) && (
           <div className="timer-options-specific-date">
             <TextInput
               id="specific-date-input"
@@ -212,11 +233,10 @@ export function TimerOptions({ element }: { element: WithTimer }) {
                         "@_id": generateUuid(),
                         __$$element: "timerEventDefinition",
                       };
-
-                      e.eventDefinition ??= [];
-                      e.eventDefinition.push(timerEventDefinition);
-
-                      timerEventDefinition.timeDate = timerEventDefinition.timeDate || { "@_id": generateUuid() };
+                      timerEventDefinition.timeDate ??= {
+                        "@_id": generateUuid(),
+                        __$$text: newTimeDate || "",
+                      };
                       timerEventDefinition.timeDate.__$$text = newTimeDate;
                     }
                   });
@@ -227,7 +247,7 @@ export function TimerOptions({ element }: { element: WithTimer }) {
               placeholder="Enter date value or expression #{expression}"
               className="timer-input"
             />
-            <div className="datepicker-group">
+            {/* <div className="datepicker-group">
               <DatePicker
                 value={selectedDate}
                 onChange={handleDateChange}
@@ -237,7 +257,7 @@ export function TimerOptions({ element }: { element: WithTimer }) {
                   "aria-label": "Date picker input",
                 }}
               />
-            </div>
+            </div> */}
           </div>
         )}
       </div>

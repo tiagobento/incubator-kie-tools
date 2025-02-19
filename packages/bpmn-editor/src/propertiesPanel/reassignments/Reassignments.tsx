@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { useBpmnEditorStore, useBpmnEditorStoreApi } from "../../store/StoreContext";
 import { Button, ButtonVariant } from "@patternfly/react-core/dist/js/components/Button/Button";
 import { Modal, ModalVariant } from "@patternfly/react-core/dist/js/components/Modal";
@@ -78,6 +78,33 @@ function DropdownWithAdd({ items, setItems }: { items: string[]; setItems: (item
   );
 }
 
+type Reassignment = {
+  users: string;
+  groups: string;
+  type: string;
+  period: number;
+  periodUnit: string;
+};
+
+const typeOptions = [
+  { value: "NotStartedReassign", label: "Not Started" },
+  { value: "NotCompletedReassign", label: "Not Completed" },
+];
+
+const periodUnits = [
+  { value: "m", label: "minutes" },
+  { value: "h", label: "hours" },
+  { value: "d", label: "days" },
+  { value: "M", label: "months" },
+  { value: "y", label: "years" },
+];
+
+const entryStyle = {
+  padding: "4px",
+  margin: "8px",
+  width: "calc(100% - 2 * 4px - 2 * 8px)",
+};
+
 export function Reassignments({
   isOpen,
   onClose,
@@ -87,79 +114,77 @@ export function Reassignments({
   onClose: () => void;
   element: Normalized<BPMN20__tUserTask> & { __$$element: "userTask" };
 }) {
-  const [reassignments, setReassignments] = useState<
-    { users: string; groups: string; type: string; period: number | ""; periodUnit: string }[]
-  >([]);
+  const bpmnEditorStoreApi = useBpmnEditorStoreApi();
+  const [reassignments, setReassignments] = useState<Reassignment[]>([]);
   const [hoveredIndex, setHoveredIndex] = useState<number | undefined>(undefined);
-  const addReassignment = () => {
+
+  const addReassignment = useCallback(() => {
     setReassignments([
       ...reassignments,
-      { users: "", groups: "", type: "NotStartedReassign", period: "", periodUnit: "m" },
+      { users: "", groups: "", type: "NotStartedReassign", period: 0, periodUnit: "m" },
     ]);
-  };
-  const typeOptions = [
-    { value: "NotStartedReassign", label: "Not Started" },
-    { value: "NotCompletedReassign", label: "Not Completed" },
-  ];
-  const periodUnits = [
-    { value: "m", label: "minutes" },
-    { value: "h", label: "hours" },
-    { value: "d", label: "days" },
-    { value: "M", label: "months" },
-    { value: "y", label: "years" },
-  ];
-  const removeReassignment = (index: number) => {
-    setReassignments(reassignments.filter((_, i) => i !== index));
-  };
-  const handleInputChange = (index: number, field: string, value: string | number) => {
+  }, [reassignments]);
+
+  const removeReassignment = useCallback(
+    (index: number) => {
+      setReassignments(reassignments.filter((_, i) => i !== index));
+    },
+    [reassignments]
+  );
+
+  const handleInputChange = useCallback((index: number, propertyName: keyof Reassignment, value: string | number) => {
     setReassignments((prevReassignments) => {
       const updatedReassignments = [...prevReassignments];
-      updatedReassignments[index] = { ...updatedReassignments[index], [field]: value };
+      updatedReassignments[index] = { ...updatedReassignments[index], [propertyName]: value };
       return updatedReassignments;
     });
-  };
+  }, []);
+
+  //populates intermediary `reassignments` state from the model
   useEffect(() => {
-    if (isOpen && element) {
-      const extractedReassignments = element?.dataInputAssociation
-        ?.filter((association) => association.targetRef?.__$$text.includes("Reassign"))
-        ?.map((association) => {
-          const assignment = association.assignment?.[0];
-
-          if (assignment) {
-            const reassignmentText = assignment.from.__$$text || "";
-            const usersMatches = [...reassignmentText.matchAll(/users:([^ |]*)/g)];
-            const groupsMatches = [...reassignmentText.matchAll(/groups:([^ \]]*)/g)];
-            const periodMatches = [...reassignmentText.matchAll(/(\d+)([mhdMy])/g)];
-
-            const users = usersMatches.map((match) => match[1]);
-            const groups = groupsMatches.map((match) => match[1]);
-            const periods = periodMatches.map((match) => parseInt(match[1]));
-            const periodUnits = periodMatches.map((match) => match[2]);
-            const reassignments = [];
-            for (let i = 0; i < users.length; i++) {
-              reassignments.push({
-                users: users[i] || "",
-                groups: groups[i] || "",
-                type: association.targetRef.__$$text.includes("NotStartedReassign")
-                  ? "NotStartedReassign"
-                  : "NotCompletedReassign",
-                period: periods[i] || "",
-                periodUnit: periodUnits[i] || "m",
-              });
-            }
-            return reassignments;
-          }
-        })
-        .flat()
-        .filter(
-          (item): item is { users: string; groups: string; type: string; period: number | ""; periodUnit: string } =>
-            item !== null
-        );
-      setReassignments(extractedReassignments || []);
+    if (!isOpen || !element) {
+      return;
     }
+    const extractedReassignments = element?.dataInputAssociation
+      ?.filter(
+        (dataInputAssociation) =>
+          dataInputAssociation.targetRef?.__$$text.includes("NotStartedReassign") ||
+          dataInputAssociation.targetRef?.__$$text.includes("NotCompletedReassign")
+      )
+      ?.flatMap((association) => {
+        const assignment = association.assignment?.[0];
+        if (!assignment) {
+          return [];
+        }
+        const reassignmentText = assignment.from.__$$text || "";
+        const usersMatches = [...reassignmentText.matchAll(/users:([^|]*)/g)];
+        const groupsMatches = [...reassignmentText.matchAll(/groups:([^\]]*)/g)];
+        const periodMatches = [...reassignmentText.matchAll(/(\d+)([mhdMy])/g)];
+
+        const users = usersMatches.map((match) => match[1]);
+        const groups = groupsMatches.map((match) => match[1]);
+        const periods = periodMatches.map((match) => parseInt(match[1]));
+        const periodUnits = periodMatches.map((match) => match[2]);
+
+        const reassignments = [];
+        for (let i = 0; i < users.length; i++) {
+          reassignments.push({
+            users: users[i] || "",
+            groups: groups[i] || "",
+            type: association.targetRef.__$$text.includes("NotStartedReassign")
+              ? "NotStartedReassign"
+              : "NotCompletedReassign",
+            period: periods[i] || 0,
+            periodUnit: periodUnits[i] || "m",
+          });
+        }
+        return reassignments;
+      });
+
+    setReassignments(extractedReassignments || []);
   }, [isOpen, element]);
-  const bpmnEditorStoreApi = useBpmnEditorStoreApi();
-  const handleSubmit = () => {
+
+  const handleSubmit = useCallback(() => {
     bpmnEditorStoreApi.setState((s) => {
       const { process } = addOrGetProcessAndDiagramElements({
         definitions: s.bpmn.model.definitions,
@@ -167,14 +192,33 @@ export function Reassignments({
       visitFlowElementsAndArtifacts(process, ({ element: e }) => {
         if (e["@_id"] === element?.["@_id"] && e.__$$element === element.__$$element) {
           setBpmn20Drools10MetaData(e, "elementname", e["@_name"] || "");
-          e.ioSpecification = {
+          e.ioSpecification ??= {
             "@_id": generateUuid(),
-            inputSet: [{ "@_id": generateUuid(), dataInputRefs: [] }],
+            inputSet: [],
             outputSet: [],
             dataInput: [],
           };
-          e.ioSpecification.dataInput = [];
-          e.dataInputAssociation = [];
+          e.ioSpecification.dataInput ??= [];
+          e.dataInputAssociation ??= [];
+
+          e.ioSpecification.dataInput = e.ioSpecification.dataInput?.filter(
+            (dataInput) =>
+              !dataInput["@_name"]?.includes("NotStartedReassign") &&
+              !dataInput["@_name"]?.includes("NotCompletedReassign")
+          );
+          if (e.ioSpecification?.inputSet?.[0]?.dataInputRefs) {
+            e.ioSpecification.inputSet[0].dataInputRefs = e.ioSpecification.inputSet[0].dataInputRefs?.filter(
+              (dataInputRefs) =>
+                !dataInputRefs.__$$text.includes("NotStartedReassign") &&
+                !dataInputRefs.__$$text?.includes("NotCompletedReassign")
+            );
+          }
+          e.dataInputAssociation = e.dataInputAssociation?.filter(
+            (dataInputAssociation) =>
+              !dataInputAssociation.targetRef.__$$text.includes("NotStartedReassign") &&
+              !dataInputAssociation.targetRef.__$$text.includes("NotCompletedReassign")
+          );
+
           reassignments.forEach((reassignment) => {
             let dataInput = e?.ioSpecification?.dataInput?.find((input) => input["@_name"] === reassignment.type);
             if (!dataInput) {
@@ -186,8 +230,21 @@ export function Reassignments({
               };
               e?.ioSpecification?.dataInput?.push(dataInput);
             }
-            if (!e?.ioSpecification?.inputSet[0]?.dataInputRefs?.some((ref) => ref.__$$text === dataInput["@_id"])) {
-              e?.ioSpecification?.inputSet[0]?.dataInputRefs?.push({ __$$text: dataInput["@_id"] });
+            let inputSet = e.ioSpecification?.inputSet[0];
+            if (!inputSet) {
+              inputSet = {
+                "@_id": `${e["@_id"]}_${reassignment.type}InputX`,
+                dataInputRefs: [
+                  {
+                    __$$text: `${e["@_id"]}_${reassignment.type}InputX`,
+                  },
+                ],
+              };
+              e.ioSpecification?.inputSet.push(inputSet);
+            } else {
+              e.ioSpecification?.inputSet[0].dataInputRefs?.push({
+                __$$text: `${e["@_id"]}_${reassignment.type}InputX`,
+              });
             }
             let dataInputAssociation = e.dataInputAssociation?.find(
               (association) => association.targetRef.__$$text === dataInput["@_id"]
@@ -203,7 +260,7 @@ export function Reassignments({
             const existingAssignment = dataInputAssociation?.assignment?.find(
               (assignment) => assignment["@_id"] === `${e["@_id"]}_assignment_${reassignment.type}`
             );
-            const newEntry = `users:${reassignment.users} groups:${reassignment.groups} ${reassignment.period}${reassignment.periodUnit}`;
+            const newEntry = `users:${reassignment.users}|groups:${reassignment.groups}]@[${reassignment.period}${reassignment.periodUnit}`;
             if (existingAssignment) {
               const existingValues = new Set(existingAssignment?.from?.__$$text?.split(" "));
               const newValues = newEntry.split(" ");
@@ -223,12 +280,101 @@ export function Reassignments({
         }
       });
     });
-  };
-  const entryStyle = {
-    padding: "4px",
-    margin: "8px",
-    width: "calc(100% - 2 * 4px - 2 * 8px)",
-  };
+  }, [bpmnEditorStoreApi, element, reassignments]);
+
+  // const handleSubmit = useCallback(() => {
+  //   bpmnEditorStoreApi.setState((s) => {
+  //     const { process } = addOrGetProcessAndDiagramElements({
+  //       definitions: s.bpmn.model.definitions,
+  //     });
+  //     visitFlowElementsAndArtifacts(process, ({ element: e }) => {
+  //       if (e["@_id"] === element?.["@_id"] && e.__$$element === element.__$$element) {
+  //         setBpmn20Drools10MetaData(e, "elementname", e["@_name"] || "");
+  //         e.ioSpecification ??= {
+  //           "@_id": generateUuid(),
+  //           inputSet: [],
+  //           outputSet: [],
+  //           dataInput: [],
+  //         };
+  //         e.dataInputAssociation ??= [];
+
+  //         e.ioSpecification.dataInput = e.ioSpecification.dataInput?.filter(
+  //           (dataInput) =>
+  //             !dataInput["@_name"]?.includes("NotStartedReassign") ||
+  //             !dataInput["@_name"]?.includes("NotCompletedReassign")
+  //         );
+  //         if (e.ioSpecification?.inputSet?.[0]?.dataInputRefs) {
+  //           e.ioSpecification.inputSet[0].dataInputRefs = e.ioSpecification.inputSet[0].dataInputRefs?.filter(
+  //             (dataInputRefs) =>
+  //               !dataInputRefs.__$$text.includes("NotStartedReassign") ||
+  //               !dataInputRefs.__$$text?.includes("NotCompletedReassign")
+  //           );
+  //         }
+  //         e.dataInputAssociation = e.dataInputAssociation?.filter(
+  //           (dataInputAssociation) =>
+  //             !dataInputAssociation.targetRef.__$$text.includes("NotStartedReassign") ||
+  //             !dataInputAssociation.targetRef.__$$text.includes("NotCompletedReassign")
+  //         );
+
+  //         reassignments.forEach((reassignment, index) => {
+  //           let dataInput = e.ioSpecification?.dataInput?.[index];
+  //           if (!dataInput) {
+  //             dataInput = {
+  //               "@_id": `${e["@_id"]}_${reassignment.type}InputX`,
+  //               "@_drools:dtype": "Object",
+  //               "@_itemSubjectRef": `_${e["@_id"]}_${reassignment.type}InputX`,
+  //               "@_name": reassignment.type,
+  //             };
+  //             e.ioSpecification?.dataInput?.push(dataInput);
+  //           }
+
+  //           let inputSet = e.ioSpecification?.inputSet[0];
+  //           if (!inputSet) {
+  //             inputSet = {
+  //               "@_id": dataInput["@_id"],
+  //               dataInputRefs: [
+  //                 {
+  //                   __$$text: dataInput["@_id"],
+  //                 },
+  //               ],
+  //             };
+  //             e.ioSpecification?.inputSet.push(inputSet);
+  //           } else {
+  //             e.ioSpecification?.inputSet[0].dataInputRefs?.push({ __$$text: dataInput["@_id"] });
+  //           }
+
+  //           let dataInputAssociation = e.dataInputAssociation?.find(
+  //             (association) => association.targetRef.__$$text === dataInput["@_id"]
+  //           );
+
+  //           if (!dataInputAssociation) {
+  //             dataInputAssociation = {
+  //               "@_id": `${e["@_id"]}_dataInputAssociation_${reassignment.type}`,
+  //               targetRef: { __$$text: dataInput["@_id"] },
+  //             };
+  //             e.dataInputAssociation?.push(dataInputAssociation);
+  //           }
+  //           if (!dataInputAssociation.assignment) {
+  //           dataInputAssociation.assignment = [
+  //             {
+  //               "@_id": `${e["@_id"]}_assignment_${reassignment.type}`,
+  //               from: {
+  //                 "@_id": `${e["@_id"]}`,
+  //                 __$$text: `users:${reassignment.users} groups:${reassignment.groups} ${reassignment.period}${reassignment.periodUnit}`,
+  //               },
+  //               to: { "@_id": dataInput["@_id"], __$$text: dataInput["@_id"] },
+  //             },
+  //           ];
+  //         }
+  //         else {
+  //           dataInputAssociation.assignment[0].from.__$$text += `users:${reassignment.users} groups:${reassignment.groups} ${reassignment.period}${reassignment.periodUnit}`
+  //         }
+  //         });
+  //       }
+  //     });
+  //   });
+  // }, [bpmnEditorStoreApi, element, reassignments]);
+
   return (
     <Modal
       className="kie-bpmn-editor--reassignments--modal"

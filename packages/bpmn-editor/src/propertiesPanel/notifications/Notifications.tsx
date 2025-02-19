@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { useBpmnEditorStore, useBpmnEditorStoreApi } from "../../store/StoreContext";
 import { Button, ButtonVariant } from "@patternfly/react-core/dist/js/components/Button/Button";
 import { Modal, ModalVariant } from "@patternfly/react-core/dist/js/components/Modal";
@@ -23,60 +23,28 @@ import { FormSelectOption } from "@patternfly/react-core/dist/js/components/Form
 import { generateUuid } from "@kie-tools/xyflow-react-kie-diagram/dist/uuid/uuid";
 import { Form } from "@patternfly/react-core/dist/js/components/Form/Form";
 
-// function DropdownWithAdd({ items, setItems }: { items: string[]; setItems: (items: string[]) => void }) {
-//   const [isOpen, setIsOpen] = useState(false);
-//   const [newItem, setNewItem] = useState("");
-//   const [selectedItem, setSelectedItem] = useState<string | undefined>(undefined);
+type Notification = {
+  from: string;
+  tousers: string;
+  togroups: string;
+  toemails: string;
+  replyTo: string;
+  subject: string;
+  body: string;
+  type: string;
+  expiresAt: string;
+};
 
-//   const handleAddItem = () => {
-//     if (newItem && !items.includes(newItem)) {
-//       setItems([...items, newItem]);
-//       setSelectedItem(newItem);
-//     }
-//     setNewItem("");
-//     setIsOpen(false);
-//   };
+const typeOptions = [
+  { value: "NotStartedNotify", label: "Not Started" },
+  { value: "NotCompletedNotify", label: "Not Completed" },
+];
 
-//   const handleSelectItem = (item: string) => {
-//     setSelectedItem(item);
-//     setIsOpen(false);
-//   };
-
-//   return (
-//     <Dropdown
-//       toggle={<DropdownToggle onToggle={() => setIsOpen(!isOpen)}>{selectedItem || "Select or add..."}</DropdownToggle>}
-//       isOpen={isOpen}
-//       dropdownItems={[
-//         ...items.map((item) => (
-//           <DropdownItem key={item} onClick={() => handleSelectItem(item)}>
-//             {item}
-//           </DropdownItem>
-//         )),
-//         <DropdownItem key="add-new" isDisabled>
-//           <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-//             <input
-//               type="text"
-//               placeholder="Add new..."
-//               value={newItem}
-//               onChange={(e) => setNewItem(e.target.value)}
-//               onKeyDown={(e) => {
-//                 if (e.key === "Enter") handleAddItem();
-//               }}
-//               style={{
-//                 flex: 1,
-//                 padding: "4px",
-//                 borderRadius: "4px",
-//               }}
-//             />
-//             <Button variant="link" onClick={handleAddItem} isDisabled={newItem.trim() === ""} aria-label="Add new item">
-//               ✓
-//             </Button>
-//           </div>
-//         </DropdownItem>,
-//       ]}
-//     />
-//   );
-// }
+const entryStyle = {
+  padding: "4px",
+  margin: "8px",
+  width: "calc(100% - 2 * 4px - 2 * 8px)",
+};
 
 export function Notifications({
   isOpen,
@@ -87,21 +55,11 @@ export function Notifications({
   onClose: () => void;
   element: Normalized<BPMN20__tUserTask> & { __$$element: "userTask" };
 }) {
-  const [notifications, setNotifications] = useState<
-    {
-      from: string;
-      tousers: string;
-      togroups: string;
-      toemails: string;
-      replyTo: string;
-      subject: string;
-      body: string;
-      type: string;
-      expiresAt: string;
-    }[]
-  >([]);
+  const bpmnEditorStoreApi = useBpmnEditorStoreApi();
+  const [notifications, setNotifications] = useState<Notification[]>([]);
   const [hoveredIndex, setHoveredIndex] = useState<number | undefined>(undefined);
-  const addNotification = () => {
+
+  const addNotification = useCallback(() => {
     setNotifications([
       ...notifications,
       {
@@ -116,97 +74,83 @@ export function Notifications({
         expiresAt: "",
       },
     ]);
-  };
-  const typeOptions = [
-    { value: "NotStartedNotify", label: "Not Started" },
-    { value: "NotCompletedNotify", label: "Not Completed" },
-  ];
-  const periodUnits = [
-    { value: "m", label: "minutes" },
-    { value: "h", label: "hours" },
-    { value: "d", label: "days" },
-    { value: "M", label: "months" },
-    { value: "y", label: "years" },
-  ];
-  const removeNotification = (index: number) => {
-    setNotifications(notifications.filter((_, i) => i !== index));
-  };
-  const handleInputChange = (index: number, field: string, value: string | number) => {
-    console.log(`Updating field: ${field}, value: ${value}`); // Log to debug
+  }, [notifications]);
+
+  const removeNotification = useCallback(
+    (index: number) => {
+      setNotifications(notifications.filter((_, i) => i !== index));
+    },
+    [notifications]
+  );
+
+  const handleInputChange = useCallback((index: number, propertyName: keyof Notification, value: string | number) => {
     setNotifications((prevNotifications) => {
       const updatedNotifications = [...prevNotifications];
-      updatedNotifications[index] = { ...updatedNotifications[index], [field]: value };
+      updatedNotifications[index] = { ...updatedNotifications[index], [propertyName]: value };
       return updatedNotifications;
     });
-  };
-  useEffect(() => {
-    if (isOpen && element) {
-      const extractedNotifications = element?.dataInputAssociation
-        ?.filter((association) => association.targetRef?.__$$text.includes("Notify"))
-        ?.map((association) => {
-          const assignment = association.assignment?.[0];
-          if (assignment) {
-            const notificationText = assignment.from.__$$text || "";
-            const fromMatches = [...notificationText.matchAll(/from:([^ |]*)/g)];
-            const bodyMatches = [...notificationText.matchAll(/body:([^ @\]]*)/g)];
-            const subjectMatches = [...notificationText.matchAll(/subject:([^ |]*)/g)];
-            const toEmailsMatches = [...notificationText.matchAll(/toemails:([^ |]*)/g)];
-            const replyToMatches = [...notificationText.matchAll(/replyTo:([^ |]*)/g)];
-            const usersMatches = [...notificationText.matchAll(/tousers:([^ |]*)/g)];
-            const groupsMatches = [...notificationText.matchAll(/togroups:([^ |]*)/g)];
-            let expiresAtMatches = [...notificationText.matchAll(/\]@\[([^ |]*)/g)];
-            if (expiresAtMatches.length === 0) {
-              expiresAtMatches = [...notificationText.matchAll(/@([^@]*)$/g)];
-            }
+  }, []);
 
-            const from = fromMatches.map((match) => match[1]);
-            const tousers = usersMatches.map((match) => match[1]);
-            const togroups = groupsMatches.map((match) => match[1]);
-            const toemails = toEmailsMatches.map((match) => match[1]);
-            const replyTo = replyToMatches.map((match) => match[1]);
-            const subject = subjectMatches.map((match) => match[1]);
-            const body = bodyMatches.map((match) => match[1]);
-            const expiresAt = expiresAtMatches.map((match) => match[1]);
-            const notifications = [];
-            for (let i = 0; i < from.length; i++) {
-              notifications.push({
-                from: from[i] || "",
-                tousers: tousers[i] || "",
-                togroups: togroups[i] || "",
-                toemails: toemails[i] || "",
-                replyTo: replyTo[i] || "",
-                subject: subject[i] || "",
-                body: body[i] || "",
-                expiresAt: expiresAt[i] || "",
-                type: association.targetRef.__$$text.includes("NotStartedNotify")
-                  ? "NotStartedNotify"
-                  : "NotCompletedNotify",
-              });
-            }
-            return notifications;
-          }
-        })
-        .flat()
-        .filter(
-          (
-            item
-          ): item is {
-            from: string;
-            expiresAt: string;
-            tousers: string;
-            togroups: string;
-            toemails: string;
-            replyTo: string;
-            subject: string;
-            body: string;
-            type: string;
-          } => item !== null
-        );
-      setNotifications(extractedNotifications || []);
+  //populates intermediary `notifications` state from the model
+  useEffect(() => {
+    if (!isOpen || !element) {
+      return;
     }
+
+    const extractedNotifications = element?.dataInputAssociation
+      ?.filter(
+        (dataInputAssociation) =>
+          dataInputAssociation.targetRef?.__$$text.includes("NotStartedNotify") ||
+          dataInputAssociation.targetRef?.__$$text.includes("NotCompletedNotify")
+      )
+      ?.flatMap((association) => {
+        const assignment = association.assignment?.[0];
+        if (!assignment) {
+          return [];
+        }
+
+        const notificationText = assignment.from.__$$text || "";
+        const fromMatches = [...notificationText.matchAll(/from:([^|]*)/g)];
+        const bodyMatches = [...notificationText.matchAll(/body:([^@\]]*)/g)];
+        const subjectMatches = [...notificationText.matchAll(/subject:([^|]*)/g)];
+        const toEmailsMatches = [...notificationText.matchAll(/toemails:([^|]*)/g)];
+        const replyToMatches = [...notificationText.matchAll(/replyTo:([^|]*)/g)];
+        const usersMatches = [...notificationText.matchAll(/tousers:([^|]*)/g)];
+        const groupsMatches = [...notificationText.matchAll(/togroups:([^|]*)/g)];
+        const expiresAtMatches = [...notificationText.matchAll(/\]@\[([^\]]*)/g)];
+
+        const from = fromMatches.map((match) => match[1]);
+        const tousers = usersMatches.map((match) => match[1]);
+        const togroups = groupsMatches.map((match) => match[1]);
+        const toemails = toEmailsMatches.map((match) => match[1]);
+        const replyTo = replyToMatches.map((match) => match[1]);
+        const subject = subjectMatches.map((match) => match[1]);
+        const body = bodyMatches.map((match) => match[1]);
+        const expiresAt = expiresAtMatches.map((match) => match[1]);
+
+        const notifications = [];
+        for (let i = 0; i < from.length; i++) {
+          notifications.push({
+            from: from[i] || "",
+            tousers: tousers[i] || "",
+            togroups: togroups[i] || "",
+            toemails: toemails[i] || "",
+            replyTo: replyTo[i] || "",
+            subject: subject[i] || "",
+            body: body[i] || "",
+            expiresAt: expiresAt[i] || "",
+            type: association.targetRef.__$$text.includes("NotStartedNotify")
+              ? "NotStartedNotify"
+              : "NotCompletedNotify",
+          });
+        }
+        return notifications;
+      });
+
+    setNotifications(extractedNotifications || []);
   }, [isOpen, element]);
-  const bpmnEditorStoreApi = useBpmnEditorStoreApi();
-  const handleSubmit = () => {
+
+  const handleSubmit = useCallback(() => {
     bpmnEditorStoreApi.setState((s) => {
       const { process } = addOrGetProcessAndDiagramElements({
         definitions: s.bpmn.model.definitions,
@@ -214,64 +158,33 @@ export function Notifications({
       visitFlowElementsAndArtifacts(process, ({ element: e }) => {
         if (e["@_id"] === element?.["@_id"] && e.__$$element === element.__$$element) {
           setBpmn20Drools10MetaData(e, "elementname", e["@_name"] || "");
-          //     if (!e.ioSpecification) {
-          //       e.ioSpecification = {
-          //         "@_id": generateUuid(),
-          //         inputSet: [],
-          //         outputSet: [],
-          //         dataInput: [],
-          //         dataOutput: [],
-          //       };
-          //     }
 
-          //     e.dataInputAssociation ??= [];
-          //     e.dataOutputAssociation ??= [];
-
-          //       notifications.forEach((notification, index) => {
-          //         let dataInput = e.ioSpecification?.dataInput?.[index];
-          //         dataInput = {
-          //           "@_id": `${e["@_id"]}_${notification.type}InputX`,
-          //           "@_drools:dtype": "Object",
-          //           "@_itemSubjectRef": `_${e["@_id"]}_${notification.type}InputXItem`,
-          //           "@_name": notification.type,
-          //         };
-          //         e.ioSpecification?.dataInput?.push(dataInput);
-
-          //         let dataInputAssociation = e.dataInputAssociation?.find(
-          //           (association) => association.targetRef.__$$text === dataInput["@_id"]
-          //         );
-
-          //         if (!dataInputAssociation) {
-          //           dataInputAssociation = {
-          //             "@_id": `${e["@_id"]}_dataInputAssociation_${notification.type}`,
-          //             targetRef: { __$$text: dataInput["@_id"] },
-          //             assignment: [],
-          //           };
-          //           e.dataInputAssociation?.push(dataInputAssociation);
-          //         }
-          //         const newEntry = `from:${notification.from} tousers:${notification.tousers} togroups:${notification.togroups} toemails:${notification.toemails} replyTo:${notification.replyTo} subject:${notification.subject} body:${notification.body}@${notification.expiresAt}`;
-
-          //         dataInputAssociation.assignment = [
-          //           {
-          //             "@_id": `${e["@_id"]}_assignment_${notification.type}`,
-          //             from: { "@_id": `${e["@_id"]}`, __$$text: newEntry },
-          //             to: { "@_id": dataInput["@_id"], __$$text: dataInput["@_id"] },
-          //           },
-          //         ];
-          //       });
-          //     }
-          //   })
-          // })
-          //   }
-
-          e.ioSpecification = {
+          e.ioSpecification ??= {
             "@_id": generateUuid(),
             inputSet: [{ "@_id": generateUuid(), dataInputRefs: [] }],
             outputSet: [],
             dataInput: [],
           };
-          e.ioSpecification.dataInput = [];
-          e.dataInputAssociation = [];
+          e.ioSpecification.dataInput ??= [];
+          e.dataInputAssociation ??= [];
+
+          e.ioSpecification.dataInput = e.ioSpecification.dataInput?.filter(
+            (dataInput) =>
+              !dataInput["@_name"]?.includes("NotStartedNotify") && !dataInput["@_name"]?.includes("NotCompletedNotify")
+          );
+          if (e.ioSpecification?.inputSet?.[0]?.dataInputRefs) {
+            e.ioSpecification.inputSet[0].dataInputRefs = e.ioSpecification.inputSet[0].dataInputRefs?.filter(
+              (dataInputRefs) =>
+                !dataInputRefs.__$$text.includes("NotStartedNotify") &&
+                !dataInputRefs.__$$text?.includes("NotCompletedNotify")
+            );
+          }
+          e.dataInputAssociation = e.dataInputAssociation?.filter(
+            (dataInputAssociation) =>
+              !dataInputAssociation.targetRef.__$$text.includes("NotStartedNotify") &&
+              !dataInputAssociation.targetRef.__$$text.includes("NotCompletedNotify")
+          );
+
           notifications.forEach((notification) => {
             let dataInput = e?.ioSpecification?.dataInput?.find((input) => input["@_name"] === notification.type);
             if (!dataInput) {
@@ -283,9 +196,23 @@ export function Notifications({
               };
               e?.ioSpecification?.dataInput?.push(dataInput);
             }
-            if (!e?.ioSpecification?.inputSet[0]?.dataInputRefs?.some((ref) => ref.__$$text === dataInput["@_id"])) {
-              e?.ioSpecification?.inputSet[0]?.dataInputRefs?.push({ __$$text: dataInput["@_id"] });
+            let inputSet = e.ioSpecification?.inputSet[0];
+            if (!inputSet) {
+              inputSet = {
+                "@_id": `${e["@_id"]}_${notification.type}InputX`,
+                dataInputRefs: [
+                  {
+                    __$$text: `${e["@_id"]}_${notification.type}InputX`,
+                  },
+                ],
+              };
+              e.ioSpecification?.inputSet.push(inputSet);
+            } else {
+              e.ioSpecification?.inputSet[0].dataInputRefs?.push({
+                __$$text: `${e["@_id"]}_${notification.type}InputX`,
+              });
             }
+
             let dataInputAssociation = e.dataInputAssociation?.find(
               (association) => association.targetRef.__$$text === dataInput["@_id"]
             );
@@ -300,7 +227,7 @@ export function Notifications({
             const existingAssignment = dataInputAssociation?.assignment?.find(
               (assignment) => assignment["@_id"] === `${e["@_id"]}_assignment_${notification.type}`
             );
-            const newEntry = `from:${notification.from} tousers:${notification.tousers} togroups:${notification.togroups} toemails:${notification.toemails} replyTo:${notification.replyTo} subject:${notification.subject} body:${notification.body}@${notification.expiresAt}`;
+            const newEntry = `from:${notification.from}|tousers:${notification.tousers}|togroups:${notification.togroups}|toemails:${notification.toemails}|replyTo:${notification.replyTo}|subject:${notification.subject}|body:${notification.body}]@[${notification.expiresAt}]`;
 
             if (existingAssignment) {
               const existingValues = new Set(existingAssignment?.from?.__$$text?.split(" "));
@@ -321,12 +248,8 @@ export function Notifications({
         }
       });
     });
-  };
-  const entryStyle = {
-    padding: "4px",
-    margin: "8px",
-    width: "calc(100% - 2 * 4px - 2 * 8px)",
-  };
+  }, [element, bpmnEditorStoreApi, notifications]);
+
   return (
     <Modal
       className="kie-bpmn-editor--notifications--modal"

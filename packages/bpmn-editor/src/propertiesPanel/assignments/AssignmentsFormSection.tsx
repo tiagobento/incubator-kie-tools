@@ -23,7 +23,7 @@ import { Form, FormSection } from "@patternfly/react-core/dist/js/components/For
 import { SectionHeader } from "@kie-tools/xyflow-react-kie-diagram/dist/propertiesPanel/SectionHeader";
 import { Button, ButtonVariant } from "@patternfly/react-core/dist/js/components/Button";
 import { EditIcon } from "@patternfly/react-icons/dist/js/icons/edit-icon";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   BPMN20__tDataInputAssociation,
   BPMN20__tDataOutputAssociation,
@@ -52,32 +52,53 @@ import { assign } from "lodash";
 import { FormSelect } from "@patternfly/react-core/dist/js/components/FormSelect/FormSelect";
 import { FormSelectOption } from "@patternfly/react-core/dist/js/components/FormSelect/FormSelectOption";
 
-export type WithAssignments = Normalized<
+type WithAssignments = Normalized<
   ElementFilter<
     Unpacked<NonNullable<BPMN20__tProcess["flowElement"]>>,
     "callActivity" | "businessRuleTask" | "userTask" | "serviceTask" | "scriptTask"
   >
 >;
 
-export type WithOutputAssignments = Normalized<
+type WithOutputAssignments = Normalized<
   ElementFilter<
     Unpacked<NonNullable<BPMN20__tProcess["flowElement"]>>,
     "startEvent" | "intermediateCatchEvent" | "boundaryEvent"
   >
 >;
 
-export type WithInputAssignments = Normalized<
+type WithInputAssignments = Normalized<
   ElementFilter<Unpacked<NonNullable<BPMN20__tProcess["flowElement"]>>, "endEvent" | "intermediateThrowEvent">
 >;
 
-export const blacklistedNames = new Set([
+type Assignment = {
+  name: string;
+  dataType: string;
+  value: string;
+};
+
+const dataType = [
+  { value: "Custom", label: "Custom..." },
+  { value: "Boolean", label: "Boolean" },
+  { value: "Float", label: "Float" },
+  { value: "Integer", label: "Integer" },
+  { value: "Object", label: "Object" },
+  { value: "String", label: "String" },
+];
+
+const entryStyle = {
+  padding: "4px",
+  margin: "8px",
+  width: "calc(100% - 2 * 4px - 2 * 8px)",
+};
+
+const namesFromOtherTypes = [
   "TaskName",
+  "Skippable",
   "NotStartedReassign",
   "NotCompletedReassign",
-  "Skippable",
   "NotStartedNotify",
   "NotCompletedNotify",
-]);
+];
 
 export function AssignmentsFormSection({
   sectionLabel,
@@ -96,10 +117,7 @@ export function AssignmentsFormSection({
           <SectionHeader
             expands={"modal"}
             icon={<div style={{ marginLeft: "12px", width: "16px", height: "36px", lineHeight: "36px" }}>{"⇆"}</div>}
-            title={
-              "Assignments"
-              // + sectionLabel
-            }
+            title={"Assignments" + sectionLabel}
             toogleSectionExpanded={() => setShowAssignmentsModal(true)}
             action={
               <Button
@@ -129,25 +147,28 @@ export function AssignmentsFormSection({
 }
 
 export function BidirectionalAssignmentsFormSection({ element }: { element: WithAssignments }) {
-  // const inputCount = element.
-  // const inputCount = element.dataInputAssociation?.length ?? 0;
-  // const outputCount = element.dataOutputAssociation?.length ?? 0;
-  // const sectionLabel = useMemo(() => {
-  //   if (inputCount > 0 && outputCount > 0) {
-  //     return ` (in: ${inputCount}, out: ${outputCount})`;
-  //   } else if (inputCount > 0) {
-  //     return ` (in: ${inputCount}, out: -)`;
-  //   } else if (outputCount > 0) {
-  //     return ` (in: -, out: ${outputCount})`;
-  //   } else {
-  //     return "";
-  //   }
-  // }, [inputCount, outputCount]);
+  const inputCount = element?.dataInputAssociation?.filter(
+    (association) =>
+      !namesFromOtherTypes.some((namesFromOtherTypes) => association.targetRef?.__$$text.includes(namesFromOtherTypes))
+  ).length;
+  const outputCount = element?.dataOutputAssociation?.filter(
+    (association) =>
+      !namesFromOtherTypes.some((namesFromOtherTypes) => association.targetRef?.__$$text.includes(namesFromOtherTypes))
+  ).length;
+  const sectionLabel = useMemo(() => {
+    if (inputCount && inputCount > 0 && outputCount && outputCount > 0) {
+      return ` (in: ${inputCount}, out: ${outputCount})`;
+    } else if (inputCount && inputCount > 0) {
+      return ` (in: ${inputCount}, out: -)`;
+    } else if (outputCount && outputCount > 0) {
+      return ` (in: -, out: ${outputCount})`;
+    } else {
+      return "";
+    }
+  }, [inputCount, outputCount]);
 
   return (
-    <AssignmentsFormSection
-    // sectionLabel={sectionLabel}
-    >
+    <AssignmentsFormSection sectionLabel={sectionLabel}>
       <div className="kie-bpmn-editor--assignments--modal-section" style={{ height: "50%" }}>
         <AssignmentList section={"input"} element={element} />
       </div>
@@ -159,24 +180,17 @@ export function BidirectionalAssignmentsFormSection({ element }: { element: With
 }
 
 export function InputOnlyAssociationFormSection({ element }: { element: WithInputAssignments }) {
-  // const inputCount = element.dataInput?.length ?? 0;
-  const inputCount = element.dataInput
-    ? element.dataInput.filter((input) => !blacklistedNames.has(input["@_name"] ?? "")).length
-    : 0;
-
-  // const inputCount = element.dataInputAssociation?.length ?? 0;
-  // const sectionLabel = useMemo(() => {
-  //   if (inputCount > 0) {
-  //     return ` (in: ${inputCount})`;
-  //   } else {
-  //     return ` (in: -)`;
-  //   }
-  // }, [inputCount]);
+  const inputCount = element.dataInputAssociation?.length ?? 0;
+  const sectionLabel = useMemo(() => {
+    if (inputCount > 0) {
+      return ` (in: ${inputCount})`;
+    } else {
+      return ` (in: -)`;
+    }
+  }, [inputCount]);
 
   return (
-    <AssignmentsFormSection
-    // sectionLabel={sectionLabel}
-    >
+    <AssignmentsFormSection sectionLabel={sectionLabel}>
       <div className="kie-bpmn-editor--assignments--modal-section" style={{ height: "100%" }}>
         <AssignmentList section={"input"} element={element} />
       </div>
@@ -216,238 +230,363 @@ export function AssignmentList({
       element: WithAssignments | (WithOutputAssignments & { dataInputAssociation?: BPMN20__tDataInputAssociation[] });
     }) {
   const bpmnEditorStoreApi = useBpmnEditorStoreApi();
-  const [inputAssignments, setInputAssignments] = useState<{ name: string; dataType: string; value: string }[]>([]);
-  const [outputAssignments, setOutputAssignments] = useState<{ name: string; dataType: string; value: string }[]>([]);
-  const isReadOnly = useBpmnEditorStore((s) => s.settings.isReadOnly);
-  const dataType = [
-    { value: "Custom", label: "Custom..." },
-    { value: "Boolean", label: "Boolean" },
-    { value: "Float", label: "Float" },
-    { value: "Integer", label: "Integer" },
-    { value: "Object", label: "Object" },
-    { value: "String", label: "String" },
-  ];
-  const removeAssignment = (index: number) => {
-    if (section === "input") {
-      setInputAssignments(inputAssignments.filter((_, i) => i !== index));
-    } else {
-      setOutputAssignments(outputAssignments.filter((_, i) => i !== index));
-    }
-  };
-  const handleInputChange = (index: number, field: string, value: string | number) => {
-    if (section === "input") {
-      setInputAssignments((prevInputAssignments) => {
-        const updatedInputAssignments = [...prevInputAssignments];
-        updatedInputAssignments[index] = { ...updatedInputAssignments[index], [field]: [value] };
-        return updatedInputAssignments;
-      });
-    } else {
-      setOutputAssignments((prevOutputAssignments) => {
-        const updatedOutputAssignments = [...prevOutputAssignments];
-        updatedOutputAssignments[index] = { ...updatedOutputAssignments[index], [field]: [value] };
-        return updatedOutputAssignments;
-      });
-    }
-  };
+  const isReadOnly = bpmnEditorStoreApi((s) => s.settings.isReadOnly);
+
+  const [inputAssignments, setInputAssignments] = useState<Assignment[]>([]);
+  const [outputAssignments, setOutputAssignments] = useState<Assignment[]>([]);
   const [hoveredIndex, setHoveredIndex] = useState<number | undefined>(undefined);
-  const { title, associationsPropName, lastColumnLabel, entryTitle } = useMemo(() => {
+
+  const handleInputChange = useCallback(
+    (index: number, propertyName: keyof Assignment, value: string | number) => {
+      if (section === "input") {
+        setInputAssignments((prevInputAssignments) => {
+          const updatedInputAssignments = [...prevInputAssignments];
+          updatedInputAssignments[index] = { ...updatedInputAssignments[index], [propertyName]: [value] };
+          return updatedInputAssignments;
+        });
+      } else {
+        setOutputAssignments((prevOutputAssignments) => {
+          const updatedOutputAssignments = [...prevOutputAssignments];
+          updatedOutputAssignments[index] = { ...updatedOutputAssignments[index], [propertyName]: [value] };
+          return updatedOutputAssignments;
+        });
+      }
+    },
+    [section]
+  );
+
+  const { title, lastColumnLabel, entryTitle } = useMemo(() => {
     if (section === "input") {
       return {
         title: "Inputs",
         entryTitle: "Input",
-        associationsPropName: "dataInputAssociation",
         lastColumnLabel: "Source",
       } as const;
     } else {
       return {
         title: "Outputs",
         entryTitle: "Output",
-        associationsPropName: "dataOutputAssociation",
         lastColumnLabel: "Target",
       } as const;
     }
   }, [section]);
 
-  // const count = element[associationsPropName]?.length ?? 0;
+  const titleComponent = useMemo(() => <Title headingLevel="h2">{title}</Title>, [title]);
 
-  useEffect(() => {
-    if (element) {
-      if (
-        element.__$$element === "callActivity" ||
-        element.__$$element === "businessRuleTask" ||
-        element.__$$element === "userTask" ||
-        element.__$$element === "serviceTask" ||
-        element.__$$element === "scriptTask"
-      ) {
-        if (section === "input") {
-          const extractedInputAssignments = element?.dataInputAssociation
-            // ?.filter((association) => !association.targetRef?.__$$text.includes(blacklistedNames.toString()))
-            ?.map((association) => {
-              const assignment = association.assignment?.[0];
-              if (assignment) {
-                const value = assignment.from.__$$text || "";
-
-                const dataInput = element.ioSpecification?.dataInput?.find(
-                  (input) => input["@_id"] === association.targetRef?.__$$text
-                );
-
-                const name = dataInput?.["@_name"] || "";
-                const dataType = dataInput?.["@_drools:dtype"] || "";
-
-                return {
-                  name: name,
-                  dataType: dataType,
-                  value: value,
-                };
-              }
-            })
-            .filter((item): item is { name: string; dataType: string; value: string } => item !== null);
-          setInputAssignments(extractedInputAssignments || []);
-        }
-        if (section === "output") {
-          const extractedOutputAssignments = element?.dataOutputAssociation
-            ?.filter((association) => !association.targetRef?.__$$text.includes(blacklistedNames.toString()))
-            ?.map((association) => {
-              const assignment = association.assignment?.[0];
-              if (assignment) {
-                const value = assignment.to.__$$text || "";
-
-                const dataOutput = element.ioSpecification?.dataOutput?.find(
-                  (output) => output["@_id"] === association.targetRef?.__$$text
-                );
-
-                const name = dataOutput?.["@_name"] || "";
-                const dataType = dataOutput?.["@_drools:dtype"] || "";
-
-                return {
-                  name: name,
-                  dataType: dataType,
-                  value: value,
-                };
-              }
-            })
-            .filter((item): item is { name: string; dataType: string; value: string } => item !== null);
-          setOutputAssignments(extractedOutputAssignments || []);
-        }
-      } else if (element.__$$element === "endEvent" || element.__$$element === "intermediateThrowEvent") {
-        const extractedInputAssignments = element?.dataInputAssociation
-          // ?.filter((association) => !association.targetRef?.__$$text.includes(blacklistedNames.toString()))
-          ?.map((association) => {
-            const assignment = association.assignment?.[0];
-            if (assignment) {
-              const value = assignment.from.__$$text || "";
-
-              const dataInput = element.dataInput?.find((input) => input["@_id"] === association.targetRef?.__$$text);
-
-              const name = dataInput?.["@_name"] || "";
-              const dataType = dataInput?.["@_drools:dtype"] || "";
-
-              return {
-                name: name,
-                dataType: dataType,
-                value: value,
-              };
-            }
-          })
-          .filter((item): item is { name: string; dataType: string; value: string } => item !== null);
-        setInputAssignments(extractedInputAssignments || []);
-      } else if (
-        element.__$$element === "startEvent" ||
-        element.__$$element === "intermediateCatchEvent" ||
-        element.__$$element === "boundaryEvent"
-      ) {
-        const extractedOutputAssignments = element?.dataOutputAssociation
-          // ?.filter((association) => !association.targetRef?.__$$text.includes(blacklistedNames.toString()))
-          ?.map((association) => {
-            const assignment = association.assignment?.[0];
-            if (assignment) {
-              const value = assignment.to.__$$text || "";
-
-              const dataOutput = element.dataOutput?.find(
-                (output) => output["@_id"] === association.targetRef?.__$$text
-              );
-
-              const name = dataOutput?.["@_name"] || "";
-              const dataType = dataOutput?.["@_drools:dtype"] || "";
-
-              return {
-                name: name,
-                dataType: dataType,
-                value: value,
-              };
-            }
-          })
-          .filter((item): item is { name: string; dataType: string; value: string } => item !== null);
-
-        setOutputAssignments(extractedOutputAssignments || []);
-      }
-    }
-  }, [element, section]);
-
-  const addAssignment = () => {
+  const addAssignment = useCallback(() => {
     if (section === "input") {
       setInputAssignments([...inputAssignments, { name: "", dataType: "", value: "" }]);
     } else {
       setOutputAssignments([...outputAssignments, { name: "", dataType: "", value: "" }]);
     }
-  };
+  }, [inputAssignments, outputAssignments, section]);
 
-  const handleSubmit = () => {
-    bpmnEditorStoreApi.setState((s) => {
-      const { process } = addOrGetProcessAndDiagramElements({
-        definitions: s.bpmn.model.definitions,
-      });
+  const removeAssignment = useCallback(
+    (index: number) => {
+      if (section === "input") {
+        setInputAssignments(inputAssignments.filter((_, i) => i !== index));
+      } else {
+        setOutputAssignments(outputAssignments.filter((_, i) => i !== index));
+      }
+    },
+    [inputAssignments, outputAssignments, section]
+  );
 
-      visitFlowElementsAndArtifacts(process, ({ element: e }) => {
-        if (e["@_id"] === element?.["@_id"] && e.__$$element === element.__$$element) {
-          if (
-            element.__$$element === "callActivity" ||
-            element.__$$element === "businessRuleTask" ||
-            element.__$$element === "userTask" ||
-            element.__$$element === "serviceTask" ||
-            element.__$$element === "scriptTask"
-          ) {
-            handleSubmitForWithAssignments(e as WithAssignments);
-          } else if (element.__$$element === "endEvent" || element.__$$element === "intermediateThrowEvent") {
-            handleSubmitForWithInputAssignments(e as WithInputAssignments);
-          } else if (
-            element.__$$element === "startEvent" ||
-            element.__$$element === "intermediateCatchEvent" ||
-            element.__$$element === "boundaryEvent"
-          ) {
-            handleSubmitForWithOutputAssignments(e as WithOutputAssignments);
-          }
+  //populates intermediary `assignments` state from the model
+  useEffect(() => {
+    if (!element) {
+      return;
+    }
+    if (
+      element.__$$element === "callActivity" ||
+      element.__$$element === "businessRuleTask" ||
+      element.__$$element === "userTask" ||
+      element.__$$element === "serviceTask" ||
+      element.__$$element === "scriptTask"
+    ) {
+      if (section === "input") {
+        const extractedInputAssignments = element?.dataInputAssociation
+          ?.filter(
+            (association) =>
+              !namesFromOtherTypes.some((namesFromOtherTypes) =>
+                association.targetRef?.__$$text.includes(namesFromOtherTypes)
+              )
+          )
+          ?.flatMap((association) => {
+            const assignment = association.assignment?.[0];
+            if (!assignment) {
+              return [];
+            }
+            const value = assignment.from.__$$text || "";
+
+            const dataInput = element.ioSpecification?.dataInput?.find(
+              (input) => input["@_id"] === association.targetRef?.__$$text
+            );
+
+            const name = dataInput?.["@_name"] || "";
+            const dataType = dataInput?.["@_drools:dtype"] || "";
+
+            return {
+              name: name,
+              dataType: dataType,
+              value: value,
+            };
+          });
+        setInputAssignments(extractedInputAssignments || []);
+      }
+      if (section === "output") {
+        const extractedOutputAssignments = element?.dataOutputAssociation
+          ?.filter(
+            (association) =>
+              !association.targetRef?.__$$text.includes("TaskName") &&
+              !association.targetRef?.__$$text.includes("Skippable") &&
+              !association.targetRef?.__$$text.includes("NotStartedReassign") &&
+              !association.targetRef?.__$$text.includes("NotCompletedReassign") &&
+              !association.targetRef?.__$$text.includes("NotStartedNotify") &&
+              !association.targetRef?.__$$text.includes("NotCompletedNotify")
+          )
+          ?.flatMap((association) => {
+            const assignment = association.assignment?.[0];
+            if (!assignment) {
+              return [];
+            }
+            const value = assignment.to.__$$text || "";
+
+            const dataOutput = element.ioSpecification?.dataOutput?.find(
+              (output) => output["@_id"] === association.targetRef?.__$$text
+            );
+
+            const name = dataOutput?.["@_name"] || "";
+            const dataType = dataOutput?.["@_drools:dtype"] || "";
+
+            return {
+              name: name,
+              dataType: dataType,
+              value: value,
+            };
+          });
+        setOutputAssignments(extractedOutputAssignments || []);
+      }
+    } else if (element.__$$element === "endEvent" || element.__$$element === "intermediateThrowEvent") {
+      const extractedInputAssignments = element?.dataInputAssociation?.flatMap((association) => {
+        const assignment = association.assignment?.[0];
+        if (!assignment) {
+          return [];
         }
+        const value = assignment.from.__$$text || "";
+
+        const dataInput = element.dataInput?.find((input) => input["@_id"] === association.targetRef?.__$$text);
+
+        const name = dataInput?.["@_name"] || "";
+        const dataType = dataInput?.["@_drools:dtype"] || "";
+
+        return {
+          name: name,
+          dataType: dataType,
+          value: value,
+        };
       });
-    });
-  };
+      setInputAssignments(extractedInputAssignments || []);
+    } else if (
+      element.__$$element === "startEvent" ||
+      element.__$$element === "intermediateCatchEvent" ||
+      element.__$$element === "boundaryEvent"
+    ) {
+      const extractedOutputAssignments = element?.dataOutputAssociation?.flatMap((association) => {
+        const assignment = association.assignment?.[0];
+        if (!assignment) {
+          return [];
+        }
+        const value = assignment.to.__$$text || "";
 
-  const handleSubmitForWithAssignments = (e: WithAssignments) => {
-    setBpmn20Drools10MetaData(e, "elementname", e["@_name"] || "");
+        const dataOutput = element.dataOutput?.find((output) => output["@_id"] === association.targetRef?.__$$text);
 
-    if (!e.ioSpecification) {
-      e.ioSpecification = {
+        const name = dataOutput?.["@_name"] || "";
+        const dataType = dataOutput?.["@_drools:dtype"] || "";
+
+        return {
+          name: name,
+          dataType: dataType,
+          value: value,
+        };
+      });
+      setOutputAssignments(extractedOutputAssignments || []);
+    }
+  }, [element, section]);
+
+  const handleSubmitForNodesWithInputAndOutputAssignments = useCallback(
+    (e: WithAssignments) => {
+      setBpmn20Drools10MetaData(e, "elementname", e["@_name"] || "");
+
+      e.ioSpecification ??= {
         "@_id": generateUuid(),
         inputSet: [],
         outputSet: [],
         dataInput: [],
         dataOutput: [],
       };
-    }
 
-    e.dataInputAssociation ??= [];
-    e.dataOutputAssociation ??= [];
-    console.log(section);
-    if (section === "input") {
+      e.dataInputAssociation ??= [];
+      e.dataOutputAssociation ??= [];
+
+      if (section === "input") {
+        e.ioSpecification.dataInput = e.ioSpecification?.dataInput?.filter(
+          (dataInput) =>
+            dataInput["@_name"]?.includes("NotStartedReassign") || dataInput["@_name"]?.includes("NotCompletedReassign")
+        );
+
+        if (e.ioSpecification?.inputSet?.[0]?.dataInputRefs) {
+          e.ioSpecification.inputSet[0].dataInputRefs = e.ioSpecification?.inputSet[0].dataInputRefs?.filter(
+            (dataInputRefs) =>
+              dataInputRefs.__$$text.includes("NotStartedReassign") ||
+              dataInputRefs.__$$text?.includes("NotCompletedReassign")
+          );
+        }
+
+        e.dataInputAssociation = e.dataInputAssociation?.filter(
+          (dataInputAssociation) =>
+            dataInputAssociation.targetRef.__$$text.includes("NotStartedReassign") ||
+            dataInputAssociation.targetRef.__$$text.includes("NotCompletedReassign")
+        );
+
+        inputAssignments.forEach((assignment, index) => {
+          let dataInput = e.ioSpecification?.dataInput?.[index];
+
+          if (!dataInput) {
+            dataInput = {
+              "@_id": `${e["@_id"]}_${assignment.name}InputX`,
+              "@_drools:dtype": assignment.dataType,
+              "@_itemSubjectRef": `_${e["@_id"]}_${assignment.name}InputXItem`,
+              "@_name": assignment.name,
+            };
+            e.ioSpecification?.dataInput?.push(dataInput);
+          }
+
+          let inputSet = e.ioSpecification?.inputSet[0];
+          if (!inputSet) {
+            inputSet = {
+              "@_id": `${e["@_id"]}_${assignment.name}InputX`,
+              dataInputRefs: [
+                {
+                  __$$text: `${e["@_id"]}_${assignment.name}InputX`,
+                },
+              ],
+            };
+            e.ioSpecification?.inputSet.push(inputSet);
+          } else {
+            e.ioSpecification?.inputSet[0].dataInputRefs?.push({ __$$text: `${e["@_id"]}_${assignment.name}InputX` });
+          }
+
+          let dataInputAssociation = e.dataInputAssociation?.find(
+            (association) => association.targetRef.__$$text === dataInput["@_id"]
+          );
+
+          if (!dataInputAssociation) {
+            dataInputAssociation = {
+              "@_id": `${e["@_id"]}_dataInputAssociation_${assignment.name}`,
+              targetRef: { __$$text: dataInput["@_id"] },
+              assignment: [],
+            };
+            e.dataInputAssociation?.push(dataInputAssociation);
+          }
+          dataInputAssociation.assignment = [
+            {
+              "@_id": `${e["@_id"]}_assignment_${assignment.name}`,
+              from: { "@_id": `${e["@_id"]}`, __$$text: assignment.value },
+              to: { "@_id": dataInput["@_id"], __$$text: dataInput["@_id"] },
+            },
+          ];
+        });
+      } else if (section === "output") {
+        e.ioSpecification.dataOutput = e.ioSpecification?.dataOutput?.filter(
+          (dataOutput) =>
+            dataOutput["@_name"]?.includes("NotStartedReassign") ||
+            dataOutput["@_name"]?.includes("NotCompletedReassign")
+        );
+
+        if (e.ioSpecification?.outputSet?.[0]?.dataOutputRefs) {
+          e.ioSpecification.outputSet[0].dataOutputRefs = e.ioSpecification?.outputSet[0].dataOutputRefs?.filter(
+            (dataOutputRefs) =>
+              dataOutputRefs.__$$text.includes("NotStartedReassign") ||
+              dataOutputRefs.__$$text?.includes("NotCompletedReassign")
+          );
+        }
+
+        e.dataOutputAssociation = e.dataOutputAssociation?.filter(
+          (dataOutputAssociation) =>
+            dataOutputAssociation.targetRef.__$$text.includes("NotStartedReassign") ||
+            dataOutputAssociation.targetRef.__$$text.includes("NotCompletedReassign")
+        );
+
+        outputAssignments.forEach((assignment, index) => {
+          let dataOutput = e.ioSpecification?.dataOutput?.[index];
+          if (!dataOutput) {
+            dataOutput = {
+              "@_id": `${e["@_id"]}_${assignment.name}OutputX`,
+              "@_drools:dtype": assignment.dataType,
+              "@_itemSubjectRef": `_${e["@_id"]}_${assignment.name}OutputXItem`,
+              "@_name": assignment.name,
+            };
+            e.ioSpecification?.dataOutput?.push(dataOutput);
+          }
+
+          let outputSet = e.ioSpecification?.outputSet[0];
+          if (!outputSet) {
+            outputSet = {
+              "@_id": `${e["@_id"]}_${assignment.name}OutputX`,
+              dataOutputRefs: [
+                {
+                  __$$text: `${e["@_id"]}_${assignment.name}OutputX`,
+                },
+              ],
+            };
+            e.ioSpecification?.outputSet.push(outputSet);
+          } else {
+            e.ioSpecification?.outputSet[0].dataOutputRefs?.push({
+              __$$text: `${e["@_id"]}_${assignment.name}OutputX`,
+            });
+          }
+
+          let dataOutputAssociation = e.dataOutputAssociation?.find(
+            (association) => association.targetRef.__$$text === dataOutput["@_id"]
+          );
+
+          if (!dataOutputAssociation) {
+            dataOutputAssociation = {
+              "@_id": `${e["@_id"]}_dataOutputAssociation_${assignment.name}`,
+              targetRef: { __$$text: dataOutput["@_id"] },
+              assignment: [],
+            };
+            e.dataOutputAssociation?.push(dataOutputAssociation);
+          }
+          dataOutputAssociation.assignment = [
+            {
+              "@_id": `${e["@_id"]}_assignment_${assignment.name}`,
+              from: { "@_id": dataOutput["@_id"], __$$text: dataOutput["@_id"] },
+              to: { "@_id": `${e["@_id"]}`, __$$text: assignment.value },
+            },
+          ];
+        });
+      }
+    },
+    [inputAssignments, outputAssignments, section]
+  );
+
+  const handleSubmitForNodesWithInputAssignments = useCallback(
+    (e: WithInputAssignments) => {
+      e.dataInputAssociation = [];
+      e.dataInput = [];
       inputAssignments.forEach((assignment, index) => {
-        let dataInput = e.ioSpecification?.dataInput?.[index];
-        dataInput = {
-          "@_id": `${e["@_id"]}_${assignment.name}InputX`,
-          "@_drools:dtype": assignment.dataType,
-          "@_itemSubjectRef": `_${e["@_id"]}_${assignment.name}InputXItem`,
-          "@_name": assignment.name,
-        };
-        e.ioSpecification?.dataInput?.push(dataInput);
+        let dataInput = e.dataInput?.[index];
+        if (!dataInput) {
+          dataInput = {
+            "@_id": `${e["@_id"]}_${assignment.name}InputX`,
+            "@_drools:dtype": assignment.dataType,
+            "@_itemSubjectRef": `_${e["@_id"]}_${assignment.name}InputXItem`,
+            "@_name": assignment.name,
+          };
+          e.dataInput?.push(dataInput);
+        }
 
         let dataInputAssociation = e.dataInputAssociation?.find(
           (association) => association.targetRef.__$$text === dataInput["@_id"]
@@ -469,16 +608,25 @@ export function AssignmentList({
           },
         ];
       });
-    } else if (section === "output") {
+    },
+    [inputAssignments]
+  );
+
+  const handleSubmitForNodesWithOutputAssignments = useCallback(
+    (e: WithOutputAssignments) => {
+      e.dataOutputAssociation = [];
+      e.dataOutput = [];
       outputAssignments.forEach((assignment, index) => {
-        let dataOutput = e.ioSpecification?.dataOutput?.[index];
-        dataOutput = {
-          "@_id": `${e["@_id"]}_${assignment.name}OutputX`,
-          "@_drools:dtype": assignment.dataType,
-          "@_itemSubjectRef": `_${e["@_id"]}_${assignment.name}OutputXItem`,
-          "@_name": assignment.name,
-        };
-        e.ioSpecification?.dataOutput?.push(dataOutput);
+        let dataOutput = e.dataOutput?.[index];
+        if (!dataOutput) {
+          dataOutput = {
+            "@_id": `${e["@_id"]}_${assignment.name}OutputX`,
+            "@_drools:dtype": assignment.dataType,
+            "@_itemSubjectRef": `_${e["@_id"]}_${assignment.name}OutputXItem`,
+            "@_name": assignment.name,
+          };
+          e.dataOutput?.push(dataOutput);
+        }
 
         let dataOutputAssociation = e.dataOutputAssociation?.find(
           (association) => association.targetRef.__$$text === dataOutput["@_id"]
@@ -500,192 +648,45 @@ export function AssignmentList({
           },
         ];
       });
-    }
-  };
+    },
+    [outputAssignments]
+  );
 
-  const handleSubmitForWithInputAssignments = (e: WithInputAssignments) => {
-    e.dataInputAssociation ??= [];
+  const handleSubmit = useCallback(() => {
+    bpmnEditorStoreApi.setState((s) => {
+      const { process } = addOrGetProcessAndDiagramElements({
+        definitions: s.bpmn.model.definitions,
+      });
 
-    inputAssignments.forEach((assignment, index) => {
-      let dataInput = e.dataInput?.[index];
-      dataInput = {
-        "@_id": `${e["@_id"]}_${assignment.name}InputX`,
-        "@_drools:dtype": assignment.dataType,
-        "@_itemSubjectRef": `_${e["@_id"]}_${assignment.name}InputXItem`,
-        "@_name": assignment.name,
-      };
-      e.dataInput?.push(dataInput);
-
-      let dataInputAssociation = e.dataInputAssociation?.find(
-        (association) => association.targetRef.__$$text === dataInput["@_id"]
-      );
-
-      if (!dataInputAssociation) {
-        dataInputAssociation = {
-          "@_id": `${e["@_id"]}_dataInputAssociation_${assignment.name}`,
-          targetRef: { __$$text: dataInput["@_id"] },
-          assignment: [],
-        };
-        e.dataInputAssociation?.push(dataInputAssociation);
-      }
-      dataInputAssociation.assignment = [
-        {
-          "@_id": `${e["@_id"]}_assignment_${assignment.name}`,
-          from: { "@_id": `${e["@_id"]}`, __$$text: assignment.value },
-          to: { "@_id": dataInput["@_id"], __$$text: dataInput["@_id"] },
-        },
-      ];
+      visitFlowElementsAndArtifacts(process, ({ element: e }) => {
+        if (e["@_id"] === element?.["@_id"] && e.__$$element === element.__$$element) {
+          if (
+            element.__$$element === "callActivity" ||
+            element.__$$element === "businessRuleTask" ||
+            element.__$$element === "userTask" ||
+            element.__$$element === "serviceTask" ||
+            element.__$$element === "scriptTask"
+          ) {
+            handleSubmitForNodesWithInputAndOutputAssignments(e as WithAssignments);
+          } else if (element.__$$element === "endEvent" || element.__$$element === "intermediateThrowEvent") {
+            handleSubmitForNodesWithInputAssignments(e as WithInputAssignments);
+          } else if (
+            element.__$$element === "startEvent" ||
+            element.__$$element === "intermediateCatchEvent" ||
+            element.__$$element === "boundaryEvent"
+          ) {
+            handleSubmitForNodesWithOutputAssignments(e as WithOutputAssignments);
+          }
+        }
+      });
     });
-  };
-  // e.dataInputAssociation ??= [];
-  // e.dataInput ??= [];
-  // outputAssignments.forEach((assignment) => {
-  //   if (section === "output") {
-  //     let dataInput = e?.dataInput?.find((output) => output["@_name"] === assignment.name);
-  //     if (!dataInput) {
-  //       dataInput = {
-  //         "@_id": `${e["@_id"]}_${assignment.name}InputX`,
-  //         "@_drools:dtype": assignment.dataType,
-  //         "@_itemSubjectRef": `_${e["@_id"]}_${assignment.name}InputXItem`,
-  //         "@_name": assignment.name,
-  //       };
-  //       e?.dataInput?.push(dataInput);
-  //     }
-  //     if (!e.inputSet) {
-  //       e.inputSet = {
-  //         "@_id": "",
-  //         dataInputRefs: [{ __$$text: dataInput["@_id"] }],
-  //       };
-  //     }
-  //     let dataInputAssociation = e.dataInputAssociation?.find(
-  //       (association) => association.targetRef.__$$text === dataInput["@_id"]
-  //     );
-  //     if (!dataInputAssociation) {
-  //       dataInputAssociation = {
-  //         "@_id": `${e["@_id"]}_dataInputAssociation_${assignment.name}`,
-  //         targetRef: { __$$text: dataInput["@_id"] },
-  //         assignment: [],
-  //       };
-  //       e.dataInputAssociation?.push(dataInputAssociation);
-  //     }
-  //     const existingAssignment = dataInputAssociation?.assignment?.find(
-  //       (assigned) => assigned["@_id"] === `${e["@_id"]}_assignment_${assignment.name}`
-  //     );
-  //     const newEntry = assignment.value;
-  //     if (existingAssignment) {
-  //       const existingValues = new Set(existingAssignment?.from?.__$$text?.split(" "));
-  //       const newValues = newEntry.split(" ");
-  //       const uniqueValues = [...existingValues, ...newValues].join(" ");
-  //       existingAssignment.from.__$$text = uniqueValues;
-  //     } else {
-  //       dataInputAssociation?.assignment?.push({
-  //         "@_id": `${e["@_id"]}_assignment_${assignment.name}`,
-  //         from: {
-  //           "@_id": `${e["@_id"]}`,
-  //           __$$text: newEntry,
-  //         },
-  //         to: { "@_id": dataInput["@_id"], __$$text: dataInput["@_id"] },
-  //       });
-  //     }
-  //   }
-  // });
-  // };
-
-  const handleSubmitForWithOutputAssignments = (e: WithOutputAssignments) => {
-    e.dataOutputAssociation ??= [];
-    outputAssignments.forEach((assignment, index) => {
-      let dataOutput = e.dataOutput?.[index];
-      dataOutput = {
-        "@_id": `${e["@_id"]}_${assignment.name}OutputX`,
-        "@_drools:dtype": assignment.dataType,
-        "@_itemSubjectRef": `_${e["@_id"]}_${assignment.name}OutputXItem`,
-        "@_name": assignment.name,
-      };
-      e.dataOutput?.push(dataOutput);
-
-      let dataOutputAssociation = e.dataOutputAssociation?.find(
-        (association) => association.targetRef.__$$text === dataOutput["@_id"]
-      );
-
-      if (!dataOutputAssociation) {
-        dataOutputAssociation = {
-          "@_id": `${e["@_id"]}_dataOutputAssociation_${assignment.name}`,
-          targetRef: { __$$text: dataOutput["@_id"] },
-          assignment: [],
-        };
-        e.dataOutputAssociation?.push(dataOutputAssociation);
-      }
-      dataOutputAssociation.assignment = [
-        {
-          "@_id": `${e["@_id"]}_assignment_${assignment.name}`,
-          from: { "@_id": dataOutput["@_id"], __$$text: dataOutput["@_id"] },
-          to: { "@_id": `${e["@_id"]}`, __$$text: assignment.value },
-        },
-      ];
-    });
-  };
-
-  //   e.dataOutputAssociation = [];
-  //   e.dataOutput = [];
-
-  //   outputAssignments.forEach((assignment) => {
-  //     let dataOutput = e?.dataOutput?.find((output) => output["@_name"] === assignment.name);
-  //     if (!dataOutput) {
-  //       dataOutput = {
-  //         "@_id": `${e["@_id"]}_${assignment.name}OutputX`,
-  //         "@_drools:dtype": assignment.dataType,
-  //         "@_itemSubjectRef": `_${e["@_id"]}_${assignment.name}OutputXItem`,
-  //         "@_name": assignment.name,
-  //       };
-  //       e?.dataOutput?.push(dataOutput);
-  //     }
-  //     if (!e.outputSet) {
-  //       e.outputSet = {
-  //         "@_id": "",
-  //         dataOutputRefs: [{ __$$text: dataOutput["@_id"] }],
-  //       };
-  //     }
-  //     let dataOutputAssociation = e.dataOutputAssociation?.find(
-  //       (association) => association.sourceRef?.[0].__$$text === dataOutput["@_id"]
-  //     );
-  //     if (!dataOutputAssociation) {
-  //       dataOutputAssociation = {
-  //         "@_id": `${e["@_id"]}_dataOutputAssociation_${assignment.name}`,
-  //         sourceRef: [{ __$$text: dataOutput["@_id"] }],
-  //         targetRef: { __$$text: "" }, //Mandatory field here, but targetRef not used in old editor for outputs, resulting in empty targetRef tags in the xml <targetRef></targetRef>
-  //         assignment: [],
-  //       };
-  //       e.dataOutputAssociation?.push(dataOutputAssociation);
-  //     }
-  //     const existingAssignment = dataOutputAssociation?.assignment?.find(
-  //       (assigned) => assigned["@_id"] === `${e["@_id"]}_assignment_${assignment.name}`
-  //     );
-  //     const newEntry = assignment.value;
-  //     if (existingAssignment) {
-  //       const existingValues = new Set(existingAssignment?.from?.__$$text?.split(" "));
-  //       const newValues = newEntry.split(" ");
-  //       const uniqueValues = [...existingValues, ...newValues].join(" ");
-  //       existingAssignment.from.__$$text = uniqueValues;
-  //     } else {
-  //       dataOutputAssociation?.assignment?.push({
-  //         "@_id": `${e["@_id"]}_assignment_${assignment.name}`,
-  //         from: { "@_id": dataOutput["@_id"], __$$text: dataOutput["@_id"] },
-  //         to: {
-  //           "@_id": `${e["@_id"]}`,
-  //           __$$text: newEntry,
-  //         },
-  //       });
-  //     }
-  //   });
-  // };
-
-  const entryStyle = {
-    padding: "4px",
-    margin: "8px",
-    width: "calc(100% - 2 * 4px - 2 * 8px)",
-  };
-
-  const titleComponent = useMemo(() => <Title headingLevel="h2">{title}</Title>, [title]);
+  }, [
+    bpmnEditorStoreApi,
+    element,
+    handleSubmitForNodesWithInputAndOutputAssignments,
+    handleSubmitForNodesWithInputAssignments,
+    handleSubmitForNodesWithOutputAssignments,
+  ]);
 
   return (
     <>
