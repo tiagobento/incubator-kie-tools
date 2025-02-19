@@ -20,7 +20,6 @@
 import * as React from "react";
 import { useBpmnEditorStore, useBpmnEditorStoreApi } from "../../store/StoreContext";
 import { FormGroup, FormSection } from "@patternfly/react-core/dist/js/components/Form";
-import { FormSelect, FormSelectOption } from "@patternfly/react-core/dist/js/components/FormSelect";
 import { addOrGetProcessAndDiagramElements } from "../../mutations/addOrGetProcessAndDiagramElements";
 import { visitFlowElementsAndArtifacts } from "../../mutations/_elementVisitor";
 import { Normalized } from "../../normalization/normalize";
@@ -28,8 +27,7 @@ import { BPMN20__tProcess } from "@kie-tools/bpmn-marshaller/dist/schemas/bpmn-2
 import { ElementFilter } from "@kie-tools/xml-parser-ts/dist/elementFilter";
 import { Unpacked } from "@kie-tools/xyflow-react-kie-diagram/dist/tsExt/tsExt";
 import "./EscalationCodeSelector.css";
-import { TextArea } from "@patternfly/react-core/dist/js/components/TextArea";
-import { InteractiveDropdown } from "../dropdown/InteractiveDropdown";
+import { TextInput } from "@patternfly/react-core/dist/js/components/TextInput/TextInput";
 
 export type WithEscalationCode =
   | undefined
@@ -71,10 +69,10 @@ export function EscalationCodeSelector({ element }: { element: WithEscalationCod
   return (
     <FormSection>
       <FormGroup label="Escalation Code">
-        <InteractiveDropdown
+        <TextInput
+          aria-label="Escalation Code"
           value={currentValue}
           onChange={handleValueChange}
-          items={[]}
           placeholder="Select Escalation Code"
         />
       </FormGroup>

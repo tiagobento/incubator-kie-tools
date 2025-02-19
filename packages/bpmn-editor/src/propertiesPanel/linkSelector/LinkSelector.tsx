@@ -47,23 +47,23 @@ export function LinkSelector({ element }: { element: WithLinkExpression }) {
   const currentValue =
     element?.eventDefinition?.find((eventDef) => eventDef.__$$element === "linkEventDefinition")?.["@_name"] || "";
 
-  const links: string[] = [];
+  // const links: string[] = [];
 
-  const getDropdownValues = () => {
-    bpmnEditorStoreApi.setState((s) => {
-      const { process } = addOrGetProcessAndDiagramElements({
-        definitions: s.bpmn.model.definitions,
-      });
-      visitFlowElementsAndArtifacts(process, ({ element: e }) => {
-        if (e.__$$element === element?.__$$element) {
-          const linkEventDefinition = e.eventDefinition?.find((event) => event.__$$element === "linkEventDefinition");
-          if (linkEventDefinition) {
-            links.push(linkEventDefinition["@_name"]);
-          }
-        }
-      });
-    });
-  };
+  // const getDropdownValues = () => {
+  //   bpmnEditorStoreApi.setState((s) => {
+  //     const { process } = addOrGetProcessAndDiagramElements({
+  //       definitions: s.bpmn.model.definitions,
+  //     });
+  //     visitFlowElementsAndArtifacts(process, ({ element: e }) => {
+  //       if (e.__$$element === element?.__$$element) {
+  //         const linkEventDefinition = e.eventDefinition?.find((event) => event.__$$element === "linkEventDefinition");
+  //         if (linkEventDefinition) {
+  //           links.push(linkEventDefinition["@_name"]);
+  //         }
+  //       }
+  //     });
+  //   });
+  // };
 
   const handleValueChange = (newValue: string | undefined) => {
     bpmnEditorStoreApi.setState((s) => {
@@ -75,7 +75,7 @@ export function LinkSelector({ element }: { element: WithLinkExpression }) {
           const linkEventDefinition = e.eventDefinition?.find((event) => event.__$$element === "linkEventDefinition");
           if (linkEventDefinition) {
             linkEventDefinition["@_name"] = newValue || "";
-            links.push(linkEventDefinition["@_name"]);
+            // links.push(linkEventDefinition["@_name"]);
           }
         }
       });
@@ -86,7 +86,7 @@ export function LinkSelector({ element }: { element: WithLinkExpression }) {
     <FormSection>
       <FormGroup label="Link">
         <TextInput value={currentValue} onChange={handleValueChange} label={"Link"} />
-        <Select onToggle={() => getDropdownValues}></Select>
+        {/* <Select onToggle={() => getDropdownValues}></Select> */}
       </FormGroup>
     </FormSection>
   );

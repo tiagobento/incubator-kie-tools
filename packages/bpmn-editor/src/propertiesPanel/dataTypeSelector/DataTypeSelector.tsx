@@ -19,18 +19,9 @@
 
 import * as React from "react";
 import { useBpmnEditorStore } from "../../store/StoreContext";
-import { FormGroup, FormSection } from "@patternfly/react-core/dist/js/components/Form";
+import { FormGroup } from "@patternfly/react-core/dist/js/components/Form";
 import { FormSelect, FormSelectOption } from "@patternfly/react-core/dist/js/components/FormSelect";
 import "./DataTypeSelector.css";
-
-export enum BpmnDataType {
-  Custom = "Custom",
-  Boolean = "Boolean",
-  Float = "Float",
-  Integer = "Integer",
-  Object = "Object",
-  String = "String",
-}
 
 export function DataTypeSelector({ element }: { element: any }) {
   const isReadOnly = useBpmnEditorStore((s) => s.settings.isReadOnly);

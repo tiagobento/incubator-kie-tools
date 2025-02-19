@@ -19,7 +19,7 @@
 
 import * as React from "react";
 import { useBpmnEditorStore, useBpmnEditorStoreApi } from "../../store/StoreContext";
-import { FormGroup, FormSection } from "@patternfly/react-core/dist/js/components/Form";
+import { FormSection } from "@patternfly/react-core/dist/js/components/Form";
 import { addOrGetProcessAndDiagramElements } from "../../mutations/addOrGetProcessAndDiagramElements";
 import { visitFlowElementsAndArtifacts } from "../../mutations/_elementVisitor";
 import { Normalized } from "../../normalization/normalize";

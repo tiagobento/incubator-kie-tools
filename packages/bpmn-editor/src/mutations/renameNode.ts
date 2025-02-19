@@ -112,26 +112,3 @@ export function updateTextAnnotation({
     }
   });
 }
-
-export function updateItemDefinition({
-  definitions,
-  newItemDefinition,
-  id,
-}: {
-  definitions: Normalized<BPMN20__tDefinitions>;
-  newItemDefinition: Partial<Normalized<BPMN20__tItemDefinition>>;
-  id: string;
-}) {
-  if (!definitions.rootElement) return;
-
-  for (let i = 0; i < definitions.rootElement.length; i++) {
-    const element = definitions.rootElement[i];
-
-    if (element.__$$element === "itemDefinition" && element["@_id"] === id) {
-      definitions.rootElement[i] = { ...element, ...newItemDefinition };
-      return;
-    }
-  }
-
-  throw new Error(`ItemDefinition with id ${id} not found`);
-}

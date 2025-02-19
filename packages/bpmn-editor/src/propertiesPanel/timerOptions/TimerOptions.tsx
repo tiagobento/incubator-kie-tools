@@ -1,3 +1,22 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import * as React from "react";
 import { useState } from "react";
 import { useBpmnEditorStore, useBpmnEditorStoreApi } from "../../store/StoreContext";
@@ -73,7 +92,6 @@ export function TimerOptions({ element }: { element: WithTimer }) {
           id="fire-once"
           name="timer-options"
           label="Fire once after duration"
-          // Check if timeDuration has a value
           isChecked={
             selectedOption === "fire-once" ||
             !!element?.eventDefinition?.find((eventDef) => eventDef.__$$element === "timerEventDefinition")
@@ -127,7 +145,6 @@ export function TimerOptions({ element }: { element: WithTimer }) {
           id="fire-multiple"
           name="timer-options"
           label="Fire multiple times"
-          // Check if timeCycle has a value
           isChecked={
             selectedOption === "fire-multiple" ||
             !!element?.eventDefinition?.find((eventDef) => eventDef.__$$element === "timerEventDefinition")?.timeCycle
@@ -200,7 +217,6 @@ export function TimerOptions({ element }: { element: WithTimer }) {
           id="fire-specific-date"
           name="timer-options"
           label="Fire at a specific date"
-          // Check if timeDate has a value
           isChecked={
             selectedOption === "fire-specific-date" ||
             !!element?.eventDefinition?.find((eventDef) => eventDef.__$$element === "timerEventDefinition")?.timeDate

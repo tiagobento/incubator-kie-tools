@@ -58,7 +58,7 @@ export function ScriptTaskProperties({
 
               visitFlowElementsAndArtifacts(process, ({ element: e }) => {
                 if (e["@_id"] === scriptTask["@_id"] && e.__$$element === scriptTask.__$$element) {
-                  e.script ??= { __$$text: "" };
+                  e.script ??= { __$$text: newScript || "" };
                   e.script.__$$text = newScript;
                 }
               });

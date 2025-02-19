@@ -1,6 +1,6 @@
 import * as React from "react";
 import { useState, useMemo, useEffect, useCallback } from "react";
-import { useBpmnEditorStore, useBpmnEditorStoreApi } from "../../store/StoreContext";
+import { useBpmnEditorStoreApi } from "../../store/StoreContext";
 import { Button, ButtonVariant } from "@patternfly/react-core/dist/js/components/Button/Button";
 import { Modal, ModalVariant } from "@patternfly/react-core/dist/js/components/Modal";
 import { Grid, GridItem } from "@patternfly/react-core/dist/js/layouts/Grid";
@@ -9,7 +9,6 @@ import { TimesIcon } from "@patternfly/react-icons/dist/js/icons/times-icon";
 import { Bullseye } from "@patternfly/react-core/dist/js/layouts/Bullseye";
 import { EmptyState, EmptyStateBody, EmptyStateIcon } from "@patternfly/react-core/dist/js/components/EmptyState";
 import { Title } from "@patternfly/react-core/dist/js/components/Title";
-import { Dropdown, DropdownItem, DropdownToggle } from "@patternfly/react-core/dist/js/components/Dropdown";
 import "./Reassignments.css";
 import { visitFlowElementsAndArtifacts } from "../../mutations/_elementVisitor";
 import { setBpmn20Drools10MetaData } from "@kie-tools/bpmn-marshaller/dist/drools-extension-metaData";
@@ -19,64 +18,9 @@ import { Normalized } from "../../normalization/normalize";
 import { TextArea } from "@patternfly/react-core/dist/js/components/TextArea/TextArea";
 import { FormSelect } from "@patternfly/react-core/dist/js/components/FormSelect/FormSelect";
 import { FormSelectOption } from "@patternfly/react-core/dist/js/components/FormSelect/FormSelectOption";
-// import { CubesIcon } from "@patternfly/react-icons/dist/js/icons/cubes-icon";
+import { CubesIcon } from "@patternfly/react-icons/dist/js/icons/cubes-icon";
 import { generateUuid } from "@kie-tools/xyflow-react-kie-diagram/dist/uuid/uuid";
 import { Form } from "@patternfly/react-core/dist/js/components/Form/Form";
-
-function DropdownWithAdd({ items, setItems }: { items: string[]; setItems: (items: string[]) => void }) {
-  const [isOpen, setIsOpen] = useState(false);
-  const [newItem, setNewItem] = useState("");
-  const [selectedItem, setSelectedItem] = useState<string | undefined>(undefined);
-
-  const handleAddItem = () => {
-    if (newItem && !items.includes(newItem)) {
-      setItems([...items, newItem]);
-      setSelectedItem(newItem);
-    }
-    setNewItem("");
-    setIsOpen(false);
-  };
-
-  const handleSelectItem = (item: string) => {
-    setSelectedItem(item);
-    setIsOpen(false);
-  };
-
-  return (
-    <Dropdown
-      toggle={<DropdownToggle onToggle={() => setIsOpen(!isOpen)}>{selectedItem || "Select or add..."}</DropdownToggle>}
-      isOpen={isOpen}
-      dropdownItems={[
-        ...items.map((item) => (
-          <DropdownItem key={item} onClick={() => handleSelectItem(item)}>
-            {item}
-          </DropdownItem>
-        )),
-        <DropdownItem key="add-new" isDisabled>
-          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-            <input
-              type="text"
-              placeholder="Add new..."
-              value={newItem}
-              onChange={(e) => setNewItem(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") handleAddItem();
-              }}
-              style={{
-                flex: 1,
-                padding: "4px",
-                borderRadius: "4px",
-              }}
-            />
-            <Button variant="link" onClick={handleAddItem} isDisabled={newItem.trim() === ""} aria-label="Add new item">
-              ✓
-            </Button>
-          </div>
-        </DropdownItem>,
-      ]}
-    />
-  );
-}
 
 type Reassignment = {
   users: string;
@@ -282,99 +226,6 @@ export function Reassignments({
     });
   }, [bpmnEditorStoreApi, element, reassignments]);
 
-  // const handleSubmit = useCallback(() => {
-  //   bpmnEditorStoreApi.setState((s) => {
-  //     const { process } = addOrGetProcessAndDiagramElements({
-  //       definitions: s.bpmn.model.definitions,
-  //     });
-  //     visitFlowElementsAndArtifacts(process, ({ element: e }) => {
-  //       if (e["@_id"] === element?.["@_id"] && e.__$$element === element.__$$element) {
-  //         setBpmn20Drools10MetaData(e, "elementname", e["@_name"] || "");
-  //         e.ioSpecification ??= {
-  //           "@_id": generateUuid(),
-  //           inputSet: [],
-  //           outputSet: [],
-  //           dataInput: [],
-  //         };
-  //         e.dataInputAssociation ??= [];
-
-  //         e.ioSpecification.dataInput = e.ioSpecification.dataInput?.filter(
-  //           (dataInput) =>
-  //             !dataInput["@_name"]?.includes("NotStartedReassign") ||
-  //             !dataInput["@_name"]?.includes("NotCompletedReassign")
-  //         );
-  //         if (e.ioSpecification?.inputSet?.[0]?.dataInputRefs) {
-  //           e.ioSpecification.inputSet[0].dataInputRefs = e.ioSpecification.inputSet[0].dataInputRefs?.filter(
-  //             (dataInputRefs) =>
-  //               !dataInputRefs.__$$text.includes("NotStartedReassign") ||
-  //               !dataInputRefs.__$$text?.includes("NotCompletedReassign")
-  //           );
-  //         }
-  //         e.dataInputAssociation = e.dataInputAssociation?.filter(
-  //           (dataInputAssociation) =>
-  //             !dataInputAssociation.targetRef.__$$text.includes("NotStartedReassign") ||
-  //             !dataInputAssociation.targetRef.__$$text.includes("NotCompletedReassign")
-  //         );
-
-  //         reassignments.forEach((reassignment, index) => {
-  //           let dataInput = e.ioSpecification?.dataInput?.[index];
-  //           if (!dataInput) {
-  //             dataInput = {
-  //               "@_id": `${e["@_id"]}_${reassignment.type}InputX`,
-  //               "@_drools:dtype": "Object",
-  //               "@_itemSubjectRef": `_${e["@_id"]}_${reassignment.type}InputX`,
-  //               "@_name": reassignment.type,
-  //             };
-  //             e.ioSpecification?.dataInput?.push(dataInput);
-  //           }
-
-  //           let inputSet = e.ioSpecification?.inputSet[0];
-  //           if (!inputSet) {
-  //             inputSet = {
-  //               "@_id": dataInput["@_id"],
-  //               dataInputRefs: [
-  //                 {
-  //                   __$$text: dataInput["@_id"],
-  //                 },
-  //               ],
-  //             };
-  //             e.ioSpecification?.inputSet.push(inputSet);
-  //           } else {
-  //             e.ioSpecification?.inputSet[0].dataInputRefs?.push({ __$$text: dataInput["@_id"] });
-  //           }
-
-  //           let dataInputAssociation = e.dataInputAssociation?.find(
-  //             (association) => association.targetRef.__$$text === dataInput["@_id"]
-  //           );
-
-  //           if (!dataInputAssociation) {
-  //             dataInputAssociation = {
-  //               "@_id": `${e["@_id"]}_dataInputAssociation_${reassignment.type}`,
-  //               targetRef: { __$$text: dataInput["@_id"] },
-  //             };
-  //             e.dataInputAssociation?.push(dataInputAssociation);
-  //           }
-  //           if (!dataInputAssociation.assignment) {
-  //           dataInputAssociation.assignment = [
-  //             {
-  //               "@_id": `${e["@_id"]}_assignment_${reassignment.type}`,
-  //               from: {
-  //                 "@_id": `${e["@_id"]}`,
-  //                 __$$text: `users:${reassignment.users} groups:${reassignment.groups} ${reassignment.period}${reassignment.periodUnit}`,
-  //               },
-  //               to: { "@_id": dataInput["@_id"], __$$text: dataInput["@_id"] },
-  //             },
-  //           ];
-  //         }
-  //         else {
-  //           dataInputAssociation.assignment[0].from.__$$text += `users:${reassignment.users} groups:${reassignment.groups} ${reassignment.period}${reassignment.periodUnit}`
-  //         }
-  //         });
-  //       }
-  //     });
-  //   });
-  // }, [bpmnEditorStoreApi, element, reassignments]);
-
   return (
     <Modal
       className="kie-bpmn-editor--reassignments--modal"
@@ -503,7 +354,7 @@ export function Reassignments({
         <div className="kie-bpmn-editor--reassignments--empty-state">
           <Bullseye>
             <EmptyState>
-              {/* <EmptyStateIcon icon={CubesIcon} /> */}
+              <EmptyStateIcon icon={CubesIcon} />
               <Title headingLevel="h4">No reassignments yet</Title>
               <EmptyStateBody>
                 {"This represents the empty state for reassignments. You can add reassignments to get started."}

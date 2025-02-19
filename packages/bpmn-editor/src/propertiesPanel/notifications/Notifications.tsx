@@ -1,6 +1,6 @@
 import * as React from "react";
-import { useState, useMemo, useEffect, useCallback } from "react";
-import { useBpmnEditorStore, useBpmnEditorStoreApi } from "../../store/StoreContext";
+import { useState, useEffect, useCallback } from "react";
+import { useBpmnEditorStoreApi } from "../../store/StoreContext";
 import { Button, ButtonVariant } from "@patternfly/react-core/dist/js/components/Button/Button";
 import { Modal, ModalVariant } from "@patternfly/react-core/dist/js/components/Modal";
 import { Grid, GridItem } from "@patternfly/react-core/dist/js/layouts/Grid";
@@ -9,7 +9,6 @@ import { TimesIcon } from "@patternfly/react-icons/dist/js/icons/times-icon";
 import { Bullseye } from "@patternfly/react-core/dist/js/layouts/Bullseye";
 import { EmptyState, EmptyStateBody, EmptyStateIcon } from "@patternfly/react-core/dist/js/components/EmptyState";
 import { Title } from "@patternfly/react-core/dist/js/components/Title";
-import { Dropdown, DropdownItem, DropdownToggle } from "@patternfly/react-core/dist/js/components/Dropdown";
 import "./Notifications.css";
 import { visitFlowElementsAndArtifacts } from "../../mutations/_elementVisitor";
 import { setBpmn20Drools10MetaData } from "@kie-tools/bpmn-marshaller/dist/drools-extension-metaData";
@@ -19,7 +18,7 @@ import { Normalized } from "../../normalization/normalize";
 import { TextArea } from "@patternfly/react-core/dist/js/components/TextArea/TextArea";
 import { FormSelect } from "@patternfly/react-core/dist/js/components/FormSelect/FormSelect";
 import { FormSelectOption } from "@patternfly/react-core/dist/js/components/FormSelect/FormSelectOption";
-// import { CubesIcon } from "@patternfly/react-icons/dist/js/icons/cubes-icon";
+import { CubesIcon } from "@patternfly/react-icons/dist/js/icons/cubes-icon";
 import { generateUuid } from "@kie-tools/xyflow-react-kie-diagram/dist/uuid/uuid";
 import { Form } from "@patternfly/react-core/dist/js/components/Form/Form";
 
@@ -438,7 +437,7 @@ export function Notifications({
         <div className="kie-bpmn-editor--notifications--empty-state">
           <Bullseye>
             <EmptyState>
-              {/* <EmptyStateIcon icon={CubesIcon} /> */}
+              <EmptyStateIcon icon={CubesIcon} />
               <Title headingLevel="h4">No notifications yet</Title>
               <EmptyStateBody>
                 {"This represents the empty state for notifications. You can add notifications to get started."}

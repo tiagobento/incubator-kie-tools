@@ -33,7 +33,6 @@ import { visitFlowElementsAndArtifacts } from "../../mutations/_elementVisitor";
 import { addOrGetProcessAndDiagramElements } from "../../mutations/addOrGetProcessAndDiagramElements";
 import { useBpmnEditorStore, useBpmnEditorStoreApi } from "../../store/StoreContext";
 import { TextInput } from "@patternfly/react-core/dist/js/components/TextInput";
-import { updateItemDefinition } from "../../mutations/renameNode";
 import "./MultiInstanceProperties.css";
 import { FormSelectOption } from "@patternfly/react-core/dist/js/components/FormSelect/FormSelectOption";
 import { FormSelect } from "@patternfly/react-core/dist/js/components/FormSelect/FormSelect";
@@ -55,12 +54,7 @@ export function MultiInstanceProperties({ element }: { element: WithMultiInstanc
 
   return (
     <>
-      <FormGroup
-        label="Execution mode"
-        // helperText={
-        //   "Consectetur adipiscing elit. Lorem ipsum dolor sit amet, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
-        // } // FIXME: Tiago -> Description
-      >
+      <FormGroup label="Execution mode">
         <ToggleGroup aria-label="Execution mode">
           <ToggleGroupItem
             text="Parallel"

@@ -26,7 +26,7 @@ import { addOrGetProcessAndDiagramElements } from "../../../mutations/addOrGetPr
 import { Normalized } from "../../../normalization/normalize";
 import { useBpmnEditorStoreApi } from "../../../store/StoreContext";
 import { EndEventIcon, EventDefinitionIcon, IntermediateThrowEventIcon, StartEventIcon } from "../NodeIcons";
-import { BPMN20__tProcess } from "@kie-tools/bpmn-marshaller/dist/schemas/bpmn-2_0/ts-gen/types";
+import { BPMN20__tProcess } from "@kie-tools/bpmn-marshaller/src/schemas/bpmn-2_0/ts-gen/types";
 import { ElementFilter } from "@kie-tools/xml-parser-ts/dist/elementFilter";
 import { NODE_COLORS } from "../NodeSvgs";
 

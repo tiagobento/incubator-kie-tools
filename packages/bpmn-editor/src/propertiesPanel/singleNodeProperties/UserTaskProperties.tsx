@@ -17,13 +17,7 @@
  * under the License.
  */
 
-import {
-  BPMN20__tDefinitions,
-  BPMN20__tFormalExpression,
-  BPMN20__tPotentialOwner,
-  BPMN20__tUserTask,
-  WithMetaData,
-} from "@kie-tools/bpmn-marshaller/dist/schemas/bpmn-2_0/ts-gen/types";
+import { BPMN20__tUserTask } from "@kie-tools/bpmn-marshaller/dist/schemas/bpmn-2_0/ts-gen/types";
 import * as React from "react";
 import { Normalized } from "../../normalization/normalize";
 import { NameDocumentationAndId } from "../nameDocumentationAndId/NameDocumentationAndId";
@@ -41,10 +35,7 @@ import { FormGroup, FormSection } from "@patternfly/react-core/dist/js/component
 import { TextArea } from "@patternfly/react-core/dist/js/components/TextArea/TextArea";
 import { useBpmnEditorStore, useBpmnEditorStoreApi } from "../../store/StoreContext";
 import { Reassignments } from "../reassignments/Reassignments";
-import {
-  parseBpmn20Drools10MetaData,
-  setBpmn20Drools10MetaData,
-} from "@kie-tools/bpmn-marshaller/dist/drools-extension-metaData";
+import { setBpmn20Drools10MetaData } from "@kie-tools/bpmn-marshaller/dist/drools-extension-metaData";
 import { useState } from "react";
 import { SectionHeader } from "@kie-tools/xyflow-react-kie-diagram/dist/propertiesPanel/SectionHeader";
 import RedoIcon from "@patternfly/react-icons/dist/js/icons/redo-icon";
@@ -54,9 +45,7 @@ import EditIcon from "@patternfly/react-icons/dist/js/icons/edit-icon";
 import { visitFlowElementsAndArtifacts } from "../../mutations/_elementVisitor";
 import { generateUuid } from "@kie-tools/xyflow-react-kie-diagram/dist/uuid/uuid";
 import { addOrGetProcessAndDiagramElements } from "../../mutations/addOrGetProcessAndDiagramElements";
-import { UserTaskStuff } from "../nameDocumentationAndId/UserTaskStuff";
 import { Checkbox } from "@patternfly/react-core/dist/js/components/Checkbox/Checkbox";
-import { abort } from "process";
 import { Notifications } from "../notifications/Notifications";
 
 export function UserTaskProperties({
