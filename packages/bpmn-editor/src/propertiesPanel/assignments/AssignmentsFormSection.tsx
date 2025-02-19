@@ -427,23 +427,21 @@ export function AssignmentList({
       e.dataOutputAssociation ??= [];
 
       if (section === "input") {
-        e.ioSpecification.dataInput = e.ioSpecification?.dataInput?.filter(
-          (dataInput) =>
-            !namesFromOtherTypes.some((namesFromOtherTypes) => dataInput["@_name"]?.includes(namesFromOtherTypes))
+        e.ioSpecification.dataInput = e.ioSpecification?.dataInput?.filter((dataInput) =>
+          namesFromOtherTypes.some((namesFromOtherTypes) => dataInput["@_name"]?.includes(namesFromOtherTypes))
         );
 
         if (e.ioSpecification?.inputSet?.[0]?.dataInputRefs) {
           e.ioSpecification.inputSet[0].dataInputRefs = e.ioSpecification?.inputSet[0].dataInputRefs?.filter(
             (dataInputRefs) =>
-              !namesFromOtherTypes.some((namesFromOtherTypes) => dataInputRefs.__$$text.includes(namesFromOtherTypes))
+              namesFromOtherTypes.some((namesFromOtherTypes) => dataInputRefs.__$$text.includes(namesFromOtherTypes))
           );
         }
 
-        e.dataInputAssociation = e.dataInputAssociation?.filter(
-          (dataInputAssociation) =>
-            !namesFromOtherTypes.some((namesFromOtherTypes) =>
-              dataInputAssociation.targetRef.__$$text.includes(namesFromOtherTypes)
-            )
+        e.dataInputAssociation = e.dataInputAssociation?.filter((dataInputAssociation) =>
+          namesFromOtherTypes.some((namesFromOtherTypes) =>
+            dataInputAssociation.targetRef.__$$text.includes(namesFromOtherTypes)
+          )
         );
 
         inputAssignments.forEach((assignment, index) => {
@@ -495,23 +493,21 @@ export function AssignmentList({
           ];
         });
       } else if (section === "output") {
-        e.ioSpecification.dataOutput = e.ioSpecification?.dataOutput?.filter(
-          (dataOutput) =>
-            !namesFromOtherTypes.some((namesFromOtherTypes) => dataOutput["@_name"]?.includes(namesFromOtherTypes))
+        e.ioSpecification.dataOutput = e.ioSpecification?.dataOutput?.filter((dataOutput) =>
+          namesFromOtherTypes.some((namesFromOtherTypes) => dataOutput["@_name"]?.includes(namesFromOtherTypes))
         );
 
         if (e.ioSpecification?.outputSet?.[0]?.dataOutputRefs) {
           e.ioSpecification.outputSet[0].dataOutputRefs = e.ioSpecification?.outputSet[0].dataOutputRefs?.filter(
             (dataOutputRefs) =>
-              !namesFromOtherTypes.some((namesFromOtherTypes) => dataOutputRefs.__$$text.includes(namesFromOtherTypes))
+              namesFromOtherTypes.some((namesFromOtherTypes) => dataOutputRefs.__$$text.includes(namesFromOtherTypes))
           );
         }
 
-        e.dataOutputAssociation = e.dataOutputAssociation?.filter(
-          (dataOutputAssociation) =>
-            !namesFromOtherTypes.some((namesFromOtherTypes) =>
-              dataOutputAssociation.targetRef.__$$text.includes(namesFromOtherTypes)
-            )
+        e.dataOutputAssociation = e.dataOutputAssociation?.filter((dataOutputAssociation) =>
+          namesFromOtherTypes.some((namesFromOtherTypes) =>
+            dataOutputAssociation.targetRef.__$$text.includes(namesFromOtherTypes)
+          )
         );
 
         outputAssignments.forEach((assignment, index) => {
@@ -836,11 +832,7 @@ export function AssignmentList({
               </div>
             ))}
           <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "16px", paddingRight: "8px" }}>
-            <Button
-              variant="primary"
-              onClick={handleSubmit}
-              isDisabled={isReadOnly || (inputAssignments.length === 0 && outputAssignments.length === 0)}
-            >
+            <Button variant="primary" onClick={handleSubmit} isDisabled={isReadOnly}>
               Save
             </Button>
           </div>
@@ -863,6 +855,11 @@ export function AssignmentList({
                 </Button>
               </EmptyState>
             </Bullseye>
+          </div>
+          <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "16px", paddingRight: "8px" }}>
+            <Button variant="primary" onClick={handleSubmit} isDisabled={isReadOnly}>
+              Save
+            </Button>
           </div>
         </>
       )}

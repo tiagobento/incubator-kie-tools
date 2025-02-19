@@ -72,44 +72,6 @@ export function Reassignments({
   const removeReassignment = useCallback(
     (index: number) => {
       setReassignments(reassignments.filter((_, i) => i !== index));
-      if (reassignments.length === 1) {
-        bpmnEditorStoreApi.setState((s) => {
-          const { process } = addOrGetProcessAndDiagramElements({
-            definitions: s.bpmn.model.definitions,
-          });
-          visitFlowElementsAndArtifacts(process, ({ element: e }) => {
-            if (e["@_id"] === element?.["@_id"] && e.__$$element === element.__$$element) {
-              setBpmn20Drools10MetaData(e, "elementname", e["@_name"] || "");
-              e.ioSpecification ??= {
-                "@_id": generateUuid(),
-                inputSet: [],
-                outputSet: [],
-                dataInput: [],
-              };
-              e.ioSpecification.dataInput ??= [];
-              e.dataInputAssociation ??= [];
-
-              e.ioSpecification.dataInput = e.ioSpecification.dataInput?.filter(
-                (dataInput) =>
-                  !dataInput["@_name"]?.includes("NotStartedReassign") &&
-                  !dataInput["@_name"]?.includes("NotCompletedReassign")
-              );
-              if (e.ioSpecification?.inputSet?.[0]?.dataInputRefs) {
-                e.ioSpecification.inputSet[0].dataInputRefs = e.ioSpecification.inputSet[0].dataInputRefs?.filter(
-                  (dataInputRefs) =>
-                    !dataInputRefs.__$$text.includes("NotStartedReassign") &&
-                    !dataInputRefs.__$$text?.includes("NotCompletedReassign")
-                );
-              }
-              e.dataInputAssociation = e.dataInputAssociation?.filter(
-                (dataInputAssociation) =>
-                  !dataInputAssociation.targetRef.__$$text.includes("NotStartedReassign") &&
-                  !dataInputAssociation.targetRef.__$$text.includes("NotCompletedReassign")
-              );
-            }
-          });
-        });
-      }
     },
     [reassignments]
   );
@@ -402,6 +364,9 @@ export function Reassignments({
               </Button>
             </EmptyState>
           </Bullseye>
+          <Button onClick={handleSubmit} className="kie-bpmn-editor--properties-panel--reassignment-submit-save-button">
+            Save
+          </Button>
         </div>
       )}
     </Modal>
