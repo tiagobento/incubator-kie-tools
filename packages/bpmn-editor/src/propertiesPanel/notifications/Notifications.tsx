@@ -78,8 +78,48 @@ export function Notifications({
   const removeNotification = useCallback(
     (index: number) => {
       setNotifications(notifications.filter((_, i) => i !== index));
+
+      if (notifications.length === 1) {
+        bpmnEditorStoreApi.setState((s) => {
+          const { process } = addOrGetProcessAndDiagramElements({
+            definitions: s.bpmn.model.definitions,
+          });
+          visitFlowElementsAndArtifacts(process, ({ element: e }) => {
+            if (e["@_id"] === element?.["@_id"] && e.__$$element === element.__$$element) {
+              setBpmn20Drools10MetaData(e, "elementname", e["@_name"] || "");
+
+              e.ioSpecification ??= {
+                "@_id": generateUuid(),
+                inputSet: [{ "@_id": generateUuid(), dataInputRefs: [] }],
+                outputSet: [],
+                dataInput: [],
+              };
+              e.ioSpecification.dataInput ??= [];
+              e.dataInputAssociation ??= [];
+
+              e.ioSpecification.dataInput = e.ioSpecification.dataInput?.filter(
+                (dataInput) =>
+                  !dataInput["@_name"]?.includes("NotStartedNotify") &&
+                  !dataInput["@_name"]?.includes("NotCompletedNotify")
+              );
+              if (e.ioSpecification?.inputSet?.[0]?.dataInputRefs) {
+                e.ioSpecification.inputSet[0].dataInputRefs = e.ioSpecification.inputSet[0].dataInputRefs?.filter(
+                  (dataInputRefs) =>
+                    !dataInputRefs.__$$text.includes("NotStartedNotify") &&
+                    !dataInputRefs.__$$text?.includes("NotCompletedNotify")
+                );
+              }
+              e.dataInputAssociation = e.dataInputAssociation?.filter(
+                (dataInputAssociation) =>
+                  !dataInputAssociation.targetRef.__$$text.includes("NotStartedNotify") &&
+                  !dataInputAssociation.targetRef.__$$text.includes("NotCompletedNotify")
+              );
+            }
+          });
+        });
+      }
     },
-    [notifications]
+    [bpmnEditorStoreApi, element, notifications]
   );
 
   const handleInputChange = useCallback((index: number, propertyName: keyof Notification, value: string | number) => {
@@ -128,7 +168,7 @@ export function Notifications({
         const expiresAt = expiresAtMatches.map((match) => match[1]);
 
         const notifications = [];
-        for (let i = 0; i < from.length; i++) {
+        for (let i = 0; i < expiresAt.length; i++) {
           notifications.push({
             from: from[i] || "",
             tousers: tousers[i] || "",

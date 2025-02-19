@@ -338,12 +338,9 @@ export function AssignmentList({
         const extractedOutputAssignments = element?.dataOutputAssociation
           ?.filter(
             (association) =>
-              !association.targetRef?.__$$text.includes("TaskName") &&
-              !association.targetRef?.__$$text.includes("Skippable") &&
-              !association.targetRef?.__$$text.includes("NotStartedReassign") &&
-              !association.targetRef?.__$$text.includes("NotCompletedReassign") &&
-              !association.targetRef?.__$$text.includes("NotStartedNotify") &&
-              !association.targetRef?.__$$text.includes("NotCompletedNotify")
+              !namesFromOtherTypes.some((namesFromOtherTypes) =>
+                association.targetRef?.__$$text.includes(namesFromOtherTypes)
+              )
           )
           ?.flatMap((association) => {
             const assignment = association.assignment?.[0];
@@ -432,21 +429,21 @@ export function AssignmentList({
       if (section === "input") {
         e.ioSpecification.dataInput = e.ioSpecification?.dataInput?.filter(
           (dataInput) =>
-            dataInput["@_name"]?.includes("NotStartedReassign") || dataInput["@_name"]?.includes("NotCompletedReassign")
+            !namesFromOtherTypes.some((namesFromOtherTypes) => dataInput["@_name"]?.includes(namesFromOtherTypes))
         );
 
         if (e.ioSpecification?.inputSet?.[0]?.dataInputRefs) {
           e.ioSpecification.inputSet[0].dataInputRefs = e.ioSpecification?.inputSet[0].dataInputRefs?.filter(
             (dataInputRefs) =>
-              dataInputRefs.__$$text.includes("NotStartedReassign") ||
-              dataInputRefs.__$$text?.includes("NotCompletedReassign")
+              !namesFromOtherTypes.some((namesFromOtherTypes) => dataInputRefs.__$$text.includes(namesFromOtherTypes))
           );
         }
 
         e.dataInputAssociation = e.dataInputAssociation?.filter(
           (dataInputAssociation) =>
-            dataInputAssociation.targetRef.__$$text.includes("NotStartedReassign") ||
-            dataInputAssociation.targetRef.__$$text.includes("NotCompletedReassign")
+            !namesFromOtherTypes.some((namesFromOtherTypes) =>
+              dataInputAssociation.targetRef.__$$text.includes(namesFromOtherTypes)
+            )
         );
 
         inputAssignments.forEach((assignment, index) => {
@@ -500,22 +497,21 @@ export function AssignmentList({
       } else if (section === "output") {
         e.ioSpecification.dataOutput = e.ioSpecification?.dataOutput?.filter(
           (dataOutput) =>
-            dataOutput["@_name"]?.includes("NotStartedReassign") ||
-            dataOutput["@_name"]?.includes("NotCompletedReassign")
+            !namesFromOtherTypes.some((namesFromOtherTypes) => dataOutput["@_name"]?.includes(namesFromOtherTypes))
         );
 
         if (e.ioSpecification?.outputSet?.[0]?.dataOutputRefs) {
           e.ioSpecification.outputSet[0].dataOutputRefs = e.ioSpecification?.outputSet[0].dataOutputRefs?.filter(
             (dataOutputRefs) =>
-              dataOutputRefs.__$$text.includes("NotStartedReassign") ||
-              dataOutputRefs.__$$text?.includes("NotCompletedReassign")
+              !namesFromOtherTypes.some((namesFromOtherTypes) => dataOutputRefs.__$$text.includes(namesFromOtherTypes))
           );
         }
 
         e.dataOutputAssociation = e.dataOutputAssociation?.filter(
           (dataOutputAssociation) =>
-            dataOutputAssociation.targetRef.__$$text.includes("NotStartedReassign") ||
-            dataOutputAssociation.targetRef.__$$text.includes("NotCompletedReassign")
+            !namesFromOtherTypes.some((namesFromOtherTypes) =>
+              dataOutputAssociation.targetRef.__$$text.includes(namesFromOtherTypes)
+            )
         );
 
         outputAssignments.forEach((assignment, index) => {
