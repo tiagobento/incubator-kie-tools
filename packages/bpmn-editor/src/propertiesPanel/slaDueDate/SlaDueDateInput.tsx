@@ -71,7 +71,7 @@ export function SlaDueDateInput({ element }: { element: WithSlaDueDate }) {
           type={"text"}
           isDisabled={isReadOnly}
           placeholder={"Enter a date..."}
-          value={parseBpmn20Drools10MetaData(element).get("customSLADueDate")}
+          value={parseBpmn20Drools10MetaData(element).get("customSLADueDate") || ""}
           onChange={(newSlaDueDate) =>
             bpmnEditorStoreApi.setState((s) => {
               const { process } = addOrGetProcessAndDiagramElements({

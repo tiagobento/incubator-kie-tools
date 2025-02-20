@@ -63,7 +63,7 @@ export function NameDocumentationAndId({
           isDisabled={settings.isReadOnly}
           id={element["@_id"]}
           name={element["@_name"]}
-          value={element["@_name"]}
+          value={element["@_name"] || ""}
           placeholder={"Enter a name..."}
           onChange={onNameChanged}
         />
@@ -74,7 +74,7 @@ export function NameDocumentationAndId({
           aria-label={"Documentation"}
           type={"text"}
           isDisabled={settings.isReadOnly}
-          value={element?.documentation?.[0].__$$text}
+          value={element?.documentation?.[0].__$$text || ""}
           onChange={(newDocumentation) =>
             bpmnEditorStoreApi.setState((s) => {
               const { process } = addOrGetProcessAndDiagramElements({

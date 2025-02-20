@@ -249,7 +249,7 @@ export function UserTaskProperties({
                 ?.resourceAssignmentExpression?.expression?.["__$$element"] === "formalExpression"
                 ? userTask.resourceRole.find((role) => role.__$$element === "potentialOwner")
                     ?.resourceAssignmentExpression?.expression.__$$text ?? ""
-                : undefined
+                : ""
             }
             onChange={(newValue) =>
               bpmnEditorStoreApi.setState((s) => {
