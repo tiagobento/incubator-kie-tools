@@ -355,8 +355,7 @@ export function TaskNodeSvg(
     props: { ..._props },
   } = normalize(__props);
 
-  const { variant, isIcon } = { ..._props };
-  const { markers: _markers, variant: _variant, ...props } = { ..._props };
+  const { markers: _markers, variant: _variant, variant, isIcon } = { ..._props };
 
   const markers = useMemo(() => new Set(_markers), [_markers]);
   const iconSize = 200;
@@ -383,7 +382,6 @@ export function TaskNodeSvg(
           strokeLinejoin={"round"}
           rx="3"
           ry="3"
-          {...props}
         />
       )}
 
@@ -427,7 +425,6 @@ export function TaskNodeSvg(
           strokeLinejoin={"round"}
           rx="0"
           ry="0"
-          {...props}
         />
       )}
       <ActivityNodeIcons x={x} y={y} width={width} height={height} icons={markers as Set<ActivityNodeMarker>} />

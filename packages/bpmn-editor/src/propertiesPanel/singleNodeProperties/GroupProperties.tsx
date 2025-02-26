@@ -22,11 +22,100 @@ import { BPMN20__tGroup } from "@kie-tools/bpmn-marshaller/dist/schemas/bpmn-2_0
 import { Normalized } from "../../normalization/normalize";
 import { GroupIcon } from "../../diagram/nodes/NodeIcons";
 import { PropertiesPanelHeaderFormSection } from "./_PropertiesPanelHeaderFormSection";
+import { addOrGetCategory } from "../../mutations/addOrGetCategory";
+import { useCallback } from "react";
+import { useBpmnEditorStore, useBpmnEditorStoreApi } from "../../store/StoreContext";
+import { visitFlowElementsAndArtifacts } from "../../mutations/_elementVisitor";
+import { generateUuid } from "@kie-tools/xyflow-react-kie-diagram/dist/uuid/uuid";
+import { FormSection } from "@patternfly/react-core/dist/js/components/Form/FormSection";
+import { FormGroup } from "@patternfly/react-core/dist/js/components/Form/FormGroup";
+import { TextArea } from "@patternfly/react-core/dist/js/components/TextArea/TextArea";
+import { TextInput } from "@patternfly/react-core/dist/js/components/TextInput/TextInput";
+import { ClipboardCopy } from "@patternfly/react-core/dist/js/components/ClipboardCopy/ClipboardCopy";
+import { addOrGetProcessAndDiagramElements } from "../../mutations/addOrGetProcessAndDiagramElements";
 
 export function GroupProperties({ group }: { group: Normalized<BPMN20__tGroup> & { __$$element: "group" } }) {
+  const bpmnEditorStoreApi = useBpmnEditorStoreApi();
+  const settings = useBpmnEditorStore((s) => s.settings);
+
+  const onNameChanged = useCallback(
+    (newName: string) => {
+      bpmnEditorStoreApi.setState((s) => {
+        const { category: category } = addOrGetCategory({
+          definitions: s.bpmn.model.definitions,
+        });
+        category.categoryValue ??= [
+          {
+            "@_id": generateUuid(),
+          },
+        ];
+        category.categoryValue[0]["@_value"] = newName;
+        const { process } = addOrGetProcessAndDiagramElements({
+          definitions: s.bpmn.model.definitions,
+        });
+        visitFlowElementsAndArtifacts(process, ({ element: e }) => {
+          if (e["@_id"] === group["@_id"] && e.__$$element === group.__$$element) {
+            e["@_categoryValueRef"] = newName;
+          }
+        });
+      });
+    },
+    [bpmnEditorStoreApi, group]
+  );
+
+  const onDocumentationChanged = useCallback(
+    (newDocumentation) =>
+      bpmnEditorStoreApi.setState((s) => {
+        const { process } = addOrGetProcessAndDiagramElements({
+          definitions: s.bpmn.model.definitions,
+        });
+        visitFlowElementsAndArtifacts(process, ({ element: e }) => {
+          if (e["@_id"] === group["@_id"] && e.__$$element === group.__$$element) {
+            e.documentation ??= [];
+            e.documentation[0] = {
+              "@_id": generateUuid(),
+              __$$text: newDocumentation,
+            };
+          }
+        });
+      }),
+    [bpmnEditorStoreApi, group]
+  );
+
   return (
     <>
-      <PropertiesPanelHeaderFormSection title={"Group"} icon={<GroupIcon />}></PropertiesPanelHeaderFormSection>
+      <PropertiesPanelHeaderFormSection title={"Group"} icon={<GroupIcon />}>
+        <FormSection>
+          <FormGroup label="Name">
+            <TextInput
+              isDisabled={settings.isReadOnly}
+              id={group["@_id"]}
+              value={group["@_categoryValueRef"] || ""}
+              placeholder={"Enter a name..."}
+              onChange={onNameChanged}
+            />
+          </FormGroup>
+
+          <FormGroup label="Documentation">
+            <TextArea
+              aria-label={"Documentation"}
+              type={"text"}
+              isDisabled={settings.isReadOnly}
+              value={group?.documentation?.[0].__$$text || ""}
+              onChange={onDocumentationChanged}
+              placeholder={"Enter documentation..."}
+              style={{ resize: "vertical", minHeight: "40px" }}
+              rows={3}
+            />
+          </FormGroup>
+
+          <FormGroup label="ID">
+            <ClipboardCopy isReadOnly={settings.isReadOnly} hoverTip="Copy" clickTip="Copied">
+              {group["@_id"]}
+            </ClipboardCopy>
+          </FormGroup>
+        </FormSection>
+      </PropertiesPanelHeaderFormSection>
     </>
   );
 }

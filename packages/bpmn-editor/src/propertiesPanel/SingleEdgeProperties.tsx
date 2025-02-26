@@ -133,27 +133,27 @@ export function SingleEdgeProperties() {
         >
           {isSectionExpanded && properties}
         </FormSection>
-      </Form>
 
-      <FormSection
-        title={
-          <SectionHeader
-            expands={true}
-            isSectionExpanded={isMetadataSectionExpanded}
-            toogleSectionExpanded={() => setMetadataSectionExpanded((prev) => !prev)}
-            icon={<ColumnsIcon width={16} height={36} style={{ marginLeft: "12px" }} />}
-            title={"Metadata"}
-          />
-        }
-      >
-        {isMetadataSectionExpanded && (
-          <>
-            <FormSection style={{ paddingLeft: "20px", marginTop: "20px", gap: 0 }}>
-              <Metadata obj={selectedEdge?.data?.bpmnEdge} />
-            </FormSection>
-          </>
-        )}
-      </FormSection>
+        <FormSection
+          title={
+            <SectionHeader
+              expands={true}
+              isSectionExpanded={isMetadataSectionExpanded}
+              toogleSectionExpanded={() => setMetadataSectionExpanded((prev) => !prev)}
+              icon={<ColumnsIcon width={16} height={36} style={{ marginLeft: "12px" }} />}
+              title={"Metadata"}
+            />
+          }
+        >
+          {isMetadataSectionExpanded && (
+            <>
+              <FormSection style={{ paddingLeft: "20px", marginTop: "20px", gap: 0 }}>
+                <Metadata obj={selectedEdge?.data?.bpmnEdge} />
+              </FormSection>
+            </>
+          )}
+        </FormSection>
+      </Form>
     </>
   );
 }

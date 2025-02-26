@@ -22,6 +22,8 @@ import * as React from "react";
 import { Normalized } from "../../normalization/normalize";
 import { NameDocumentationAndId } from "../nameDocumentationAndId/NameDocumentationAndId";
 import { BidirectionalAssignmentsFormSection } from "../assignments/AssignmentsFormSection";
+import { ReassignmentsFormSection } from "../reassignments/Reassignments";
+import { NotificationsFormSection } from "../notifications/Notifications";
 import { OnEntryAndExitScriptsFormSection } from "../onEntryAndExitScripts/OnEntryAndExitScriptsFormSection";
 import { TaskIcon } from "../../diagram/nodes/NodeIcons";
 import { PropertiesPanelHeaderFormSection } from "./_PropertiesPanelHeaderFormSection";
@@ -31,22 +33,15 @@ import { SlaDueDateInput } from "../slaDueDate/SlaDueDateInput";
 import { MultiInstanceCheckbox } from "../multiInstanceCheckbox/MultiInstanceCheckbox";
 import { MultiInstanceProperties } from "../multiInstance/MultiInstanceProperties";
 import { AdhocAutostartCheckbox } from "../adhocAutostartCheckbox/AdhocAutostartCheckbox";
-import { FormGroup, FormSection } from "@patternfly/react-core/dist/js/components/Form";
+import { FormGroup } from "@patternfly/react-core/dist/js/components/Form";
 import { TextArea } from "@patternfly/react-core/dist/js/components/TextArea/TextArea";
 import { useBpmnEditorStore, useBpmnEditorStoreApi } from "../../store/StoreContext";
-import { Reassignments } from "../reassignments/Reassignments";
 import { setBpmn20Drools10MetaData } from "@kie-tools/bpmn-marshaller/dist/drools-extension-metaData";
 import { useState } from "react";
-import { SectionHeader } from "@kie-tools/xyflow-react-kie-diagram/dist/propertiesPanel/SectionHeader";
-import RedoIcon from "@patternfly/react-icons/dist/js/icons/redo-icon";
-import BellIcon from "@patternfly/react-icons/dist/js/icons/bell-icon";
-import { Button, ButtonVariant } from "@patternfly/react-core/dist/js/components/Button";
-import EditIcon from "@patternfly/react-icons/dist/js/icons/edit-icon";
 import { visitFlowElementsAndArtifacts } from "../../mutations/_elementVisitor";
 import { generateUuid } from "@kie-tools/xyflow-react-kie-diagram/dist/uuid/uuid";
 import { addOrGetProcessAndDiagramElements } from "../../mutations/addOrGetProcessAndDiagramElements";
 import { Checkbox } from "@patternfly/react-core/dist/js/components/Checkbox/Checkbox";
-import { Notifications } from "../notifications/Notifications";
 
 export function UserTaskProperties({
   userTask,
@@ -55,10 +50,6 @@ export function UserTaskProperties({
 }) {
   const bpmnEditorStoreApi = useBpmnEditorStoreApi();
   const settings = useBpmnEditorStore((s) => s.settings);
-  const [showReassignmentsModal, setShowReassignmentsModal] = useState(false);
-  const closeReassignmentsModal = React.useCallback(() => {
-    setShowReassignmentsModal(false);
-  }, []);
   const [showNotificationsModal, setShowNotificationsModal] = useState(false);
   const closeNotificationsModal = React.useCallback(() => {
     setShowNotificationsModal(false);
@@ -281,6 +272,7 @@ export function UserTaskProperties({
             rows={3}
           />
         </FormGroup>
+
         <FormGroup label={"Groups"}>
           <TextArea
             aria-label={"Groups"}
@@ -322,52 +314,10 @@ export function UserTaskProperties({
       </PropertiesPanelHeaderFormSection>
 
       <BidirectionalAssignmentsFormSection element={userTask} />
-      <Reassignments isOpen={showReassignmentsModal} onClose={closeReassignmentsModal} element={userTask} />
-      <Notifications isOpen={showNotificationsModal} onClose={closeNotificationsModal} element={userTask} />
 
-      <FormSection
-        title={
-          <SectionHeader
-            expands={"modal"}
-            icon={<RedoIcon width={16} height={36} style={{ marginLeft: "12px" }} />}
-            title={"Reassignments"}
-            toogleSectionExpanded={() => setShowReassignmentsModal(true)}
-            action={
-              <Button
-                title={"Manage"}
-                variant={ButtonVariant.plain}
-                isDisabled={settings.isReadOnly}
-                onClick={() => setShowReassignmentsModal(true)}
-                style={{ paddingBottom: 0, paddingTop: 0 }}
-              >
-                <EditIcon />
-              </Button>
-            }
-          />
-        }
-      />
-      {/* <Notifications isOpen={showNotificationsModal} onClose={closeNotificationsModal} /> */}
-      <FormSection
-        title={
-          <SectionHeader
-            expands={"modal"}
-            icon={<BellIcon width={16} height={36} style={{ marginLeft: "12px" }} />}
-            title={"Notifications"}
-            toogleSectionExpanded={() => setShowNotificationsModal(true)}
-            action={
-              <Button
-                title={"Manage"}
-                variant={ButtonVariant.plain}
-                isDisabled={settings.isReadOnly}
-                onClick={() => setShowNotificationsModal(true)}
-                style={{ paddingBottom: 0, paddingTop: 0 }}
-              >
-                <EditIcon />
-              </Button>
-            }
-          />
-        }
-      />
+      <ReassignmentsFormSection element={userTask} />
+
+      <NotificationsFormSection element={userTask} />
 
       <OnEntryAndExitScriptsFormSection element={userTask} />
     </>

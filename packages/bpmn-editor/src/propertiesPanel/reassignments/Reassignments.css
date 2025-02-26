@@ -18,6 +18,7 @@
  */
 
 .kie-bpmn-editor--reassignments--modal {
+  position: relative;
   height: 80%;
   width: 70%;
   padding: 16px;

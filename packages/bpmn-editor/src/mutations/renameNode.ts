@@ -19,7 +19,6 @@
 
 import {
   BPMN20__tDefinitions,
-  BPMN20__tItemDefinition,
   BPMN20__tLane,
   BPMN20__tProcess,
   BPMN20__tTextAnnotation,

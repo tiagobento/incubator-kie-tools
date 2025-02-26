@@ -18,10 +18,16 @@
  */
 
 import { BPMN20__tSequenceFlow } from "@kie-tools/bpmn-marshaller/dist/schemas/bpmn-2_0/ts-gen/types";
-import { FormSection } from "@patternfly/react-core/dist/js/components/Form";
+import { FormGroup, FormSection } from "@patternfly/react-core/dist/js/components/Form";
 import * as React from "react";
 import { Normalized } from "../../normalization/normalize";
 import { useBpmnEditorStoreApi } from "../../store/StoreContext";
+import { addOrGetProcessAndDiagramElements } from "../../mutations/addOrGetProcessAndDiagramElements";
+import { visitFlowElementsAndArtifacts } from "../../mutations/_elementVisitor";
+import { NameDocumentationAndId } from "../nameDocumentationAndId/NameDocumentationAndId";
+import { CodeInput } from "../codeInput/CodeInput";
+import { TextInput } from "@patternfly/react-core/dist/js/components/TextInput/TextInput";
+import { generateUuid } from "@kie-tools/xyflow-react-kie-diagram/dist/uuid/uuid";
 
 export function SequenceFlowProperties({
   sequenceFlow,
@@ -29,15 +35,54 @@ export function SequenceFlowProperties({
   sequenceFlow: Normalized<BPMN20__tSequenceFlow> & { __$$element: "sequenceFlow" };
 }) {
   const bpmnEditorStoreApi = useBpmnEditorStoreApi();
+  const isReadOnly = bpmnEditorStoreApi((s) => s.settings.isReadOnly);
 
-  const onLabelChanged = React.useCallback(
-    (newLabel: string) => {
-      bpmnEditorStoreApi.setState((s) => {
-        // renameFlowElement({ definitions: s.bpmn.model.definitions, newLabel, id: sequenceFlow["@_id"] });
-      });
-    },
-    [bpmnEditorStoreApi]
+  return (
+    <FormSection>
+      <NameDocumentationAndId element={sequenceFlow} />
+      <FormGroup label="Priority">
+        <TextInput
+          aria-label={"Priority"}
+          type={"number"}
+          isDisabled={isReadOnly}
+          value={sequenceFlow["@_drools:priority"] || ""}
+          onChange={(newPriority) =>
+            bpmnEditorStoreApi.setState((s) => {
+              const { process } = addOrGetProcessAndDiagramElements({
+                definitions: s.bpmn.model.definitions,
+              });
+              visitFlowElementsAndArtifacts(process, ({ element: e }) => {
+                if (e["@_id"] === sequenceFlow?.["@_id"] && e.__$$element === sequenceFlow.__$$element) {
+                  e["@_drools:priority"] = newPriority;
+                }
+              });
+            })
+          }
+          placeholder={"Enter priority..."}
+          style={{ resize: "vertical", minHeight: "40px" }}
+          rows={1}
+        />
+      </FormGroup>
+      <CodeInput
+        label={"Condition Expression"}
+        languages={["Java", "MVEL", "DROOLS", "FEEL"]}
+        value={sequenceFlow.conditionExpression?.__$$text || ""}
+        onChange={(newPriority) =>
+          bpmnEditorStoreApi.setState((s) => {
+            const { process } = addOrGetProcessAndDiagramElements({
+              definitions: s.bpmn.model.definitions,
+            });
+            visitFlowElementsAndArtifacts(process, ({ element: e }) => {
+              if (e["@_id"] === sequenceFlow?.["@_id"] && e.__$$element === sequenceFlow.__$$element) {
+                e.conditionExpression ??= {
+                  "@_id": generateUuid(),
+                };
+                e.conditionExpression.__$$text = newPriority;
+              }
+            });
+          })
+        }
+      ></CodeInput>
+    </FormSection>
   );
-
-  return <FormSection>SequenceFlowProperties</FormSection>;
 }

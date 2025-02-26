@@ -160,6 +160,11 @@ declare module "./schemas/bpmn-2_0/ts-gen/types" {
   export interface BPMN20__tErrorEventDefinition {
     "@_drools:erefname"?: Namespaced<DROOLS, string>;
   }
+
+  // Sequence Flow Definition
+  export interface BPMN20__tSequenceFlow {
+    "@_drools:priority"?: Namespaced<DROOLS, string>;
+  }
 }
 
 bpmn20ns.set(DROOLS_NS, drools10ns.get("")!);
@@ -280,6 +285,14 @@ mergeMetas(bpmn20meta, [[DROOLS_NS, drools10meta]]);
   isArray: false,
   xsdType: "xsd:string",
   fromType: "BPMN20__tErrorEventDefinition",
+};
+
+// Error Event Definition
+(bpmn20meta["BPMN20__tSequenceFlow"] as any)["@_drools:priority"] = {
+  type: "string",
+  isArray: false,
+  xsdType: "xsd:string",
+  fromType: "BPMN20__tSequenceFlow",
 };
 
 class MetaType {

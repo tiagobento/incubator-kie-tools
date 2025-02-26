@@ -18,8 +18,8 @@
  */
 
 import * as React from "react";
-import { useState, useEffect, useCallback } from "react";
-import { useBpmnEditorStoreApi } from "../../store/StoreContext";
+import { useState, useEffect, useCallback, useMemo } from "react";
+import { useBpmnEditorStore, useBpmnEditorStoreApi } from "../../store/StoreContext";
 import { Button, ButtonVariant } from "@patternfly/react-core/dist/js/components/Button/Button";
 import { Modal, ModalVariant } from "@patternfly/react-core/dist/js/components/Modal";
 import { Grid, GridItem } from "@patternfly/react-core/dist/js/layouts/Grid";
@@ -40,6 +40,13 @@ import { FormSelectOption } from "@patternfly/react-core/dist/js/components/Form
 import { CubesIcon } from "@patternfly/react-icons/dist/js/icons/cubes-icon";
 import { generateUuid } from "@kie-tools/xyflow-react-kie-diagram/dist/uuid/uuid";
 import { Form } from "@patternfly/react-core/dist/js/components/Form/Form";
+import { TextInput } from "@patternfly/react-core/dist/js/components/TextInput/TextInput";
+import { FormSection } from "@patternfly/react-core/dist/js/components/Form/FormSection";
+import { SectionHeader } from "@kie-tools/xyflow-react-kie-diagram/dist/propertiesPanel/SectionHeader";
+import { BellIcon } from "@patternfly/react-icons/dist/js/icons/bell-icon";
+import EyeIcon from "@patternfly/react-icons/dist/js/icons/eye-icon";
+import EditIcon from "@patternfly/react-icons/dist/js/icons/edit-icon";
+import { Alert } from "@patternfly/react-core/dist/js/components/Alert/Alert";
 
 type Notification = {
   from: string;
@@ -64,18 +71,85 @@ const entryStyle = {
   width: "calc(100% - 2 * 4px - 2 * 8px)",
 };
 
-export function Notifications({
-  isOpen,
-  onClose,
+export function NotificationsFormSection({
   element,
 }: {
-  isOpen: boolean;
-  onClose: () => void;
   element: Normalized<BPMN20__tUserTask> & { __$$element: "userTask" };
 }) {
+  const isReadOnly = useBpmnEditorStore((s) => s.settings.isReadOnly);
+  const [showNotificationsModal, setShowNotificationsModal] = useState(false);
+  const count =
+    element?.dataInputAssociation?.filter(
+      (association) =>
+        association.targetRef.__$$text.includes("NotStartedNotify") ||
+        association.targetRef.__$$text.includes("NotCompletedNotify")
+    ).length ?? 0;
+  const sectionLabel = useMemo(() => {
+    if (count > 0) {
+      return ` (${count})`;
+    } else {
+      return "";
+    }
+  }, [count]);
+
+  return (
+    <>
+      <FormSection
+        title={
+          <SectionHeader
+            expands={"modal"}
+            icon={<BellIcon width={16} height={36} style={{ marginLeft: "12px" }} />}
+            title={"Notifications" + sectionLabel}
+            toogleSectionExpanded={() => setShowNotificationsModal(true)}
+            action={
+              <Button
+                title={"Manage"}
+                variant={ButtonVariant.plain}
+                isDisabled={isReadOnly}
+                onClick={() => setShowNotificationsModal(true)}
+                style={{ paddingBottom: 0, paddingTop: 0 }}
+              >
+                {isReadOnly ? <EyeIcon /> : <EditIcon />}
+              </Button>
+            }
+          />
+        }
+      />
+      <Modal
+        title="Notifications"
+        className={"kie-bpmn-editor--notifications--modal"}
+        aria-labelledby={"Notifications"}
+        variant={ModalVariant.large}
+        isOpen={showNotificationsModal}
+        onClose={() => setShowNotificationsModal(false)}
+      >
+        <div style={{ height: "100%" }}>
+          <Notifications element={element} />
+        </div>
+      </Modal>
+    </>
+  );
+}
+
+export function Notifications({ element }: { element: Normalized<BPMN20__tUserTask> & { __$$element: "userTask" } }) {
   const bpmnEditorStoreApi = useBpmnEditorStoreApi();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [hoveredIndex, setHoveredIndex] = useState<number | undefined>(undefined);
+  const [onSaveMessage, setOnSaveMessage] = useState<string | null>(null);
+
+  const count =
+    element?.dataInputAssociation?.filter(
+      (association) =>
+        association.targetRef.__$$text.includes("NotStartedNotify") ||
+        association.targetRef.__$$text.includes("NotCompletedNotify")
+    ).length ?? 0;
+  const sectionLabel = useMemo(() => {
+    if (count > 0) {
+      return ` (in: ${count})`;
+    } else {
+      return ` (in: -)`;
+    }
+  }, [count]);
 
   const addNotification = useCallback(() => {
     setNotifications([
@@ -111,7 +185,7 @@ export function Notifications({
 
   //populates intermediary `notifications` state from the model
   useEffect(() => {
-    if (!isOpen || !element) {
+    if (!element) {
       return;
     }
 
@@ -166,119 +240,131 @@ export function Notifications({
       });
 
     setNotifications(extractedNotifications || []);
-  }, [isOpen, element]);
+  }, [element]);
 
-  const handleSubmit = useCallback(() => {
-    bpmnEditorStoreApi.setState((s) => {
-      const { process } = addOrGetProcessAndDiagramElements({
-        definitions: s.bpmn.model.definitions,
-      });
-      visitFlowElementsAndArtifacts(process, ({ element: e }) => {
-        if (e["@_id"] === element?.["@_id"] && e.__$$element === element.__$$element) {
-          setBpmn20Drools10MetaData(e, "elementname", e["@_name"] || "");
+  const handleSubmit = useCallback(
+    (event) => {
+      event.preventDefault();
+      if (!event.target.checkValidity()) {
+        event.target.reportValidity();
+        return;
+      }
+      bpmnEditorStoreApi.setState((s) => {
+        const { process } = addOrGetProcessAndDiagramElements({
+          definitions: s.bpmn.model.definitions,
+        });
+        visitFlowElementsAndArtifacts(process, ({ element: e }) => {
+          if (e["@_id"] === element?.["@_id"] && e.__$$element === element.__$$element) {
+            setBpmn20Drools10MetaData(e, "elementname", e["@_name"] || "");
 
-          e.ioSpecification ??= {
-            "@_id": generateUuid(),
-            inputSet: [{ "@_id": generateUuid(), dataInputRefs: [] }],
-            outputSet: [],
-            dataInput: [],
-          };
-          e.ioSpecification.dataInput ??= [];
-          e.dataInputAssociation ??= [];
+            e.ioSpecification ??= {
+              "@_id": generateUuid(),
+              inputSet: [{ "@_id": generateUuid(), dataInputRefs: [] }],
+              outputSet: [],
+              dataInput: [],
+            };
+            e.ioSpecification.dataInput ??= [];
+            e.dataInputAssociation ??= [];
 
-          e.ioSpecification.dataInput = e.ioSpecification.dataInput?.filter(
-            (dataInput) =>
-              !dataInput["@_name"]?.includes("NotStartedNotify") && !dataInput["@_name"]?.includes("NotCompletedNotify")
-          );
-          if (e.ioSpecification?.inputSet?.[0]?.dataInputRefs) {
-            e.ioSpecification.inputSet[0].dataInputRefs = e.ioSpecification.inputSet[0].dataInputRefs?.filter(
-              (dataInputRefs) =>
-                !dataInputRefs.__$$text.includes("NotStartedNotify") &&
-                !dataInputRefs.__$$text?.includes("NotCompletedNotify")
+            e.ioSpecification.dataInput = e.ioSpecification.dataInput?.filter(
+              (dataInput) =>
+                !dataInput["@_name"]?.includes("NotStartedNotify") &&
+                !dataInput["@_name"]?.includes("NotCompletedNotify")
             );
-          }
-          e.dataInputAssociation = e.dataInputAssociation?.filter(
-            (dataInputAssociation) =>
-              !dataInputAssociation.targetRef.__$$text.includes("NotStartedNotify") &&
-              !dataInputAssociation.targetRef.__$$text.includes("NotCompletedNotify")
-          );
-
-          notifications.forEach((notification) => {
-            let dataInput = e?.ioSpecification?.dataInput?.find((input) => input["@_name"] === notification.type);
-            if (!dataInput) {
-              dataInput = {
-                "@_id": `${e["@_id"]}_${notification.type}InputX`,
-                "@_drools:dtype": "Object",
-                "@_itemSubjectRef": `_${e["@_id"]}_${notification.type}InputX`,
-                "@_name": notification.type,
-              };
-              e?.ioSpecification?.dataInput?.push(dataInput);
+            if (e.ioSpecification?.inputSet?.[0]?.dataInputRefs) {
+              e.ioSpecification.inputSet[0].dataInputRefs = e.ioSpecification.inputSet[0].dataInputRefs?.filter(
+                (dataInputRefs) =>
+                  !dataInputRefs.__$$text.includes("NotStartedNotify") &&
+                  !dataInputRefs.__$$text?.includes("NotCompletedNotify")
+              );
             }
-            let inputSet = e.ioSpecification?.inputSet[0];
-            if (!inputSet) {
-              inputSet = {
-                "@_id": `${e["@_id"]}_${notification.type}InputX`,
-                dataInputRefs: [
-                  {
-                    __$$text: `${e["@_id"]}_${notification.type}InputX`,
+            e.dataInputAssociation = e.dataInputAssociation?.filter(
+              (dataInputAssociation) =>
+                !dataInputAssociation.targetRef.__$$text.includes("NotStartedNotify") &&
+                !dataInputAssociation.targetRef.__$$text.includes("NotCompletedNotify")
+            );
+
+            notifications.forEach((notification) => {
+              let dataInput = e?.ioSpecification?.dataInput?.find((input) => input["@_name"] === notification.type);
+              if (!dataInput) {
+                dataInput = {
+                  "@_id": `${e["@_id"]}_${notification.type}InputX`,
+                  "@_drools:dtype": "Object",
+                  "@_itemSubjectRef": `_${e["@_id"]}_${notification.type}InputX`,
+                  "@_name": notification.type,
+                };
+                e?.ioSpecification?.dataInput?.push(dataInput);
+              }
+              let inputSet = e.ioSpecification?.inputSet[0];
+              if (!inputSet) {
+                inputSet = {
+                  "@_id": generateUuid(),
+                  dataInputRefs: [
+                    {
+                      __$$text: `${e["@_id"]}_${notification.type}InputX`,
+                    },
+                  ],
+                };
+                e.ioSpecification?.inputSet.push(inputSet);
+              } else {
+                e.ioSpecification?.inputSet[0].dataInputRefs?.push({
+                  __$$text: `${e["@_id"]}_${notification.type}InputX`,
+                });
+              }
+
+              let dataInputAssociation = e.dataInputAssociation?.find(
+                (association) => association.targetRef.__$$text === dataInput["@_id"]
+              );
+              if (!dataInputAssociation) {
+                dataInputAssociation = {
+                  "@_id": `${e["@_id"]}_dataInputAssociation_${notification.type}`,
+                  targetRef: { __$$text: dataInput["@_id"] },
+                  assignment: [],
+                };
+                e.dataInputAssociation?.push(dataInputAssociation);
+              }
+              const existingAssignment = dataInputAssociation?.assignment?.find(
+                (assignment) => assignment["@_id"] === `${e["@_id"]}_assignment_${notification.type}`
+              );
+              const newEntry = `from:${notification.from}|tousers:${notification.tousers}|togroups:${notification.togroups}|toemails:${notification.toemails}|replyTo:${notification.replyTo}|subject:${notification.subject}|body:${notification.body}]@[${notification.expiresAt}]`;
+
+              if (existingAssignment) {
+                const existingValues = new Set(existingAssignment?.from?.__$$text?.split(" "));
+                const newValues = newEntry.split(" ");
+                const uniqueValues = [...existingValues, ...newValues].join(" ");
+                existingAssignment.from.__$$text = uniqueValues;
+              } else {
+                dataInputAssociation?.assignment?.push({
+                  "@_id": `${e["@_id"]}_assignment_${notification.type}`,
+                  from: {
+                    "@_id": `${e["@_id"]}`,
+                    __$$text: newEntry,
                   },
-                ],
-              };
-              e.ioSpecification?.inputSet.push(inputSet);
-            } else {
-              e.ioSpecification?.inputSet[0].dataInputRefs?.push({
-                __$$text: `${e["@_id"]}_${notification.type}InputX`,
-              });
-            }
-
-            let dataInputAssociation = e.dataInputAssociation?.find(
-              (association) => association.targetRef.__$$text === dataInput["@_id"]
-            );
-            if (!dataInputAssociation) {
-              dataInputAssociation = {
-                "@_id": `${e["@_id"]}_dataInputAssociation_${notification.type}`,
-                targetRef: { __$$text: dataInput["@_id"] },
-                assignment: [],
-              };
-              e.dataInputAssociation?.push(dataInputAssociation);
-            }
-            const existingAssignment = dataInputAssociation?.assignment?.find(
-              (assignment) => assignment["@_id"] === `${e["@_id"]}_assignment_${notification.type}`
-            );
-            const newEntry = `from:${notification.from}|tousers:${notification.tousers}|togroups:${notification.togroups}|toemails:${notification.toemails}|replyTo:${notification.replyTo}|subject:${notification.subject}|body:${notification.body}]@[${notification.expiresAt}]`;
-
-            if (existingAssignment) {
-              const existingValues = new Set(existingAssignment?.from?.__$$text?.split(" "));
-              const newValues = newEntry.split(" ");
-              const uniqueValues = [...existingValues, ...newValues].join(" ");
-              existingAssignment.from.__$$text = uniqueValues;
-            } else {
-              dataInputAssociation?.assignment?.push({
-                "@_id": `${e["@_id"]}_assignment_${notification.type}`,
-                from: {
-                  "@_id": `${e["@_id"]}`,
-                  __$$text: newEntry,
-                },
-                to: { "@_id": dataInput["@_id"], __$$text: dataInput["@_id"] },
-              });
-            }
-          });
-        }
+                  to: { "@_id": dataInput["@_id"], __$$text: dataInput["@_id"] },
+                });
+              }
+            });
+          }
+        });
       });
-    });
-  }, [element, bpmnEditorStoreApi, notifications]);
+      setOnSaveMessage("Notifications saved successfully!");
+      setTimeout(() => {
+        setOnSaveMessage(null);
+      }, 1500);
+    },
+
+    [element, bpmnEditorStoreApi, notifications]
+  );
 
   return (
-    <Modal
-      className="kie-bpmn-editor--notifications--modal"
-      aria-labelledby="Notifications"
-      title="Notifications"
-      variant={ModalVariant.large}
-      isOpen={isOpen}
-      onClose={onClose}
-    >
-      {notifications.length > 0 ? (
-        <Form>
+    <>
+      {onSaveMessage && (
+        <div>
+          <Alert variant="success" title={onSaveMessage} isInline />
+        </div>
+      )}
+      {(notifications.length > 0 && (
+        <Form onSubmit={handleSubmit}>
           <Grid md={12} style={{ padding: "0 8px" }}>
             <GridItem span={2}>
               <div style={entryStyle}>
@@ -354,17 +440,18 @@ export function Notifications({
                   </FormSelect>
                 </GridItem>
                 <GridItem span={1}>
-                  <TextArea
+                  <TextInput
                     aria-label={"expires at"}
                     style={entryStyle}
                     type="text"
                     placeholder="Expires at..."
+                    isRequired={true}
                     value={entry.expiresAt}
                     onChange={(e) => handleInputChange(i, "expiresAt", e)}
                   />
                 </GridItem>
                 <GridItem span={1}>
-                  <TextArea
+                  <TextInput
                     aria-label={"from"}
                     style={entryStyle}
                     type="text"
@@ -374,7 +461,7 @@ export function Notifications({
                   />
                 </GridItem>
                 <GridItem span={1}>
-                  <TextArea
+                  <TextInput
                     aria-label={"to users"}
                     style={entryStyle}
                     type="text"
@@ -384,7 +471,7 @@ export function Notifications({
                   />
                 </GridItem>
                 <GridItem span={1}>
-                  <TextArea
+                  <TextInput
                     aria-label={"to groups"}
                     style={entryStyle}
                     type="text"
@@ -394,17 +481,17 @@ export function Notifications({
                   />
                 </GridItem>
                 <GridItem span={1}>
-                  <TextArea
+                  <TextInput
                     aria-label={"to emails"}
                     style={entryStyle}
-                    type="text"
+                    type="email"
                     placeholder="To Emails..."
                     value={entry.toemails}
                     onChange={(e) => handleInputChange(i, "toemails", e)}
                   />
                 </GridItem>
                 <GridItem span={1}>
-                  <TextArea
+                  <TextInput
                     aria-label={"reply to"}
                     style={entryStyle}
                     type="text"
@@ -414,7 +501,7 @@ export function Notifications({
                   />
                 </GridItem>
                 <GridItem span={1}>
-                  <TextArea
+                  <TextInput
                     aria-label={"subject"}
                     style={entryStyle}
                     type="text"
@@ -448,11 +535,15 @@ export function Notifications({
               </Grid>
             </div>
           ))}
-          <Button onClick={handleSubmit} className="kie-bpmn-editor--properties-panel--notification-submit-save-button">
+          <Button
+            type="submit"
+            className="kie-bpmn-editor--properties-panel--notification-submit-save-button"
+            onMouseUp={(e) => e.currentTarget.blur()}
+          >
             Save
           </Button>
         </Form>
-      ) : (
+      )) || (
         <div className="kie-bpmn-editor--notifications--empty-state">
           <Bullseye>
             <EmptyState>
@@ -466,8 +557,16 @@ export function Notifications({
               </Button>
             </EmptyState>
           </Bullseye>
+          <Button
+            variant="primary"
+            onClick={handleSubmit}
+            className="kie-bpmn-editor--properties-panel--notification-submit-save-button"
+            onMouseUp={(e) => e.currentTarget.blur()}
+          >
+            Save
+          </Button>
         </div>
       )}
-    </Modal>
+    </>
   );
 }

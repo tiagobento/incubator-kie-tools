@@ -22,52 +22,113 @@ import { FormGroup, FormSection } from "@patternfly/react-core/dist/js/component
 import { TextArea } from "@patternfly/react-core/dist/js/components/TextArea";
 import { TextInput } from "@patternfly/react-core/dist/js/components/TextInput";
 import * as React from "react";
-import { updateFlowElement } from "../../mutations/renameNode";
+import { updateFlowElement, updateLane } from "../../mutations/renameNode";
 import { Normalized } from "../../normalization/normalize";
 import { useBpmnEditorStore, useBpmnEditorStoreApi } from "../../store/StoreContext";
-import { BPMN20__tLane, BPMN20__tProcess } from "@kie-tools/bpmn-marshaller/dist/schemas/bpmn-2_0/ts-gen/types";
+import {
+  BPMN20__tAssociation,
+  BPMN20__tGroup,
+  BPMN20__tLane,
+  BPMN20__tProcess,
+} from "@kie-tools/bpmn-marshaller/dist/schemas/bpmn-2_0/ts-gen/types";
 import { ElementExclusion } from "@kie-tools/xml-parser-ts/dist/elementFilter";
 import { Unpacked } from "@kie-tools/xyflow-react-kie-diagram/dist/tsExt/tsExt";
-import { visitFlowElementsAndArtifacts } from "../../mutations/_elementVisitor";
+import { visitFlowElementsAndArtifacts, visitLanes } from "../../mutations/_elementVisitor";
 import { generateUuid } from "@kie-tools/xyflow-react-kie-diagram/dist/uuid/uuid";
 import { addOrGetProcessAndDiagramElements } from "../../mutations/addOrGetProcessAndDiagramElements";
+import { useCallback } from "react";
+import { setBpmn20Drools10MetaData } from "@kie-tools/bpmn-marshaller/dist/drools-extension-metaData";
 
 export function NameDocumentationAndId({
   element,
 }: {
   element: Normalized<
-    | ElementExclusion<Unpacked<NonNullable<BPMN20__tProcess["flowElement"]>>, "sequenceFlow">
+    | Unpacked<NonNullable<BPMN20__tProcess["flowElement"]>>
     | (BPMN20__tLane & { __$$element: "lane" })
+    | (BPMN20__tAssociation & { __$$element: "association" })
+    | (BPMN20__tGroup & { __$$element: "group" })
   >;
 }) {
   const bpmnEditorStoreApi = useBpmnEditorStoreApi();
   const settings = useBpmnEditorStore((s) => s.settings);
 
-  const onNameChanged = React.useCallback(
+  const onNameChanged = useCallback(
     (newName: string) => {
       bpmnEditorStoreApi.setState((s) => {
-        updateFlowElement({
-          definitions: s.bpmn.model.definitions,
-          id: element["@_id"],
-          newFlowElement: { "@_name": newName },
-        });
+        if (element.__$$element === "lane") {
+          updateLane({
+            definitions: s.bpmn.model.definitions,
+            newLane: { "@_name": newName },
+            id: element["@_id"],
+          });
+        } else {
+          updateFlowElement({
+            definitions: s.bpmn.model.definitions,
+            id: element["@_id"],
+            newFlowElement: { "@_name": newName },
+          });
+          if (element.__$$element === "sequenceFlow") {
+            const { process } = addOrGetProcessAndDiagramElements({
+              definitions: s.bpmn.model.definitions,
+            });
+            visitFlowElementsAndArtifacts(process, ({ element: e }) => {
+              if (e["@_id"] === element?.["@_id"] && e.__$$element === element.__$$element) {
+                setBpmn20Drools10MetaData(e, "elementname", e["@_name"] || "");
+                console.log("e.extensionElements: " + e.extensionElements);
+              }
+            });
+          }
+        }
       });
     },
     [element, bpmnEditorStoreApi]
   );
 
+  const onDocumentationChanged = useCallback(
+    (newDocumentation) =>
+      bpmnEditorStoreApi.setState((s) => {
+        const { process } = addOrGetProcessAndDiagramElements({
+          definitions: s.bpmn.model.definitions,
+        });
+        if (element.__$$element === "lane") {
+          visitLanes(process, ({ lane: e }) => {
+            if (e["@_id"] === element["@_id"]) {
+              e.documentation ??= [];
+              e.documentation[0] = {
+                "@_id": generateUuid(),
+                __$$text: newDocumentation,
+              };
+            }
+          });
+        } else {
+          visitFlowElementsAndArtifacts(process, ({ element: e }) => {
+            if (e["@_id"] === element["@_id"] && e.__$$element === element.__$$element) {
+              e.documentation ??= [];
+              e.documentation[0] = {
+                "@_id": generateUuid(),
+                __$$text: newDocumentation,
+              };
+            }
+          });
+        }
+      }),
+    [bpmnEditorStoreApi, element]
+  );
+
   return (
     <FormSection>
-      <FormGroup label="Name">
-        <TextInput
-          isDisabled={settings.isReadOnly}
-          id={element["@_id"]}
-          name={element["@_name"]}
-          value={element["@_name"] || ""}
-          placeholder={"Enter a name..."}
-          onChange={onNameChanged}
-        />
-      </FormGroup>
+      {element.__$$element !== "association" && element.__$$element !== "group" && (
+        <FormGroup label="Name">
+          <TextInput
+            isDisabled={settings.isReadOnly}
+            id={element["@_id"]}
+            name={element["@_name"]}
+            value={element["@_name"] || ""}
+            placeholder={"Enter a name..."}
+            onChange={onNameChanged}
+          />
+        </FormGroup>
+      )}
 
       <FormGroup label="Documentation">
         <TextArea
@@ -75,22 +136,7 @@ export function NameDocumentationAndId({
           type={"text"}
           isDisabled={settings.isReadOnly}
           value={element?.documentation?.[0].__$$text || ""}
-          onChange={(newDocumentation) =>
-            bpmnEditorStoreApi.setState((s) => {
-              const { process } = addOrGetProcessAndDiagramElements({
-                definitions: s.bpmn.model.definitions,
-              });
-              visitFlowElementsAndArtifacts(process, ({ element: e }) => {
-                if (e["@_id"] === element["@_id"] && e.__$$element === element.__$$element) {
-                  e.documentation ??= [];
-                  e.documentation[0] = {
-                    "@_id": generateUuid(),
-                    __$$text: newDocumentation,
-                  };
-                }
-              });
-            })
-          }
+          onChange={onDocumentationChanged}
           placeholder={"Enter documentation..."}
           style={{ resize: "vertical", minHeight: "40px" }}
           rows={3}

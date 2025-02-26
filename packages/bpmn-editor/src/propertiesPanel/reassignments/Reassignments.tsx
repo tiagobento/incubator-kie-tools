@@ -19,7 +19,7 @@
 
 import * as React from "react";
 import { useState, useMemo, useEffect, useCallback } from "react";
-import { useBpmnEditorStoreApi } from "../../store/StoreContext";
+import { useBpmnEditorStore, useBpmnEditorStoreApi } from "../../store/StoreContext";
 import { Button, ButtonVariant } from "@patternfly/react-core/dist/js/components/Button/Button";
 import { Modal, ModalVariant } from "@patternfly/react-core/dist/js/components/Modal";
 import { Grid, GridItem } from "@patternfly/react-core/dist/js/layouts/Grid";
@@ -40,6 +40,12 @@ import { FormSelectOption } from "@patternfly/react-core/dist/js/components/Form
 import { CubesIcon } from "@patternfly/react-icons/dist/js/icons/cubes-icon";
 import { generateUuid } from "@kie-tools/xyflow-react-kie-diagram/dist/uuid/uuid";
 import { Form } from "@patternfly/react-core/dist/js/components/Form/Form";
+import { Alert } from "@patternfly/react-core/dist/js/components/Alert/Alert";
+import { EyeIcon } from "@patternfly/react-icons/dist/js/icons/eye-icon";
+import { EditIcon } from "@patternfly/react-icons/dist/js/icons/edit-icon";
+import { SectionHeader } from "@kie-tools/xyflow-react-kie-diagram/dist/propertiesPanel/SectionHeader";
+import { FormSection } from "@patternfly/react-core/dist/js/components/Form/FormSection";
+import { RedoIcon } from "@patternfly/react-icons/dist/js/icons/redo-icon";
 
 type Reassignment = {
   users: string;
@@ -68,18 +74,85 @@ const entryStyle = {
   width: "calc(100% - 2 * 4px - 2 * 8px)",
 };
 
-export function Reassignments({
-  isOpen,
-  onClose,
+export function ReassignmentsFormSection({
   element,
 }: {
-  isOpen: boolean;
-  onClose: () => void;
   element: Normalized<BPMN20__tUserTask> & { __$$element: "userTask" };
 }) {
+  const isReadOnly = useBpmnEditorStore((s) => s.settings.isReadOnly);
+  const [showReassignmentsModal, setShowReassignmentsModal] = useState(false);
+  const count =
+    element?.dataInputAssociation?.filter(
+      (association) =>
+        association.targetRef.__$$text.includes("NotStartedReassign") ||
+        association.targetRef.__$$text.includes("NotCompletedReassign")
+    ).length ?? 0;
+  const sectionLabel = useMemo(() => {
+    if (count > 0) {
+      return ` (${count})`;
+    } else {
+      return "";
+    }
+  }, [count]);
+
+  return (
+    <>
+      <FormSection
+        title={
+          <SectionHeader
+            expands={"modal"}
+            icon={<RedoIcon width={16} height={36} style={{ marginLeft: "12px" }} />}
+            title={"Reassignments" + sectionLabel}
+            toogleSectionExpanded={() => setShowReassignmentsModal(true)}
+            action={
+              <Button
+                title={"Manage"}
+                variant={ButtonVariant.plain}
+                isDisabled={isReadOnly}
+                onClick={() => setShowReassignmentsModal(true)}
+                style={{ paddingBottom: 0, paddingTop: 0 }}
+              >
+                {isReadOnly ? <EyeIcon /> : <EditIcon />}
+              </Button>
+            }
+          />
+        }
+      />
+      <Modal
+        title="Reassignments"
+        className={"kie-bpmn-editor--reassignments--modal"}
+        aria-labelledby={"Reassignments"}
+        variant={ModalVariant.large}
+        isOpen={showReassignmentsModal}
+        onClose={() => setShowReassignmentsModal(false)}
+      >
+        <div style={{ height: "100%" }}>
+          <Reassignments element={element} />
+        </div>
+      </Modal>
+    </>
+  );
+}
+
+export function Reassignments({ element }: { element: Normalized<BPMN20__tUserTask> & { __$$element: "userTask" } }) {
   const bpmnEditorStoreApi = useBpmnEditorStoreApi();
   const [reassignments, setReassignments] = useState<Reassignment[]>([]);
   const [hoveredIndex, setHoveredIndex] = useState<number | undefined>(undefined);
+  const [onSaveMessage, setOnSaveMessage] = useState<string | null>(null);
+
+  const count =
+    element?.dataInputAssociation?.filter(
+      (association) =>
+        association.targetRef.__$$text.includes("NotStartedReassign") ||
+        association.targetRef.__$$text.includes("NotCompletedReassign")
+    ).length ?? 0;
+  const sectionLabel = useMemo(() => {
+    if (count > 0) {
+      return ` (in: ${count})`;
+    } else {
+      return ` (in: -)`;
+    }
+  }, [count]);
 
   const addReassignment = useCallback(() => {
     setReassignments([
@@ -105,7 +178,7 @@ export function Reassignments({
 
   //populates intermediary `reassignments` state from the model
   useEffect(() => {
-    if (!isOpen || !element) {
+    if (!element) {
       return;
     }
     const extractedReassignments = element?.dataInputAssociation
@@ -145,117 +218,127 @@ export function Reassignments({
       });
 
     setReassignments(extractedReassignments || []);
-  }, [isOpen, element]);
+  }, [element]);
 
-  const handleSubmit = useCallback(() => {
-    bpmnEditorStoreApi.setState((s) => {
-      const { process } = addOrGetProcessAndDiagramElements({
-        definitions: s.bpmn.model.definitions,
-      });
-      visitFlowElementsAndArtifacts(process, ({ element: e }) => {
-        if (e["@_id"] === element?.["@_id"] && e.__$$element === element.__$$element) {
-          setBpmn20Drools10MetaData(e, "elementname", e["@_name"] || "");
-          e.ioSpecification ??= {
-            "@_id": generateUuid(),
-            inputSet: [],
-            outputSet: [],
-            dataInput: [],
-          };
-          e.ioSpecification.dataInput ??= [];
-          e.dataInputAssociation ??= [];
+  const handleSubmit = useCallback(
+    (event) => {
+      event.preventDefault();
+      if (!event.target.checkValidity()) {
+        event.target.reportValidity();
+        return;
+      }
+      bpmnEditorStoreApi.setState((s) => {
+        const { process } = addOrGetProcessAndDiagramElements({
+          definitions: s.bpmn.model.definitions,
+        });
+        visitFlowElementsAndArtifacts(process, ({ element: e }) => {
+          if (e["@_id"] === element?.["@_id"] && e.__$$element === element.__$$element) {
+            setBpmn20Drools10MetaData(e, "elementname", e["@_name"] || "");
+            e.ioSpecification ??= {
+              "@_id": generateUuid(),
+              inputSet: [],
+              outputSet: [],
+              dataInput: [],
+            };
+            e.ioSpecification.dataInput ??= [];
+            e.dataInputAssociation ??= [];
 
-          e.ioSpecification.dataInput = e.ioSpecification.dataInput?.filter(
-            (dataInput) =>
-              !dataInput["@_name"]?.includes("NotStartedReassign") &&
-              !dataInput["@_name"]?.includes("NotCompletedReassign")
-          );
-          if (e.ioSpecification?.inputSet?.[0]?.dataInputRefs) {
-            e.ioSpecification.inputSet[0].dataInputRefs = e.ioSpecification.inputSet[0].dataInputRefs?.filter(
-              (dataInputRefs) =>
-                !dataInputRefs.__$$text.includes("NotStartedReassign") &&
-                !dataInputRefs.__$$text?.includes("NotCompletedReassign")
+            e.ioSpecification.dataInput = e.ioSpecification.dataInput?.filter(
+              (dataInput) =>
+                !dataInput["@_name"]?.includes("NotStartedReassign") &&
+                !dataInput["@_name"]?.includes("NotCompletedReassign")
             );
-          }
-          e.dataInputAssociation = e.dataInputAssociation?.filter(
-            (dataInputAssociation) =>
-              !dataInputAssociation.targetRef.__$$text.includes("NotStartedReassign") &&
-              !dataInputAssociation.targetRef.__$$text.includes("NotCompletedReassign")
-          );
-
-          reassignments.forEach((reassignment) => {
-            let dataInput = e?.ioSpecification?.dataInput?.find((input) => input["@_name"] === reassignment.type);
-            if (!dataInput) {
-              dataInput = {
-                "@_id": `${e["@_id"]}_${reassignment.type}InputX`,
-                "@_drools:dtype": "Object",
-                "@_itemSubjectRef": `_${e["@_id"]}_${reassignment.type}InputX`,
-                "@_name": reassignment.type,
-              };
-              e?.ioSpecification?.dataInput?.push(dataInput);
+            if (e.ioSpecification?.inputSet?.[0]?.dataInputRefs) {
+              e.ioSpecification.inputSet[0].dataInputRefs = e.ioSpecification.inputSet[0].dataInputRefs?.filter(
+                (dataInputRefs) =>
+                  !dataInputRefs.__$$text.includes("NotStartedReassign") &&
+                  !dataInputRefs.__$$text?.includes("NotCompletedReassign")
+              );
             }
-            let inputSet = e.ioSpecification?.inputSet[0];
-            if (!inputSet) {
-              inputSet = {
-                "@_id": `${e["@_id"]}_${reassignment.type}InputX`,
-                dataInputRefs: [
-                  {
-                    __$$text: `${e["@_id"]}_${reassignment.type}InputX`,
+            e.dataInputAssociation = e.dataInputAssociation?.filter(
+              (dataInputAssociation) =>
+                !dataInputAssociation.targetRef.__$$text.includes("NotStartedReassign") &&
+                !dataInputAssociation.targetRef.__$$text.includes("NotCompletedReassign")
+            );
+
+            reassignments.forEach((reassignment) => {
+              let dataInput = e?.ioSpecification?.dataInput?.find((input) => input["@_name"] === reassignment.type);
+              if (!dataInput) {
+                dataInput = {
+                  "@_id": `${e["@_id"]}_${reassignment.type}InputX`,
+                  "@_drools:dtype": "Object",
+                  "@_itemSubjectRef": `_${e["@_id"]}_${reassignment.type}InputX`,
+                  "@_name": reassignment.type,
+                };
+                e?.ioSpecification?.dataInput?.push(dataInput);
+              }
+              let inputSet = e.ioSpecification?.inputSet[0];
+              if (!inputSet) {
+                inputSet = {
+                  "@_id": `${e["@_id"]}_${reassignment.type}InputX`,
+                  dataInputRefs: [
+                    {
+                      __$$text: `${e["@_id"]}_${reassignment.type}InputX`,
+                    },
+                  ],
+                };
+                e.ioSpecification?.inputSet.push(inputSet);
+              } else {
+                e.ioSpecification?.inputSet[0].dataInputRefs?.push({
+                  __$$text: `${e["@_id"]}_${reassignment.type}InputX`,
+                });
+              }
+              let dataInputAssociation = e.dataInputAssociation?.find(
+                (association) => association.targetRef.__$$text === dataInput["@_id"]
+              );
+              if (!dataInputAssociation) {
+                dataInputAssociation = {
+                  "@_id": `${e["@_id"]}_dataInputAssociation_${reassignment.type}`,
+                  targetRef: { __$$text: dataInput["@_id"] },
+                  assignment: [],
+                };
+                e.dataInputAssociation?.push(dataInputAssociation);
+              }
+              const existingAssignment = dataInputAssociation?.assignment?.find(
+                (assignment) => assignment["@_id"] === `${e["@_id"]}_assignment_${reassignment.type}`
+              );
+              const newEntry = `users:${reassignment.users}|groups:${reassignment.groups}]@[${reassignment.period}${reassignment.periodUnit}`;
+              if (existingAssignment) {
+                const existingValues = new Set(existingAssignment?.from?.__$$text?.split(" "));
+                const newValues = newEntry.split(" ");
+                const uniqueValues = [...existingValues, ...newValues].join(" ");
+                existingAssignment.from.__$$text = uniqueValues;
+              } else {
+                dataInputAssociation?.assignment?.push({
+                  "@_id": `${e["@_id"]}_assignment_${reassignment.type}`,
+                  from: {
+                    "@_id": `${e["@_id"]}`,
+                    __$$text: newEntry,
                   },
-                ],
-              };
-              e.ioSpecification?.inputSet.push(inputSet);
-            } else {
-              e.ioSpecification?.inputSet[0].dataInputRefs?.push({
-                __$$text: `${e["@_id"]}_${reassignment.type}InputX`,
-              });
-            }
-            let dataInputAssociation = e.dataInputAssociation?.find(
-              (association) => association.targetRef.__$$text === dataInput["@_id"]
-            );
-            if (!dataInputAssociation) {
-              dataInputAssociation = {
-                "@_id": `${e["@_id"]}_dataInputAssociation_${reassignment.type}`,
-                targetRef: { __$$text: dataInput["@_id"] },
-                assignment: [],
-              };
-              e.dataInputAssociation?.push(dataInputAssociation);
-            }
-            const existingAssignment = dataInputAssociation?.assignment?.find(
-              (assignment) => assignment["@_id"] === `${e["@_id"]}_assignment_${reassignment.type}`
-            );
-            const newEntry = `users:${reassignment.users}|groups:${reassignment.groups}]@[${reassignment.period}${reassignment.periodUnit}`;
-            if (existingAssignment) {
-              const existingValues = new Set(existingAssignment?.from?.__$$text?.split(" "));
-              const newValues = newEntry.split(" ");
-              const uniqueValues = [...existingValues, ...newValues].join(" ");
-              existingAssignment.from.__$$text = uniqueValues;
-            } else {
-              dataInputAssociation?.assignment?.push({
-                "@_id": `${e["@_id"]}_assignment_${reassignment.type}`,
-                from: {
-                  "@_id": `${e["@_id"]}`,
-                  __$$text: newEntry,
-                },
-                to: { "@_id": dataInput["@_id"], __$$text: dataInput["@_id"] },
-              });
-            }
-          });
-        }
+                  to: { "@_id": dataInput["@_id"], __$$text: dataInput["@_id"] },
+                });
+              }
+            });
+          }
+        });
       });
-    });
-  }, [bpmnEditorStoreApi, element, reassignments]);
+      setOnSaveMessage("Reassignments saved successfully!");
+      setTimeout(() => {
+        setOnSaveMessage(null);
+      }, 1500);
+    },
+    [bpmnEditorStoreApi, element, reassignments]
+  );
 
   return (
-    <Modal
-      className="kie-bpmn-editor--reassignments--modal"
-      aria-labelledby="Reassignments"
-      title="Reassignments"
-      variant={ModalVariant.large}
-      isOpen={isOpen}
-      onClose={onClose}
-    >
-      {reassignments.length > 0 ? (
-        <Form>
+    <>
+      {onSaveMessage && (
+        <div>
+          <Alert variant="success" title={onSaveMessage} isInline />
+        </div>
+      )}
+      {(reassignments.length > 0 && (
+        <Form onSubmit={handleSubmit}>
           <Grid md={12} style={{ padding: "0 8px" }}>
             <GridItem span={3}>
               <div style={entryStyle}>
@@ -326,12 +409,13 @@ export function Reassignments({
                     ))}
                   </FormSelect>
                 </GridItem>
-                <GridItem span={2}>
+                <GridItem span={3}>
                   <div style={{ display: "flex", gap: "4px", alignItems: "center" }}>
                     <input
                       aria-label={"period"}
                       style={entryStyle}
                       type="number"
+                      required
                       placeholder="Enter value"
                       value={entry.period}
                       onChange={(e) => handleInputChange(i, "period", e.target.value)}
@@ -365,11 +449,15 @@ export function Reassignments({
               </Grid>
             </div>
           ))}
-          <Button onClick={handleSubmit} className="kie-bpmn-editor--properties-panel--reassignment-submit-save-button">
+          <Button
+            type="submit"
+            className="kie-bpmn-editor--properties-panel--reassignment-submit-save-button"
+            onMouseUp={(e) => e.currentTarget.blur()}
+          >
             Save
           </Button>
         </Form>
-      ) : (
+      )) || (
         <div className="kie-bpmn-editor--reassignments--empty-state">
           <Bullseye>
             <EmptyState>
@@ -383,11 +471,16 @@ export function Reassignments({
               </Button>
             </EmptyState>
           </Bullseye>
-          <Button onClick={handleSubmit} className="kie-bpmn-editor--properties-panel--reassignment-submit-save-button">
+          <Button
+            variant="primary"
+            onClick={handleSubmit}
+            className="kie-bpmn-editor--properties-panel--reassignment-submit-save-button"
+            onMouseUp={(e) => e.currentTarget.blur()}
+          >
             Save
           </Button>
         </div>
       )}
-    </Modal>
+    </>
   );
 }

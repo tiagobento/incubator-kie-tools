@@ -51,6 +51,8 @@ import { TextArea } from "@patternfly/react-core/dist/js/components/TextArea/Tex
 import { assign } from "lodash";
 import { FormSelect } from "@patternfly/react-core/dist/js/components/FormSelect/FormSelect";
 import { FormSelectOption } from "@patternfly/react-core/dist/js/components/FormSelect/FormSelectOption";
+import { Alert, AlertVariant } from "@patternfly/react-core/dist/js/components/Alert/Alert";
+import { CubesIcon } from "@patternfly/react-icons/dist/js/icons/cubes-icon";
 
 type WithAssignments = Normalized<
   ElementFilter<
@@ -104,18 +106,22 @@ const namesFromOtherTypes = [
   "Priority",
   "CreatedBy",
   "Content",
+  "multiInstanceItemType",
 ];
 
 export function AssignmentsFormSection({
   sectionLabel,
   children,
+  onModalStateChange,
 }: React.PropsWithChildren<{
   sectionLabel?: string;
+  onModalStateChange?: (isOpen: boolean) => void;
 }>) {
   const isReadOnly = useBpmnEditorStore((s) => s.settings.isReadOnly);
-
   const [showAssignmentsModal, setShowAssignmentsModal] = useState(false);
-
+  useEffect(() => {
+    onModalStateChange?.(showAssignmentsModal);
+  }, [showAssignmentsModal, onModalStateChange]);
   return (
     <>
       <FormSection
@@ -153,13 +159,15 @@ export function AssignmentsFormSection({
 }
 
 export function BidirectionalAssignmentsFormSection({ element }: { element: WithAssignments }) {
-  const inputCount = element?.dataInputAssociation?.filter(
-    (association) =>
-      !namesFromOtherTypes.some((namesFromOtherTypes) => association.targetRef?.__$$text.includes(namesFromOtherTypes))
+  const [isAssignmentsModalOpen, setAssignmentsModalOpen] = useState(false);
+
+  const inputCount = element?.ioSpecification?.dataInput?.filter(
+    (dataInput) =>
+      !namesFromOtherTypes.some((namesFromOtherTypes) => dataInput["@_itemSubjectRef"]?.includes(namesFromOtherTypes))
   ).length;
-  const outputCount = element?.dataOutputAssociation?.filter(
-    (association) =>
-      !namesFromOtherTypes.some((namesFromOtherTypes) => association.targetRef?.__$$text.includes(namesFromOtherTypes))
+  const outputCount = element?.ioSpecification?.dataOutput?.filter(
+    (dataOutput) =>
+      !namesFromOtherTypes.some((namesFromOtherTypes) => dataOutput["@_itemSubjectRef"]?.includes(namesFromOtherTypes))
   ).length;
   const sectionLabel = useMemo(() => {
     if (inputCount && inputCount > 0 && outputCount && outputCount > 0) {
@@ -172,14 +180,13 @@ export function BidirectionalAssignmentsFormSection({ element }: { element: With
       return "";
     }
   }, [inputCount, outputCount]);
-
   return (
-    <AssignmentsFormSection sectionLabel={sectionLabel}>
+    <AssignmentsFormSection sectionLabel={sectionLabel} onModalStateChange={setAssignmentsModalOpen}>
       <div className="kie-bpmn-editor--assignments--modal-section" style={{ height: "50%" }}>
-        <AssignmentList section={"input"} element={element} />
+        <AssignmentList section={"input"} element={element} isOpen={isAssignmentsModalOpen} />
       </div>
       <div className="kie-bpmn-editor--assignments--modal-section" style={{ height: "50%" }}>
-        <AssignmentList section={"output"} element={element} />
+        <AssignmentList section={"output"} element={element} isOpen={isAssignmentsModalOpen} />
       </div>
     </AssignmentsFormSection>
   );
@@ -224,14 +231,17 @@ export function OutputOnlyAssociationFormSection({ element }: { element: WithOut
 }
 
 export function AssignmentList({
+  isOpen,
   section,
   element,
 }:
   | {
+      isOpen?: boolean;
       section: "input";
       element: WithAssignments | (WithInputAssignments & { dataOutputAssociation?: BPMN20__tDataOutputAssociation[] });
     }
   | {
+      isOpen?: boolean;
       section: "output";
       element: WithAssignments | (WithOutputAssignments & { dataInputAssociation?: BPMN20__tDataInputAssociation[] });
     }) {
@@ -241,6 +251,7 @@ export function AssignmentList({
   const [inputAssignments, setInputAssignments] = useState<Assignment[]>([]);
   const [outputAssignments, setOutputAssignments] = useState<Assignment[]>([]);
   const [hoveredIndex, setHoveredIndex] = useState<number | undefined>(undefined);
+  const [onSaveMessage, setOnSaveMessage] = useState<string | null>(null);
 
   const handleInputChange = useCallback(
     (index: number, propertyName: keyof Assignment, value: string | number) => {
@@ -300,7 +311,7 @@ export function AssignmentList({
 
   //populates intermediary `assignments` state from the model
   useEffect(() => {
-    if (!element) {
+    if (isOpen || !element) {
       return;
     }
     if (
@@ -311,24 +322,23 @@ export function AssignmentList({
       element.__$$element === "scriptTask"
     ) {
       if (section === "input") {
-        const extractedInputAssignments = element?.dataInputAssociation
+        const extractedInputAssignments = element?.ioSpecification?.dataInput
           ?.filter(
-            (association) =>
+            (dataInput) =>
               !namesFromOtherTypes.some((namesFromOtherTypes) =>
-                association.targetRef?.__$$text.includes(namesFromOtherTypes)
+                dataInput["@_itemSubjectRef"]?.includes(namesFromOtherTypes)
               )
           )
-          ?.flatMap((association) => {
-            const assignment = association.assignment?.[0];
+          ?.flatMap((dataInput) => {
+            const association = element.dataInputAssociation?.find(
+              (association) => association.targetRef?.__$$text === dataInput["@_id"]
+            );
+            const assignment = association?.assignment?.[0];
             if (!assignment) {
               return [];
             }
+
             const value = assignment.from.__$$text || "";
-
-            const dataInput = element.ioSpecification?.dataInput?.find(
-              (input) => input["@_id"] === association.targetRef?.__$$text
-            );
-
             const name = dataInput?.["@_name"] || "";
             const dataType = dataInput?.["@_drools:dtype"] || "";
 
@@ -415,7 +425,7 @@ export function AssignmentList({
       });
       setOutputAssignments(extractedOutputAssignments || []);
     }
-  }, [element, section]);
+  }, [element, isOpen, section]);
 
   const handleSubmitForNodesWithInputAndOutputAssignments = useCallback(
     (e: WithAssignments) => {
@@ -433,20 +443,26 @@ export function AssignmentList({
       e.dataOutputAssociation ??= [];
 
       if (section === "input") {
+        const matchingDataInputIds = e.ioSpecification?.dataInput
+          ?.filter((dataInput) => namesFromOtherTypes.some((name) => dataInput["@_itemSubjectRef"]?.includes(name)))
+          .map((dataInput) => dataInput["@_id"]);
+
         e.ioSpecification.dataInput = e.ioSpecification?.dataInput?.filter((dataInput) =>
-          namesFromOtherTypes.some((namesFromOtherTypes) => dataInput["@_name"]?.includes(namesFromOtherTypes))
+          matchingDataInputIds?.some((matchingDataInputIds) => dataInput["@_id"]?.includes(matchingDataInputIds))
         );
 
         if (e.ioSpecification?.inputSet?.[0]?.dataInputRefs) {
           e.ioSpecification.inputSet[0].dataInputRefs = e.ioSpecification?.inputSet[0].dataInputRefs?.filter(
             (dataInputRefs) =>
-              namesFromOtherTypes.some((namesFromOtherTypes) => dataInputRefs.__$$text.includes(namesFromOtherTypes))
+              matchingDataInputIds?.some((matchingDataInputIds) =>
+                dataInputRefs.__$$text.includes(matchingDataInputIds)
+              )
           );
         }
 
         e.dataInputAssociation = e.dataInputAssociation?.filter((dataInputAssociation) =>
-          namesFromOtherTypes.some((namesFromOtherTypes) =>
-            dataInputAssociation.targetRef.__$$text.includes(namesFromOtherTypes)
+          matchingDataInputIds?.some((matchingDataInputIds) =>
+            dataInputAssociation.targetRef.__$$text.includes(matchingDataInputIds)
           )
         );
 
@@ -456,17 +472,20 @@ export function AssignmentList({
           if (!dataInput) {
             dataInput = {
               "@_id": `${e["@_id"]}_${assignment.name}InputX`,
-              "@_drools:dtype": assignment.dataType,
-              "@_itemSubjectRef": `_${e["@_id"]}_${assignment.name}InputXItem`,
-              "@_name": assignment.name,
             };
-            e.ioSpecification?.dataInput?.push(dataInput);
           }
+          dataInput = {
+            "@_id": `${e["@_id"]}_${assignment.name}InputX`,
+            "@_drools:dtype": assignment.dataType,
+            "@_itemSubjectRef": `_${e["@_id"]}_${assignment.name}InputXItem`,
+            "@_name": assignment.name,
+          };
+          e.ioSpecification?.dataInput?.push(dataInput);
 
           let inputSet = e.ioSpecification?.inputSet[0];
           if (!inputSet) {
             inputSet = {
-              "@_id": `${e["@_id"]}_${assignment.name}InputX`,
+              "@_id": generateUuid(),
               dataInputRefs: [
                 {
                   __$$text: `${e["@_id"]}_${assignment.name}InputX`,
@@ -475,7 +494,10 @@ export function AssignmentList({
             };
             e.ioSpecification?.inputSet.push(inputSet);
           } else {
-            e.ioSpecification?.inputSet[0].dataInputRefs?.push({ __$$text: `${e["@_id"]}_${assignment.name}InputX` });
+            e.ioSpecification?.inputSet[0].dataInputRefs?.push({
+              ...e.ioSpecification?.inputSet[0].dataInputRefs,
+              __$$text: `${e["@_id"]}_${assignment.name}InputX`,
+            });
           }
 
           let dataInputAssociation = e.dataInputAssociation?.find(
@@ -498,21 +520,33 @@ export function AssignmentList({
             },
           ];
         });
+        setOnSaveMessage("Input Assignments saved successfully!");
+        setTimeout(() => {
+          setOnSaveMessage(null);
+        }, 1500);
       } else if (section === "output") {
+        const matchingDataOutputIds = e.ioSpecification?.dataOutput
+          ?.filter((dataOutput) => namesFromOtherTypes.some((name) => dataOutput["@_itemSubjectRef"]?.includes(name)))
+          .map((dataOutput) => dataOutput["@_id"]);
+
         e.ioSpecification.dataOutput = e.ioSpecification?.dataOutput?.filter((dataOutput) =>
-          namesFromOtherTypes.some((namesFromOtherTypes) => dataOutput["@_name"]?.includes(namesFromOtherTypes))
+          matchingDataOutputIds?.some((matchingDataOutputIds) => dataOutput["@_id"]?.includes(matchingDataOutputIds))
         );
 
         if (e.ioSpecification?.outputSet?.[0]?.dataOutputRefs) {
           e.ioSpecification.outputSet[0].dataOutputRefs = e.ioSpecification?.outputSet[0].dataOutputRefs?.filter(
             (dataOutputRefs) =>
-              namesFromOtherTypes.some((namesFromOtherTypes) => dataOutputRefs.__$$text.includes(namesFromOtherTypes))
+              matchingDataOutputIds?.some((matchingDataOutputIds) =>
+                dataOutputRefs.__$$text.includes(matchingDataOutputIds)
+              )
           );
         }
 
         e.dataOutputAssociation = e.dataOutputAssociation?.filter((dataOutputAssociation) =>
-          namesFromOtherTypes.some((namesFromOtherTypes) =>
-            dataOutputAssociation.targetRef.__$$text.includes(namesFromOtherTypes)
+          matchingDataOutputIds?.some(
+            (matchingDataOutputIds) =>
+              Array.isArray(dataOutputAssociation.sourceRef) &&
+              dataOutputAssociation.sourceRef![0].__$$text.includes(matchingDataOutputIds)
           )
         );
 
@@ -521,17 +555,20 @@ export function AssignmentList({
           if (!dataOutput) {
             dataOutput = {
               "@_id": `${e["@_id"]}_${assignment.name}OutputX`,
-              "@_drools:dtype": assignment.dataType,
-              "@_itemSubjectRef": `_${e["@_id"]}_${assignment.name}OutputXItem`,
-              "@_name": assignment.name,
             };
-            e.ioSpecification?.dataOutput?.push(dataOutput);
           }
+          dataOutput = {
+            "@_id": `${e["@_id"]}_${assignment.name}OutputX`,
+            "@_drools:dtype": assignment.dataType,
+            "@_itemSubjectRef": `_${e["@_id"]}_${assignment.name}OutputXItem`,
+            "@_name": assignment.name,
+          };
+          e.ioSpecification?.dataOutput?.push(dataOutput);
 
           let outputSet = e.ioSpecification?.outputSet[0];
           if (!outputSet) {
             outputSet = {
-              "@_id": `${e["@_id"]}_${assignment.name}OutputX`,
+              "@_id": generateUuid(),
               dataOutputRefs: [
                 {
                   __$$text: `${e["@_id"]}_${assignment.name}OutputX`,
@@ -565,6 +602,10 @@ export function AssignmentList({
             },
           ];
         });
+        setOnSaveMessage("Output Assignments saved successfully!");
+        setTimeout(() => {
+          setOnSaveMessage(null);
+        }, 1500);
       }
     },
     [inputAssignments, outputAssignments, section]
@@ -579,12 +620,15 @@ export function AssignmentList({
         if (!dataInput) {
           dataInput = {
             "@_id": `${e["@_id"]}_${assignment.name}InputX`,
-            "@_drools:dtype": assignment.dataType,
-            "@_itemSubjectRef": `_${e["@_id"]}_${assignment.name}InputXItem`,
-            "@_name": assignment.name,
           };
-          e.dataInput?.push(dataInput);
         }
+        dataInput = {
+          "@_id": `${e["@_id"]}_${assignment.name}InputX`,
+          "@_drools:dtype": assignment.dataType,
+          "@_itemSubjectRef": `_${e["@_id"]}_${assignment.name}InputXItem`,
+          "@_name": assignment.name,
+        };
+        e.dataInput?.push(dataInput);
 
         let dataInputAssociation = e.dataInputAssociation?.find(
           (association) => association.targetRef.__$$text === dataInput["@_id"]
@@ -606,6 +650,10 @@ export function AssignmentList({
           },
         ];
       });
+      setOnSaveMessage("Assignments saved successfully!");
+      setTimeout(() => {
+        setOnSaveMessage(null);
+      }, 1500);
     },
     [inputAssignments]
   );
@@ -619,13 +667,15 @@ export function AssignmentList({
         if (!dataOutput) {
           dataOutput = {
             "@_id": `${e["@_id"]}_${assignment.name}OutputX`,
-            "@_drools:dtype": assignment.dataType,
-            "@_itemSubjectRef": `_${e["@_id"]}_${assignment.name}OutputXItem`,
-            "@_name": assignment.name,
           };
-          e.dataOutput?.push(dataOutput);
         }
-
+        dataOutput = {
+          "@_id": `${e["@_id"]}_${assignment.name}OutputX`,
+          "@_drools:dtype": assignment.dataType,
+          "@_itemSubjectRef": `_${e["@_id"]}_${assignment.name}OutputXItem`,
+          "@_name": assignment.name,
+        };
+        e.dataOutput?.push(dataOutput);
         let dataOutputAssociation = e.dataOutputAssociation?.find(
           (association) => association.targetRef.__$$text === dataOutput["@_id"]
         );
@@ -646,50 +696,67 @@ export function AssignmentList({
           },
         ];
       });
+      setOnSaveMessage("Assignments saved successfully!");
+      setTimeout(() => {
+        setOnSaveMessage(null);
+      }, 1500);
     },
     [outputAssignments]
   );
 
-  const handleSubmit = useCallback(() => {
-    bpmnEditorStoreApi.setState((s) => {
-      const { process } = addOrGetProcessAndDiagramElements({
-        definitions: s.bpmn.model.definitions,
-      });
+  const handleSubmit = useCallback(
+    (event) => {
+      event.preventDefault();
+      if (!event.target.checkValidity()) {
+        event.target.reportValidity();
+        return;
+      }
+      bpmnEditorStoreApi.setState((s) => {
+        const { process } = addOrGetProcessAndDiagramElements({
+          definitions: s.bpmn.model.definitions,
+        });
 
-      visitFlowElementsAndArtifacts(process, ({ element: e }) => {
-        if (e["@_id"] === element?.["@_id"] && e.__$$element === element.__$$element) {
-          if (
-            element.__$$element === "callActivity" ||
-            element.__$$element === "businessRuleTask" ||
-            element.__$$element === "userTask" ||
-            element.__$$element === "serviceTask" ||
-            element.__$$element === "scriptTask"
-          ) {
-            handleSubmitForNodesWithInputAndOutputAssignments(e as WithAssignments);
-          } else if (element.__$$element === "endEvent" || element.__$$element === "intermediateThrowEvent") {
-            handleSubmitForNodesWithInputAssignments(e as WithInputAssignments);
-          } else if (
-            element.__$$element === "startEvent" ||
-            element.__$$element === "intermediateCatchEvent" ||
-            element.__$$element === "boundaryEvent"
-          ) {
-            handleSubmitForNodesWithOutputAssignments(e as WithOutputAssignments);
+        visitFlowElementsAndArtifacts(process, ({ element: e }) => {
+          if (e["@_id"] === element?.["@_id"] && e.__$$element === element.__$$element) {
+            if (
+              element.__$$element === "callActivity" ||
+              element.__$$element === "businessRuleTask" ||
+              element.__$$element === "userTask" ||
+              element.__$$element === "serviceTask" ||
+              element.__$$element === "scriptTask"
+            ) {
+              handleSubmitForNodesWithInputAndOutputAssignments(e as WithAssignments);
+            } else if (element.__$$element === "endEvent" || element.__$$element === "intermediateThrowEvent") {
+              handleSubmitForNodesWithInputAssignments(e as WithInputAssignments);
+            } else if (
+              element.__$$element === "startEvent" ||
+              element.__$$element === "intermediateCatchEvent" ||
+              element.__$$element === "boundaryEvent"
+            ) {
+              handleSubmitForNodesWithOutputAssignments(e as WithOutputAssignments);
+            }
           }
-        }
+        });
       });
-    });
-  }, [
-    bpmnEditorStoreApi,
-    element,
-    handleSubmitForNodesWithInputAndOutputAssignments,
-    handleSubmitForNodesWithInputAssignments,
-    handleSubmitForNodesWithOutputAssignments,
-  ]);
+    },
+    [
+      bpmnEditorStoreApi,
+      element,
+      handleSubmitForNodesWithInputAndOutputAssignments,
+      handleSubmitForNodesWithInputAssignments,
+      handleSubmitForNodesWithOutputAssignments,
+    ]
+  );
 
   return (
     <>
+      {onSaveMessage && (
+        <div>
+          <Alert variant="success" title={onSaveMessage} isInline />
+        </div>
+      )}
       {((inputAssignments.length > 0 || outputAssignments.length > 0) && (
-        <Form>
+        <Form onSubmit={handleSubmit}>
           <div style={{ position: "sticky", top: "0", backdropFilter: "blur(8px)" }}>
             {titleComponent}
             <Divider style={{ margin: "8px 0" }} inset={{ default: "insetMd" }} />
@@ -718,7 +785,6 @@ export function AssignmentList({
               </Grid>
             </div>
           </div>
-          {/* {element[associationsPropName]?.map((entry, i) => ( */}
           {section === "input" &&
             inputAssignments.map((entry, i) => (
               <div key={i} style={{ padding: "0 8px" }}>
@@ -734,6 +800,7 @@ export function AssignmentList({
                       autoFocus={true}
                       style={entryStyle}
                       type="text"
+                      isRequired={true}
                       placeholder="Name..."
                       value={entry.name}
                       onChange={(e) => handleInputChange(i, "name", e)}
@@ -742,11 +809,9 @@ export function AssignmentList({
                   <GridItem span={3}>
                     <FormSelect
                       aria-label={"data type"}
-                      type={"text"}
-                      value={entry.dataType}
+                      value={String(entry.dataType) || ""}
                       onChange={(e) => handleInputChange(i, "dataType", e)}
                       style={entryStyle}
-                      rows={1}
                     >
                       {dataType.map((option) => (
                         <FormSelectOption key={option.label} label={option.label} value={option.value} />
@@ -793,6 +858,7 @@ export function AssignmentList({
                       autoFocus={true}
                       style={entryStyle}
                       type="text"
+                      isRequired={true}
                       placeholder="Name..."
                       value={entry.name}
                       onChange={(e) => handleInputChange(i, "name", e)}
@@ -801,11 +867,9 @@ export function AssignmentList({
                   <GridItem span={3}>
                     <FormSelect
                       aria-label={"data type"}
-                      type={"text"}
-                      value={entry.dataType}
+                      value={String(entry.dataType) || ""}
                       onChange={(e) => handleInputChange(i, "dataType", e)}
                       style={entryStyle}
-                      rows={1}
                     >
                       {dataType.map((option) => (
                         <FormSelectOption key={option.label} label={option.label} value={option.value} />
@@ -838,7 +902,7 @@ export function AssignmentList({
               </div>
             ))}
           <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "16px", paddingRight: "8px" }}>
-            <Button variant="primary" onClick={handleSubmit} isDisabled={isReadOnly}>
+            <Button variant="primary" type="submit" isDisabled={isReadOnly} onMouseUp={(e) => e.currentTarget.blur()}>
               Save
             </Button>
           </div>
@@ -849,7 +913,7 @@ export function AssignmentList({
           <div className={"kie-bpmn-editor--assignments--empty-state"}>
             <Bullseye>
               <EmptyState>
-                {/* <EmptyStateIcon /> */}
+                <EmptyStateIcon icon={CubesIcon} />
                 <Title headingLevel="h4">
                   {isReadOnly ? `No ${entryTitle} assignments` : `No ${entryTitle} assignments yet`}
                 </Title>
@@ -863,7 +927,12 @@ export function AssignmentList({
             </Bullseye>
           </div>
           <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "16px", paddingRight: "8px" }}>
-            <Button variant="primary" onClick={handleSubmit} isDisabled={isReadOnly}>
+            <Button
+              variant="primary"
+              onClick={handleSubmit}
+              isDisabled={isReadOnly}
+              onMouseUp={(e) => e.currentTarget.blur()}
+            >
               Save
             </Button>
           </div>

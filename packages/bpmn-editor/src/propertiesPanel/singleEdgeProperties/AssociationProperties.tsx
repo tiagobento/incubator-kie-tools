@@ -22,6 +22,8 @@ import { FormSection } from "@patternfly/react-core/dist/js/components/Form";
 import * as React from "react";
 import { Normalized } from "../../normalization/normalize";
 import { useBpmnEditorStoreApi } from "../../store/StoreContext";
+import { NameDocumentationAndId } from "../nameDocumentationAndId/NameDocumentationAndId";
+import { Divider } from "@patternfly/react-core/dist/js/components/Divider/Divider";
 
 export function AssociationProperties({
   association,
@@ -39,5 +41,10 @@ export function AssociationProperties({
     [bpmnEditorStoreApi]
   );
 
-  return <FormSection>AssociationProperties</FormSection>;
+  return (
+    <FormSection>
+      <NameDocumentationAndId element={association} />
+      <Divider inset={{ default: "insetXs" }} />
+    </FormSection>
+  );
 }
