@@ -81,12 +81,27 @@ export function ReassignmentsFormSection({
 }) {
   const isReadOnly = useBpmnEditorStore((s) => s.settings.isReadOnly);
   const [showReassignmentsModal, setShowReassignmentsModal] = useState(false);
-  const count =
-    element?.dataInputAssociation?.filter(
-      (association) =>
-        association.targetRef.__$$text.includes("NotStartedReassign") ||
-        association.targetRef.__$$text.includes("NotCompletedReassign")
-    ).length ?? 0;
+
+  const count = useMemo(() => {
+    return (
+      element?.dataInputAssociation
+        ?.filter(
+          (dataInputAssociation) =>
+            dataInputAssociation.targetRef?.__$$text.includes("NotStartedReassign") ||
+            dataInputAssociation.targetRef?.__$$text.includes("NotCompletedReassign")
+        )
+        ?.reduce((acc, association) => {
+          const assignment = association.assignment?.[0];
+          if (!assignment) {
+            return acc;
+          }
+          const reassignmentText = assignment.from.__$$text || "";
+          const periodMatches = [...reassignmentText.matchAll(/(\d+)([mhdMy])/g)];
+          return acc + periodMatches.length;
+        }, 0) || 0
+    );
+  }, [element?.dataInputAssociation]);
+
   const sectionLabel = useMemo(() => {
     if (count > 0) {
       return ` (${count})`;
@@ -139,20 +154,6 @@ export function Reassignments({ element }: { element: Normalized<BPMN20__tUserTa
   const [reassignments, setReassignments] = useState<Reassignment[]>([]);
   const [hoveredIndex, setHoveredIndex] = useState<number | undefined>(undefined);
   const [onSaveMessage, setOnSaveMessage] = useState<string | null>(null);
-
-  const count =
-    element?.dataInputAssociation?.filter(
-      (association) =>
-        association.targetRef.__$$text.includes("NotStartedReassign") ||
-        association.targetRef.__$$text.includes("NotCompletedReassign")
-    ).length ?? 0;
-  const sectionLabel = useMemo(() => {
-    if (count > 0) {
-      return ` (in: ${count})`;
-    } else {
-      return ` (in: -)`;
-    }
-  }, [count]);
 
   const addReassignment = useCallback(() => {
     setReassignments([

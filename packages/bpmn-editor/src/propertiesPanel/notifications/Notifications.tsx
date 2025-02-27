@@ -78,12 +78,26 @@ export function NotificationsFormSection({
 }) {
   const isReadOnly = useBpmnEditorStore((s) => s.settings.isReadOnly);
   const [showNotificationsModal, setShowNotificationsModal] = useState(false);
-  const count =
-    element?.dataInputAssociation?.filter(
-      (association) =>
-        association.targetRef.__$$text.includes("NotStartedNotify") ||
-        association.targetRef.__$$text.includes("NotCompletedNotify")
-    ).length ?? 0;
+  const count = useMemo(() => {
+    return (
+      element?.dataInputAssociation
+        ?.filter(
+          (dataInputAssociation) =>
+            dataInputAssociation.targetRef?.__$$text.includes("NotStartedNotify") ||
+            dataInputAssociation.targetRef?.__$$text.includes("NotCompletedNotify")
+        )
+        ?.reduce((acc, association) => {
+          const assignment = association.assignment?.[0];
+          if (!assignment) {
+            return acc;
+          }
+          const notificationText = assignment.from.__$$text || "";
+          const expiresAtMatches = [...notificationText.matchAll(/\]@\[([^\]]*)/g)];
+          return acc + expiresAtMatches.length;
+        }, 0) || 0
+    );
+  }, [element?.dataInputAssociation]);
+
   const sectionLabel = useMemo(() => {
     if (count > 0) {
       return ` (${count})`;
@@ -136,20 +150,6 @@ export function Notifications({ element }: { element: Normalized<BPMN20__tUserTa
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [hoveredIndex, setHoveredIndex] = useState<number | undefined>(undefined);
   const [onSaveMessage, setOnSaveMessage] = useState<string | null>(null);
-
-  const count =
-    element?.dataInputAssociation?.filter(
-      (association) =>
-        association.targetRef.__$$text.includes("NotStartedNotify") ||
-        association.targetRef.__$$text.includes("NotCompletedNotify")
-    ).length ?? 0;
-  const sectionLabel = useMemo(() => {
-    if (count > 0) {
-      return ` (in: ${count})`;
-    } else {
-      return ` (in: -)`;
-    }
-  }, [count]);
 
   const addNotification = useCallback(() => {
     setNotifications([
