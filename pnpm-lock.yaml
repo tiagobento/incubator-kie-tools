@@ -14145,7 +14145,7 @@ importers:
         specifier: ^5.5.3
         version: 5.5.3
       webpack:
-        specifier: ^5.88.2
+        specifier: ^5.94.0
         version: 5.94.0(webpack-cli@4.10.0)
       webpack-cli:
         specifier: ^4.10.0
