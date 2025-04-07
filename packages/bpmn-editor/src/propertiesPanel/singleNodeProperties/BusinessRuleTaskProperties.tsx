@@ -132,6 +132,9 @@ export function BusinessRuleTaskProperties({
             <FormGroup label="DMN File">
               <FormSelect id={"select"} value={undefined} isDisabled={isReadOnly}>
                 <FormSelectOption id={"none"} isPlaceholder={true} label={"-- None --"} />
+                {/*//Use to get DMN files from workspace
+  // const workspacePromise = useWorkspacePromise(props.workspaceFile.workspaceId);
+*/}
                 {/* FIXME: Tiago */}
               </FormSelect>
             </FormGroup>

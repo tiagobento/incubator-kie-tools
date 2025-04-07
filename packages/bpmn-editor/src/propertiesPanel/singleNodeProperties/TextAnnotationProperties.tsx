@@ -28,6 +28,10 @@ import { TextArea } from "@patternfly/react-core/dist/js/components/TextArea";
 import { ClipboardCopy } from "@patternfly/react-core/dist/js/components/ClipboardCopy";
 import { PropertiesPanelHeaderFormSection } from "./_PropertiesPanelHeaderFormSection";
 import { TextAnnotationIcon } from "../../diagram/nodes/NodeIcons";
+import { visitFlowElementsAndArtifacts } from "../../mutations/_elementVisitor";
+import { addOrGetProcessAndDiagramElements } from "../../mutations/addOrGetProcessAndDiagramElements";
+import { generateUuid } from "@kie-tools/xyflow-react-kie-diagram/dist/uuid/uuid";
+import { setBpmn20Drools10MetaData } from "@kie-tools/bpmn-marshaller/dist/drools-extension-metaData";
 
 export function TextAnnotationProperties({
   textAnnotation,
@@ -71,9 +75,45 @@ export function TextAnnotationProperties({
                 newTextAnnotation: { text: { __$$text: newText } },
                 id: textAnnotation["@_id"]!,
               });
+              const { process } = addOrGetProcessAndDiagramElements({
+                definitions: s.bpmn.model.definitions,
+              });
+              visitFlowElementsAndArtifacts(process, ({ element: e }) => {
+                if (e["@_id"] === textAnnotation?.["@_id"] && e.__$$element === textAnnotation.__$$element) {
+                  setBpmn20Drools10MetaData(e, "elementname", e.text?.__$$text || "");
+                }
+              });
             });
           }}
           placeholder={"Enter text..."}
+          style={{ resize: "vertical", minHeight: "40px" }}
+          rows={3}
+        />
+      </FormGroup>
+
+      <FormGroup label="Documentation">
+        <TextArea
+          aria-label={"Documentation"}
+          type={"text"}
+          isDisabled={settings.isReadOnly}
+          value={textAnnotation?.documentation?.[0].__$$text || ""}
+          onChange={(newDocumentation) => {
+            bpmnEditorStoreApi.setState((s) => {
+              const { process } = addOrGetProcessAndDiagramElements({
+                definitions: s.bpmn.model.definitions,
+              });
+              visitFlowElementsAndArtifacts(process, ({ element: e }) => {
+                if (e["@_id"] === textAnnotation["@_id"] && e.__$$element === textAnnotation.__$$element) {
+                  e.documentation ??= [];
+                  e.documentation[0] = {
+                    "@_id": generateUuid(),
+                    __$$text: newDocumentation,
+                  };
+                }
+              });
+            });
+          }}
+          placeholder={"Enter documentation..."}
           style={{ resize: "vertical", minHeight: "40px" }}
           rows={3}
         />

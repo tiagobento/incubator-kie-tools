@@ -28,7 +28,6 @@ import {
   BPMN20__tDataInputAssociation,
   BPMN20__tDataOutputAssociation,
   BPMN20__tProcess,
-  BPMN20__tUserTask,
 } from "@kie-tools/bpmn-marshaller/dist/schemas/bpmn-2_0/ts-gen/types";
 import { Modal, ModalVariant } from "@patternfly/react-core/dist/js/components/Modal/Modal";
 import { generateUuid } from "@kie-tools/xyflow-react-kie-diagram/dist/uuid/uuid";
@@ -48,10 +47,9 @@ import { Normalized } from "../../normalization/normalize";
 import { Divider } from "@patternfly/react-core/dist/js/components/Divider";
 import { setBpmn20Drools10MetaData } from "@kie-tools/bpmn-marshaller/dist/drools-extension-metaData";
 import { TextArea } from "@patternfly/react-core/dist/js/components/TextArea/TextArea";
-import { assign } from "lodash";
 import { FormSelect } from "@patternfly/react-core/dist/js/components/FormSelect/FormSelect";
 import { FormSelectOption } from "@patternfly/react-core/dist/js/components/FormSelect/FormSelectOption";
-import { Alert, AlertVariant } from "@patternfly/react-core/dist/js/components/Alert/Alert";
+import { Alert } from "@patternfly/react-core/dist/js/components/Alert/Alert";
 import { CubesIcon } from "@patternfly/react-icons/dist/js/icons/cubes-icon";
 
 type WithAssignments = Normalized<

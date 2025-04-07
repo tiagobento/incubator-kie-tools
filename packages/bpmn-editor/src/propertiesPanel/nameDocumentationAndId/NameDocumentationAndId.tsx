@@ -31,7 +31,6 @@ import {
   BPMN20__tLane,
   BPMN20__tProcess,
 } from "@kie-tools/bpmn-marshaller/dist/schemas/bpmn-2_0/ts-gen/types";
-import { ElementExclusion } from "@kie-tools/xml-parser-ts/dist/elementFilter";
 import { Unpacked } from "@kie-tools/xyflow-react-kie-diagram/dist/tsExt/tsExt";
 import { visitFlowElementsAndArtifacts, visitLanes } from "../../mutations/_elementVisitor";
 import { generateUuid } from "@kie-tools/xyflow-react-kie-diagram/dist/uuid/uuid";
@@ -67,14 +66,20 @@ export function NameDocumentationAndId({
             id: element["@_id"],
             newFlowElement: { "@_name": newName },
           });
-          if (element.__$$element === "sequenceFlow") {
+          if (
+            element.__$$element === "sequenceFlow" ||
+            element.__$$element === "userTask" ||
+            element.__$$element === "complexGateway" ||
+            element.__$$element === "parallelGateway" ||
+            element.__$$element === "exclusiveGateway" ||
+            element.__$$element === "inclusiveGateway"
+          ) {
             const { process } = addOrGetProcessAndDiagramElements({
               definitions: s.bpmn.model.definitions,
             });
             visitFlowElementsAndArtifacts(process, ({ element: e }) => {
               if (e["@_id"] === element?.["@_id"] && e.__$$element === element.__$$element) {
                 setBpmn20Drools10MetaData(e, "elementname", e["@_name"] || "");
-                console.log("e.extensionElements: " + e.extensionElements);
               }
             });
           }

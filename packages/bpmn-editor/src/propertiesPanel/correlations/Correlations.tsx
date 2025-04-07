@@ -23,9 +23,11 @@ import { BPMN20__tProcess } from "@kie-tools/bpmn-marshaller/dist/schemas/bpmn-2
 import { Button, ButtonVariant } from "@patternfly/react-core/dist/js/components/Button/Button";
 import { useBpmnEditorStore, useBpmnEditorStoreApi } from "../../store/StoreContext";
 import { addOrGetProcessAndDiagramElements } from "../../mutations/addOrGetProcessAndDiagramElements";
+import { visitFlowElementsAndArtifacts } from "../../mutations/_elementVisitor";
+import { setBpmn20Drools10MetaData } from "@kie-tools/bpmn-marshaller/dist/drools-extension-metaData";
 import { Grid, GridItem } from "@patternfly/react-core/dist/js/layouts/Grid";
 import { PlusCircleIcon } from "@patternfly/react-icons/dist/js/icons/plus-circle-icon";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { CubesIcon } from "@patternfly/react-icons/dist/js/icons/cubes-icon";
 import { TimesIcon } from "@patternfly/react-icons/dist/js/icons/times-icon";
 import { Normalized } from "../../normalization/normalize";
@@ -35,10 +37,52 @@ import { Modal, ModalVariant } from "@patternfly/react-core/dist/js/components/M
 import "./Correlations.css";
 import { generateUuid } from "@kie-tools/xyflow-react-kie-diagram/dist/uuid/uuid";
 import { Bullseye } from "@patternfly/react-core/dist/js/layouts/Bullseye";
+import { Form } from "@patternfly/react-core/dist/js/components/Form/Form";
+import { Alert } from "@patternfly/react-core/dist/js/components/Alert/Alert";
+import { FormSelect } from "@patternfly/react-core/dist/js/components/FormSelect/FormSelect";
+import { FormSelectOption } from "@patternfly/react-core/dist/js/components/FormSelect/FormSelectOption";
+
+type Correlation = {
+  id: string;
+  name: string;
+  propertyId: string;
+  propertyName: string;
+  propertyType: string;
+};
+
+const dataType = [
+  { value: "Custom", label: "Custom..." },
+  { value: "Boolean", label: "Boolean" },
+  { value: "Float", label: "Float" },
+  { value: "Integer", label: "Integer" },
+  { value: "Object", label: "Object" },
+  { value: "String", label: "String" },
+];
+
+const entryStyle = {
+  padding: "4px",
+  margin: "8px",
+  width: "calc(100% - 2 * 4px - 2 * 8px)",
+};
 
 export function Correlations({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   const bpmnEditorStoreApi = useBpmnEditorStoreApi();
+  const [correlations, setCorrelations] = useState<Correlation[]>([]);
+  const [hoveredIndex, setHoveredIndex] = useState<number | undefined>(undefined);
+  const [onSaveMessage, setOnSaveMessage] = useState<string | null>(null);
+
   const isReadOnly = useBpmnEditorStore((s) => s.settings.isReadOnly);
+
+  const addCorrelation = useCallback(() => {
+    setCorrelations([...correlations, { id: "", name: "", propertyId: "", propertyName: "", propertyType: "Custom" }]);
+  }, [correlations]);
+
+  const removeCorrelation = useCallback(
+    (index: number) => {
+      setCorrelations(correlations.filter((_, i) => i !== index));
+    },
+    [correlations]
+  );
 
   const addAtEnd = React.useCallback(() => {
     bpmnEditorStoreApi.setState((s) => {
@@ -71,26 +115,42 @@ export function Correlations({ isOpen, onClose }: { isOpen: boolean; onClose: ()
 
   const addButton = useMemo(
     () => (
-      <Button variant={ButtonVariant.plain} style={{ paddingLeft: 0 }} onClick={addAtEnd}>
+      <Button variant={ButtonVariant.plain} style={{ paddingLeft: 0 }} onClick={addCorrelation}>
         <PlusCircleIcon color="var(--pf-c-button--m-primary--BackgroundColor)" />
       </Button>
     ),
     [addAtEnd]
   );
 
-  const entryStyle = {
-    padding: "4px",
-    margin: "8px",
-    width: "calc(100% - 2 * 4px - 2 * 8px)",
-  };
-
-  const [hoveredIndex, setHoveredIndex] = useState<number | undefined>(undefined);
-
   const process: undefined | Normalized<BPMN20__tProcess> = useBpmnEditorStore((s) =>
     s.bpmn.model.definitions.rootElement?.find((s) => s.__$$element === "process")
   );
 
   const correlationCount = process?.correlationSubscription?.length ?? 0;
+
+  const handleSubmit = useCallback(
+    (event) => {
+      event.preventDefault();
+      if (!event.target.checkValidity()) {
+        event.target.reportValidity();
+        return;
+      }
+      bpmnEditorStoreApi.setState((s) => {
+        const { process } = addOrGetProcessAndDiagramElements({
+          definitions: s.bpmn.model.definitions,
+        });
+        visitFlowElementsAndArtifacts(process, ({ element: e }) => {
+          console.log("hey");
+        });
+      });
+
+      setOnSaveMessage("Correlations saved successfully!");
+      setTimeout(() => {
+        setOnSaveMessage(null);
+      }, 1500);
+    },
+    [bpmnEditorStoreApi]
+  );
 
   return (
     <Modal
@@ -101,8 +161,13 @@ export function Correlations({ isOpen, onClose }: { isOpen: boolean; onClose: ()
       isOpen={isOpen}
       onClose={onClose}
     >
-      {(correlationCount > 0 && (
-        <>
+      {onSaveMessage && (
+        <div>
+          <Alert variant="success" title={onSaveMessage} isInline />
+        </div>
+      )}
+      {(correlations.length > 0 && (
+        <Form onSubmit={handleSubmit}>
           <div style={{ padding: "0 8px", position: "sticky", top: "-16px", backdropFilter: "blur(8px)" }}>
             <Grid md={6} style={{ alignItems: "center" }}>
               <GridItem span={2}>
@@ -135,7 +200,7 @@ export function Correlations({ isOpen, onClose }: { isOpen: boolean; onClose: ()
               </GridItem>
             </Grid>
           </div>
-          {process?.correlationSubscription?.map((entry, i) => (
+          {correlations.map((entry, i) => (
             <div key={i} style={{ padding: "0 8px" }}>
               <Grid
                 md={6}
@@ -148,8 +213,9 @@ export function Correlations({ isOpen, onClose }: { isOpen: boolean; onClose: ()
                     autoFocus={true}
                     style={entryStyle}
                     type="text"
+                    required
                     placeholder="ID..."
-                    value={""}
+                    value={entry.id}
                     onChange={(e) =>
                       bpmnEditorStoreApi.setState((s) => {
                         const { process } = addOrGetProcessAndDiagramElements({
@@ -163,8 +229,9 @@ export function Correlations({ isOpen, onClose }: { isOpen: boolean; onClose: ()
                   <input
                     style={entryStyle}
                     type="text"
+                    required
                     placeholder="Name..."
-                    value={""}
+                    value={entry.name}
                     onChange={(e) =>
                       bpmnEditorStoreApi.setState((s) => {
                         const { process } = addOrGetProcessAndDiagramElements({
@@ -178,8 +245,9 @@ export function Correlations({ isOpen, onClose }: { isOpen: boolean; onClose: ()
                   <input
                     style={entryStyle}
                     type="text"
+                    required
                     placeholder="Property ID..."
-                    value={""}
+                    value={entry.propertyId}
                     onChange={(e) =>
                       bpmnEditorStoreApi.setState((s) => {
                         const { process } = addOrGetProcessAndDiagramElements({
@@ -193,8 +261,9 @@ export function Correlations({ isOpen, onClose }: { isOpen: boolean; onClose: ()
                   <input
                     style={entryStyle}
                     type="text"
+                    required
                     placeholder="Property name..."
-                    value={""}
+                    value={entry.propertyName}
                     onChange={(e) =>
                       bpmnEditorStoreApi.setState((s) => {
                         const { process } = addOrGetProcessAndDiagramElements({
@@ -205,11 +274,12 @@ export function Correlations({ isOpen, onClose }: { isOpen: boolean; onClose: ()
                   />
                 </GridItem>
                 <GridItem span={2}>
-                  <input
+                  <FormSelect
+                    aria-label={"property type"}
+                    type={"text"}
+                    value={entry.propertyType}
                     style={entryStyle}
-                    type="text"
-                    placeholder="Property type..."
-                    value={""}
+                    rows={1}
                     onChange={(e) =>
                       bpmnEditorStoreApi.setState((s) => {
                         const { process } = addOrGetProcessAndDiagramElements({
@@ -217,7 +287,11 @@ export function Correlations({ isOpen, onClose }: { isOpen: boolean; onClose: ()
                         });
                       })
                     }
-                  />
+                  >
+                    {dataType.map((option) => (
+                      <FormSelectOption key={option.label} label={option.label} value={option.value} />
+                    ))}
+                  </FormSelect>
                 </GridItem>
                 <GridItem span={1} style={{ textAlign: "right" }}>
                   {hoveredIndex === i && (
@@ -225,14 +299,7 @@ export function Correlations({ isOpen, onClose }: { isOpen: boolean; onClose: ()
                       tabIndex={9999} // Prevent tab from going to this button
                       variant={ButtonVariant.plain}
                       style={{ paddingLeft: 0 }}
-                      onClick={() => {
-                        bpmnEditorStoreApi.setState((s) => {
-                          const { process } = addOrGetProcessAndDiagramElements({
-                            definitions: s.bpmn.model.definitions,
-                          });
-                          process.correlationSubscription?.splice(i, 1);
-                        });
-                      }}
+                      onClick={() => removeCorrelation(i)}
                     >
                       <TimesIcon />
                     </Button>
@@ -244,7 +311,14 @@ export function Correlations({ isOpen, onClose }: { isOpen: boolean; onClose: ()
           <br />
           <br />
           <br />
-        </>
+          <Button
+            type="submit"
+            className="kie-bpmn-editor--properties-panel--reassignment-submit-save-button"
+            onMouseUp={(e) => e.currentTarget.blur()}
+          >
+            Save
+          </Button>
+        </Form>
       )) || (
         <div className={"kie-bpmn-editor--correlations--empty-state"}>
           <Bullseye>
@@ -254,7 +328,7 @@ export function Correlations({ isOpen, onClose }: { isOpen: boolean; onClose: ()
               <EmptyStateBody style={{ padding: "0 25%" }}>
                 {`This represents an the empty state pattern in Patternfly 4. Hopefully it's simple enough to use but flexible enough to meet a variety of needs.`}
               </EmptyStateBody>
-              <Button variant="primary" onClick={addAtEnd}>
+              <Button variant="primary" onClick={addCorrelation}>
                 {"Add correlation"}
               </Button>
             </EmptyState>

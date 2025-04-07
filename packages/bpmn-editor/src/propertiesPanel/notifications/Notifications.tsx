@@ -32,6 +32,7 @@ import "./Notifications.css";
 import { visitFlowElementsAndArtifacts } from "../../mutations/_elementVisitor";
 import { setBpmn20Drools10MetaData } from "@kie-tools/bpmn-marshaller/dist/drools-extension-metaData";
 import { addOrGetProcessAndDiagramElements } from "../../mutations/addOrGetProcessAndDiagramElements";
+import { addOrGetItemDefinitions } from "../../mutations/addOrGetItemDefinitions";
 import { BPMN20__tUserTask } from "@kie-tools/bpmn-marshaller/dist/schemas/bpmn-2_0/ts-gen/types";
 import { Normalized } from "../../normalization/normalize";
 import { TextArea } from "@patternfly/react-core/dist/js/components/TextArea/TextArea";
@@ -263,6 +264,7 @@ export function Notifications({ element }: { element: Normalized<BPMN20__tUserTa
               outputSet: [],
               dataInput: [],
             };
+
             e.ioSpecification.dataInput ??= [];
             e.dataInputAssociation ??= [];
 
@@ -343,6 +345,11 @@ export function Notifications({ element }: { element: Normalized<BPMN20__tUserTa
                   to: { "@_id": dataInput["@_id"], __$$text: dataInput["@_id"] },
                 });
               }
+              addOrGetItemDefinitions({
+                definitions: s.bpmn.model.definitions,
+                oldId: `${e["@_id"]}_dataInputAssociation_${notification.type}`,
+                structureRef: "object",
+              });
             });
           }
         });

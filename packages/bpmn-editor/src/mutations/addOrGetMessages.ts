@@ -17,32 +17,39 @@
  * under the License.
  */
 
-import { generateUuid } from "@kie-tools/xyflow-react-kie-diagram/dist/uuid/uuid";
 import { BPMN20__tDefinitions } from "@kie-tools/bpmn-marshaller/dist/schemas/bpmn-2_0/ts-gen/types";
 import { ElementFilter } from "@kie-tools/xml-parser-ts/dist/elementFilter";
 import { Unpacked } from "@kie-tools/xyflow-react-kie-diagram/dist/tsExt/tsExt";
 import { Normalized } from "../normalization/normalize";
 
-export function addOrGetCategory({ definitions }: { definitions: Normalized<BPMN20__tDefinitions> }): {
-  category: ElementFilter<Unpacked<Normalized<BPMN20__tDefinitions["rootElement"]>>, "category">;
+export function addOrGetMessages({
+  definitions,
+  id,
+  message,
+}: {
+  definitions: Normalized<BPMN20__tDefinitions>;
+  id: string;
+  message: string;
+}): {
+  message: ElementFilter<Unpacked<Normalized<BPMN20__tDefinitions["rootElement"]>>, "message">;
 } {
   definitions.rootElement ??= [];
+  const messages = definitions.rootElement.filter((s) => s.__$$element === "message");
   const itemDefinitions = definitions.rootElement.filter((s) => s.__$$element === "itemDefinition");
   const index = itemDefinitions.length;
-
-  let category = definitions.rootElement?.filter((s) => s.__$$element === "category")[0];
-  if (!category) {
-    category = {
-      __$$element: "category",
-      "@_id": generateUuid(),
-      categoryValue: [
-        {
-          "@_id": generateUuid(),
-        },
-      ],
-    };
-    definitions.rootElement?.splice(index, 0, category);
+  const existingMessage = messages.find((s) => s["@_id"] === id);
+  if (existingMessage) {
+    existingMessage["@_itemRef"] = `${message}Type`;
+    existingMessage["@_name"] = message;
+    return { message: existingMessage };
   }
+  const newMessage = {
+    __$$element: "message",
+    "@_id": id,
+    "@_itemRef": `${message}Type`,
+    "@_name": message,
+  } as ElementFilter<Unpacked<Normalized<BPMN20__tDefinitions["rootElement"]>>, "message">;
 
-  return { category: category };
+  definitions.rootElement.splice(index, 0, newMessage);
+  return { message: newMessage };
 }

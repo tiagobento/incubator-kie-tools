@@ -30,6 +30,7 @@ import { Unpacked } from "@kie-tools/xyflow-react-kie-diagram/dist/tsExt/tsExt";
 import { TextArea } from "@patternfly/react-core/dist/js/components/TextArea";
 
 import "./ErrorSelector.css";
+import { addOrGetErrors } from "../../mutations/addOrGetErrors";
 
 export type WithError =
   | undefined
@@ -56,7 +57,7 @@ export function ErrorSelector({ element }: { element: WithError }) {
               "@_errorRef"
             ] || ""
           }
-          onChange={(newError: string | undefined) =>
+          onChange={(newError: string) =>
             bpmnEditorStoreApi.setState((s) => {
               const { process } = addOrGetProcessAndDiagramElements({
                 definitions: s.bpmn.model.definitions,
@@ -66,6 +67,11 @@ export function ErrorSelector({ element }: { element: WithError }) {
                   const errorEventDefinition = e.eventDefinition?.find(
                     (event) => event.__$$element === "errorEventDefinition"
                   );
+                  addOrGetErrors({
+                    definitions: s.bpmn.model.definitions,
+                    oldError: errorEventDefinition?.["@_errorRef"] || "",
+                    newError: newError,
+                  });
                   if (errorEventDefinition) {
                     errorEventDefinition["@_drools:erefname"] = newError;
                     errorEventDefinition["@_errorRef"] = newError;

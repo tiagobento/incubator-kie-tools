@@ -17,7 +17,10 @@
  * under the License.
  */
 
-import { BPMN20__tDataObject } from "@kie-tools/bpmn-marshaller/dist/schemas/bpmn-2_0/ts-gen/types";
+import {
+  BPMN20__tDataObject,
+  BPMN20__tDataObjectReference,
+} from "@kie-tools/bpmn-marshaller/dist/schemas/bpmn-2_0/ts-gen/types";
 import * as React from "react";
 import { Normalized } from "../../normalization/normalize";
 import { useBpmnEditorStoreApi } from "../../store/StoreContext";
@@ -35,9 +38,7 @@ export function DataObjectProperties({
   return (
     <PropertiesPanelHeaderFormSection title={dataObject["@_name"] || "Data object"} icon={<DataObjectIcon />}>
       <NameDocumentationAndId element={dataObject} />
-
       <Divider inset={{ default: "insetXs" }} />
-
       <DataTypeSelector element={dataObject} />
     </PropertiesPanelHeaderFormSection>
   );

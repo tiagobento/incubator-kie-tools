@@ -17,25 +17,37 @@
  * under the License.
  */
 
-import { generateUuid } from "@kie-tools/xyflow-react-kie-diagram/dist/uuid/uuid";
 import { BPMN20__tDefinitions } from "@kie-tools/bpmn-marshaller/dist/schemas/bpmn-2_0/ts-gen/types";
 import { ElementFilter } from "@kie-tools/xml-parser-ts/dist/elementFilter";
 import { Unpacked } from "@kie-tools/xyflow-react-kie-diagram/dist/tsExt/tsExt";
 import { Normalized } from "../normalization/normalize";
 
-export function addOrGetItemDefinitions({ definitions }: { definitions: Normalized<BPMN20__tDefinitions> }): {
+export function addOrGetItemDefinitions({
+  definitions,
+  oldId,
+  newId,
+  structureRef,
+}: {
+  definitions: Normalized<BPMN20__tDefinitions>;
+  oldId: string;
+  newId?: string;
+  structureRef?: string;
+}): {
   itemDefinition: ElementFilter<Unpacked<Normalized<BPMN20__tDefinitions["rootElement"]>>, "itemDefinition">;
 } {
   definitions.rootElement ??= [];
-
-  let itemDefinition = definitions.rootElement?.filter((s) => s.__$$element === "itemDefinition")[0];
-  if (!itemDefinition) {
-    itemDefinition = {
-      __$$element: "itemDefinition",
-      "@_id": generateUuid(),
-    };
-    definitions.rootElement?.push(itemDefinition);
+  const itemDefinitions = definitions.rootElement.filter((s) => s.__$$element === "itemDefinition");
+  const existingItemDefinition = itemDefinitions.find((s) => s["@_id"] === oldId);
+  if (existingItemDefinition) {
+    existingItemDefinition["@_id"] = newId ?? oldId;
+    return { itemDefinition: existingItemDefinition };
   }
+  const newItemDefinition = {
+    __$$element: "itemDefinition",
+    "@_id": newId ?? oldId,
+    "@_structureRef": structureRef || "",
+  } as ElementFilter<Unpacked<Normalized<BPMN20__tDefinitions["rootElement"]>>, "itemDefinition">;
 
-  return { itemDefinition };
+  definitions.rootElement.splice(0, 0, newItemDefinition);
+  return { itemDefinition: newItemDefinition };
 }

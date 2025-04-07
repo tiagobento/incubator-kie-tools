@@ -17,32 +17,38 @@
  * under the License.
  */
 
-import { generateUuid } from "@kie-tools/xyflow-react-kie-diagram/dist/uuid/uuid";
 import { BPMN20__tDefinitions } from "@kie-tools/bpmn-marshaller/dist/schemas/bpmn-2_0/ts-gen/types";
 import { ElementFilter } from "@kie-tools/xml-parser-ts/dist/elementFilter";
 import { Unpacked } from "@kie-tools/xyflow-react-kie-diagram/dist/tsExt/tsExt";
 import { Normalized } from "../normalization/normalize";
 
-export function addOrGetCategory({ definitions }: { definitions: Normalized<BPMN20__tDefinitions> }): {
-  category: ElementFilter<Unpacked<Normalized<BPMN20__tDefinitions["rootElement"]>>, "category">;
+export function addOrGetErrors({
+  definitions,
+  oldError: oldErrorMessage,
+  newError: newErrorMessage,
+}: {
+  definitions: Normalized<BPMN20__tDefinitions>;
+  oldError: string;
+  newError: string;
+}): {
+  error: ElementFilter<Unpacked<Normalized<BPMN20__tDefinitions["rootElement"]>>, "error">;
 } {
   definitions.rootElement ??= [];
   const itemDefinitions = definitions.rootElement.filter((s) => s.__$$element === "itemDefinition");
   const index = itemDefinitions.length;
-
-  let category = definitions.rootElement?.filter((s) => s.__$$element === "category")[0];
-  if (!category) {
-    category = {
-      __$$element: "category",
-      "@_id": generateUuid(),
-      categoryValue: [
-        {
-          "@_id": generateUuid(),
-        },
-      ],
-    };
-    definitions.rootElement?.splice(index, 0, category);
+  const errors = definitions.rootElement.filter((s) => s.__$$element === "error");
+  const existingError = errors.find((s) => s["@_id"] === oldErrorMessage);
+  if (existingError) {
+    existingError["@_id"] = newErrorMessage ?? oldErrorMessage;
+    existingError["@_errorCode"] = newErrorMessage ?? oldErrorMessage;
+    return { error: existingError };
   }
+  const newError = {
+    __$$element: "error",
+    "@_id": newErrorMessage ?? oldErrorMessage,
+    "@_errorCode": newErrorMessage ?? oldErrorMessage,
+  } as ElementFilter<Unpacked<Normalized<BPMN20__tDefinitions["rootElement"]>>, "error">;
 
-  return { category: category };
+  definitions.rootElement.splice(index, 0, newError);
+  return { error: newError };
 }

@@ -36,12 +36,11 @@ import { AdhocAutostartCheckbox } from "../adhocAutostartCheckbox/AdhocAutostart
 import { FormGroup } from "@patternfly/react-core/dist/js/components/Form";
 import { TextArea } from "@patternfly/react-core/dist/js/components/TextArea/TextArea";
 import { useBpmnEditorStore, useBpmnEditorStoreApi } from "../../store/StoreContext";
-import { setBpmn20Drools10MetaData } from "@kie-tools/bpmn-marshaller/dist/drools-extension-metaData";
-import { useState } from "react";
 import { visitFlowElementsAndArtifacts } from "../../mutations/_elementVisitor";
 import { generateUuid } from "@kie-tools/xyflow-react-kie-diagram/dist/uuid/uuid";
 import { addOrGetProcessAndDiagramElements } from "../../mutations/addOrGetProcessAndDiagramElements";
 import { Checkbox } from "@patternfly/react-core/dist/js/components/Checkbox/Checkbox";
+import { addOrGetItemDefinitions } from "../../mutations/addOrGetItemDefinitions";
 
 export function UserTaskProperties({
   userTask,
@@ -50,10 +49,6 @@ export function UserTaskProperties({
 }) {
   const bpmnEditorStoreApi = useBpmnEditorStoreApi();
   const settings = useBpmnEditorStore((s) => s.settings);
-  const [showNotificationsModal, setShowNotificationsModal] = useState(false);
-  const closeNotificationsModal = React.useCallback(() => {
-    setShowNotificationsModal(false);
-  }, []);
   const priorityInputX = "PriorityInputX";
   const contentInputX = "ContentInputX";
   const subjectInputX = "CommentInputX";
@@ -62,8 +57,6 @@ export function UserTaskProperties({
   const skippableInputX = "SkippableInputX";
   const createdByInputX = "CreatedByInputX";
   const groupIdInputX = "GroupIdInputX";
-
-  const item = "Item";
 
   const handleChange = (fieldName: string, newValue: string | boolean) => {
     const valueAsString = String(newValue);
@@ -74,14 +67,17 @@ export function UserTaskProperties({
 
       visitFlowElementsAndArtifacts(process, ({ element: e }) => {
         if (e["@_id"] === userTask?.["@_id"] && e.__$$element === userTask.__$$element) {
-          setBpmn20Drools10MetaData(e, "elementname", e["@_name"] || "");
           e.ioSpecification ??= {
             "@_id": "",
             inputSet: [],
             outputSet: [],
             dataInput: [],
           };
-
+          addOrGetItemDefinitions({
+            definitions: s.bpmn.model.definitions,
+            oldId: `${e["@_id"]}_${fieldName}InputX`,
+            structureRef: "object",
+          });
           e.ioSpecification.inputSet[0] ??= {
             "@_id": "",
             dataInputRefs: [],

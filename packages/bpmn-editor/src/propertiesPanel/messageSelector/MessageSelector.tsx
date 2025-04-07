@@ -36,6 +36,8 @@ import { TextArea } from "@patternfly/react-core/dist/js/components/TextArea/Tex
 import { TextInput } from "@patternfly/react-core/dist/js/components/TextInput";
 import { generateUuid } from "@kie-tools/xyflow-react-kie-diagram/dist/uuid/uuid";
 import { updateFlowElement } from "../../mutations/renameNode";
+import { addOrGetItemDefinitions } from "../../mutations/addOrGetItemDefinitions";
+import { addOrGetMessages } from "../../mutations/addOrGetMessages";
 
 export type WithMessage =
   | undefined
@@ -62,7 +64,7 @@ export function MessageSelector({ element }: { element: WithMessage }) {
               "@_drools:msgref"
             ] || ""
           }
-          onChange={(newMessage: string | undefined) =>
+          onChange={(newMessage: string) =>
             bpmnEditorStoreApi.setState((s) => {
               const { process } = addOrGetProcessAndDiagramElements({
                 definitions: s.bpmn.model.definitions,
@@ -72,6 +74,12 @@ export function MessageSelector({ element }: { element: WithMessage }) {
                   const messageEventDefinition = e.eventDefinition?.find(
                     (event) => event.__$$element === "messageEventDefinition"
                   );
+                  addOrGetItemDefinitions({
+                    definitions: s.bpmn.model.definitions,
+                    oldId: messageEventDefinition?.["@_drools:msgref"] || "",
+                    newId: newMessage,
+                  });
+                  addOrGetMessages({ definitions: s.bpmn.model.definitions, id: e["@_id"], message: newMessage });
                   if (messageEventDefinition) {
                     messageEventDefinition["@_drools:msgref"] = newMessage;
                     messageEventDefinition["@_messageRef"] = e["@_id"];

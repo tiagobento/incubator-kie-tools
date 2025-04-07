@@ -41,7 +41,7 @@ export function GroupProperties({ group }: { group: Normalized<BPMN20__tGroup> &
   const onNameChanged = useCallback(
     (newName: string) => {
       bpmnEditorStoreApi.setState((s) => {
-        const { category: category } = addOrGetCategory({
+        const { category } = addOrGetCategory({
           definitions: s.bpmn.model.definitions,
         });
         category.categoryValue ??= [
