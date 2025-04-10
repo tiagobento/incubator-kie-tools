@@ -41,6 +41,7 @@ import { EmptyState, EmptyStateBody, EmptyStateIcon } from "@patternfly/react-co
 import { Title } from "@patternfly/react-core/dist/js/components/Title";
 
 export const EXTERNAL_MODELS_SEARCH_GLOB_PATTERN = "**/*.{dmn,pmml}";
+export const TARGET_DIRECTORY = "target/classes/";
 
 export const EMPTY_DMN = () => `<?xml version="1.0" encoding="UTF-8"?>
 <definitions
@@ -57,6 +58,7 @@ export type DmnEditorRootProps = {
   onRequestWorkspaceFilesList: WorkspaceChannelApi["kogitoWorkspace_resourceListRequest"];
   onRequestWorkspaceFileContent: WorkspaceChannelApi["kogitoWorkspace_resourceContentRequest"];
   onOpenFileFromNormalizedPosixPathRelativeToTheWorkspaceRoot: WorkspaceChannelApi["kogitoWorkspace_openFile"];
+  onOpenedBoxedExpressionEditorNodeChange?: (newOpenedNodeId: string | undefined) => void;
   workspaceRootAbsolutePosixPath: string;
   keyboardShortcutsService: KeyboardShortcutsService | undefined;
   isReadOnly: boolean;
@@ -73,6 +75,7 @@ export type DmnEditorRootState = {
   keyboardShortcutsRegisterIds: number[];
   keyboardShortcutsRegistered: boolean;
   error: Error | undefined;
+  evaluationResultsByNodeId: DmnEditor.EvaluationResultsByNodeId;
 };
 
 export class DmnEditorRoot extends React.Component<DmnEditorRootProps, DmnEditorRootState> {
@@ -95,6 +98,7 @@ export class DmnEditorRoot extends React.Component<DmnEditorRootProps, DmnEditor
       keyboardShortcutsRegisterIds: [],
       keyboardShortcutsRegistered: false,
       error: undefined,
+      evaluationResultsByNodeId: new Map(),
     };
   }
 
@@ -102,6 +106,10 @@ export class DmnEditorRoot extends React.Component<DmnEditorRootProps, DmnEditor
 
   public openBoxedExpressionEditor(nodeId: string): void {
     this.dmnEditorRef.current?.openBoxedExpressionEditor(nodeId);
+  }
+
+  public showDmnEvaluationResults(evaluationResultsByNodeId: DmnEditor.EvaluationResultsByNodeId): void {
+    this.setState((prev) => ({ ...prev, evaluationResultsByNodeId: evaluationResultsByNodeId }));
   }
 
   public async undo(): Promise<void> {
@@ -230,8 +238,8 @@ export class DmnEditorRoot extends React.Component<DmnEditorRootProps, DmnEditor
     });
 
     return list.normalizedPosixPathsRelativeToTheWorkspaceRoot.flatMap((p) =>
-      // Do not show this DMN on the list
-      p === this.state.openFileNormalizedPosixPathRelativeToTheWorkspaceRoot
+      // Do not show this DMN on the list and filter out assets into target/classes directory
+      p === this.state.openFileNormalizedPosixPathRelativeToTheWorkspaceRoot || p.includes(TARGET_DIRECTORY)
         ? []
         : __path.relative(__path.dirname(this.state.openFileNormalizedPosixPathRelativeToTheWorkspaceRoot!), p)
     );
@@ -478,13 +486,14 @@ export class DmnEditorRoot extends React.Component<DmnEditorRootProps, DmnEditor
               originalVersion={this.state.marshaller?.originalVersion}
               model={this.model}
               externalModelsByNamespace={this.state.externalModelsByNamespace}
-              evaluationResults={[]}
+              evaluationResultsByNodeId={this.state.evaluationResultsByNodeId}
               validationMessages={[]}
               externalContextName={""}
               externalContextDescription={""}
               issueTrackerHref={""}
               isReadOnly={this.state.isReadOnly}
               onModelChange={this.onModelChange}
+              onOpenedBoxedExpressionEditorNodeChange={this.props.onOpenedBoxedExpressionEditorNodeChange}
               onRequestExternalModelsAvailableToInclude={this.onRequestExternalModelsAvailableToInclude}
               // (begin) All paths coming from inside the DmnEditor component are paths relative to the open file.
               onRequestExternalModelByPath={this.onRequestExternalModelByPathsRelativeToTheOpenFile}
@@ -604,7 +613,11 @@ function ExternalModelsManager({
         for (let i = 0; i < list.normalizedPosixPathsRelativeToTheWorkspaceRoot.length; i++) {
           const normalizedPosixPathRelativeToTheWorkspaceRoot = list.normalizedPosixPathsRelativeToTheWorkspaceRoot[i];
 
-          if (normalizedPosixPathRelativeToTheWorkspaceRoot === thisDmnsNormalizedPosixPathRelativeToTheWorkspaceRoot) {
+          // Do not show this DMN on the list and filter out assets into target/classes directory
+          if (
+            normalizedPosixPathRelativeToTheWorkspaceRoot === thisDmnsNormalizedPosixPathRelativeToTheWorkspaceRoot ||
+            normalizedPosixPathRelativeToTheWorkspaceRoot.includes(TARGET_DIRECTORY)
+          ) {
             continue;
           }
 

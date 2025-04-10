@@ -71,7 +71,23 @@ export type DmnEditorRef = {
   getCommands: () => Commands;
 };
 
-export type EvaluationResults = Record<string, any>;
+/**
+ * We need to keep in sync:
+ *   * dmn-editor/src/DmnEditor.tsx - NodeEvaluationResults
+ *   * dmn-editor-envelope/src/DmnEditorRoot.tsx -
+ *   * dmn-editor-envelope/src/NewDmnEditorEnvelopeApi.tsx - newDmnEditor_showDmnEvaluationResults
+ *   * dmn-editor-envelope/src/NewDmnEditorFactory.tsx - NewDmnEditorInterface#showDmnEvaluationResults
+ *   * extended-services-api/src/dmnResult.ts - DmnEvaluationStatus
+ *
+ * For more details see: https://github.com/apache/incubator-kie-issues/issues/1823
+ */
+export type NodeEvaluationResults = {
+  evaluationResult: EvaluationResult;
+  evaluationHitsCountByRuleOrRowId: Map<string, number>;
+};
+
+export type EvaluationResult = "succeeded" | "failed" | "skipped";
+export type EvaluationResultsByNodeId = Map<string, NodeEvaluationResults>;
 export type ValidationMessages = Record<string, any>;
 export type OnDmnModelChange = (model: Normalized<DmnLatestModel>) => void;
 
@@ -127,9 +143,9 @@ export type DmnEditorProps = {
    */
   externalModelsByNamespace?: ExternalModelsIndex;
   /**
-   * To show information about execution results directly on the DMN diagram and/or Boxed Expression Editor, use this prop.
+   * To show information about evaluation results directly on the DMN diagram and/or Boxed Expression Editor, use this prop.
    */
-  evaluationResults?: EvaluationResults;
+  evaluationResultsByNodeId?: EvaluationResultsByNodeId;
   /**
    * To show information about validation messages directly on the DMN diagram and/or Boxed Expression Editor, use this prop.
    */
@@ -170,16 +186,20 @@ export type DmnEditorProps = {
    * Notifies the caller when the DMN Editor performs a new edit after the debounce time.
    */
   onModelDebounceStateChanged?: (changed: boolean) => void;
+
+  onOpenedBoxedExpressionEditorNodeChange?: (newOpenedNodeId: string | undefined) => void;
 };
 
 export const DmnEditorInternal = ({
   model,
   originalVersion,
   onModelChange,
+  onOpenedBoxedExpressionEditorNodeChange,
   onModelDebounceStateChanged,
   forwardRef,
 }: DmnEditorProps & { forwardRef?: React.Ref<DmnEditorRef> }) => {
   const boxedExpressionEditorActiveDrgElementId = useDmnEditorStore((s) => s.boxedExpressionEditor.activeDrgElementId);
+  const dmnEditorActiveTab = useDmnEditorStore((s) => s.navigation.tab);
   const isBeePropertiesPanelOpen = useDmnEditorStore((s) => s.boxedExpressionEditor.propertiesPanel.isOpen);
   const isDiagramPropertiesPanelOpen = useDmnEditorStore((s) => s.diagram.propertiesPanel.isOpen);
   const navigationTab = useDmnEditorStore((s) => s.navigation.tab);
@@ -190,6 +210,13 @@ export const DmnEditorInternal = ({
 
   const { dmnModelBeforeEditingRef, dmnEditorRootElementRef } = useDmnEditor();
   const { externalModelsByNamespace } = useExternalModels();
+
+  // Code to keep FormDmnOutputs.tsx selected card highlight in proper state
+  useEffect(() => {
+    onOpenedBoxedExpressionEditorNodeChange?.(
+      dmnEditorActiveTab === DmnEditorTab.EDITOR ? boxedExpressionEditorActiveDrgElementId : undefined
+    );
+  }, [boxedExpressionEditorActiveDrgElementId, dmnEditorActiveTab, onOpenedBoxedExpressionEditorNodeChange]);
 
   // Refs
   const diagramRef = useRef<DiagramRef>(null);
@@ -206,6 +233,7 @@ export const DmnEditorInternal = ({
       },
       openBoxedExpressionEditor: (nodeId: string) => {
         dmnEditorStoreApi.setState((state) => {
+          state.navigation.tab = DmnEditorTab.EDITOR;
           state.dispatch(state).boxedExpressionEditor.open(nodeId);
         });
       },
