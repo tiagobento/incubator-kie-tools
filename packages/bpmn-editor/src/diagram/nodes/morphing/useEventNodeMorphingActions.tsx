@@ -230,7 +230,7 @@ export function useEventNodeMorphingActions(event: Event) {
         action: () => morphEvent("terminateEventDefinition"),
       } as const,
     ];
-  }, [event.__$$element, foregroundColor, filled, morphEvent]);
+  }, [event.__$$element, foregroundColor, filled, backgroundColor, morphEvent]);
 
   return morphingActions;
 }

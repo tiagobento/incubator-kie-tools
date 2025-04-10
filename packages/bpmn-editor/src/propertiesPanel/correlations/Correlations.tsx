@@ -119,7 +119,7 @@ export function Correlations({ isOpen, onClose }: { isOpen: boolean; onClose: ()
         <PlusCircleIcon color="var(--pf-c-button--m-primary--BackgroundColor)" />
       </Button>
     ),
-    [addAtEnd]
+    [addCorrelation]
   );
 
   const process: undefined | Normalized<BPMN20__tProcess> = useBpmnEditorStore((s) =>
