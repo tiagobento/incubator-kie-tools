@@ -102,7 +102,7 @@ export function BpmnPalette({ pulse }: { pulse: boolean }) {
             <TaskIcon />
           </div>
           <div
-            title={"Call Activities"}
+            title={"Call Activity"}
             className={"kie-bpmn-editor--palette-button dndnode callActivity"}
             onDragStart={(event) => onDragStart(event, NODE_TYPES.task, "callActivity")}
             draggable={true}

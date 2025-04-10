@@ -155,10 +155,10 @@ export function SubProcessIcon({ variant }: { variant?: SubProcessVariant }) {
     <RoundSvg>
       <SubProcessNodeSvg
         {...nodeSvgProps}
-        strokeWidth={10}
+        strokeWidth={20}
         rimWidth={20}
         borderRadius={20}
-        variant={variant ?? "transaction"}
+        variant={variant ?? "other"}
       />
     </RoundSvg>
   );
