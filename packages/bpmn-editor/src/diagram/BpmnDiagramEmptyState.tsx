@@ -30,6 +30,7 @@ import { AngleDoubleRightIcon } from "@patternfly/react-icons/dist/js/icons/angl
 import { MousePointerIcon } from "@patternfly/react-icons/dist/js/icons/mouse-pointer-icon";
 import { TimesIcon } from "@patternfly/react-icons/dist/js/icons/times-icon";
 import { UserIcon } from "@patternfly/react-icons/dist/js/icons/user-icon";
+import { TopologyIcon } from "@patternfly/react-icons/dist/js/icons/topology-icon";
 import * as React from "react";
 import { useBpmnEditorStoreApi } from "../store/StoreContext";
 
@@ -77,10 +78,20 @@ export function BpmnDiagramEmptyState({
               variant={ButtonVariant.link}
               icon={<UserIcon />}
               onClick={() => {
-                // FIXME: Tiago: Implement (new human task)
+                // FIXME: Tiago: Implement (new human-driven process)
               }}
             >
-              New Human Task...
+              New Human-driven Process...
+            </Button>
+            <br />
+            <Button
+              variant={ButtonVariant.link}
+              icon={<TopologyIcon />}
+              onClick={() => {
+                // FIXME: Tiago: Implement (new event-driven process)
+              }}
+            >
+              New Event-driven Process...
             </Button>
             <br />
             <Button
