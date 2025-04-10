@@ -28,6 +28,7 @@ import {
   GatewayIcon,
   GroupIcon,
   IntermediateCatchEventIcon,
+  IntermediateThrowEventIcon,
   LaneIcon,
   StartEventIcon,
   SubProcessIcon,
@@ -69,12 +70,20 @@ export function BpmnPalette({ pulse }: { pulse: boolean }) {
             <StartEventIcon />
           </div>
           <div
-            title={"Intermediate Events"}
+            title={"Intermediate Catch Events"}
             className={"kie-bpmn-editor--palette-button dndnode intermediate-catch-event"}
             onDragStart={(event) => onDragStart(event, NODE_TYPES.intermediateCatchEvent, "intermediateCatchEvent")}
             draggable={true}
           >
             <IntermediateCatchEventIcon />
+          </div>
+          <div
+            title={"Intermediate Throw Events"}
+            className={"kie-bpmn-editor--palette-button dndnode intermediate-throw-event"}
+            onDragStart={(event) => onDragStart(event, NODE_TYPES.intermediateThrowEvent, "intermediateThrowEvent")}
+            draggable={true}
+          >
+            <IntermediateThrowEventIcon />
           </div>
           <div
             title={"End Events"}
