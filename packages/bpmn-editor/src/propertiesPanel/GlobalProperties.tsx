@@ -177,6 +177,8 @@ export function GlobalProperties() {
           )}
         </FormSection>
 
+        <VariablesFormSection p={process} />
+
         <FormSection
           title={
             <SectionHeader
@@ -196,8 +198,6 @@ export function GlobalProperties() {
             </>
           )}
         </FormSection>
-
-        <VariablesFormSection p={process} />
 
         <FormSection
           title={

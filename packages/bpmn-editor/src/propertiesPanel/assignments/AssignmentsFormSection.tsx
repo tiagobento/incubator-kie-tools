@@ -916,7 +916,7 @@ export function AssignmentList({
                   {isReadOnly ? `No ${entryTitle} assignments` : `No ${entryTitle} assignments yet`}
                 </Title>
                 <EmptyStateBody style={{ padding: "0 25%" }}>
-                  {`This represents an the empty state pattern in Patternfly 4. Hopefully it's simple enough to use but flexible.`}
+                  {"This represents the empty state for assignments. You can add assignments to get started."}
                 </EmptyStateBody>
                 <Button variant="primary" onClick={addAssignment}>
                   {`Add ${entryTitle} assignment`}
