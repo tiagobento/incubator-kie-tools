@@ -33,9 +33,13 @@ const preview: Preview = {
       storySort: {
         order: [
           "Dev",
-          "Misc",
+          "DMN Editor",
+          ["Overview", "*", ["Overview", "*", ["Overview", "*"]]],
+          "Features",
           ["Overview", "*", ["Overview", "*", ["Overview", "*"]]],
           "Use cases",
+          ["Overview", "*", ["Overview", "*", ["Overview", "*"]]],
+          "Misc",
           ["Overview", "*", ["Overview", "*", ["Overview", "*"]]],
         ],
       },

@@ -34,9 +34,9 @@ The Test Scenario Editor still doesn't fully support the DRL test case, the foll
 
 The editor is based on the following technology stack:
 
-- [Typescript](https://www.typescriptlang.org/)
+- [TypeScript](https://www.typescriptlang.org/)
 - [React.js](https://react.dev/)
-- [Patternfly](https://www.patternfly.org/)
+- [PatternFly](https://www.patternfly.org/)
 - [Zustand](https://zustand-demo.pmnd.rs/) + [Immer](https://immerjs.github.io/immer/) frameworks to manage the editor's state
 
 # Project Structure

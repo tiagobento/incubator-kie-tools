@@ -108,8 +108,8 @@ export type ExternalDmn = {
 
 export type TestScenarioEditorProps = {
   /**
-   * When the SceSim represented by `model` ("This SceSim") is DMN-type Test Scenario this prop needs to map their contents by namespace.
-   * The SceSim model won't be correctly rendered if an included model is not found on this object.
+   * When the Test Scenario represented by `model` ("This Test Scenario") is a DMN-based Test Scenario, this prop needs to map their contents by namespace.
+   * The Test Scenario model won't be correctly rendered if an included model is not found on this object.
    */
   externalModelsByNamespace?: ExternalDmnsIndex;
   /**

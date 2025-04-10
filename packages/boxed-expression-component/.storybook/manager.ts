@@ -21,7 +21,7 @@ import { addons } from "@storybook/manager-api";
 import { KieToolsTheme } from "@kie-tools/storybook-base/dist/config/theme";
 
 addons.setConfig({
-  theme: KieToolsTheme,
+  theme: { ...KieToolsTheme, brandTitle: "Apache KIE :: Boxed Expression Editor" },
   // Disable Storybook keyboard shortcuts.
   // The shortcuts conflicts with the Monaco editor, impacting its behavior
   enableShortcuts: false,

@@ -196,7 +196,7 @@ To use it follow the steps:
 
 This repository contains several applications. To develop each one of them individually, refer to the instructions below.
 
-#### VS Code Extension (DMN, BPMN, SceSim, and PMML Editors)
+#### VS Code Extension (DMN, BPMN, Test Scenario, and PMML Editors)
 
 1. After you've successfully built the project following the instructions above, open the `packages/kie-editors-dev-vscode-extension` folder on VS Code. Use a new VS Code window so that the `packages/kie-editors-dev-vscode-extension` folder shows up as root in the VS Code explorer.
 2. From there, you can Run the extension or the end-to-end tests by using the `Debug` menu/section. You can also use the respective shortcuts (F5 to start debugging, for instance).
@@ -209,7 +209,7 @@ This repository contains several applications. To develop each one of them indiv
 1. From there, you can Run the extension or the end-to-end tests by using the `Debug` menu/section. You can also use the respective shortcuts (F5 to start debugging, for instance).
 1. **Remember!** If you make changes to any package other than `packages/serverless-workflow-vscode-extension`, you have to manually rebuild them before relaunching the extension on VS Code.
 
-#### Chrome Extension (DMN, BPMN, and SceSim Editors)
+#### Chrome Extension (DMN, BPMN, and Test Scenario Editors)
 
 1. After you've successfully built the project following the instructions above, open the `packages/chrome-extension-pack-kogito-kie-editors` folder on your favourite IDE. You can import the entire repo as well if you want to make changes to other packages.
 2. Run `pnpm build:dev` on `packages/chrome-extension-pack-kogito-kie-editors`. This will create a version of the Chrome Extension that fetches the envelope locally.
@@ -248,7 +248,7 @@ This repository contains several applications. To develop each one of them indiv
 2. Open a terminal and run `pnpm start`. This will start a `webpack serve` instance with the Standalone Editors test page.
 3. From now on you can use the development version of the Standalone DMN Editor by accessing `https://localhost:9001/resources/dmn` and the Standalone BPMN Editor by accessing `https://localhost:9001/resources/bpmn`.
 
-#### Knative Workflow plugin
+#### Knative plugin for Serverless Workflow
 
 [Read the documentation](./packages/kn-plugin-workflow/README.md)
 
