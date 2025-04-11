@@ -21,7 +21,7 @@ import { BPMN20__tStartEvent } from "@kie-tools/bpmn-marshaller/dist/schemas/bpm
 import * as React from "react";
 import { Normalized } from "../../normalization/normalize";
 import { NameDocumentationAndId } from "../nameDocumentationAndId/NameDocumentationAndId";
-import { OutputOnlyAssociationFormSection } from "../assignments/AssignmentsFormSection";
+import { OutputOnlyAssociationFormSection } from "../dataMapping/DataMappingFormSection";
 import { EventDefinitionProperties } from "../eventDefinition/EventDefinitionProperties";
 import { EventDefinitionIcon, StartEventIcon } from "../../diagram/nodes/NodeIcons";
 import { PropertiesPanelHeaderFormSection } from "./_PropertiesPanelHeaderFormSection";

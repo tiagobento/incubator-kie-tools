@@ -22,7 +22,7 @@ import * as React from "react";
 import { Normalized } from "../../normalization/normalize";
 import { useBpmnEditorStore, useBpmnEditorStoreApi } from "../../store/StoreContext";
 import { NameDocumentationAndId } from "../nameDocumentationAndId/NameDocumentationAndId";
-import { BidirectionalAssignmentsFormSection } from "../assignments/AssignmentsFormSection";
+import { BidirectionalDataMappingFormSection } from "../dataMapping/DataMappingFormSection";
 import { OnEntryAndExitScriptsFormSection } from "../onEntryAndExitScripts/OnEntryAndExitScriptsFormSection";
 import { PropertiesPanelHeaderFormSection } from "./_PropertiesPanelHeaderFormSection";
 import { TaskIcon } from "../../diagram/nodes/NodeIcons";
@@ -38,7 +38,6 @@ import { ToggleGroupItem } from "@patternfly/react-core/dist/js/components/Toggl
 import { addOrGetProcessAndDiagramElements } from "../../mutations/addOrGetProcessAndDiagramElements";
 import { FormSelect, FormSelectOption } from "@patternfly/react-core/dist/js/components/FormSelect";
 import { TextInput } from "@patternfly/react-core/dist/js/components/TextInput";
-import { TextArea } from "@patternfly/react-core/dist/js/components/TextArea/TextArea";
 
 export function BusinessRuleTaskProperties({
   businessRuleTask,
@@ -103,7 +102,7 @@ export function BusinessRuleTaskProperties({
         {businessRuleTask["@_implementation"] === BUSINESS_RULE_TASK_IMPLEMENTATIONS.drools && (
           <>
             <FormGroup label="Rule flow group">
-              <TextArea
+              <TextInput
                 aria-label={"Signal"}
                 type={"text"}
                 isDisabled={isReadOnly}
@@ -121,8 +120,6 @@ export function BusinessRuleTaskProperties({
                   });
                 }}
                 placeholder={"-- None --"}
-                style={{ resize: "vertical", minHeight: "40px" }}
-                rows={1}
               />
             </FormGroup>
           </>
@@ -193,7 +190,7 @@ export function BusinessRuleTaskProperties({
         <Divider inset={{ default: "insetXs" }} />
       </PropertiesPanelHeaderFormSection>
 
-      <BidirectionalAssignmentsFormSection element={businessRuleTask} />
+      <BidirectionalDataMappingFormSection element={businessRuleTask} />
 
       <OnEntryAndExitScriptsFormSection element={businessRuleTask} />
     </>

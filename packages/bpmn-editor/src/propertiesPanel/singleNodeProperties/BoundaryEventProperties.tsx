@@ -23,7 +23,7 @@ import { Normalized } from "../../normalization/normalize";
 import { useBpmnEditorStoreApi } from "../../store/StoreContext";
 import { NameDocumentationAndId } from "../nameDocumentationAndId/NameDocumentationAndId";
 import { EventDefinitionProperties } from "../eventDefinition/EventDefinitionProperties";
-import { OutputOnlyAssociationFormSection } from "../assignments/AssignmentsFormSection";
+import { OutputOnlyAssociationFormSection } from "../dataMapping/DataMappingFormSection";
 import { PropertiesPanelHeaderFormSection } from "./_PropertiesPanelHeaderFormSection";
 import { IntermediateCatchEventIcon } from "../../diagram/nodes/NodeIcons";
 import { Divider } from "@patternfly/react-core/dist/js/components/Divider";

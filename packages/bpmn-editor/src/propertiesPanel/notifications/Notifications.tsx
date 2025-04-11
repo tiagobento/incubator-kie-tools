@@ -439,7 +439,6 @@ export function Notifications({ element }: { element: Normalized<BPMN20__tUserTa
                     value={entry.type}
                     onChange={(e) => handleInputChange(i, "type", e)}
                     style={entryStyle}
-                    rows={1}
                   >
                     {typeOptions.map((option) => (
                       <FormSelectOption key={option.label} label={option.label} value={option.value} />

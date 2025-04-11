@@ -21,7 +21,7 @@ import { BPMN20__tServiceTask } from "@kie-tools/bpmn-marshaller/dist/schemas/bp
 import * as React from "react";
 import { Normalized } from "../../normalization/normalize";
 import { NameDocumentationAndId } from "../nameDocumentationAndId/NameDocumentationAndId";
-import { BidirectionalAssignmentsFormSection } from "../assignments/AssignmentsFormSection";
+import { BidirectionalDataMappingFormSection } from "../dataMapping/DataMappingFormSection";
 import { OnEntryAndExitScriptsFormSection } from "../onEntryAndExitScripts/OnEntryAndExitScriptsFormSection";
 import { TaskIcon } from "../../diagram/nodes/NodeIcons";
 import { PropertiesPanelHeaderFormSection } from "./_PropertiesPanelHeaderFormSection";
@@ -170,7 +170,7 @@ export function ServiceTaskProperties({
         )}
       </PropertiesPanelHeaderFormSection>
 
-      <BidirectionalAssignmentsFormSection element={serviceTask} />
+      <BidirectionalDataMappingFormSection element={serviceTask} />
 
       <OnEntryAndExitScriptsFormSection element={serviceTask} />
     </>

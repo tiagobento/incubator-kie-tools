@@ -55,7 +55,7 @@ export function MessageSelector({ element }: { element: WithMessage }) {
   return (
     <FormSection>
       <FormGroup label="Message">
-        <TextArea
+        <TextInput
           aria-label={"Message"}
           type={"text"}
           isDisabled={settings.isReadOnly}
@@ -89,8 +89,6 @@ export function MessageSelector({ element }: { element: WithMessage }) {
             })
           }
           placeholder={"Enter message..."}
-          style={{ resize: "vertical", minHeight: "40px" }}
-          rows={1}
         />
       </FormGroup>
     </FormSection>

@@ -27,10 +27,9 @@ import { Normalized } from "../../normalization/normalize";
 import { BPMN20__tProcess } from "@kie-tools/bpmn-marshaller/dist/schemas/bpmn-2_0/ts-gen/types";
 import { ElementFilter } from "@kie-tools/xml-parser-ts/dist/elementFilter";
 import { Unpacked } from "@kie-tools/xyflow-react-kie-diagram/dist/tsExt/tsExt";
-import { TextArea } from "@patternfly/react-core/dist/js/components/TextArea";
-
-import "./ErrorSelector.css";
+import { TextInput } from "@patternfly/react-core/dist/js/components/TextInput";
 import { addOrGetErrors } from "../../mutations/addOrGetErrors";
+import "./ErrorSelector.css";
 
 export type WithError =
   | undefined
@@ -48,7 +47,7 @@ export function ErrorSelector({ element }: { element: WithError }) {
   return (
     <FormSection>
       <FormGroup label="Error">
-        <TextArea
+        <TextInput
           aria-label={"Error"}
           type={"text"}
           isDisabled={settings.isReadOnly}
@@ -81,8 +80,6 @@ export function ErrorSelector({ element }: { element: WithError }) {
             })
           }
           placeholder={"-- None --"}
-          style={{ resize: "vertical", minHeight: "40px" }}
-          rows={1}
         />
       </FormGroup>
     </FormSection>

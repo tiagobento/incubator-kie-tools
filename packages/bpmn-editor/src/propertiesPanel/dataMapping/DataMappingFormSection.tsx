@@ -31,7 +31,6 @@ import {
 } from "@kie-tools/bpmn-marshaller/dist/schemas/bpmn-2_0/ts-gen/types";
 import { Modal, ModalVariant } from "@patternfly/react-core/dist/js/components/Modal/Modal";
 import { generateUuid } from "@kie-tools/xyflow-react-kie-diagram/dist/uuid/uuid";
-import "./AssignmentsFormSection.css";
 import { EmptyState, EmptyStateIcon, EmptyStateBody } from "@patternfly/react-core/dist/js/components/EmptyState";
 import { Title } from "@patternfly/react-core/dist/js/components/Title";
 import { Bullseye } from "@patternfly/react-core/dist/js/layouts/Bullseye";
@@ -46,31 +45,32 @@ import { Unpacked } from "@kie-tools/xyflow-react-kie-diagram/dist/tsExt/tsExt";
 import { Normalized } from "../../normalization/normalize";
 import { Divider } from "@patternfly/react-core/dist/js/components/Divider";
 import { setBpmn20Drools10MetaData } from "@kie-tools/bpmn-marshaller/dist/drools-extension-metaData";
-import { TextArea } from "@patternfly/react-core/dist/js/components/TextArea/TextArea";
 import { FormSelect } from "@patternfly/react-core/dist/js/components/FormSelect/FormSelect";
 import { FormSelectOption } from "@patternfly/react-core/dist/js/components/FormSelect/FormSelectOption";
 import { Alert } from "@patternfly/react-core/dist/js/components/Alert/Alert";
 import { CubesIcon } from "@patternfly/react-icons/dist/js/icons/cubes-icon";
+import { TextInput } from "@patternfly/react-core/dist/js/components/TextInput";
+import "./DataMappingFormSection.css";
 
-type WithAssignments = Normalized<
+type WithDataMapping = Normalized<
   ElementFilter<
     Unpacked<NonNullable<BPMN20__tProcess["flowElement"]>>,
     "callActivity" | "businessRuleTask" | "userTask" | "serviceTask" | "scriptTask"
   >
 >;
 
-type WithOutputAssignments = Normalized<
+type WithOutputDataMapping = Normalized<
   ElementFilter<
     Unpacked<NonNullable<BPMN20__tProcess["flowElement"]>>,
     "startEvent" | "intermediateCatchEvent" | "boundaryEvent"
   >
 >;
 
-type WithInputAssignments = Normalized<
+type WithInputDataMapping = Normalized<
   ElementFilter<Unpacked<NonNullable<BPMN20__tProcess["flowElement"]>>, "endEvent" | "intermediateThrowEvent">
 >;
 
-type Assignment = {
+type DataMapping = {
   name: string;
   dataType: string;
   value: string;
@@ -107,7 +107,7 @@ const namesFromOtherTypes = [
   "multiInstanceItemType",
 ];
 
-export function AssignmentsFormSection({
+export function DataMappingFormSection({
   sectionLabel,
   children,
   onModalStateChange,
@@ -116,10 +116,10 @@ export function AssignmentsFormSection({
   onModalStateChange?: (isOpen: boolean) => void;
 }>) {
   const isReadOnly = useBpmnEditorStore((s) => s.settings.isReadOnly);
-  const [showAssignmentsModal, setShowAssignmentsModal] = useState(false);
+  const [showDataMappingModal, setShowDataMappingModal] = useState(false);
   useEffect(() => {
-    onModalStateChange?.(showAssignmentsModal);
-  }, [showAssignmentsModal, onModalStateChange]);
+    onModalStateChange?.(showDataMappingModal);
+  }, [showDataMappingModal, onModalStateChange]);
   return (
     <>
       <FormSection
@@ -127,13 +127,13 @@ export function AssignmentsFormSection({
           <SectionHeader
             expands={"modal"}
             icon={<div style={{ marginLeft: "12px", width: "16px", height: "36px", lineHeight: "36px" }}>{"⇆"}</div>}
-            title={"Assignments" + sectionLabel}
-            toogleSectionExpanded={() => setShowAssignmentsModal(true)}
+            title={"Data mapping" + sectionLabel}
+            toogleSectionExpanded={() => setShowDataMappingModal(true)}
             action={
               <Button
                 title={"Manage"}
                 variant={ButtonVariant.plain}
-                onClick={() => setShowAssignmentsModal(true)}
+                onClick={() => setShowDataMappingModal(true)}
                 style={{ paddingBottom: 0, paddingTop: 0 }}
               >
                 {isReadOnly ? <EyeIcon /> : <EditIcon />}
@@ -143,12 +143,12 @@ export function AssignmentsFormSection({
         }
       />
       <Modal
-        title="Assignments"
-        className={"kie-bpmn-editor--assignments--modal"}
-        aria-labelledby={"Assignments"}
+        title="Data mapping"
+        className={"kie-bpmn-editor--data-mappings--modal"}
+        aria-labelledby={"Data mapping"}
         variant={ModalVariant.large}
-        isOpen={showAssignmentsModal}
-        onClose={() => setShowAssignmentsModal(false)}
+        isOpen={showDataMappingModal}
+        onClose={() => setShowDataMappingModal(false)}
       >
         {children}
       </Modal>
@@ -156,8 +156,8 @@ export function AssignmentsFormSection({
   );
 }
 
-export function BidirectionalAssignmentsFormSection({ element }: { element: WithAssignments }) {
-  const [isAssignmentsModalOpen, setAssignmentsModalOpen] = useState(false);
+export function BidirectionalDataMappingFormSection({ element }: { element: WithDataMapping }) {
+  const [isDataMappingModalOpen, setDataMappingModalOpen] = useState(false);
 
   const inputCount = element?.ioSpecification?.dataInput?.filter(
     (dataInput) =>
@@ -179,18 +179,18 @@ export function BidirectionalAssignmentsFormSection({ element }: { element: With
     }
   }, [inputCount, outputCount]);
   return (
-    <AssignmentsFormSection sectionLabel={sectionLabel} onModalStateChange={setAssignmentsModalOpen}>
-      <div className="kie-bpmn-editor--assignments--modal-section" style={{ height: "50%" }}>
-        <AssignmentList section={"input"} element={element} isOpen={isAssignmentsModalOpen} />
+    <DataMappingFormSection sectionLabel={sectionLabel} onModalStateChange={setDataMappingModalOpen}>
+      <div className="kie-bpmn-editor--data-mappings--modal-section" style={{ height: "50%" }}>
+        <DataMappingsList section={"input"} element={element} isOpen={isDataMappingModalOpen} />
       </div>
-      <div className="kie-bpmn-editor--assignments--modal-section" style={{ height: "50%" }}>
-        <AssignmentList section={"output"} element={element} isOpen={isAssignmentsModalOpen} />
+      <div className="kie-bpmn-editor--data-mappings--modal-section" style={{ height: "50%" }}>
+        <DataMappingsList section={"output"} element={element} isOpen={isDataMappingModalOpen} />
       </div>
-    </AssignmentsFormSection>
+    </DataMappingFormSection>
   );
 }
 
-export function InputOnlyAssociationFormSection({ element }: { element: WithInputAssignments }) {
+export function InputOnlyAssociationFormSection({ element }: { element: WithInputDataMapping }) {
   const inputCount = element.dataInputAssociation?.length ?? 0;
   const sectionLabel = useMemo(() => {
     if (inputCount > 0) {
@@ -201,15 +201,15 @@ export function InputOnlyAssociationFormSection({ element }: { element: WithInpu
   }, [inputCount]);
 
   return (
-    <AssignmentsFormSection sectionLabel={sectionLabel}>
-      <div className="kie-bpmn-editor--assignments--modal-section" style={{ height: "100%" }}>
-        <AssignmentList section={"input"} element={element} />
+    <DataMappingFormSection sectionLabel={sectionLabel}>
+      <div className="kie-bpmn-editor--data-mappings--modal-section" style={{ height: "100%" }}>
+        <DataMappingsList section={"input"} element={element} />
       </div>
-    </AssignmentsFormSection>
+    </DataMappingFormSection>
   );
 }
 
-export function OutputOnlyAssociationFormSection({ element }: { element: WithOutputAssignments }) {
+export function OutputOnlyAssociationFormSection({ element }: { element: WithOutputDataMapping }) {
   const outputCount = element.dataOutputAssociation?.length ?? 0;
   const sectionLabel = useMemo(() => {
     if (outputCount > 0) {
@@ -220,15 +220,15 @@ export function OutputOnlyAssociationFormSection({ element }: { element: WithOut
   }, [outputCount]);
 
   return (
-    <AssignmentsFormSection sectionLabel={sectionLabel}>
-      <div className="kie-bpmn-editor--assignments--modal-section" style={{ height: "100%" }}>
-        <AssignmentList section={"output"} element={element} />
+    <DataMappingFormSection sectionLabel={sectionLabel}>
+      <div className="kie-bpmn-editor--data-mappings--modal-section" style={{ height: "100%" }}>
+        <DataMappingsList section={"output"} element={element} />
       </div>
-    </AssignmentsFormSection>
+    </DataMappingFormSection>
   );
 }
 
-export function AssignmentList({
+export function DataMappingsList({
   isOpen,
   section,
   element,
@@ -236,34 +236,34 @@ export function AssignmentList({
   | {
       isOpen?: boolean;
       section: "input";
-      element: WithAssignments | (WithInputAssignments & { dataOutputAssociation?: BPMN20__tDataOutputAssociation[] });
+      element: WithDataMapping | (WithInputDataMapping & { dataOutputAssociation?: BPMN20__tDataOutputAssociation[] });
     }
   | {
       isOpen?: boolean;
       section: "output";
-      element: WithAssignments | (WithOutputAssignments & { dataInputAssociation?: BPMN20__tDataInputAssociation[] });
+      element: WithDataMapping | (WithOutputDataMapping & { dataInputAssociation?: BPMN20__tDataInputAssociation[] });
     }) {
   const bpmnEditorStoreApi = useBpmnEditorStoreApi();
   const isReadOnly = bpmnEditorStoreApi((s) => s.settings.isReadOnly);
 
-  const [inputAssignments, setInputAssignments] = useState<Assignment[]>([]);
-  const [outputAssignments, setOutputAssignments] = useState<Assignment[]>([]);
+  const [inputDataMapping, setInputDataMapping] = useState<DataMapping[]>([]);
+  const [outputDataMapping, setOutputDataMapping] = useState<DataMapping[]>([]);
   const [hoveredIndex, setHoveredIndex] = useState<number | undefined>(undefined);
   const [onSaveMessage, setOnSaveMessage] = useState<string | null>(null);
 
   const handleInputChange = useCallback(
-    (index: number, propertyName: keyof Assignment, value: string | number) => {
+    (index: number, propertyName: keyof DataMapping, value: string | number) => {
       if (section === "input") {
-        setInputAssignments((prevInputAssignments) => {
-          const updatedInputAssignments = [...prevInputAssignments];
-          updatedInputAssignments[index] = { ...updatedInputAssignments[index], [propertyName]: [value] };
-          return updatedInputAssignments;
+        setInputDataMapping((prevInputDataMapping) => {
+          const updatedInputDataMapping = [...prevInputDataMapping];
+          updatedInputDataMapping[index] = { ...updatedInputDataMapping[index], [propertyName]: [value] };
+          return updatedInputDataMapping;
         });
       } else {
-        setOutputAssignments((prevOutputAssignments) => {
-          const updatedOutputAssignments = [...prevOutputAssignments];
-          updatedOutputAssignments[index] = { ...updatedOutputAssignments[index], [propertyName]: [value] };
-          return updatedOutputAssignments;
+        setOutputDataMapping((prevOutputDataMapping) => {
+          const updatedOutputDataMapping = [...prevOutputDataMapping];
+          updatedOutputDataMapping[index] = { ...updatedOutputDataMapping[index], [propertyName]: [value] };
+          return updatedOutputDataMapping;
         });
       }
     },
@@ -288,23 +288,23 @@ export function AssignmentList({
 
   const titleComponent = useMemo(() => <Title headingLevel="h2">{title}</Title>, [title]);
 
-  const addAssignment = useCallback(() => {
+  const addDataMapping = useCallback(() => {
     if (section === "input") {
-      setInputAssignments([...inputAssignments, { name: "", dataType: "", value: "" }]);
+      setInputDataMapping([...inputDataMapping, { name: "", dataType: "", value: "" }]);
     } else {
-      setOutputAssignments([...outputAssignments, { name: "", dataType: "", value: "" }]);
+      setOutputDataMapping([...outputDataMapping, { name: "", dataType: "", value: "" }]);
     }
-  }, [inputAssignments, outputAssignments, section]);
+  }, [inputDataMapping, outputDataMapping, section]);
 
-  const removeAssignment = useCallback(
+  const removeDataMapping = useCallback(
     (index: number) => {
       if (section === "input") {
-        setInputAssignments(inputAssignments.filter((_, i) => i !== index));
+        setInputDataMapping(inputDataMapping.filter((_, i) => i !== index));
       } else {
-        setOutputAssignments(outputAssignments.filter((_, i) => i !== index));
+        setOutputDataMapping(outputDataMapping.filter((_, i) => i !== index));
       }
     },
-    [inputAssignments, outputAssignments, section]
+    [inputDataMapping, outputDataMapping, section]
   );
 
   //populates intermediary `assignments` state from the model
@@ -320,7 +320,7 @@ export function AssignmentList({
       element.__$$element === "scriptTask"
     ) {
       if (section === "input") {
-        const extractedInputAssignments = element?.ioSpecification?.dataInput
+        const extractedInputDataMappings = element?.ioSpecification?.dataInput
           ?.filter(
             (dataInput) =>
               !namesFromOtherTypes.some((namesFromOtherTypes) =>
@@ -346,10 +346,10 @@ export function AssignmentList({
               value: value,
             };
           });
-        setInputAssignments(extractedInputAssignments || []);
+        setInputDataMapping(extractedInputDataMappings || []);
       }
       if (section === "output") {
-        const extractedOutputAssignments = element?.dataOutputAssociation
+        const extractedOutputDataMapping = element?.dataOutputAssociation
           ?.filter(
             (association) =>
               !namesFromOtherTypes.some((namesFromOtherTypes) =>
@@ -376,10 +376,10 @@ export function AssignmentList({
               value: value,
             };
           });
-        setOutputAssignments(extractedOutputAssignments || []);
+        setOutputDataMapping(extractedOutputDataMapping || []);
       }
     } else if (element.__$$element === "endEvent" || element.__$$element === "intermediateThrowEvent") {
-      const extractedInputAssignments = element?.dataInputAssociation?.flatMap((association) => {
+      const extractedInputDataMapping = element?.dataInputAssociation?.flatMap((association) => {
         const assignment = association.assignment?.[0];
         if (!assignment) {
           return [];
@@ -397,13 +397,13 @@ export function AssignmentList({
           value: value,
         };
       });
-      setInputAssignments(extractedInputAssignments || []);
+      setInputDataMapping(extractedInputDataMapping || []);
     } else if (
       element.__$$element === "startEvent" ||
       element.__$$element === "intermediateCatchEvent" ||
       element.__$$element === "boundaryEvent"
     ) {
-      const extractedOutputAssignments = element?.dataOutputAssociation?.flatMap((association) => {
+      const extractedOutputDataMapping = element?.dataOutputAssociation?.flatMap((association) => {
         const assignment = association.assignment?.[0];
         if (!assignment) {
           return [];
@@ -421,12 +421,12 @@ export function AssignmentList({
           value: value,
         };
       });
-      setOutputAssignments(extractedOutputAssignments || []);
+      setOutputDataMapping(extractedOutputDataMapping || []);
     }
   }, [element, isOpen, section]);
 
-  const handleSubmitForNodesWithInputAndOutputAssignments = useCallback(
-    (e: WithAssignments) => {
+  const handleSubmitForNodesWithInputAndOutputDataMapping = useCallback(
+    (e: WithDataMapping) => {
       setBpmn20Drools10MetaData(e, "elementname", e["@_name"] || "");
 
       e.ioSpecification ??= {
@@ -464,19 +464,19 @@ export function AssignmentList({
           )
         );
 
-        inputAssignments.forEach((assignment, index) => {
+        inputDataMapping.forEach((dataMapping, index) => {
           let dataInput = e.ioSpecification?.dataInput?.[index];
 
           if (!dataInput) {
             dataInput = {
-              "@_id": `${e["@_id"]}_${assignment.name}InputX`,
+              "@_id": `${e["@_id"]}_${dataMapping.name}InputX`,
             };
           }
           dataInput = {
-            "@_id": `${e["@_id"]}_${assignment.name}InputX`,
-            "@_drools:dtype": assignment.dataType,
-            "@_itemSubjectRef": `_${e["@_id"]}_${assignment.name}InputXItem`,
-            "@_name": assignment.name,
+            "@_id": `${e["@_id"]}_${dataMapping.name}InputX`,
+            "@_drools:dtype": dataMapping.dataType,
+            "@_itemSubjectRef": `_${e["@_id"]}_${dataMapping.name}InputXItem`,
+            "@_name": dataMapping.name,
           };
           e.ioSpecification?.dataInput?.push(dataInput);
 
@@ -486,7 +486,7 @@ export function AssignmentList({
               "@_id": generateUuid(),
               dataInputRefs: [
                 {
-                  __$$text: `${e["@_id"]}_${assignment.name}InputX`,
+                  __$$text: `${e["@_id"]}_${dataMapping.name}InputX`,
                 },
               ],
             };
@@ -494,7 +494,7 @@ export function AssignmentList({
           } else {
             e.ioSpecification?.inputSet[0].dataInputRefs?.push({
               ...e.ioSpecification?.inputSet[0].dataInputRefs,
-              __$$text: `${e["@_id"]}_${assignment.name}InputX`,
+              __$$text: `${e["@_id"]}_${dataMapping.name}InputX`,
             });
           }
 
@@ -504,7 +504,7 @@ export function AssignmentList({
 
           if (!dataInputAssociation) {
             dataInputAssociation = {
-              "@_id": `${e["@_id"]}_dataInputAssociation_${assignment.name}`,
+              "@_id": `${e["@_id"]}_dataInputAssociation_${dataMapping.name}`,
               targetRef: { __$$text: dataInput["@_id"] },
               assignment: [],
             };
@@ -512,13 +512,13 @@ export function AssignmentList({
           }
           dataInputAssociation.assignment = [
             {
-              "@_id": `${e["@_id"]}_assignment_${assignment.name}`,
-              from: { "@_id": `${e["@_id"]}`, __$$text: assignment.value },
+              "@_id": `${e["@_id"]}_assignment_${dataMapping.name}`,
+              from: { "@_id": `${e["@_id"]}`, __$$text: dataMapping.value },
               to: { "@_id": dataInput["@_id"], __$$text: dataInput["@_id"] },
             },
           ];
         });
-        setOnSaveMessage("Input Assignments saved successfully!");
+        setOnSaveMessage("Input Data Mapping saved successfully!");
         setTimeout(() => {
           setOnSaveMessage(null);
         }, 1500);
@@ -548,18 +548,18 @@ export function AssignmentList({
           )
         );
 
-        outputAssignments.forEach((assignment, index) => {
+        outputDataMapping.forEach((dataMapping, index) => {
           let dataOutput = e.ioSpecification?.dataOutput?.[index];
           if (!dataOutput) {
             dataOutput = {
-              "@_id": `${e["@_id"]}_${assignment.name}OutputX`,
+              "@_id": `${e["@_id"]}_${dataMapping.name}OutputX`,
             };
           }
           dataOutput = {
-            "@_id": `${e["@_id"]}_${assignment.name}OutputX`,
-            "@_drools:dtype": assignment.dataType,
-            "@_itemSubjectRef": `_${e["@_id"]}_${assignment.name}OutputXItem`,
-            "@_name": assignment.name,
+            "@_id": `${e["@_id"]}_${dataMapping.name}OutputX`,
+            "@_drools:dtype": dataMapping.dataType,
+            "@_itemSubjectRef": `_${e["@_id"]}_${dataMapping.name}OutputXItem`,
+            "@_name": dataMapping.name,
           };
           e.ioSpecification?.dataOutput?.push(dataOutput);
 
@@ -569,14 +569,14 @@ export function AssignmentList({
               "@_id": generateUuid(),
               dataOutputRefs: [
                 {
-                  __$$text: `${e["@_id"]}_${assignment.name}OutputX`,
+                  __$$text: `${e["@_id"]}_${dataMapping.name}OutputX`,
                 },
               ],
             };
             e.ioSpecification?.outputSet.push(outputSet);
           } else {
             e.ioSpecification?.outputSet[0].dataOutputRefs?.push({
-              __$$text: `${e["@_id"]}_${assignment.name}OutputX`,
+              __$$text: `${e["@_id"]}_${dataMapping.name}OutputX`,
             });
           }
 
@@ -586,7 +586,7 @@ export function AssignmentList({
 
           if (!dataOutputAssociation) {
             dataOutputAssociation = {
-              "@_id": `${e["@_id"]}_dataOutputAssociation_${assignment.name}`,
+              "@_id": `${e["@_id"]}_dataOutputAssociation_${dataMapping.name}`,
               targetRef: { __$$text: dataOutput["@_id"] },
               assignment: [],
             };
@@ -594,37 +594,37 @@ export function AssignmentList({
           }
           dataOutputAssociation.assignment = [
             {
-              "@_id": `${e["@_id"]}_assignment_${assignment.name}`,
+              "@_id": `${e["@_id"]}_assignment_${dataMapping.name}`,
               from: { "@_id": dataOutput["@_id"], __$$text: dataOutput["@_id"] },
-              to: { "@_id": `${e["@_id"]}`, __$$text: assignment.value },
+              to: { "@_id": `${e["@_id"]}`, __$$text: dataMapping.value },
             },
           ];
         });
-        setOnSaveMessage("Output Assignments saved successfully!");
+        setOnSaveMessage("Output Data Mapping saved successfully!");
         setTimeout(() => {
           setOnSaveMessage(null);
         }, 1500);
       }
     },
-    [inputAssignments, outputAssignments, section]
+    [inputDataMapping, outputDataMapping, section]
   );
 
-  const handleSubmitForNodesWithInputAssignments = useCallback(
-    (e: WithInputAssignments) => {
+  const handleSubmitForNodesWithInputDataMapping = useCallback(
+    (e: WithInputDataMapping) => {
       e.dataInputAssociation = [];
       e.dataInput = [];
-      inputAssignments.forEach((assignment, index) => {
+      inputDataMapping.forEach((dataMapping, index) => {
         let dataInput = e.dataInput?.[index];
         if (!dataInput) {
           dataInput = {
-            "@_id": `${e["@_id"]}_${assignment.name}InputX`,
+            "@_id": `${e["@_id"]}_${dataMapping.name}InputX`,
           };
         }
         dataInput = {
-          "@_id": `${e["@_id"]}_${assignment.name}InputX`,
-          "@_drools:dtype": assignment.dataType,
-          "@_itemSubjectRef": `_${e["@_id"]}_${assignment.name}InputXItem`,
-          "@_name": assignment.name,
+          "@_id": `${e["@_id"]}_${dataMapping.name}InputX`,
+          "@_drools:dtype": dataMapping.dataType,
+          "@_itemSubjectRef": `_${e["@_id"]}_${dataMapping.name}InputXItem`,
+          "@_name": dataMapping.name,
         };
         e.dataInput?.push(dataInput);
 
@@ -634,7 +634,7 @@ export function AssignmentList({
 
         if (!dataInputAssociation) {
           dataInputAssociation = {
-            "@_id": `${e["@_id"]}_dataInputAssociation_${assignment.name}`,
+            "@_id": `${e["@_id"]}_dataInputAssociation_${dataMapping.name}`,
             targetRef: { __$$text: dataInput["@_id"] },
             assignment: [],
           };
@@ -642,36 +642,36 @@ export function AssignmentList({
         }
         dataInputAssociation.assignment = [
           {
-            "@_id": `${e["@_id"]}_assignment_${assignment.name}`,
-            from: { "@_id": `${e["@_id"]}`, __$$text: assignment.value },
+            "@_id": `${e["@_id"]}_assignment_${dataMapping.name}`,
+            from: { "@_id": `${e["@_id"]}`, __$$text: dataMapping.value },
             to: { "@_id": dataInput["@_id"], __$$text: dataInput["@_id"] },
           },
         ];
       });
-      setOnSaveMessage("Assignments saved successfully!");
+      setOnSaveMessage("Input Data Mapping saved successfully!");
       setTimeout(() => {
         setOnSaveMessage(null);
       }, 1500);
     },
-    [inputAssignments]
+    [inputDataMapping]
   );
 
-  const handleSubmitForNodesWithOutputAssignments = useCallback(
-    (e: WithOutputAssignments) => {
+  const handleSubmitForNodesWithOutputDataMapping = useCallback(
+    (e: WithOutputDataMapping) => {
       e.dataOutputAssociation = [];
       e.dataOutput = [];
-      outputAssignments.forEach((assignment, index) => {
+      outputDataMapping.forEach((dataMapping, index) => {
         let dataOutput = e.dataOutput?.[index];
         if (!dataOutput) {
           dataOutput = {
-            "@_id": `${e["@_id"]}_${assignment.name}OutputX`,
+            "@_id": `${e["@_id"]}_${dataMapping.name}OutputX`,
           };
         }
         dataOutput = {
-          "@_id": `${e["@_id"]}_${assignment.name}OutputX`,
-          "@_drools:dtype": assignment.dataType,
-          "@_itemSubjectRef": `_${e["@_id"]}_${assignment.name}OutputXItem`,
-          "@_name": assignment.name,
+          "@_id": `${e["@_id"]}_${dataMapping.name}OutputX`,
+          "@_drools:dtype": dataMapping.dataType,
+          "@_itemSubjectRef": `_${e["@_id"]}_${dataMapping.name}OutputXItem`,
+          "@_name": dataMapping.name,
         };
         e.dataOutput?.push(dataOutput);
         let dataOutputAssociation = e.dataOutputAssociation?.find(
@@ -680,7 +680,7 @@ export function AssignmentList({
 
         if (!dataOutputAssociation) {
           dataOutputAssociation = {
-            "@_id": `${e["@_id"]}_dataOutputAssociation_${assignment.name}`,
+            "@_id": `${e["@_id"]}_dataOutputAssociation_${dataMapping.name}`,
             targetRef: { __$$text: dataOutput["@_id"] },
             assignment: [],
           };
@@ -688,18 +688,18 @@ export function AssignmentList({
         }
         dataOutputAssociation.assignment = [
           {
-            "@_id": `${e["@_id"]}_assignment_${assignment.name}`,
+            "@_id": `${e["@_id"]}_assignment_${dataMapping.name}`,
             from: { "@_id": dataOutput["@_id"], __$$text: dataOutput["@_id"] },
-            to: { "@_id": `${e["@_id"]}`, __$$text: assignment.value },
+            to: { "@_id": `${e["@_id"]}`, __$$text: dataMapping.value },
           },
         ];
       });
-      setOnSaveMessage("Assignments saved successfully!");
+      setOnSaveMessage("Output Data Mapping saved successfully!");
       setTimeout(() => {
         setOnSaveMessage(null);
       }, 1500);
     },
-    [outputAssignments]
+    [outputDataMapping]
   );
 
   const handleSubmit = useCallback(
@@ -723,15 +723,15 @@ export function AssignmentList({
               element.__$$element === "serviceTask" ||
               element.__$$element === "scriptTask"
             ) {
-              handleSubmitForNodesWithInputAndOutputAssignments(e as WithAssignments);
+              handleSubmitForNodesWithInputAndOutputDataMapping(e as WithDataMapping);
             } else if (element.__$$element === "endEvent" || element.__$$element === "intermediateThrowEvent") {
-              handleSubmitForNodesWithInputAssignments(e as WithInputAssignments);
+              handleSubmitForNodesWithInputDataMapping(e as WithInputDataMapping);
             } else if (
               element.__$$element === "startEvent" ||
               element.__$$element === "intermediateCatchEvent" ||
               element.__$$element === "boundaryEvent"
             ) {
-              handleSubmitForNodesWithOutputAssignments(e as WithOutputAssignments);
+              handleSubmitForNodesWithOutputDataMapping(e as WithOutputDataMapping);
             }
           }
         });
@@ -740,9 +740,9 @@ export function AssignmentList({
     [
       bpmnEditorStoreApi,
       element,
-      handleSubmitForNodesWithInputAndOutputAssignments,
-      handleSubmitForNodesWithInputAssignments,
-      handleSubmitForNodesWithOutputAssignments,
+      handleSubmitForNodesWithInputAndOutputDataMapping,
+      handleSubmitForNodesWithInputDataMapping,
+      handleSubmitForNodesWithOutputDataMapping,
     ]
   );
 
@@ -753,7 +753,7 @@ export function AssignmentList({
           <Alert variant="success" title={onSaveMessage} isInline />
         </div>
       )}
-      {((inputAssignments.length > 0 || outputAssignments.length > 0) && (
+      {((inputDataMapping.length > 0 || outputDataMapping.length > 0) && (
         <Form onSubmit={handleSubmit}>
           <div style={{ position: "sticky", top: "0", backdropFilter: "blur(8px)" }}>
             {titleComponent}
@@ -776,7 +776,7 @@ export function AssignmentList({
                   </div>
                 </GridItem>
                 <GridItem span={1} style={{ textAlign: "right" }}>
-                  <Button variant={ButtonVariant.plain} style={{ paddingLeft: 0 }} onClick={addAssignment}>
+                  <Button variant={ButtonVariant.plain} style={{ paddingLeft: 0 }} onClick={addDataMapping}>
                     <PlusCircleIcon color="var(--pf-c-button--m-primary--BackgroundColor)" />
                   </Button>
                 </GridItem>
@@ -784,16 +784,16 @@ export function AssignmentList({
             </div>
           </div>
           {section === "input" &&
-            inputAssignments.map((entry, i) => (
+            inputDataMapping.map((entry, i) => (
               <div key={i} style={{ padding: "0 8px" }}>
                 <Grid
                   md={6}
-                  className={"kie-bpmn-editor--properties-panel--assignment-entry"}
+                  className={"kie-bpmn-editor--properties-panel--data-mapping-entry"}
                   onMouseEnter={() => setHoveredIndex(i)}
                   onMouseLeave={() => setHoveredIndex(undefined)}
                 >
                   <GridItem span={5}>
-                    <TextArea
+                    <TextInput
                       aria-label={"name"}
                       autoFocus={true}
                       style={entryStyle}
@@ -817,7 +817,7 @@ export function AssignmentList({
                     </FormSelect>
                   </GridItem>
                   <GridItem span={3}>
-                    <TextArea
+                    <TextInput
                       aria-label={"value"}
                       style={entryStyle}
                       type="text"
@@ -832,7 +832,7 @@ export function AssignmentList({
                         tabIndex={9999} // Prevent tab from going to this button
                         variant={ButtonVariant.plain}
                         style={{ paddingLeft: 0 }}
-                        onClick={() => removeAssignment(i)}
+                        onClick={() => removeDataMapping(i)}
                       >
                         <TimesIcon />
                       </Button>
@@ -842,16 +842,16 @@ export function AssignmentList({
               </div>
             ))}
           {section === "output" &&
-            outputAssignments.map((entry, i) => (
+            outputDataMapping.map((entry, i) => (
               <div key={i} style={{ padding: "0 8px" }}>
                 <Grid
                   md={6}
-                  className={"kie-bpmn-editor--properties-panel--assignment-entry"}
+                  className={"kie-bpmn-editor--properties-panel--data-mapping-entry"}
                   onMouseEnter={() => setHoveredIndex(i)}
                   onMouseLeave={() => setHoveredIndex(undefined)}
                 >
                   <GridItem span={5}>
-                    <TextArea
+                    <TextInput
                       aria-label={"name"}
                       autoFocus={true}
                       style={entryStyle}
@@ -875,7 +875,7 @@ export function AssignmentList({
                     </FormSelect>
                   </GridItem>
                   <GridItem span={3}>
-                    <TextArea
+                    <TextInput
                       aria-label={"value"}
                       style={entryStyle}
                       type="text"
@@ -890,7 +890,7 @@ export function AssignmentList({
                         tabIndex={9999} // Prevent tab from going to this button
                         variant={ButtonVariant.plain}
                         style={{ paddingLeft: 0 }}
-                        onClick={() => removeAssignment(i)}
+                        onClick={() => removeDataMapping(i)}
                       >
                         <TimesIcon />
                       </Button>
@@ -908,18 +908,18 @@ export function AssignmentList({
       )) || (
         <>
           {titleComponent}
-          <div className={"kie-bpmn-editor--assignments--empty-state"}>
+          <div className={"kie-bpmn-editor--data-mappings--empty-state"}>
             <Bullseye>
               <EmptyState>
                 <EmptyStateIcon icon={CubesIcon} />
                 <Title headingLevel="h4">
-                  {isReadOnly ? `No ${entryTitle} assignments` : `No ${entryTitle} assignments yet`}
+                  {isReadOnly ? `No ${entryTitle} data mappings` : `No ${entryTitle} data mappings yet`}
                 </Title>
                 <EmptyStateBody style={{ padding: "0 25%" }}>
-                  {"This represents the empty state for assignments. You can add assignments to get started."}
+                  {"This represents the empty state for data mapping. You can add data mappings to get started."}
                 </EmptyStateBody>
-                <Button variant="primary" onClick={addAssignment}>
-                  {`Add ${entryTitle} assignment`}
+                <Button variant="primary" onClick={addDataMapping}>
+                  {`Add ${entryTitle} data mapping`}
                 </Button>
               </EmptyState>
             </Bullseye>

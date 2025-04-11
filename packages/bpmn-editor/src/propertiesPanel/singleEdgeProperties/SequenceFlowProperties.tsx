@@ -59,8 +59,6 @@ export function SequenceFlowProperties({
             })
           }
           placeholder={"Enter priority..."}
-          style={{ resize: "vertical", minHeight: "40px" }}
-          rows={1}
         />
       </FormGroup>
       <CodeInput

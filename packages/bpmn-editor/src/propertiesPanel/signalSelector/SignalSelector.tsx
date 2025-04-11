@@ -26,7 +26,7 @@ import { Normalized } from "../../normalization/normalize";
 import { BPMN20__tProcess } from "@kie-tools/bpmn-marshaller/dist/schemas/bpmn-2_0/ts-gen/types";
 import { ElementFilter } from "@kie-tools/xml-parser-ts/dist/elementFilter";
 import { Unpacked } from "@kie-tools/xyflow-react-kie-diagram/dist/tsExt/tsExt";
-import { TextArea } from "@patternfly/react-core/dist/js/components/TextArea";
+import { TextInput } from "@patternfly/react-core/dist/js/components/TextInput";
 import "./SignalSelector.css";
 
 export type WithSignal =
@@ -45,7 +45,7 @@ export function SignalSelector({ element }: { element: WithSignal }) {
   return (
     <FormSection>
       <FormGroup label="Signal">
-        <TextArea
+        <TextInput
           aria-label={"Signal"}
           type={"text"}
           isDisabled={settings.isReadOnly}
@@ -72,8 +72,6 @@ export function SignalSelector({ element }: { element: WithSignal }) {
             })
           }
           placeholder={"-- None --"}
-          style={{ resize: "vertical", minHeight: "40px" }}
-          rows={1}
         />
       </FormGroup>
     </FormSection>

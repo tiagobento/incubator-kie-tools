@@ -129,7 +129,6 @@ export function AdHocSubProcessProperties({
                 });
               });
             }}
-            rows={1}
           >
             {orderingOptions.map((option) => (
               <FormSelectOption key={option.label} label={option.label} value={option.value} />

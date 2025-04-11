@@ -23,7 +23,7 @@ import * as React from "react";
 import { Normalized } from "../../normalization/normalize";
 import { useBpmnEditorStoreApi } from "../../store/StoreContext";
 import { NameDocumentationAndId } from "../nameDocumentationAndId/NameDocumentationAndId";
-import { BidirectionalAssignmentsFormSection } from "../assignments/AssignmentsFormSection";
+import { BidirectionalDataMappingFormSection } from "../dataMapping/DataMappingFormSection";
 import { OnEntryAndExitScriptsFormSection } from "../onEntryAndExitScripts/OnEntryAndExitScriptsFormSection";
 import { CallActivityIcon } from "../../diagram/nodes/NodeIcons";
 import { PropertiesPanelHeaderFormSection } from "./_PropertiesPanelHeaderFormSection";
@@ -150,7 +150,7 @@ export function CallActivityProperties({
         )}
       </PropertiesPanelHeaderFormSection>
 
-      <BidirectionalAssignmentsFormSection element={callActivity} />
+      <BidirectionalDataMappingFormSection element={callActivity} />
 
       <OnEntryAndExitScriptsFormSection element={callActivity} />
     </>

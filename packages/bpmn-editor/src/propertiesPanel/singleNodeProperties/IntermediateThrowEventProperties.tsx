@@ -21,7 +21,7 @@ import { BPMN20__tIntermediateThrowEvent } from "@kie-tools/bpmn-marshaller/dist
 import * as React from "react";
 import { Normalized } from "../../normalization/normalize";
 import { NameDocumentationAndId } from "../nameDocumentationAndId/NameDocumentationAndId";
-import { InputOnlyAssociationFormSection } from "../assignments/AssignmentsFormSection";
+import { InputOnlyAssociationFormSection } from "../dataMapping/DataMappingFormSection";
 import { EventDefinitionProperties } from "../eventDefinition/EventDefinitionProperties";
 import { EventDefinitionIcon, IntermediateThrowEventIcon } from "../../diagram/nodes/NodeIcons";
 import { PropertiesPanelHeaderFormSection } from "./_PropertiesPanelHeaderFormSection";

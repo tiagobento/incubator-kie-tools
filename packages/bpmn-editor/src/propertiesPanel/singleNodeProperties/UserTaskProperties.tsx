@@ -21,7 +21,7 @@ import { BPMN20__tUserTask } from "@kie-tools/bpmn-marshaller/dist/schemas/bpmn-
 import * as React from "react";
 import { Normalized } from "../../normalization/normalize";
 import { NameDocumentationAndId } from "../nameDocumentationAndId/NameDocumentationAndId";
-import { BidirectionalAssignmentsFormSection } from "../assignments/AssignmentsFormSection";
+import { BidirectionalDataMappingFormSection } from "../dataMapping/DataMappingFormSection";
 import { ReassignmentsFormSection } from "../reassignments/Reassignments";
 import { NotificationsFormSection } from "../notifications/Notifications";
 import { OnEntryAndExitScriptsFormSection } from "../onEntryAndExitScripts/OnEntryAndExitScriptsFormSection";
@@ -41,6 +41,16 @@ import { generateUuid } from "@kie-tools/xyflow-react-kie-diagram/dist/uuid/uuid
 import { addOrGetProcessAndDiagramElements } from "../../mutations/addOrGetProcessAndDiagramElements";
 import { Checkbox } from "@patternfly/react-core/dist/js/components/Checkbox/Checkbox";
 import { addOrGetItemDefinitions } from "../../mutations/addOrGetItemDefinitions";
+import { TextInput } from "@patternfly/react-core/dist/js/components/TextInput";
+
+const priorityInputX = "PriorityInputX";
+const contentInputX = "ContentInputX";
+const subjectInputX = "CommentInputX";
+const taskNameInputX = "TaskNameInputX";
+const descriptionInputX = "DescriptionInputX";
+const skippableInputX = "SkippableInputX";
+const createdByInputX = "CreatedByInputX";
+const groupIdInputX = "GroupIdInputX";
 
 export function UserTaskProperties({
   userTask,
@@ -49,14 +59,6 @@ export function UserTaskProperties({
 }) {
   const bpmnEditorStoreApi = useBpmnEditorStoreApi();
   const settings = useBpmnEditorStore((s) => s.settings);
-  const priorityInputX = "PriorityInputX";
-  const contentInputX = "ContentInputX";
-  const subjectInputX = "CommentInputX";
-  const taskNameInputX = "TaskNameInputX";
-  const descriptionInputX = "DescriptionInputX";
-  const skippableInputX = "SkippableInputX";
-  const createdByInputX = "CreatedByInputX";
-  const groupIdInputX = "GroupIdInputX";
 
   const handleChange = (fieldName: string, newValue: string | boolean) => {
     const valueAsString = String(newValue);
@@ -153,27 +155,23 @@ export function UserTaskProperties({
         <Divider inset={{ default: "insetXs" }} />
 
         <FormGroup label="Task Name">
-          <TextArea
+          <TextInput
             aria-label={"Task Name"}
             type={"text"}
             isDisabled={settings.isReadOnly}
             value={setValue(taskNameInputX)}
             onChange={(newTaskName) => handleChange("TaskName", newTaskName)}
             placeholder={"Enter task name..."}
-            style={{ resize: "vertical", minHeight: "40px" }}
-            rows={1}
           />
         </FormGroup>
         <FormGroup label="Subject">
-          <TextArea
+          <TextInput
             aria-label={"Subject"}
             type={"text"}
             isDisabled={settings.isReadOnly}
             value={setValue(subjectInputX)}
             onChange={(newSubject) => handleChange("Comment", newSubject)}
             placeholder={"Enter subject..."}
-            style={{ resize: "vertical", minHeight: "40px" }}
-            rows={1}
           />
         </FormGroup>
         <FormGroup label="Content">
@@ -184,21 +182,17 @@ export function UserTaskProperties({
             value={setValue(contentInputX)}
             onChange={(newContent) => handleChange("Content", newContent)}
             placeholder={"Enter content..."}
-            style={{ resize: "vertical", minHeight: "40px" }}
-            rows={3}
           />
         </FormGroup>
 
         <FormGroup label="Task Priority">
-          <TextArea
+          <TextInput
             aria-label={"Task Priority"}
             type={"text"}
             isDisabled={settings.isReadOnly}
             value={setValue(priorityInputX)}
             onChange={(newPriority) => handleChange("Priority", newPriority)}
             placeholder={"Enter priority..."}
-            style={{ resize: "vertical", minHeight: "40px" }}
-            rows={1}
           />
         </FormGroup>
         <FormGroup label="Description">
@@ -227,14 +221,14 @@ export function UserTaskProperties({
         <Divider inset={{ default: "insetXs" }} />
 
         <FormGroup label={"Actors"}>
-          <TextArea
+          <TextInput
             aria-label={"Potential Owner"}
             type={"text"}
             isDisabled={settings.isReadOnly}
             value={
               userTask?.resourceRole?.find((role) => role.__$$element === "potentialOwner")
-                ?.resourceAssignmentExpression?.expression?.["__$$element"] === "formalExpression"
-                ? userTask.resourceRole.find((role) => role.__$$element === "potentialOwner")
+                ?.resourceAssignmentExpression?.expression?.__$$element === "formalExpression"
+                ? userTask?.resourceRole?.find((role) => role.__$$element === "potentialOwner")
                     ?.resourceAssignmentExpression?.expression.__$$text ?? ""
                 : ""
             }
@@ -264,34 +258,28 @@ export function UserTaskProperties({
               })
             }
             placeholder={"Enter Actors..."}
-            style={{ resize: "vertical", minHeight: "40px" }}
-            rows={3}
           />
         </FormGroup>
 
         <FormGroup label={"Groups"}>
-          <TextArea
+          <TextInput
             aria-label={"Groups"}
             type={"text"}
             isDisabled={settings.isReadOnly}
             value={setValue(groupIdInputX)}
             onChange={(newGroups) => handleChange("GroupId", newGroups)}
             placeholder={"Enter groups..."}
-            style={{ resize: "vertical", minHeight: "40px" }}
-            rows={1}
           />
         </FormGroup>
 
         <FormGroup label={"Created by"}>
-          <TextArea
+          <TextInput
             aria-label={"Created by"}
             type={"text"}
             isDisabled={settings.isReadOnly}
             value={setValue(createdByInputX)}
             onChange={(newCreatedBy) => handleChange("CreatedBy", newCreatedBy)}
             placeholder={"Enter creator..."}
-            style={{ resize: "vertical", minHeight: "40px" }}
-            rows={1}
           />
         </FormGroup>
 
@@ -309,7 +297,7 @@ export function UserTaskProperties({
         )}
       </PropertiesPanelHeaderFormSection>
 
-      <BidirectionalAssignmentsFormSection element={userTask} />
+      <BidirectionalDataMappingFormSection element={userTask} />
 
       <ReassignmentsFormSection element={userTask} />
 

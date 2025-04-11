@@ -227,7 +227,8 @@ export function parse(args: {
           : undefined); // If the current element is not known, we simply ignore its type and go with the defaults.
 
       // If the elemNode's meta type has a __$$text property, this is the one we use to parse its value.
-      // All other properties on `elemType` are certainly attributes, which are handlded below.
+      // All other properties (except `__$$element`) on `elemType` are certainly attributes, which are handlded below.
+      // The `__$$element` property is also processed below, since there can be an element with both `__$$text` and `__$$element` properties.
       const t = elemMetaType?.["__$$text"]?.type ?? elemMetaProp?.type;
 
       let elemValue: any = {};
@@ -241,10 +242,11 @@ export function parse(args: {
         elemValue["__$$text"] = parseFloat(elemNode.textContent ?? "");
       } else {
         elemValue = parse({ ...args, node: elemNode, nodeMetaType: elemMetaType });
-        if (subsedName !== nsedName) {
-          // substitution occurred, need to save the original, normalized element name
-          elemValue["__$$element"] = nsedName;
-        }
+      }
+
+      if (subsedName !== nsedName) {
+        // substitution occurred, need to save the original, normalized element name
+        elemValue["__$$element"] = nsedName;
       }
 
       const argsForAttrs = { ns: args.ns, instanceNs: args.instanceNs, subs: {} }; // Attributes can't use substitution groups.

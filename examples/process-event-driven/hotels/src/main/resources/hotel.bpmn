@@ -7,7 +7,7 @@
   xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
   xmlns:drools="http://www.jboss.org/drools"
   xmlns:xsi="xsi"
-  id="_GlpX8YpdED2dBNv7eRNehQ"
+  id="_Xo0e0PkbED26YtYVyKHEKg"
   xsi:schemaLocation="http://www.omg.org/spec/BPMN/20100524/MODEL BPMN20.xsd http://www.jboss.org/drools drools.xsd http://www.bpsim.org/schemas/1.0 bpsim.xsd http://www.omg.org/spec/DD/20100524/DC DC.xsd http://www.omg.org/spec/DD/20100524/DI DI.xsd "
   exporter="jBPM Process Modeler"
   exporterVersion="2.0"
@@ -19,26 +19,46 @@
     structureRef="org.acme.message.Message"
   />
   <bpmn2:itemDefinition id="correlationType" structureRef="org.acme.message.Message" />
-  <bpmn2:itemDefinition id="_6404189C-98F1-471A-899F-4A66C9E9BB0E" structureRef="org.acme.message.Message" />
-  <bpmn2:itemDefinition id="_3580F1FA-767F-46C7-B043-9043FD0E817D" structureRef="org.acme.message.Message" />
-  <bpmn2:message id="_GlqmEIpdED2dBNv7eRNehQ" itemRef="correlationType" name="correlation" />
+  <bpmn2:itemDefinition id="_B3306B24-566E-4BAD-BB6D-753F64520BBF" structureRef="org.acme.message.Message" />
+  <bpmn2:itemDefinition id="_C46E0BE9-819B-4F7D-AFEC-C42740C46D58" structureRef="org.acme.message.Message" />
+  <bpmn2:itemDefinition id="correlationType" structureRef="" />
+  <bpmn2:itemDefinition id="_DF5DA1AF-BDDE-4BAD-B9C1-CD63802B8CC5" structureRef="" />
+  <bpmn2:itemDefinition id="_96EF1363-AB0A-4AFA-B7CA-69B69C02B547" structureRef="" />
+  <bpmn2:message id="_Xo0e0fkbED26YtYVyKHEKg" itemRef="correlationType" name="correlation" />
+  <bpmn2:message id="_Xo0e0vkbED26YtYVyKHEKg" itemRef="correlationType" name="correlation" />
   <bpmn2:itemDefinition id="CorrelationPropertyId_Type" structureRef="String" />
+  <bpmn2:itemDefinition id="c_Type" structureRef="String" />
   <bpmn2:correlationProperty id="CorrelationPropertyId" name="Correlation Property 1" type="CorrelationPropertyId_Type">
     <bpmn2:correlationPropertyRetrievalExpression
-      id="_01E88DC7-3BDD-48E3-BCF9-39AD0772B2AB"
-      messageRef="_GlqmEIpdED2dBNv7eRNehQ"
+      id="_88ECE28B-AE2D-47EF-B2BB-13D0031E03AE"
+      messageRef="_Xo0e0fkbED26YtYVyKHEKg"
     >
       <bpmn2:messagePath
-        id="_F1B5A911-766C-4E07-932E-A7C9BC825274"
-        evaluatesToTypeRef="_6404189C-98F1-471A-899F-4A66C9E9BB0E"
+        id="_63F999C3-18F0-46C1-BDAC-BF674FCCDCFE"
+        evaluatesToTypeRef="_B3306B24-566E-4BAD-BB6D-753F64520BBF"
         language="java"
       >id</bpmn2:messagePath>
     </bpmn2:correlationPropertyRetrievalExpression>
   </bpmn2:correlationProperty>
-  <bpmn2:collaboration id="_959642FC-7D00-486A-AED9-4E752C2F4DDC" name="Default Collaboration">
-    <bpmn2:participant id="_1A4E80E2-ECE0-4326-95E5-7EFABCA82EE1" name="Pool Participant" processRef="hotel" />
+  <bpmn2:correlationProperty id="c" name="d" type="c_Type">
+    <bpmn2:correlationPropertyRetrievalExpression
+      id="_0650B3B0-AA3C-4614-B165-0A4C704685D9"
+      messageRef="_Xo0e0vkbED26YtYVyKHEKg"
+    >
+      <bpmn2:messagePath
+        id="_BD26F997-D63B-4FAB-B5CE-E6F746770905"
+        evaluatesToTypeRef="_DF5DA1AF-BDDE-4BAD-B9C1-CD63802B8CC5"
+        language="java"
+      >id</bpmn2:messagePath>
+    </bpmn2:correlationPropertyRetrievalExpression>
+  </bpmn2:correlationProperty>
+  <bpmn2:collaboration id="_5F2111FE-3B3C-49A5-8096-55DF16951E2B" name="Default Collaboration">
+    <bpmn2:participant id="_33EDECED-5CB3-4864-9862-2D2B54748FA2" name="Pool Participant" processRef="hotel" />
     <bpmn2:correlationKey id="CorrelationKeyId" name="Correlation Key Name">
       <bpmn2:correlationPropertyRef>CorrelationPropertyId</bpmn2:correlationPropertyRef>
+    </bpmn2:correlationKey>
+    <bpmn2:correlationKey id="a" name="b">
+      <bpmn2:correlationPropertyRef>c</bpmn2:correlationPropertyRef>
     </bpmn2:correlationKey>
   </bpmn2:collaboration>
   <bpmn2:process
@@ -64,6 +84,9 @@
       sourceRef="_A07CABF6-05E3-44A3-BB33-EDE46ADF5FAA"
       targetRef="_8FC9EA63-93C8-443A-9DA5-C0351D773BE6"
     />
+    <bpmn2:startEvent id="_61CC5C5D-2B48-406A-89F0-815D823086CF">
+      <bpmn2:messageEventDefinition drools:msgref="correlation" messageRef="_Xo0e0vkbED26YtYVyKHEKg" />
+    </bpmn2:startEvent>
     <bpmn2:endEvent id="_3A2B99F1-E885-434A-8304-1213AC43CE3C" name="end">
       <bpmn2:extensionElements>
         <drools:metaData name="elementname">
@@ -107,18 +130,27 @@
       <bpmn2:outputSet>
         <bpmn2:dataOutputRefs>_A07CABF6-05E3-44A3-BB33-EDE46ADF5FAA_eventOutputX</bpmn2:dataOutputRefs>
       </bpmn2:outputSet>
-      <bpmn2:messageEventDefinition drools:msgref="correlation" messageRef="_GlqmEIpdED2dBNv7eRNehQ" />
+      <bpmn2:messageEventDefinition drools:msgref="correlation" messageRef="_Xo0e0fkbED26YtYVyKHEKg" />
     </bpmn2:startEvent>
-    <bpmn2:correlationSubscription id="_E73308CB-08B7-4F6A-BB2F-C9B6A6F15959" correlationKeyRef="CorrelationKeyId">
+    <bpmn2:correlationSubscription id="_982B2CAE-4C74-4BCF-A022-99D35CB6BEFF" correlationKeyRef="CorrelationKeyId">
       <bpmn2:correlationPropertyBinding
-        id="_E992CBBD-0534-4098-8011-F7BB829CB6A2"
+        id="_F151EEDA-2E9A-472B-83FF-65679199251A"
         correlationPropertyRef="CorrelationPropertyId"
       >
         <bpmn2:dataPath
-          id="_73166CC8-FD65-4535-A153-146429AD7CCB"
-          evaluatesToTypeRef="_3580F1FA-767F-46C7-B043-9043FD0E817D"
+          id="_7C7299CB-976A-4731-B579-8B10EDE9AB9A"
+          evaluatesToTypeRef="_C46E0BE9-819B-4F7D-AFEC-C42740C46D58"
           language="java"
         >"1"</bpmn2:dataPath>
+      </bpmn2:correlationPropertyBinding>
+    </bpmn2:correlationSubscription>
+    <bpmn2:correlationSubscription id="_76228998-313F-4596-8286-1B73C00F3CB5" correlationKeyRef="a">
+      <bpmn2:correlationPropertyBinding id="_041D13E0-E9CA-4F08-898A-D5A91EB38726" correlationPropertyRef="c">
+        <bpmn2:dataPath
+          id="_9980BE48-D838-4441-B941-07CD6F793257"
+          evaluatesToTypeRef="_96EF1363-AB0A-4AFA-B7CA-69B69C02B547"
+          language="java"
+        >"2"</bpmn2:dataPath>
       </bpmn2:correlationPropertyBinding>
     </bpmn2:correlationSubscription>
   </bpmn2:process>
@@ -141,6 +173,12 @@
         bpmnElement="_3A2B99F1-E885-434A-8304-1213AC43CE3C"
       >
         <dc:Bounds height="56" width="56" x="630" y="155" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape
+        id="shape__61CC5C5D-2B48-406A-89F0-815D823086CF"
+        bpmnElement="_61CC5C5D-2B48-406A-89F0-815D823086CF"
+      >
+        <dc:Bounds height="56" width="56" x="214" y="315" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge
         id="edge_shape__A07CABF6-05E3-44A3-BB33-EDE46ADF5FAA_to_shape__8FC9EA63-93C8-443A-9DA5-C0351D773BE6"
@@ -186,7 +224,7 @@
         </bpsim:Scenario>
       </bpsim:BPSimData>
     </bpmn2:extensionElements>
-    <bpmn2:source>_GlpX8YpdED2dBNv7eRNehQ</bpmn2:source>
-    <bpmn2:target>_GlpX8YpdED2dBNv7eRNehQ</bpmn2:target>
+    <bpmn2:source>_Xo0e0PkbED26YtYVyKHEKg</bpmn2:source>
+    <bpmn2:target>_Xo0e0PkbED26YtYVyKHEKg</bpmn2:target>
   </bpmn2:relationship>
 </bpmn2:definitions>

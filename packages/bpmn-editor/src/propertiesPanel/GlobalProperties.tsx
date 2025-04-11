@@ -400,7 +400,6 @@ export function GlobalProperties() {
                     aria-label={"Package name"}
                     type={"text"}
                     isDisabled={settings.isReadOnly}
-                    rows={3}
                     placeholder={"Enter a package name..."}
                     value={process?.["@_drools:packageName"]}
                     onChange={(newPackageName) =>

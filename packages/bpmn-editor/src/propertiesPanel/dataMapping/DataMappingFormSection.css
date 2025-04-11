@@ -17,20 +17,20 @@
  * under the License.
  */
 
-.kie-bpmn-editor--assignments--modal {
+.kie-bpmn-editor--data-mapping--modal {
   height: 80%;
   width: 80%;
   position: relative;
 }
 
-.kie-bpmn-editor--assignments--modal-section {
+.kie-bpmn-editor--data-mapping--modal-section {
   padding-bottom: 16px;
   overflow-y: scroll;
   display: flex;
   flex-direction: column;
 }
 
-.kie-bpmn-editor--assignments--empty-state {
+.kie-bpmn-editor--data-mapping--empty-state {
   padding: 4px;
   margin-top: 8px;
   background: #eee;
@@ -39,25 +39,25 @@
   flex-grow: 1;
 }
 
-.kie-bpmn-editor--properties-panel--assignment-entry {
+.kie-bpmn-editor--properties-panel--data-mapping-entry {
   align-items: center;
   border-radius: 10px;
 }
 
-.kie-bpmn-editor--properties-panel--assignment-entry:hover,
-.kie-bpmn-editor--properties-panel--assignment-entry:focus-within {
+.kie-bpmn-editor--properties-panel--data-mapping-entry:hover,
+.kie-bpmn-editor--properties-panel--data-mapping-entry:focus-within {
   background: #eee;
 }
 
-.kie-bpmn-editor--properties-panel--assignment-entry div > input {
+.kie-bpmn-editor--properties-panel--data-mapping-entry div > input {
   border: 0;
 }
 
-.kie-bpmn-editor--properties-panel--assignment-entry div:not(:nth-last-child(2)) > input {
+.kie-bpmn-editor--properties-panel--data-mapping-entry div:not(:nth-last-child(2)) > input {
   border-right: 1px dotted black;
 }
 
-.kie-bpmn-editor--properties-panel--assignment-submit-save-button {
+.kie-bpmn-editor--properties-panel--data-mapping-submit-save-button {
   position: absolute;
   bottom: 0px;
   right: 0px;

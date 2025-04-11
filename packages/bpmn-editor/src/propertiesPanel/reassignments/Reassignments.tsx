@@ -28,14 +28,12 @@ import { TimesIcon } from "@patternfly/react-icons/dist/js/icons/times-icon";
 import { Bullseye } from "@patternfly/react-core/dist/js/layouts/Bullseye";
 import { EmptyState, EmptyStateBody, EmptyStateIcon } from "@patternfly/react-core/dist/js/components/EmptyState";
 import { Title } from "@patternfly/react-core/dist/js/components/Title";
-import "./Reassignments.css";
 import { visitFlowElementsAndArtifacts } from "../../mutations/_elementVisitor";
 import { setBpmn20Drools10MetaData } from "@kie-tools/bpmn-marshaller/dist/drools-extension-metaData";
 import { addOrGetProcessAndDiagramElements } from "../../mutations/addOrGetProcessAndDiagramElements";
 import { addOrGetItemDefinitions } from "../../mutations/addOrGetItemDefinitions";
 import { BPMN20__tUserTask } from "@kie-tools/bpmn-marshaller/dist/schemas/bpmn-2_0/ts-gen/types";
 import { Normalized } from "../../normalization/normalize";
-import { TextArea } from "@patternfly/react-core/dist/js/components/TextArea/TextArea";
 import { FormSelect } from "@patternfly/react-core/dist/js/components/FormSelect/FormSelect";
 import { FormSelectOption } from "@patternfly/react-core/dist/js/components/FormSelect/FormSelectOption";
 import { CubesIcon } from "@patternfly/react-icons/dist/js/icons/cubes-icon";
@@ -47,6 +45,8 @@ import { EditIcon } from "@patternfly/react-icons/dist/js/icons/edit-icon";
 import { SectionHeader } from "@kie-tools/xyflow-react-kie-diagram/dist/propertiesPanel/SectionHeader";
 import { FormSection } from "@patternfly/react-core/dist/js/components/Form/FormSection";
 import { RedoIcon } from "@patternfly/react-icons/dist/js/icons/redo-icon";
+import { TextInput } from "@patternfly/react-core/dist/js/components/TextInput";
+import "./Reassignments.css";
 
 type Reassignment = {
   users: string;
@@ -382,7 +382,7 @@ export function Reassignments({ element }: { element: Normalized<BPMN20__tUserTa
                 onMouseLeave={() => setHoveredIndex(undefined)}
               >
                 <GridItem span={3}>
-                  <TextArea
+                  <TextInput
                     aria-label={"users"}
                     autoFocus={true}
                     style={entryStyle}
@@ -393,7 +393,7 @@ export function Reassignments({ element }: { element: Normalized<BPMN20__tUserTa
                   />
                 </GridItem>
                 <GridItem span={3}>
-                  <TextArea
+                  <TextInput
                     aria-label={"groups"}
                     style={entryStyle}
                     type="text"
@@ -409,7 +409,6 @@ export function Reassignments({ element }: { element: Normalized<BPMN20__tUserTa
                     value={entry.type}
                     onChange={(e) => handleInputChange(i, "type", e)}
                     style={entryStyle}
-                    rows={1}
                   >
                     {typeOptions.map((option) => (
                       <FormSelectOption key={option.label} label={option.label} value={option.value} />
@@ -433,7 +432,6 @@ export function Reassignments({ element }: { element: Normalized<BPMN20__tUserTa
                       value={entry.periodUnit}
                       onChange={(e) => handleInputChange(i, "periodUnit", e)}
                       style={entryStyle}
-                      rows={1}
                     >
                       {periodUnits.map((option) => (
                         <FormSelectOption key={option.label} label={option.label} value={option.value} />
