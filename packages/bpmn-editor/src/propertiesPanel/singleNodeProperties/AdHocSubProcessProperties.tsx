@@ -74,6 +74,33 @@ export function AdHocSubProcessProperties({
 
         <Divider inset={{ default: "insetXs" }} />
 
+        <FormGroup label="Ad-hoc ordering">
+          <FormSelect
+            id={"select"}
+            type={"text"}
+            isDisabled={isReadOnly}
+            value={adHocSubProcess?.["@_ordering"] ?? "Parallel"}
+            onChange={(newOrderingValue) => {
+              bpmnEditorStoreApi.setState((s) => {
+                const { process } = addOrGetProcessAndDiagramElements({
+                  definitions: s.bpmn.model.definitions,
+                });
+                visitFlowElementsAndArtifacts(process, ({ element: e }) => {
+                  if (e["@_id"] === adHocSubProcess["@_id"] && e.__$$element === adHocSubProcess.__$$element) {
+                    e["@_ordering"] = newOrderingValue as BPMN20__tAdHocOrdering;
+                  }
+                });
+              });
+            }}
+          >
+            {orderingOptions.map((option) => (
+              <FormSelectOption key={option.label} label={option.label} value={option.value} />
+            ))}
+          </FormSelect>
+        </FormGroup>
+
+        <AdhocAutostartCheckbox element={adHocSubProcess} />
+
         <CodeInput
           label={"Ad-hoc activation condition"}
           languages={["Drools"]}
@@ -110,33 +137,6 @@ export function AdHocSubProcessProperties({
             });
           }}
         />
-
-        <FormGroup label="Ad-hoc ordering">
-          <FormSelect
-            id={"select"}
-            type={"text"}
-            isDisabled={isReadOnly}
-            value={adHocSubProcess?.["@_ordering"] ?? "Parallel"}
-            onChange={(newOrderingValue) => {
-              bpmnEditorStoreApi.setState((s) => {
-                const { process } = addOrGetProcessAndDiagramElements({
-                  definitions: s.bpmn.model.definitions,
-                });
-                visitFlowElementsAndArtifacts(process, ({ element: e }) => {
-                  if (e["@_id"] === adHocSubProcess["@_id"] && e.__$$element === adHocSubProcess.__$$element) {
-                    e["@_ordering"] = newOrderingValue as BPMN20__tAdHocOrdering;
-                  }
-                });
-              });
-            }}
-          >
-            {orderingOptions.map((option) => (
-              <FormSelectOption key={option.label} label={option.label} value={option.value} />
-            ))}
-          </FormSelect>
-        </FormGroup>
-
-        <AdhocAutostartCheckbox element={adHocSubProcess} />
       </PropertiesPanelHeaderFormSection>
 
       <VariablesFormSection p={adHocSubProcess} />

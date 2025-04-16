@@ -53,7 +53,7 @@ export function addStandaloneNode({
             __readonly_element === "callActivity"
               ? {
                   "@_id": newBpmnElementId,
-                  "@_name": "New sub-process",
+                  "@_name": "New Call Activity",
                   __$$element: "callActivity",
                 }
               : {

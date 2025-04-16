@@ -1,0 +1,70 @@
+.kie-bpmn-editor--top-left-panel {
+  pointer-events: none !important;
+}
+
+.kie-bpmn-editor--variables-panel-popover .pf-c-popover__body {
+  padding: 0;
+}
+.kie-bpmn-editor--variables-panel {
+  padding: 3px 8px 3px 16px;
+  border-radius: 99999px;
+  background: white;
+  border: 1px solid black;
+  display: flex;
+  align-items: center;
+}
+.kie-bpmn-editor--variables-panel input {
+  overflow: hidden;
+  text-wrap: nowrap;
+  text-overflow: ellipsis;
+  max-width: 300px;
+  min-width: 50px;
+}
+.kie-bpmn-editor--variables-panel:hover {
+  box-shadow: 4px 4px 2px 0px rgb(127 127 127);
+  filter: brightness(95%);
+}
+.kie-bpmn-editor--variables-panel button {
+  border: 0;
+  padding: 4px 16px;
+  border-radius: 8px;
+  background: white;
+}
+.kie-bpmn-editor--variables-panel button:hover {
+  filter: brightness(95%);
+}
+.kie-bpmn-editor--variables-panel button:active {
+  filter: brightness(90%);
+}
+
+/* (begin) drg/external nodes panel toggle */
+.kie-bpmn-editor--variables-panel-toggle {
+  margin-right: 16px;
+  margin-bottom: 16px;
+  background: #fff;
+  border-radius: 40px;
+  border: 1px solid black;
+}
+.kie-bpmn-editor--variables-panel-toggle:hover {
+  box-shadow: 4px 4px 2px 0px rgb(127 127 127);
+}
+.kie-bpmn-editor--variables-panel-toggle-button {
+  margin: 0;
+  width: 100%;
+  height: 40px;
+  padding: 0 16px;
+  border-radius: 40px;
+  border: 0;
+  background: white;
+}
+.kie-bpmn-editor--variables-panel-toggle-button:hover {
+  filter: brightness(95%);
+}
+.kie-bpmn-editor--variables-panel-toggle-button:active {
+  filter: brightness(90%);
+}
+.kie-bpmn-editor--variables-panel-toggle-button.active {
+  color: #006ba4;
+}
+
+/* (end) drg/external nodes panel toggle */

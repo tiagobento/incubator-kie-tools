@@ -28,7 +28,6 @@ import {
 } from "@kie-tools/bpmn-marshaller/dist/schemas/bpmn-2_0/ts-gen/types";
 import { ElementFilter } from "@kie-tools/xml-parser-ts/dist/elementFilter";
 import { Unpacked } from "@kie-tools/xyflow-react-kie-diagram/dist/tsExt/tsExt";
-import "./MessageSelector.css";
 import { BPMN20__tMessage, BPMN20__tDefinitions } from "@kie-tools/bpmn-marshaller/dist/schemas/bpmn-2_0/ts-gen/types";
 import { addOrGetProcessAndDiagramElements } from "../../mutations/addOrGetProcessAndDiagramElements";
 import { visitFlowElementsAndArtifacts } from "../../mutations/_elementVisitor";
@@ -38,6 +37,7 @@ import { generateUuid } from "@kie-tools/xyflow-react-kie-diagram/dist/uuid/uuid
 import { updateFlowElement } from "../../mutations/renameNode";
 import { addOrGetItemDefinitions } from "../../mutations/addOrGetItemDefinitions";
 import { addOrGetMessages } from "../../mutations/addOrGetMessages";
+import "./MessageSelector.css";
 
 export type WithMessage =
   | undefined

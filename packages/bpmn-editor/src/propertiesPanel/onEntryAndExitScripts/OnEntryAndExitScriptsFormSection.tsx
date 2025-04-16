@@ -23,7 +23,6 @@ import { useState } from "react";
 import { SectionHeader } from "@kie-tools/xyflow-react-kie-diagram/dist/propertiesPanel/SectionHeader";
 import { CodeIcon } from "@patternfly/react-icons/dist/js/icons/code-icon";
 import { CodeInput } from "../codeInput/CodeInput";
-import "./OnEntryAndExitScriptsFormSection.css";
 import { BPMN20__tProcess } from "@kie-tools/bpmn-marshaller/dist/schemas/bpmn-2_0/ts-gen/types";
 import { ElementFilter } from "@kie-tools/xml-parser-ts/dist/elementFilter";
 import { Unpacked } from "@kie-tools/xyflow-react-kie-diagram/dist/tsExt/tsExt";
@@ -31,6 +30,7 @@ import { Normalized } from "../../normalization/normalize";
 import { addOrGetProcessAndDiagramElements } from "../../mutations/addOrGetProcessAndDiagramElements";
 import { visitFlowElementsAndArtifacts } from "../../mutations/_elementVisitor";
 import { FormSection } from "@patternfly/react-core/dist/js/components/Form/FormSection";
+import "./OnEntryAndExitScriptsFormSection.css";
 
 export type WithOnEntryAndExitScripts = Normalized<
   ElementFilter<

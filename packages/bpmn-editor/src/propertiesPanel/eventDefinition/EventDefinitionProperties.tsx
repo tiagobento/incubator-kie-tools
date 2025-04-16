@@ -60,7 +60,9 @@ export function EventDefinitionProperties({ event }: { event: Event }) {
 
         {/* all */}
         {eventDefinition?.__$$element === "messageEventDefinition" && ( //
-          <MessageSelector element={event} />
+          <>
+            <MessageSelector element={event} />
+          </>
         )}
 
         {/* all */}

@@ -32,7 +32,6 @@ import { ElementFilter } from "@kie-tools/xml-parser-ts/dist/elementFilter";
 import { Unpacked } from "@kie-tools/xyflow-react-kie-diagram/dist/tsExt/tsExt";
 import { generateUuid } from "@kie-tools/xyflow-react-kie-diagram/dist/uuid/uuid";
 import "./TimerOptions.css";
-import { DatePicker } from "@patternfly/react-core/dist/js/components/DatePicker";
 
 export type WithTimer =
   | undefined

@@ -177,8 +177,6 @@ export function GlobalProperties() {
           )}
         </FormSection>
 
-        <VariablesFormSection p={process} />
-
         <FormSection
           title={
             <SectionHeader
@@ -198,28 +196,6 @@ export function GlobalProperties() {
             </>
           )}
         </FormSection>
-
-        <FormSection
-          title={
-            <SectionHeader
-              expands={"modal"}
-              icon={<PeopleCarryIcon width={16} height={36} style={{ marginLeft: "12px" }} />}
-              title={"Collaboration" + (correlationCount > 0 ? ` (${correlationCount})` : "")}
-              toogleSectionExpanded={() => setShowCorrelationsModal(true)}
-              action={
-                <Button
-                  title={"Manage"}
-                  variant={ButtonVariant.plain}
-                  isDisabled={settings.isReadOnly}
-                  onClick={() => setShowCorrelationsModal(true)}
-                  style={{ paddingBottom: 0, paddingTop: 0 }}
-                >
-                  <EditIcon />
-                </Button>
-              }
-            />
-          }
-        />
 
         <FormSection
           title={

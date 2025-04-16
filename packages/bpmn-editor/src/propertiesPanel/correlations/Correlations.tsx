@@ -34,13 +34,13 @@ import { Normalized } from "../../normalization/normalize";
 import { Title } from "@patternfly/react-core/dist/js/components/Title";
 import { EmptyState, EmptyStateBody, EmptyStateIcon } from "@patternfly/react-core/dist/js/components/EmptyState";
 import { Modal, ModalVariant } from "@patternfly/react-core/dist/js/components/Modal";
-import "./Correlations.css";
 import { generateUuid } from "@kie-tools/xyflow-react-kie-diagram/dist/uuid/uuid";
 import { Bullseye } from "@patternfly/react-core/dist/js/layouts/Bullseye";
 import { Form } from "@patternfly/react-core/dist/js/components/Form/Form";
 import { Alert } from "@patternfly/react-core/dist/js/components/Alert/Alert";
 import { FormSelect } from "@patternfly/react-core/dist/js/components/FormSelect/FormSelect";
 import { FormSelectOption } from "@patternfly/react-core/dist/js/components/FormSelect/FormSelectOption";
+import "./Correlations.css";
 
 type Correlation = {
   id: string;

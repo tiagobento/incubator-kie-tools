@@ -29,10 +29,10 @@ import { visitFlowElementsAndArtifacts } from "../../mutations/_elementVisitor";
 import { addOrGetProcessAndDiagramElements } from "../../mutations/addOrGetProcessAndDiagramElements";
 import { useBpmnEditorStore, useBpmnEditorStoreApi } from "../../store/StoreContext";
 import { TextInput } from "@patternfly/react-core/dist/js/components/TextInput";
-import "./MultiInstanceProperties.css";
 import { FormSelectOption } from "@patternfly/react-core/dist/js/components/FormSelect/FormSelectOption";
 import { FormSelect } from "@patternfly/react-core/dist/js/components/FormSelect/FormSelect";
 import { generateUuid } from "@kie-tools/xyflow-react-kie-diagram/dist/uuid/uuid";
+import "./MultiInstanceProperties.css";
 
 export type WithMultiInstanceProperties = Normalized<
   ElementFilter<
@@ -104,6 +104,43 @@ export function MultiInstanceProperties({ element }: { element: WithMultiInstanc
             }}
           />
         </ToggleGroup>
+      </FormGroup>
+
+      <CodeInput
+        label={"Completion condition"}
+        languages={["MVEL"]}
+        value={
+          element?.loopCharacteristics?.__$$element === "multiInstanceLoopCharacteristics"
+            ? element?.loopCharacteristics?.completionCondition?.__$$text || ""
+            : ""
+        }
+        onChange={(newCompletionCondition) => {
+          bpmnEditorStoreApi.setState((s) => {
+            const { process } = addOrGetProcessAndDiagramElements({
+              definitions: s.bpmn.model.definitions,
+            });
+
+            visitFlowElementsAndArtifacts(process, ({ element: e }) => {
+              if (
+                e["@_id"] === element?.["@_id"] &&
+                e.__$$element === element.__$$element &&
+                e.loopCharacteristics?.__$$element === "multiInstanceLoopCharacteristics"
+              ) {
+                e.loopCharacteristics.completionCondition ??= {
+                  __$$text: "",
+                  "@_id": "",
+                };
+                e.loopCharacteristics.completionCondition.__$$text = newCompletionCondition;
+              }
+            });
+          });
+        }}
+      />
+
+      <FormGroup label={"Collection input"}>
+        <FormSelect id={"select"} value={undefined} isDisabled={isReadOnly}>
+          <FormSelectOption id={"none"} isPlaceholder={true} label={"-- Select a value --"} />
+        </FormSelect>
       </FormGroup>
 
       <FormGroup label="Data input">
@@ -222,6 +259,12 @@ export function MultiInstanceProperties({ element }: { element: WithMultiInstanc
         />
       </FormGroup>
 
+      <FormGroup label={"Collection output"}>
+        <FormSelect id={"select"} value={undefined} isDisabled={isReadOnly}>
+          <FormSelectOption id={"none"} isPlaceholder={true} label={"-- Select a value --"} />
+        </FormSelect>
+      </FormGroup>
+
       <FormGroup label="Data output">
         <TextInput
           aria-label={"Data output"}
@@ -337,46 +380,6 @@ export function MultiInstanceProperties({ element }: { element: WithMultiInstanc
           }
         />
       </FormGroup>
-      <FormGroup label={"Collection input"}></FormGroup>
-      <FormSelect id={"select"} value={undefined} isDisabled={isReadOnly}>
-        <FormSelectOption id={"none"} isPlaceholder={true} label={"-- Select a value --"} />
-      </FormSelect>
-
-      <FormGroup label={"Collection output"}></FormGroup>
-      <FormSelect id={"select"} value={undefined} isDisabled={isReadOnly}>
-        <FormSelectOption id={"none"} isPlaceholder={true} label={"-- Select a value --"} />
-      </FormSelect>
-
-      <CodeInput
-        label={"Completion condition"}
-        languages={["MVEL"]}
-        value={
-          element?.loopCharacteristics?.__$$element === "multiInstanceLoopCharacteristics"
-            ? element?.loopCharacteristics?.completionCondition?.__$$text || ""
-            : ""
-        }
-        onChange={(newCompletionCondition) => {
-          bpmnEditorStoreApi.setState((s) => {
-            const { process } = addOrGetProcessAndDiagramElements({
-              definitions: s.bpmn.model.definitions,
-            });
-
-            visitFlowElementsAndArtifacts(process, ({ element: e }) => {
-              if (
-                e["@_id"] === element?.["@_id"] &&
-                e.__$$element === element.__$$element &&
-                e.loopCharacteristics?.__$$element === "multiInstanceLoopCharacteristics"
-              ) {
-                e.loopCharacteristics.completionCondition ??= {
-                  __$$text: "",
-                  "@_id": "",
-                };
-                e.loopCharacteristics.completionCondition.__$$text = newCompletionCondition;
-              }
-            });
-          });
-        }}
-      />
     </>
   );
 }

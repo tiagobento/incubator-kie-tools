@@ -21,10 +21,10 @@ import * as React from "react";
 import { useMemo, useRef } from "react";
 import { ProcessAutomationIcon } from "@patternfly/react-icons/dist/js/icons/process-automation-icon";
 import { TimesIcon } from "@patternfly/react-icons/dist/js/icons/times-icon";
-import "./NodeMorphingPanel.css";
 import { MorphingAction } from "./MorphingAction";
 import { useBpmnEditorStore } from "../../../store/StoreContext";
 import { useKeyboardShortcutsForMorphingActions } from "./useKeyboardShortcutsForMorphingActions";
+import "./NodeMorphingPanel.css";
 
 export function NodeMorphingPanel<A extends MorphingAction>({
   isToggleVisible,

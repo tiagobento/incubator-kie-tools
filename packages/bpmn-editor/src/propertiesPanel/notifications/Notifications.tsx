@@ -28,7 +28,6 @@ import { TimesIcon } from "@patternfly/react-icons/dist/js/icons/times-icon";
 import { Bullseye } from "@patternfly/react-core/dist/js/layouts/Bullseye";
 import { EmptyState, EmptyStateBody, EmptyStateIcon } from "@patternfly/react-core/dist/js/components/EmptyState";
 import { Title } from "@patternfly/react-core/dist/js/components/Title";
-import "./Notifications.css";
 import { visitFlowElementsAndArtifacts } from "../../mutations/_elementVisitor";
 import { setBpmn20Drools10MetaData } from "@kie-tools/bpmn-marshaller/dist/drools-extension-metaData";
 import { addOrGetProcessAndDiagramElements } from "../../mutations/addOrGetProcessAndDiagramElements";
@@ -45,9 +44,10 @@ import { TextInput } from "@patternfly/react-core/dist/js/components/TextInput/T
 import { FormSection } from "@patternfly/react-core/dist/js/components/Form/FormSection";
 import { SectionHeader } from "@kie-tools/xyflow-react-kie-diagram/dist/propertiesPanel/SectionHeader";
 import { BellIcon } from "@patternfly/react-icons/dist/js/icons/bell-icon";
-import EyeIcon from "@patternfly/react-icons/dist/js/icons/eye-icon";
-import EditIcon from "@patternfly/react-icons/dist/js/icons/edit-icon";
+import { EyeIcon } from "@patternfly/react-icons/dist/js/icons/eye-icon";
+import { EditIcon } from "@patternfly/react-icons/dist/js/icons/edit-icon";
 import { Alert } from "@patternfly/react-core/dist/js/components/Alert/Alert";
+import "./Notifications.css";
 
 type Notification = {
   from: string;

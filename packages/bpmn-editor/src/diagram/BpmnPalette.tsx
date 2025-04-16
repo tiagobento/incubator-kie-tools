@@ -35,6 +35,9 @@ import {
   TaskIcon,
   TextAnnotationIcon,
 } from "./nodes/NodeIcons";
+import { CodeIcon } from "@patternfly/react-icons/dist/js/icons/code-icon";
+import { PeopleCarryIcon } from "@patternfly/react-icons/dist/js/icons/people-carry-icon";
+import "./BpmnPalette.css";
 
 export const MIME_TYPE_FOR_BPMN_EDITOR_NEW_NODE_FROM_PALETTE = "application/kie-bpmn-editor--new-node-from-palette";
 
@@ -58,9 +61,51 @@ export function BpmnPalette({ pulse }: { pulse: boolean }) {
 
   return (
     <>
-      <RF.Panel position={"top-left"} style={{ marginTop: "78px" }}>
+      <RF.Panel position={"top-left"} className={"kie-bpmn-editor--top-left-panel"}>
         <div ref={nodesPalletePopoverRef} style={{ position: "absolute", left: 0, height: 0, zIndex: -1 }} />
-        <aside className={`kie-bpmn-editor--palette ${pulse ? "pulse" : ""}`}>
+        <aside
+          className={"kie-bpmn-editor--variables-panel-toggle"}
+          style={{ position: "relative", pointerEvents: "all" }}
+        >
+          {/* {diagram.openLhsPanel === DiagramLhsPanel.DRG_NODES && (
+            <div
+              data-testid={"kie-tools--bpmn-editor--palette-nodes-popover"}
+              className={"kie-bpmn-editor--palette-nodes-popover"}
+              style={{ maxHeight }}
+            >
+              <DrgNodesPanel />
+            </div>
+          )} */}
+          <button
+            title={"Process Variables"}
+            className={`kie-bpmn-editor--variables-panel-toggle-button`}
+            onClick={() => {}}
+          >
+            <CodeIcon size={"sm"} /> Variables
+          </button>
+        </aside>
+        <aside
+          className={"kie-bpmn-editor--variables-panel-toggle"}
+          style={{ position: "relative", pointerEvents: "all" }}
+        >
+          {/* {diagram.openLhsPanel === DiagramLhsPanel.DRG_NODES && (
+            <div
+              data-testid={"kie-tools--bpmn-editor--palette-nodes-popover"}
+              className={"kie-bpmn-editor--palette-nodes-popover"}
+              style={{ maxHeight }}
+            >
+              <DrgNodesPanel />
+            </div>
+          )} */}
+          <button
+            title={"Process Variables"}
+            className={`kie-bpmn-editor--variables-panel-toggle-button`}
+            onClick={() => {}}
+          >
+            <PeopleCarryIcon size={"sm"} /> Correlations
+          </button>
+        </aside>
+        <aside className={`kie-bpmn-editor--palette ${pulse ? "pulse" : ""}`} style={{ pointerEvents: "all" }}>
           <div
             title={"Start Events"}
             className={"kie-bpmn-editor--palette-button dndnode start-event"}
@@ -135,7 +180,7 @@ export function BpmnPalette({ pulse }: { pulse: boolean }) {
           </div>
         </aside>
         <br />
-        <aside className={`kie-bpmn-editor--palette ${pulse ? "pulse" : ""}`}>
+        <aside className={`kie-bpmn-editor--palette ${pulse ? "pulse" : ""}`} style={{ pointerEvents: "all" }}>
           <div
             title={"Data Object"}
             className={"kie-bpmn-editor--palette-button dndnode data-object"}
@@ -146,7 +191,7 @@ export function BpmnPalette({ pulse }: { pulse: boolean }) {
           </div>
         </aside>
         <br />
-        <aside className={`kie-bpmn-editor--palette ${pulse ? "pulse" : ""}`}>
+        <aside className={`kie-bpmn-editor--palette ${pulse ? "pulse" : ""}`} style={{ pointerEvents: "all" }}>
           <div
             title={"Group"}
             className={"kie-bpmn-editor--palette-button dndnode group"}

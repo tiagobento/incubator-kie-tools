@@ -34,10 +34,10 @@ import { PropertiesPanelListEmptyState } from "../emptyState/PropertiesPanelList
 import { Normalized } from "../../normalization/normalize";
 import { BPMN20__tDefinitions, BPMN20__tProcess } from "@kie-tools/bpmn-marshaller/dist/schemas/bpmn-2_0/ts-gen/types";
 import { generateUuid } from "@kie-tools/xyflow-react-kie-diagram/dist/uuid/uuid";
-import "./Variables.css";
 import { ElementFilter } from "@kie-tools/xml-parser-ts/dist/elementFilter";
 import { Unpacked } from "@kie-tools/xyflow-react-kie-diagram/dist/tsExt/tsExt";
 import { visitFlowElementsAndArtifacts } from "../../mutations/_elementVisitor";
+import "./Variables.css";
 
 export type WithVariables = Normalized<
   | ElementFilter<Unpacked<NonNullable<BPMN20__tDefinitions["rootElement"]>>, "process">

@@ -21,10 +21,10 @@ import * as React from "react";
 import { useBpmnEditorStore, useBpmnEditorStoreApi } from "../../store/StoreContext";
 import { FormGroup } from "@patternfly/react-core/dist/js/components/Form";
 import { FormSelect, FormSelectOption } from "@patternfly/react-core/dist/js/components/FormSelect";
-import "./DataTypeSelector.css";
 import { addOrGetProcessAndDiagramElements } from "../../mutations/addOrGetProcessAndDiagramElements";
 import { visitFlowElementsAndArtifacts } from "../../mutations/_elementVisitor";
 import { addOrGetItemDefinitions } from "../../mutations/addOrGetItemDefinitions";
+import "./DataTypeSelector.css";
 
 const dataType = [
   { value: "Custom", label: "Custom..." },
