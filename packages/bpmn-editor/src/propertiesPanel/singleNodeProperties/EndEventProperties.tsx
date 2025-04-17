@@ -23,7 +23,7 @@ import { Normalized } from "../../normalization/normalize";
 import { NameDocumentationAndId } from "../nameDocumentationAndId/NameDocumentationAndId";
 import { InputOnlyAssociationFormSection } from "../dataMapping/DataMappingFormSection";
 import { EventDefinitionProperties } from "../eventDefinition/EventDefinitionProperties";
-import { EndEventIcon, EventDefinitionIcon } from "../../diagram/nodes/NodeIcons";
+import { EventDefinitionIcon } from "../../diagram/nodes/NodeIcons";
 import { PropertiesPanelHeaderFormSection } from "./_PropertiesPanelHeaderFormSection";
 import { Divider } from "@patternfly/react-core/dist/js/components/Divider";
 import { NODE_COLORS } from "../../diagram/nodes/NodeSvgs";

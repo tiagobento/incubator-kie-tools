@@ -18,37 +18,46 @@
  */
 
 import { BPMN20__tDefinitions } from "@kie-tools/bpmn-marshaller/dist/schemas/bpmn-2_0/ts-gen/types";
-import { ElementFilter } from "@kie-tools/xml-parser-ts/dist/elementFilter";
-import { Unpacked } from "@kie-tools/xyflow-react-kie-diagram/dist/tsExt/tsExt";
 import { Normalized } from "../normalization/normalize";
 import { generateUuid } from "@kie-tools/xyflow-react-kie-diagram/dist/uuid/uuid";
+import { visitFlowElementsAndArtifacts } from "./_elementVisitor";
+import { addOrGetProcessAndDiagramElements } from "./addOrGetProcessAndDiagramElements";
+import { pid } from "process";
 
-export function addOrGetItemDefinitions({
+export function addVariable({
   definitions,
-  dataType,
+  pId,
 }: {
   definitions: Normalized<BPMN20__tDefinitions>;
-  dataType: string;
-}): {
-  itemDefinition: ElementFilter<Unpacked<Normalized<BPMN20__tDefinitions["rootElement"]>>, "itemDefinition">;
-} {
-  definitions.rootElement ??= [];
-  const itemDefinitions = definitions.rootElement.filter((s) => s.__$$element === "itemDefinition");
-
-  const existingItemDefinition = itemDefinitions.find((s) => s["@_structureRef"] === dataType);
-  if (existingItemDefinition) {
-    return { itemDefinition: existingItemDefinition };
+  pId: string | undefined;
+}): void {
+  if (pId === undefined) {
+    throw new Error("BPMN MUTATION: Can't add a variable to a Process without an id.");
   }
 
-  const newItemDefinition: ElementFilter<
-    Unpacked<Normalized<BPMN20__tDefinitions["rootElement"]>>,
-    "itemDefinition"
-  > = {
-    __$$element: "itemDefinition",
-    "@_id": generateUuid(),
-    "@_structureRef": dataType,
-  };
-
-  definitions.rootElement.push(newItemDefinition);
-  return { itemDefinition: newItemDefinition };
+  const { process } = addOrGetProcessAndDiagramElements({ definitions });
+  if (pId === process["@_id"]) {
+    process.property ??= [];
+    process.property?.push({
+      "@_id": generateUuid(),
+      "@_name": "",
+      "@_itemSubjectRef": "",
+    });
+  } else {
+    visitFlowElementsAndArtifacts(process, ({ element }) => {
+      if (
+        element["@_id"] === pId &&
+        (element.__$$element === "subProcess" ||
+          element.__$$element === "adHocSubProcess" ||
+          element.__$$element === "transaction")
+      ) {
+        element.property ??= [];
+        element.property?.push({
+          "@_id": generateUuid(),
+          "@_name": "",
+          "@_itemSubjectRef": "",
+        });
+      }
+    });
+  }
 }

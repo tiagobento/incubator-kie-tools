@@ -45,9 +45,7 @@ import {
 } from "@kie-tools/bpmn-marshaller/dist/drools-extension-metaData";
 import { Metadata } from "./metadata/Metadata";
 import { Imports } from "./imports/Imports";
-import { Correlations } from "./correlations/Correlations";
 import { SlaDueDateInput } from "./slaDueDate/SlaDueDateInput";
-import { VariablesFormSection } from "./variables/VariablesFormSection";
 import { Divider } from "@patternfly/react-core/dist/js/components/Divider";
 
 export function GlobalProperties() {
@@ -58,7 +56,6 @@ export function GlobalProperties() {
     s.bpmn.model.definitions.rootElement?.find((s) => s.__$$element === "process")
   );
 
-  const correlationCount = process?.correlationSubscription?.length ?? 0;
   const importsCount = process?.extensionElements?.["drools:import"]?.length ?? 0;
   const metadataEntriesCount = process?.extensionElements?.["drools:metaData"]?.length ?? 0;
 
@@ -442,8 +439,6 @@ export function GlobalProperties() {
         <br />
         <br />
         <br />
-
-        <Correlations isOpen={showCorrelationsModal} onClose={closeCorrelationsModal} />
 
         <Modal
           aria-labelledby={"Regenerate ID & Namespace"}

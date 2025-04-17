@@ -100,6 +100,7 @@ export function BpmnDiagram({
   const bpmnEditorStoreApi = useBpmnEditorStoreApi();
 
   const model = useBpmnEditorStore((s) => s.bpmn.model);
+  const openLhsPanel = useBpmnEditorStore((s) => s.diagram.openLhsPanel);
 
   const { bpmnModelBeforeEditingRef } = useBpmnEditor();
 
@@ -123,7 +124,7 @@ export function BpmnDiagram({
 
   const nodes = useBpmnEditorStore((s) => s.computed(s).getDiagramData().nodes);
 
-  const isEmptyStateShowing = showEmptyState && nodes.length === 0;
+  const isEmptyStateShowing = showEmptyState && nodes.length === 0 && openLhsPanel === BpmnDiagramLhsPanel.NONE;
 
   // nodes
 

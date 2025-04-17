@@ -43,12 +43,12 @@ export function addOrGetMessages({
     existingMessage["@_name"] = message;
     return { message: existingMessage };
   }
-  const newMessage = {
+  const newMessage: ElementFilter<Unpacked<Normalized<BPMN20__tDefinitions["rootElement"]>>, "message"> = {
     __$$element: "message",
     "@_id": id,
     "@_itemRef": `${message}Type`,
     "@_name": message,
-  } as ElementFilter<Unpacked<Normalized<BPMN20__tDefinitions["rootElement"]>>, "message">;
+  };
 
   definitions.rootElement.splice(index, 0, newMessage);
   return { message: newMessage };

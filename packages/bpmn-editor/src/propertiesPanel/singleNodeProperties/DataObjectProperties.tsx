@@ -17,29 +17,43 @@
  * under the License.
  */
 
-import {
-  BPMN20__tDataObject,
-  BPMN20__tDataObjectReference,
-} from "@kie-tools/bpmn-marshaller/dist/schemas/bpmn-2_0/ts-gen/types";
 import * as React from "react";
+import { BPMN20__tDataObject } from "@kie-tools/bpmn-marshaller/dist/schemas/bpmn-2_0/ts-gen/types";
 import { Normalized } from "../../normalization/normalize";
-import { useBpmnEditorStoreApi } from "../../store/StoreContext";
 import { NameDocumentationAndId } from "../nameDocumentationAndId/NameDocumentationAndId";
-import { DataTypeSelector } from "../dataTypeSelector/DataTypeSelector";
+import { ItemDefinitionRefSelector } from "../itemDefinitionRefSelector/ItemDefinitionRefSelector";
 import { PropertiesPanelHeaderFormSection } from "./_PropertiesPanelHeaderFormSection";
 import { DataObjectIcon } from "../../diagram/nodes/NodeIcons";
 import { Divider } from "@patternfly/react-core/dist/js/components/Divider";
+import { useBpmnEditorStoreApi } from "../../store/StoreContext";
+import { visitFlowElementsAndArtifacts } from "../../mutations/_elementVisitor";
+import { addOrGetProcessAndDiagramElements } from "../../mutations/addOrGetProcessAndDiagramElements";
 
 export function DataObjectProperties({
   dataObject,
 }: {
   dataObject: Normalized<BPMN20__tDataObject> & { __$$element: "dataObject" };
 }) {
+  const bpmnEditorStoreApi = useBpmnEditorStoreApi();
   return (
     <PropertiesPanelHeaderFormSection title={dataObject["@_name"] || "Data object"} icon={<DataObjectIcon />}>
       <NameDocumentationAndId element={dataObject} />
+
       <Divider inset={{ default: "insetXs" }} />
-      <DataTypeSelector element={dataObject} />
+
+      <ItemDefinitionRefSelector
+        value={dataObject["@_itemSubjectRef"]}
+        onChange={(newItemDefinitionRef) => {
+          bpmnEditorStoreApi.setState((s) => {
+            const { process } = addOrGetProcessAndDiagramElements({ definitions: s.bpmn.model.definitions });
+            visitFlowElementsAndArtifacts(process, ({ element }) => {
+              if (element["@_id"] === dataObject["@_id"] && element.__$$element === dataObject.__$$element) {
+                element["@_itemSubjectRef"] = newItemDefinitionRef;
+              }
+            });
+          });
+        }}
+      />
     </PropertiesPanelHeaderFormSection>
   );
 }

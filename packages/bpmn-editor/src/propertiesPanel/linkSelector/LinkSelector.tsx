@@ -26,10 +26,7 @@ import { Normalized } from "../../normalization/normalize";
 import { BPMN20__tProcess } from "@kie-tools/bpmn-marshaller/dist/schemas/bpmn-2_0/ts-gen/types";
 import { ElementFilter } from "@kie-tools/xml-parser-ts/dist/elementFilter";
 import { Unpacked } from "@kie-tools/xyflow-react-kie-diagram/dist/tsExt/tsExt";
-import { CodeInput } from "../codeInput/CodeInput";
-import { generateUuid } from "@kie-tools/xyflow-react-kie-diagram/dist/uuid/uuid";
 import { TextInput } from "@patternfly/react-core/dist/js/components/TextInput/TextInput";
-import { Select } from "@patternfly/react-core/dist/js/components/Select/Select";
 
 export type WithLinkExpression =
   | undefined

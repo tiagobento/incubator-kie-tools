@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import * as React from "react";
 import "@kie-tools/bpmn-marshaller/dist/drools-extension";
 import {
   parseBpmn20Drools10MetaData,
@@ -26,7 +27,6 @@ import { Button, ButtonVariant } from "@patternfly/react-core/dist/js/components
 import { Grid, GridItem } from "@patternfly/react-core/dist/js/layouts/Grid";
 import { PlusCircleIcon } from "@patternfly/react-icons/dist/js/icons/plus-circle-icon";
 import { TimesIcon } from "@patternfly/react-icons/dist/js/icons/times-icon";
-import * as React from "react";
 import { useMemo, useState } from "react";
 import { addOrGetProcessAndDiagramElements } from "../../mutations/addOrGetProcessAndDiagramElements";
 import { useBpmnEditorStore, useBpmnEditorStoreApi } from "../../store/StoreContext";
@@ -38,6 +38,8 @@ import { ElementFilter } from "@kie-tools/xml-parser-ts/dist/elementFilter";
 import { Unpacked } from "@kie-tools/xyflow-react-kie-diagram/dist/tsExt/tsExt";
 import { visitFlowElementsAndArtifacts } from "../../mutations/_elementVisitor";
 import "./Variables.css";
+import { addVariable } from "../../mutations/addVariable";
+import { ItemDefinitionRefSelector } from "../itemDefinitionRefSelector/ItemDefinitionRefSelector";
 
 export type WithVariables = Normalized<
   | ElementFilter<Unpacked<NonNullable<BPMN20__tDefinitions["rootElement"]>>, "process">
@@ -47,7 +49,13 @@ export type WithVariables = Normalized<
     >
 >;
 
-export function Variables({ p }: { p: undefined | WithVariables }) {
+export function Variables({
+  p,
+  EmptyState,
+}: {
+  p: undefined | WithVariables;
+  EmptyState: React.ComponentType<{ addButton: JSX.Element }>;
+}) {
   const bpmnEditorStoreApi = useBpmnEditorStoreApi();
 
   const isReadOnly = useBpmnEditorStore((s) => s.settings.isReadOnly);
@@ -59,26 +67,7 @@ export function Variables({ p }: { p: undefined | WithVariables }) {
         style={{ paddingLeft: 0 }}
         onClick={() => {
           bpmnEditorStoreApi.setState((s) => {
-            const { process } = addOrGetProcessAndDiagramElements({ definitions: s.bpmn.model.definitions });
-            if (!p || p["@_id"] === process["@_id"]) {
-              process.property ??= [];
-              process.property?.push({
-                "@_id": generateUuid(),
-                "@_name": "",
-                "@_itemSubjectRef": "",
-              });
-            } else {
-              visitFlowElementsAndArtifacts(process, ({ element }) => {
-                if (element["@_id"] === p["@_id"] && element.__$$element === p.__$$element) {
-                  element.property ??= [];
-                  element.property?.push({
-                    "@_id": generateUuid(),
-                    "@_name": "",
-                    "@_itemSubjectRef": "",
-                  });
-                }
-              });
-            }
+            addVariable({ definitions: s.bpmn.model.definitions, pId: p?.["@_id"] });
           });
         }}
       >
@@ -160,31 +149,28 @@ export function Variables({ p }: { p: undefined | WithVariables }) {
                   />
                 </GridItem>
                 <GridItem span={4}>
-                  <input
-                    style={entryColumnStyle}
-                    type="text"
-                    placeholder="Data type..."
+                  <ItemDefinitionRefSelector
                     value={entry["@_itemSubjectRef"]}
-                    onChange={(e) =>
+                    onChange={(newItemDefinitionRef) => {
                       bpmnEditorStoreApi.setState((s) => {
                         const { process } = addOrGetProcessAndDiagramElements({
                           definitions: s.bpmn.model.definitions,
                         });
                         if (!p || p["@_id"] === process["@_id"]) {
                           if (process.property?.[i]) {
-                            process.property[i]["@_itemSubjectRef"] = e.target.value;
+                            process.property[i]["@_itemSubjectRef"] = newItemDefinitionRef;
                           }
                         } else {
                           visitFlowElementsAndArtifacts(process, ({ element }) => {
                             if (element["@_id"] === p["@_id"] && element.__$$element === p.__$$element) {
                               if (element.property?.[i]) {
-                                element.property[i]["@_itemSubjectRef"] = e.target.value;
+                                element.property[i]["@_itemSubjectRef"] = newItemDefinitionRef;
                               }
                             }
                           });
                         }
-                      })
-                    }
+                      });
+                    }}
                   />
                 </GridItem>
                 <GridItem span={3}>
@@ -250,16 +236,7 @@ export function Variables({ p }: { p: undefined | WithVariables }) {
             </div>
           ))}
         </>
-      )) || (
-        <div style={{ position: "relative" }}>
-          <PropertiesPanelListEmptyState />
-          {!isReadOnly && (
-            <>
-              <div style={{ position: "absolute", top: "calc(50% - 16px)", right: "0" }}>{addButton}</div>
-            </>
-          )}
-        </div>
-      )}
+      )) || <EmptyState addButton={addButton} />}
     </>
   );
 }

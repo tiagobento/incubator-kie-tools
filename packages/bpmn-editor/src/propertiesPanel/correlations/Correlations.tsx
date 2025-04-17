@@ -24,22 +24,19 @@ import { Button, ButtonVariant } from "@patternfly/react-core/dist/js/components
 import { useBpmnEditorStore, useBpmnEditorStoreApi } from "../../store/StoreContext";
 import { addOrGetProcessAndDiagramElements } from "../../mutations/addOrGetProcessAndDiagramElements";
 import { visitFlowElementsAndArtifacts } from "../../mutations/_elementVisitor";
-import { setBpmn20Drools10MetaData } from "@kie-tools/bpmn-marshaller/dist/drools-extension-metaData";
 import { Grid, GridItem } from "@patternfly/react-core/dist/js/layouts/Grid";
 import { PlusCircleIcon } from "@patternfly/react-icons/dist/js/icons/plus-circle-icon";
 import { useCallback, useMemo, useState } from "react";
-import { CubesIcon } from "@patternfly/react-icons/dist/js/icons/cubes-icon";
 import { TimesIcon } from "@patternfly/react-icons/dist/js/icons/times-icon";
 import { Normalized } from "../../normalization/normalize";
 import { Title } from "@patternfly/react-core/dist/js/components/Title";
 import { EmptyState, EmptyStateBody, EmptyStateIcon } from "@patternfly/react-core/dist/js/components/EmptyState";
-import { Modal, ModalVariant } from "@patternfly/react-core/dist/js/components/Modal";
 import { generateUuid } from "@kie-tools/xyflow-react-kie-diagram/dist/uuid/uuid";
 import { Bullseye } from "@patternfly/react-core/dist/js/layouts/Bullseye";
 import { Form } from "@patternfly/react-core/dist/js/components/Form/Form";
-import { Alert } from "@patternfly/react-core/dist/js/components/Alert/Alert";
 import { FormSelect } from "@patternfly/react-core/dist/js/components/FormSelect/FormSelect";
 import { FormSelectOption } from "@patternfly/react-core/dist/js/components/FormSelect/FormSelectOption";
+import { PeopleCarryIcon } from "@patternfly/react-icons/dist/js/icons/people-carry-icon";
 import "./Correlations.css";
 
 type Correlation = {
@@ -65,11 +62,10 @@ const entryStyle = {
   width: "calc(100% - 2 * 4px - 2 * 8px)",
 };
 
-export function Correlations({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
+export function Correlations() {
   const bpmnEditorStoreApi = useBpmnEditorStoreApi();
   const [correlations, setCorrelations] = useState<Correlation[]>([]);
   const [hoveredIndex, setHoveredIndex] = useState<number | undefined>(undefined);
-  const [onSaveMessage, setOnSaveMessage] = useState<string | null>(null);
 
   const isReadOnly = useBpmnEditorStore((s) => s.settings.isReadOnly);
 
@@ -143,29 +139,12 @@ export function Correlations({ isOpen, onClose }: { isOpen: boolean; onClose: ()
           console.log("hey");
         });
       });
-
-      setOnSaveMessage("Correlations saved successfully!");
-      setTimeout(() => {
-        setOnSaveMessage(null);
-      }, 1500);
     },
     [bpmnEditorStoreApi]
   );
 
   return (
-    <Modal
-      className={"kie-bpmn-editor--correlations--modal"}
-      aria-labelledby={"Correlations"}
-      title={"Correlations"}
-      variant={ModalVariant.large}
-      isOpen={isOpen}
-      onClose={onClose}
-    >
-      {onSaveMessage && (
-        <div>
-          <Alert variant="success" title={onSaveMessage} isInline />
-        </div>
-      )}
+    <div>
       {(correlations.length > 0 && (
         <Form onSubmit={handleSubmit}>
           <div style={{ padding: "0 8px", position: "sticky", top: "-16px", backdropFilter: "blur(8px)" }}>
@@ -323,18 +302,18 @@ export function Correlations({ isOpen, onClose }: { isOpen: boolean; onClose: ()
         <div className={"kie-bpmn-editor--correlations--empty-state"}>
           <Bullseye>
             <EmptyState>
-              <EmptyStateIcon icon={CubesIcon} />
+              <EmptyStateIcon icon={PeopleCarryIcon} />
               <Title headingLevel="h4">{isReadOnly ? "No correlations" : "No correlations yet"}</Title>
               <EmptyStateBody style={{ padding: "0 25%" }}>
-                {"This represents the empty state for correlations. You can add correlations to get started."}
+                {"Correlations let you bind a Process Instance to Messages containing specific property values."}
               </EmptyStateBody>
               <Button variant="primary" onClick={addCorrelation}>
-                {"Add correlation"}
+                {"Add Correlation"}
               </Button>
             </EmptyState>
           </Bullseye>
         </div>
       )}
-    </Modal>
+    </div>
   );
 }

@@ -345,11 +345,6 @@ export function Notifications({ element }: { element: Normalized<BPMN20__tUserTa
                   to: { "@_id": dataInput["@_id"], __$$text: dataInput["@_id"] },
                 });
               }
-              addOrGetItemDefinitions({
-                definitions: s.bpmn.model.definitions,
-                oldId: `${e["@_id"]}_dataInputAssociation_${notification.type}`,
-                structureRef: "object",
-              });
             });
           }
         });

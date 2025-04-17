@@ -74,11 +74,6 @@ export function MessageSelector({ element }: { element: WithMessage }) {
                   const messageEventDefinition = e.eventDefinition?.find(
                     (event) => event.__$$element === "messageEventDefinition"
                   );
-                  addOrGetItemDefinitions({
-                    definitions: s.bpmn.model.definitions,
-                    oldId: messageEventDefinition?.["@_drools:msgref"] || "",
-                    newId: newMessage,
-                  });
                   addOrGetMessages({ definitions: s.bpmn.model.definitions, id: e["@_id"], message: newMessage });
                   if (messageEventDefinition) {
                     messageEventDefinition["@_drools:msgref"] = newMessage;

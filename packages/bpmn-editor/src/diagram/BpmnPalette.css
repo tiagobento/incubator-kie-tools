@@ -2,39 +2,23 @@
   pointer-events: none !important;
 }
 
-.kie-bpmn-editor--variables-panel-popover .pf-c-popover__body {
-  padding: 0;
+.kie-bpmn-editor--palette-nodes-popover.variables {
+  top: 115px;
+  padding: 32px;
 }
-.kie-bpmn-editor--variables-panel {
-  padding: 3px 8px 3px 16px;
-  border-radius: 99999px;
-  background: white;
-  border: 1px solid black;
-  display: flex;
-  align-items: center;
+.kie-bpmn-editor--palette-nodes-popover.correlations {
+  top: 57px;
+  padding: 32px;
 }
-.kie-bpmn-editor--variables-panel input {
-  overflow: hidden;
-  text-wrap: nowrap;
-  text-overflow: ellipsis;
-  max-width: 300px;
-  min-width: 50px;
-}
-.kie-bpmn-editor--variables-panel:hover {
-  box-shadow: 4px 4px 2px 0px rgb(127 127 127);
-  filter: brightness(95%);
-}
-.kie-bpmn-editor--variables-panel button {
-  border: 0;
-  padding: 4px 16px;
-  border-radius: 8px;
-  background: white;
-}
-.kie-bpmn-editor--variables-panel button:hover {
-  filter: brightness(95%);
-}
-.kie-bpmn-editor--variables-panel button:active {
-  filter: brightness(90%);
+
+.kie-bpmn-editor--palette-nodes-popover {
+  position: absolute;
+  left: 58px;
+  overflow: auto;
+  box-shadow: 0px 5px 10px 0px lightgray;
+  background: rgb(255, 255, 255, 90%);
+  backdrop-filter: blur(4px);
+  width: 50vw;
 }
 
 /* (begin) drg/external nodes panel toggle */
@@ -45,6 +29,7 @@
   border-radius: 40px;
   border: 1px solid black;
 }
+.kie-bpmn-editor--variables-panel-toggle-button.active,
 .kie-bpmn-editor--variables-panel-toggle:hover {
   box-shadow: 4px 4px 2px 0px rgb(127 127 127);
 }
@@ -60,6 +45,7 @@
 .kie-bpmn-editor--variables-panel-toggle-button:hover {
   filter: brightness(95%);
 }
+.kie-bpmn-editor--variables-panel-toggle-button.active,
 .kie-bpmn-editor--variables-panel-toggle-button:active {
   filter: brightness(90%);
 }

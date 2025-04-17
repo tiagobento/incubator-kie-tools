@@ -51,6 +51,7 @@ import { Alert } from "@patternfly/react-core/dist/js/components/Alert/Alert";
 import { CubesIcon } from "@patternfly/react-icons/dist/js/icons/cubes-icon";
 import { TextInput } from "@patternfly/react-core/dist/js/components/TextInput";
 import "./DataMappingFormSection.css";
+import { ItemDefinitionRefSelector } from "../itemDefinitionRefSelector/ItemDefinitionRefSelector";
 
 type WithDataMapping = Normalized<
   ElementFilter<
@@ -72,18 +73,9 @@ type WithInputDataMapping = Normalized<
 
 type DataMapping = {
   name: string;
-  dataType: string;
+  dtype: string;
   value: string;
 };
-
-const dataType = [
-  { value: "Custom", label: "Custom..." },
-  { value: "Boolean", label: "Boolean" },
-  { value: "Float", label: "Float" },
-  { value: "Integer", label: "Integer" },
-  { value: "Object", label: "Object" },
-  { value: "String", label: "String" },
-];
 
 const entryStyle = {
   padding: "4px",
@@ -256,13 +248,13 @@ export function DataMappingsList({
       if (section === "input") {
         setInputDataMapping((prevInputDataMapping) => {
           const updatedInputDataMapping = [...prevInputDataMapping];
-          updatedInputDataMapping[index] = { ...updatedInputDataMapping[index], [propertyName]: [value] };
+          updatedInputDataMapping[index] = { ...updatedInputDataMapping[index], [propertyName]: value };
           return updatedInputDataMapping;
         });
       } else {
         setOutputDataMapping((prevOutputDataMapping) => {
           const updatedOutputDataMapping = [...prevOutputDataMapping];
-          updatedOutputDataMapping[index] = { ...updatedOutputDataMapping[index], [propertyName]: [value] };
+          updatedOutputDataMapping[index] = { ...updatedOutputDataMapping[index], [propertyName]: value };
           return updatedOutputDataMapping;
         });
       }
@@ -290,9 +282,9 @@ export function DataMappingsList({
 
   const addDataMapping = useCallback(() => {
     if (section === "input") {
-      setInputDataMapping([...inputDataMapping, { name: "", dataType: "", value: "" }]);
+      setInputDataMapping([...inputDataMapping, { name: "", dtype: "", value: "" }]);
     } else {
-      setOutputDataMapping([...outputDataMapping, { name: "", dataType: "", value: "" }]);
+      setOutputDataMapping([...outputDataMapping, { name: "", dtype: "", value: "" }]);
     }
   }, [inputDataMapping, outputDataMapping, section]);
 
@@ -338,11 +330,11 @@ export function DataMappingsList({
 
             const value = assignment.from.__$$text || "";
             const name = dataInput?.["@_name"] || "";
-            const dataType = dataInput?.["@_drools:dtype"] || "";
+            const dtype = dataInput?.["@_drools:dtype"] || "";
 
             return {
               name: name,
-              dataType: dataType,
+              dtype: dtype,
               value: value,
             };
           });
@@ -368,11 +360,11 @@ export function DataMappingsList({
             );
 
             const name = dataOutput?.["@_name"] || "";
-            const dataType = dataOutput?.["@_drools:dtype"] || "";
+            const dtype = dataOutput?.["@_drools:dtype"] || "";
 
             return {
               name: name,
-              dataType: dataType,
+              dtype: dtype,
               value: value,
             };
           });
@@ -389,11 +381,11 @@ export function DataMappingsList({
         const dataInput = element.dataInput?.find((input) => input["@_id"] === association.targetRef?.__$$text);
 
         const name = dataInput?.["@_name"] || "";
-        const dataType = dataInput?.["@_drools:dtype"] || "";
+        const dtype = dataInput?.["@_drools:dtype"] || "";
 
         return {
           name: name,
-          dataType: dataType,
+          dtype: dtype,
           value: value,
         };
       });
@@ -413,11 +405,11 @@ export function DataMappingsList({
         const dataOutput = element.dataOutput?.find((output) => output["@_id"] === association.targetRef?.__$$text);
 
         const name = dataOutput?.["@_name"] || "";
-        const dataType = dataOutput?.["@_drools:dtype"] || "";
+        const dtype = dataOutput?.["@_drools:dtype"] || "";
 
         return {
           name: name,
-          dataType: dataType,
+          dtype: dtype,
           value: value,
         };
       });
@@ -474,7 +466,7 @@ export function DataMappingsList({
           }
           dataInput = {
             "@_id": `${e["@_id"]}_${dataMapping.name}InputX`,
-            "@_drools:dtype": dataMapping.dataType,
+            "@_drools:dtype": dataMapping.dtype,
             "@_itemSubjectRef": `_${e["@_id"]}_${dataMapping.name}InputXItem`,
             "@_name": dataMapping.name,
           };
@@ -557,7 +549,7 @@ export function DataMappingsList({
           }
           dataOutput = {
             "@_id": `${e["@_id"]}_${dataMapping.name}OutputX`,
-            "@_drools:dtype": dataMapping.dataType,
+            "@_drools:dtype": dataMapping.dtype,
             "@_itemSubjectRef": `_${e["@_id"]}_${dataMapping.name}OutputXItem`,
             "@_name": dataMapping.name,
           };
@@ -622,7 +614,7 @@ export function DataMappingsList({
         }
         dataInput = {
           "@_id": `${e["@_id"]}_${dataMapping.name}InputX`,
-          "@_drools:dtype": dataMapping.dataType,
+          "@_drools:dtype": dataMapping.dtype,
           "@_itemSubjectRef": `_${e["@_id"]}_${dataMapping.name}InputXItem`,
           "@_name": dataMapping.name,
         };
@@ -669,7 +661,7 @@ export function DataMappingsList({
         }
         dataOutput = {
           "@_id": `${e["@_id"]}_${dataMapping.name}OutputX`,
-          "@_drools:dtype": dataMapping.dataType,
+          "@_drools:dtype": dataMapping.dtype,
           "@_itemSubjectRef": `_${e["@_id"]}_${dataMapping.name}OutputXItem`,
           "@_name": dataMapping.name,
         };
@@ -746,6 +738,14 @@ export function DataMappingsList({
     ]
   );
 
+  const itemDefinitionIdByDataTypes = useBpmnEditorStore((s) => {
+    return new Map(
+      s.bpmn.model.definitions.rootElement
+        ?.filter((r) => r.__$$element === "itemDefinition")
+        .map((i) => [i["@_structureRef"], i["@_id"]])
+    );
+  });
+
   return (
     <>
       {onSaveMessage && (
@@ -754,7 +754,7 @@ export function DataMappingsList({
         </div>
       )}
       {((inputDataMapping.length > 0 || outputDataMapping.length > 0) && (
-        <Form onSubmit={handleSubmit}>
+        <Form onSubmit={handleSubmit} style={{ gridRowGap: 0 }}>
           <div style={{ position: "sticky", top: "0", backdropFilter: "blur(8px)" }}>
             {titleComponent}
             <Divider style={{ margin: "8px 0" }} inset={{ default: "insetMd" }} />
@@ -805,16 +805,12 @@ export function DataMappingsList({
                     />
                   </GridItem>
                   <GridItem span={3}>
-                    <FormSelect
-                      aria-label={"data type"}
-                      value={String(entry.dataType) || ""}
-                      onChange={(e) => handleInputChange(i, "dataType", e)}
-                      style={entryStyle}
-                    >
-                      {dataType.map((option) => (
-                        <FormSelectOption key={option.label} label={option.label} value={option.value} />
-                      ))}
-                    </FormSelect>
+                    <ItemDefinitionRefSelector
+                      value={itemDefinitionIdByDataTypes.get(entry.dtype) ?? entry.dtype}
+                      onChange={(_, newDataType) => {
+                        handleInputChange(i, "dtype", newDataType!);
+                      }}
+                    />
                   </GridItem>
                   <GridItem span={3}>
                     <TextInput
@@ -863,16 +859,12 @@ export function DataMappingsList({
                     />
                   </GridItem>
                   <GridItem span={3}>
-                    <FormSelect
-                      aria-label={"data type"}
-                      value={String(entry.dataType) || ""}
-                      onChange={(e) => handleInputChange(i, "dataType", e)}
-                      style={entryStyle}
-                    >
-                      {dataType.map((option) => (
-                        <FormSelectOption key={option.label} label={option.label} value={option.value} />
-                      ))}
-                    </FormSelect>
+                    <ItemDefinitionRefSelector
+                      value={itemDefinitionIdByDataTypes.get(entry.dtype) ?? entry.dtype}
+                      onChange={(_, newDataType) => {
+                        handleInputChange(i, "dtype", newDataType!);
+                      }}
+                    />
                   </GridItem>
                   <GridItem span={3}>
                     <TextInput

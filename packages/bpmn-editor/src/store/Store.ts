@@ -41,6 +41,8 @@ enableMapSet(); // Necessary because `Computed` has a lot of Maps and Sets.
 
 export enum BpmnDiagramLhsPanel {
   NONE = "NONE",
+  VARIABLES = "VARIABLES",
+  CORRELATIONS = "CORRELATIONS",
 }
 
 export type BpmnXyFlowDiagramState = XyFlowDiagramState<State, BpmnNodeType, BpmnDiagramNodeData, BpmnDiagramEdgeData>;

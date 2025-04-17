@@ -75,11 +75,7 @@ export function UserTaskProperties({
             outputSet: [],
             dataInput: [],
           };
-          addOrGetItemDefinitions({
-            definitions: s.bpmn.model.definitions,
-            oldId: `${e["@_id"]}_${fieldName}InputX`,
-            structureRef: "object",
-          });
+
           e.ioSpecification.inputSet[0] ??= {
             "@_id": "",
             dataInputRefs: [],

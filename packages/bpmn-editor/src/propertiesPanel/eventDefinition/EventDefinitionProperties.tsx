@@ -21,7 +21,6 @@ import { BPMN20__tProcess } from "@kie-tools/bpmn-marshaller/dist/schemas/bpmn-2
 import * as React from "react";
 import { Normalized } from "../../normalization/normalize";
 import { SlaDueDateInput } from "../slaDueDate/SlaDueDateInput";
-import { CodeInput } from "../codeInput/CodeInput";
 import { MessageSelector } from "../messageSelector/MessageSelector";
 import { ElementFilter } from "@kie-tools/xml-parser-ts/dist/elementFilter";
 import { Unpacked } from "@kie-tools/xyflow-react-kie-diagram/dist/tsExt/tsExt";

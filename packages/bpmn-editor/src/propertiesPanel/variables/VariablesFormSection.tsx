@@ -23,6 +23,8 @@ import { SectionHeader } from "@kie-tools/xyflow-react-kie-diagram/dist/properti
 import { FormSection } from "@patternfly/react-core/dist/js/components/Form";
 import { DomainIcon } from "@patternfly/react-icons/dist/js/icons/domain-icon";
 import { useState } from "react";
+import { PropertiesPanelListEmptyState } from "../emptyState/PropertiesPanelListEmptyState";
+import { useBpmnEditorStore } from "../../store/StoreContext";
 
 export function VariablesFormSection({ p }: { p: undefined | WithVariables }) {
   const [isVariablesSectionExpanded, setVariablesSectionExpanded] = useState<boolean>(true);
@@ -45,11 +47,28 @@ export function VariablesFormSection({ p }: { p: undefined | WithVariables }) {
         {isVariablesSectionExpanded && (
           <>
             <FormSection style={{ paddingLeft: "20px", marginTop: "20px", gap: 0 }}>
-              <Variables p={p} />
+              <Variables p={p} EmptyState={VariablesEmptyState} />
             </FormSection>
           </>
         )}
       </FormSection>
+    </>
+  );
+}
+
+function VariablesEmptyState({ addButton }: { addButton: JSX.Element }) {
+  const isReadOnly = useBpmnEditorStore((s) => s.settings.isReadOnly);
+
+  return (
+    <>
+      <div style={{ position: "relative" }}>
+        <PropertiesPanelListEmptyState />
+        {!isReadOnly && (
+          <>
+            <div style={{ position: "absolute", top: "calc(50% - 16px)", right: "0" }}>{addButton}</div>
+          </>
+        )}
+      </div>
     </>
   );
 }

@@ -37,6 +37,16 @@ import {
 } from "./nodes/NodeIcons";
 import { CodeIcon } from "@patternfly/react-icons/dist/js/icons/code-icon";
 import { PeopleCarryIcon } from "@patternfly/react-icons/dist/js/icons/people-carry-icon";
+import { useBpmnEditorStore, useBpmnEditorStoreApi } from "../store/StoreContext";
+import { BpmnDiagramLhsPanel } from "../store/Store";
+import { addOrGetProcessAndDiagramElements } from "../mutations/addOrGetProcessAndDiagramElements";
+import { Correlations } from "../propertiesPanel/correlations/Correlations";
+import { Variables } from "../propertiesPanel/variables/Variables";
+import { Button } from "@patternfly/react-core/dist/js/components/Button";
+import { EmptyState, EmptyStateIcon, EmptyStateBody } from "@patternfly/react-core/dist/js/components/EmptyState";
+import { Title } from "@patternfly/react-core/dist/js/components/Title";
+import { Bullseye } from "@patternfly/react-core/dist/js/layouts/Bullseye";
+import { addVariable } from "../mutations/addVariable";
 import "./BpmnPalette.css";
 
 export const MIME_TYPE_FOR_BPMN_EDITOR_NEW_NODE_FROM_PALETTE = "application/kie-bpmn-editor--new-node-from-palette";
@@ -59,6 +69,13 @@ export function BpmnPalette({ pulse }: { pulse: boolean }) {
 
   const nodesPalletePopoverRef = React.useRef<HTMLDivElement>(null);
 
+  const openLhsPanel = useBpmnEditorStore((s) => s.diagram.openLhsPanel);
+  const bpmnEditorStoreApi = useBpmnEditorStoreApi();
+
+  const process = useBpmnEditorStore((s) =>
+    s.bpmn.model.definitions.rootElement?.find((s) => s.__$$element === "process")
+  );
+
   return (
     <>
       <RF.Panel position={"top-left"} className={"kie-bpmn-editor--top-left-panel"}>
@@ -67,19 +84,25 @@ export function BpmnPalette({ pulse }: { pulse: boolean }) {
           className={"kie-bpmn-editor--variables-panel-toggle"}
           style={{ position: "relative", pointerEvents: "all" }}
         >
-          {/* {diagram.openLhsPanel === DiagramLhsPanel.DRG_NODES && (
+          {openLhsPanel === BpmnDiagramLhsPanel.VARIABLES && (
             <div
-              data-testid={"kie-tools--bpmn-editor--palette-nodes-popover"}
-              className={"kie-bpmn-editor--palette-nodes-popover"}
-              style={{ maxHeight }}
+              className={"kie-bpmn-editor--palette-nodes-popover variables"}
+              // style={{ maxHeight }}
             >
-              <DrgNodesPanel />
+              <Variables p={process} EmptyState={VariablesEmptyState} />
             </div>
-          )} */}
+          )}
           <button
             title={"Process Variables"}
-            className={`kie-bpmn-editor--variables-panel-toggle-button`}
-            onClick={() => {}}
+            className={`kie-bpmn-editor--variables-panel-toggle-button ${openLhsPanel === BpmnDiagramLhsPanel.VARIABLES ? "active" : ""}`}
+            onClick={() => {
+              bpmnEditorStoreApi.setState((s) => {
+                s.diagram.openLhsPanel =
+                  s.diagram.openLhsPanel === BpmnDiagramLhsPanel.VARIABLES
+                    ? BpmnDiagramLhsPanel.NONE
+                    : BpmnDiagramLhsPanel.VARIABLES;
+              });
+            }}
           >
             <CodeIcon size={"sm"} /> Variables
           </button>
@@ -88,19 +111,25 @@ export function BpmnPalette({ pulse }: { pulse: boolean }) {
           className={"kie-bpmn-editor--variables-panel-toggle"}
           style={{ position: "relative", pointerEvents: "all" }}
         >
-          {/* {diagram.openLhsPanel === DiagramLhsPanel.DRG_NODES && (
+          {openLhsPanel === BpmnDiagramLhsPanel.CORRELATIONS && (
             <div
-              data-testid={"kie-tools--bpmn-editor--palette-nodes-popover"}
-              className={"kie-bpmn-editor--palette-nodes-popover"}
-              style={{ maxHeight }}
+              className={"kie-bpmn-editor--palette-nodes-popover correlations"}
+              // style={{ maxHeight }}
             >
-              <DrgNodesPanel />
+              <Correlations />
             </div>
-          )} */}
+          )}
           <button
             title={"Process Variables"}
-            className={`kie-bpmn-editor--variables-panel-toggle-button`}
-            onClick={() => {}}
+            className={`kie-bpmn-editor--variables-panel-toggle-button ${openLhsPanel === BpmnDiagramLhsPanel.CORRELATIONS ? "active" : ""}`}
+            onClick={() => {
+              bpmnEditorStoreApi.setState((s) => {
+                s.diagram.openLhsPanel =
+                  s.diagram.openLhsPanel === BpmnDiagramLhsPanel.CORRELATIONS
+                    ? BpmnDiagramLhsPanel.NONE
+                    : BpmnDiagramLhsPanel.CORRELATIONS;
+              });
+            }}
           >
             <PeopleCarryIcon size={"sm"} /> Correlations
           </button>
@@ -210,6 +239,38 @@ export function BpmnPalette({ pulse }: { pulse: boolean }) {
           </div>
         </aside>
       </RF.Panel>
+    </>
+  );
+}
+
+function VariablesEmptyState({ addButton: _ }: { addButton: JSX.Element }) {
+  const isReadOnly = useBpmnEditorStore((s) => s.settings.isReadOnly);
+  const bpmnEditorStoreApi = useBpmnEditorStoreApi();
+
+  return (
+    <>
+      <div className={"kie-bpmn-editor--correlations--empty-state"}>
+        <Bullseye>
+          <EmptyState>
+            <EmptyStateIcon icon={CodeIcon} />
+            <Title headingLevel="h4">{isReadOnly ? "No variables" : "No variables yet"}</Title>
+            <EmptyStateBody style={{ padding: "0 25%" }}>
+              {"Variables let you manage mutable data during the lifetime of a Process Instance."}
+            </EmptyStateBody>
+            <Button
+              variant="primary"
+              onClick={() => {
+                bpmnEditorStoreApi.setState((s) => {
+                  const { process } = addOrGetProcessAndDiagramElements({ definitions: s.bpmn.model.definitions });
+                  addVariable({ definitions: s.bpmn.model.definitions, pId: process["@_id"] });
+                });
+              }}
+            >
+              {"Add Variable"}
+            </Button>
+          </EmptyState>
+        </Bullseye>
+      </div>
     </>
   );
 }
