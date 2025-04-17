@@ -517,6 +517,7 @@ export function Notifications({ element }: { element: Normalized<BPMN20__tUserTa
                     style={entryStyle}
                     type="text"
                     placeholder="Body..."
+                    resizeOrientation={"vertical"}
                     value={entry.body}
                     onChange={(e) => handleInputChange(i, "body", e)}
                   />
