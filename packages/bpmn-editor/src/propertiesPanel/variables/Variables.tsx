@@ -19,10 +19,6 @@
 
 import * as React from "react";
 import "@kie-tools/bpmn-marshaller/dist/drools-extension";
-import {
-  parseBpmn20Drools10MetaData,
-  setBpmn20Drools10MetaData,
-} from "@kie-tools/bpmn-marshaller/dist/drools-extension-metaData";
 import { Button, ButtonVariant } from "@patternfly/react-core/dist/js/components/Button/Button";
 import { Grid, GridItem } from "@patternfly/react-core/dist/js/layouts/Grid";
 import { PlusCircleIcon } from "@patternfly/react-icons/dist/js/icons/plus-circle-icon";
@@ -30,16 +26,15 @@ import { TimesIcon } from "@patternfly/react-icons/dist/js/icons/times-icon";
 import { useMemo, useState } from "react";
 import { addOrGetProcessAndDiagramElements } from "../../mutations/addOrGetProcessAndDiagramElements";
 import { useBpmnEditorStore, useBpmnEditorStoreApi } from "../../store/StoreContext";
-import { PropertiesPanelListEmptyState } from "../emptyState/PropertiesPanelListEmptyState";
 import { Normalized } from "../../normalization/normalize";
 import { BPMN20__tDefinitions, BPMN20__tProcess } from "@kie-tools/bpmn-marshaller/dist/schemas/bpmn-2_0/ts-gen/types";
-import { generateUuid } from "@kie-tools/xyflow-react-kie-diagram/dist/uuid/uuid";
 import { ElementFilter } from "@kie-tools/xml-parser-ts/dist/elementFilter";
 import { Unpacked } from "@kie-tools/xyflow-react-kie-diagram/dist/tsExt/tsExt";
 import { visitFlowElementsAndArtifacts } from "../../mutations/_elementVisitor";
-import "./Variables.css";
 import { addVariable } from "../../mutations/addVariable";
 import { ItemDefinitionRefSelector } from "../itemDefinitionRefSelector/ItemDefinitionRefSelector";
+import { VariableTagSelector } from "./VariableTagSelector";
+import "./Variables.css";
 
 export type WithVariables = Normalized<
   | ElementFilter<Unpacked<NonNullable<BPMN20__tDefinitions["rootElement"]>>, "process">
@@ -90,7 +85,7 @@ export function Variables({
       {((p?.property?.length ?? 0) > 0 && (
         <>
           <div style={{ padding: "0 8px" }}>
-            <Grid md={6} style={{ alignItems: "center" }}>
+            <Grid md={6} style={{ alignItems: "center", columnGap: "12px" }}>
               <GridItem span={4}>
                 <div style={entryColumnStyle}>
                   <b>Name</b>
@@ -98,7 +93,7 @@ export function Variables({
               </GridItem>
               <GridItem span={4}>
                 <div style={entryColumnStyle}>
-                  <b>Data type</b>
+                  <b>Data Type</b>
                 </div>
               </GridItem>
               <GridItem span={3}>
@@ -118,6 +113,7 @@ export function Variables({
                 className={"kie-bpmn-editor--properties-panel--variables-entry"}
                 onMouseEnter={() => setHoveredIndex(i)}
                 onMouseLeave={() => setHoveredIndex(undefined)}
+                style={{ columnGap: "12px" }}
               >
                 <GridItem span={4}>
                   <input
@@ -174,36 +170,7 @@ export function Variables({
                   />
                 </GridItem>
                 <GridItem span={3}>
-                  <input
-                    style={entryColumnStyle}
-                    type="text"
-                    placeholder="Tags..."
-                    value={parseBpmn20Drools10MetaData(p.property?.[i]).get("customTags")}
-                    onChange={(e) =>
-                      bpmnEditorStoreApi.setState((s) => {
-                        const { process } = addOrGetProcessAndDiagramElements({
-                          definitions: s.bpmn.model.definitions,
-                        });
-                        if (!p || p["@_id"] === process["@_id"]) {
-                          if (process.property?.[i]) {
-                            process.property[i].extensionElements ??= {};
-                            process.property[i].extensionElements["drools:metaData"] ??= [];
-                            setBpmn20Drools10MetaData(process.property[i], "customTags", e.target.value);
-                          }
-                        } else {
-                          visitFlowElementsAndArtifacts(process, ({ element }) => {
-                            if (element["@_id"] === p["@_id"] && element.__$$element === p.__$$element) {
-                              if (element.property?.[i]) {
-                                element.property[i].extensionElements ??= {};
-                                element.property[i].extensionElements["drools:metaData"] ??= [];
-                                setBpmn20Drools10MetaData(element.property[i], "customTags", e.target.value);
-                              }
-                            }
-                          });
-                        }
-                      })
-                    }
-                  />
+                  <VariableTagSelector p={p} i={i} />
                 </GridItem>
                 <GridItem span={1} style={{ textAlign: "right" }}>
                   {hoveredIndex === i && (

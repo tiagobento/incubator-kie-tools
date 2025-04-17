@@ -22,7 +22,6 @@ import { Normalized } from "../normalization/normalize";
 import { generateUuid } from "@kie-tools/xyflow-react-kie-diagram/dist/uuid/uuid";
 import { visitFlowElementsAndArtifacts } from "./_elementVisitor";
 import { addOrGetProcessAndDiagramElements } from "./addOrGetProcessAndDiagramElements";
-import { pid } from "process";
 
 export function addVariable({
   definitions,

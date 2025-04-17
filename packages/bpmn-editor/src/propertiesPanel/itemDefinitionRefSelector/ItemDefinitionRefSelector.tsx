@@ -26,7 +26,7 @@ import { addOrGetItemDefinitions } from "../../mutations/addOrGetItemDefinitions
 import "./ItemDefinitionRefSelector.css";
 
 const DEFAULT_DATA_TYPES = [
-  { itemDefinitionRef: undefined, dataType: "-- None --" },
+  { itemDefinitionRef: undefined, dataType: "<Undefined>" },
   { itemDefinitionRef: "String", dataType: "String" },
   { itemDefinitionRef: "Boolean", dataType: "Boolean" },
   { itemDefinitionRef: "Float", dataType: "Float" },
@@ -124,9 +124,6 @@ export function ItemDefinitionRefSelector({
               itemDefinitions.filter((s) => s.itemDefinitionRef === newItemDefinitionRef.toString())?.[0].dataType
             );
           }
-        }}
-        onClear={() => {
-          onChange(undefined, undefined);
         }}
         onToggle={setOpen}
         isOpen={isOpen}
