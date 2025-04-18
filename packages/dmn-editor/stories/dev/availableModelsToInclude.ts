@@ -33,13 +33,13 @@ export const avaiableModels: DmnEditor.ExternalModel[] = [
     type: "dmn",
     model: sumBkmModel,
     svg: "",
-    normalizedPosixPathRelativeToTheOpenFile: "dev-webapp/available-models-to-include/sumBkm.dmn",
+    normalizedPosixPathRelativeToTheOpenFile: "playground/available-models-to-include/sumBkm.dmn",
   },
   {
     type: "dmn",
     model: sumDiffDsModel,
     svg: "",
-    normalizedPosixPathRelativeToTheOpenFile: "dev-webapp/available-models-to-include/sumDiffDs.dmn",
+    normalizedPosixPathRelativeToTheOpenFile: "playground/available-models-to-include/sumDiffDs.dmn",
   },
   {
     type: "dmn",
@@ -49,12 +49,12 @@ export const avaiableModels: DmnEditor.ExternalModel[] = [
       }).parser.parse()
     ),
     svg: "",
-    normalizedPosixPathRelativeToTheOpenFile: "dev-webapp/available-models-to-include/empty.dmn",
+    normalizedPosixPathRelativeToTheOpenFile: "playground/available-models-to-include/empty.dmn",
   },
   {
     type: "pmml",
     model: testTreePmmlModel,
-    normalizedPosixPathRelativeToTheOpenFile: "dev-webapp/available-models-to-include/testTree.pmml",
+    normalizedPosixPathRelativeToTheOpenFile: "playground/available-models-to-include/testTree.pmml",
   },
 ];
 

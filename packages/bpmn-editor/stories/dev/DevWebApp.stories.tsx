@@ -31,7 +31,7 @@ import { BpmnEditorProps, OnBpmnModelChange, OnRequestToJumpToPath } from "../..
 
 const initialModel = generateEmptyBpmn20();
 
-function DevWebApp(args: BpmnEditorProps) {
+function DevPlayground(args: BpmnEditorProps) {
   const [state, setState] = useState<{
     marshaller: BpmnMarshaller;
     stack: Normalized<BpmnLatestModel>[];
@@ -46,7 +46,7 @@ function DevWebApp(args: BpmnEditorProps) {
   });
 
   const onDrop = useCallback((e: React.DragEvent) => {
-    console.log("BPMN Editor :: Dev webapp :: File(s) dropped! Opening it.");
+    console.log("BPMN Editor :: Playground :: File(s) dropped! Opening it.");
 
     e.preventDefault(); // Necessary to disable the browser's default 'onDrop' handling.
 
@@ -134,14 +134,10 @@ function DevWebApp(args: BpmnEditorProps) {
           <Page onDragOver={onDragOver} onDrop={onDrop}>
             <PageSection variant={"light"} isFilled={false} padding={{ default: "padding" }}>
               <Flex justifyContent={{ default: "justifyContentSpaceBetween" }}>
-                <FlexItem shrink={{ default: "shrink" }}>
-                  <h3>BPMN Editor :: Dev webapp </h3>
-                </FlexItem>
                 <FlexItem>
                   <h5>(Drag & drop a file anywhere to open it)</h5>
                 </FlexItem>
                 <FlexItem shrink={{ default: "shrink" }}>
-                  <button onClick={() => onSelectModel(generateEmptyBpmn20())}>Empty</button>
                   &nbsp; &nbsp; | &nbsp; &nbsp;
                   <button disabled={!isUndoEnabled} style={{ opacity: isUndoEnabled ? 1 : 0.5 }} onClick={undo}>
                     {`Undo (${state.pointer})`}
@@ -153,9 +149,9 @@ function DevWebApp(args: BpmnEditorProps) {
                   &nbsp; &nbsp; | &nbsp; &nbsp;
                   <button onClick={reset}>Reset</button>
                   &nbsp; &nbsp;
-                  <button onClick={copyAsXml}>Copy as XML</button>
+                  <button onClick={copyAsXml}>Copy XML</button>
                   &nbsp; &nbsp;
-                  <button onClick={downloadAsXml}>Download as XML</button>
+                  <button onClick={downloadAsXml}>Download as .bpmn</button>
                 </FlexItem>
               </Flex>
               <a ref={downloadRef} />
@@ -198,23 +194,23 @@ function createId(length: number) {
 }
 
 // More on how to set up stories at: https://storybook.js.org/docs/writing-stories#default-export
-const meta: Meta<typeof DevWebApp> = {
-  title: "Dev/Web App",
-  component: DevWebApp,
+const meta: Meta<typeof DevPlayground> = {
+  title: "Dev/Playground",
+  component: DevPlayground,
 };
 
 export default meta;
-type Story = StoryObj<typeof DevWebApp>;
+type Story = StoryObj<typeof DevPlayground>;
 
 // More on writing stories with args: https://storybook.js.org/docs/writing-stories/args
-export const WebApp: Story = {
-  render: (args) => DevWebApp(args),
+export const Playground: Story = {
+  render: (args) => DevPlayground(args),
   args: {
     model: getMarshaller(initialModel, { upgradeTo: "latest" }).parser.parse(),
     originalVersion: "2.0",
     externalContextDescription:
-      "You're using the BPMN Dev webapp, so there's only two simple external models that can be included.",
-    externalContextName: "Dev webapp",
+      "You're using the BPMN Playground, so there's only two simple external models that can be included.",
+    externalContextName: "Playground",
     issueTrackerHref: "https://github.com/apache/incubator-kie-issues/issues/new",
   },
 };

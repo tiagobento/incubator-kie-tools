@@ -41,14 +41,14 @@ export function MultiInstanceCheckbox({ element }: { element: WithMultipleInstan
 
   return (
     <FormGroup
-      fieldId="kie-bpmn-editor--properties-panel--multiple-instance-checkbox"
+      fieldId="kie-bpmn-editor--properties-panel--multi-instance-checkbox"
       // helperText={"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod."} // FIXME: Tiago -> Description
     >
       <Checkbox
-        label="Multiple instance"
-        id="kie-bpmn-editor--properties-panel--multiple-instance-checkbox"
-        name="is-multiple-instance"
-        aria-label="Multiple instance"
+        label="Multi-instance"
+        id="kie-bpmn-editor--properties-panel--multi-instance-checkbox"
+        name="is-multi-instance"
+        aria-label="Multi-instance"
         isDisabled={isReadOnly}
         isChecked={element.loopCharacteristics?.__$$element === "multiInstanceLoopCharacteristics"}
         onChange={(checked) => {

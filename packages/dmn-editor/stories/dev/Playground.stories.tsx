@@ -21,6 +21,7 @@ import * as React from "react";
 import { useCallback, useMemo, useRef, useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react";
 import "@patternfly/react-core/dist/styles/base.css";
+
 import { Flex, FlexItem } from "@patternfly/react-core/dist/js/layouts/Flex";
 import { Page, PageSection } from "@patternfly/react-core/dist/js/components/Page";
 import { DmnLatestModel, DmnMarshaller, getMarshaller } from "@kie-tools/dmn-marshaller";
@@ -42,15 +43,11 @@ const initialModel = generateEmptyDmn15();
 
 const emptyDrd = `<?xml version="1.0" encoding="UTF-8" ?>
 <definitions xmlns="https://www.omg.org/spec/DMN/20230324/MODEL/" xmlns:dmndi="https://www.omg.org/spec/DMN/20230324/DMNDI/" xmlns:dc="http://www.omg.org/spec/DMN/20180521/DC/" xmlns:di="http://www.omg.org/spec/DMN/20180521/DI/" xmlns:kie="https://kie.org/dmn/extensions/1.0" xmlns:included0="https://kie.org/dmn/_125A5475-65CE-4574-822C-9CB2268F1393" expressionLanguage="https://www.omg.org/spec/DMN/20230324/FEEL/" namespace="https://kie.org/dmn/_2B849D68-E816-42F9-898A-1938B5D6B297" id="_A06623F7-6F03-49B9-9215-B9F99817C3ED" name="DMN_48A8D068-DBF3-4AE6-94E2-496DFC4B3E46">
-  <import id="_8079D96B-F569-4F4E-830B-7462B6AFE492" name="u" importType="http://www.omg.org/spec/DMN/20180521/MODEL/" namespace="https://kie.org/dmn/_125A5475-65CE-4574-822C-9CB2268F1393" locationURI="./Untitled-4.dmn" />
   <inputData name="My Input" id="_9392B01E-8C6B-4E29-9CC4-21C16EFB2F6B">
     <variable name="My Input" id="_9483BABF-708A-4357-AD78-18C7A770E292" typeRef="&lt;Undefined&gt;" />
   </inputData>
   <decision name="My Decision" id="_83A0C6FA-0951-4E1E-9DF1-74A9D2A95E98">
     <variable id="_01C70F45-2955-474A-9FAC-14967ABAF475" typeRef="&lt;Undefined&gt;" name="My Decision" />
-    <informationRequirement id="_A7EAFD5D-BDF7-4D09-81A9-9C22711847C0">
-      <requiredInput href="https://kie.org/dmn/_125A5475-65CE-4574-822C-9CB2268F1393#_D9138F6E-E9DA-47AB-8DEF-5CD531B94ABE" />
-    </informationRequirement>
     <informationRequirement id="_E4FE78BB-996B-46C4-9F9B-018163E9017A">
       <requiredInput href="#_9392B01E-8C6B-4E29-9CC4-21C16EFB2F6B" />
     </informationRequirement>
@@ -64,7 +61,7 @@ const emptyDrd = `<?xml version="1.0" encoding="UTF-8" ?>
 </definitions>
 `;
 
-function DevWebApp(args: DmnEditorProps) {
+function DevPlayground(args: DmnEditorProps) {
   const [state, setState] = useState<{
     marshaller: DmnMarshaller;
     stack: Normalized<DmnLatestModel>[];
@@ -79,7 +76,7 @@ function DevWebApp(args: DmnEditorProps) {
   });
 
   const onDrop = useCallback((e: React.DragEvent) => {
-    console.log("DMN Editor :: Dev webapp :: File(s) dropped! Opening it.");
+    console.log("DMN Editor :: Playground :: File(s) dropped! Opening it.");
 
     e.preventDefault(); // Necessary to disable the browser's default 'onDrop' handling.
 
@@ -182,18 +179,13 @@ function DevWebApp(args: DmnEditorProps) {
           <Page onDragOver={onDragOver} onDrop={onDrop}>
             <PageSection variant={"light"} isFilled={false} padding={{ default: "padding" }}>
               <Flex justifyContent={{ default: "justifyContentSpaceBetween" }}>
-                <FlexItem shrink={{ default: "shrink" }}>
-                  <h3>DMN Editor :: Dev webapp </h3>
-                </FlexItem>
                 <FlexItem>
                   <h5>(Drag & drop a file anywhere to open it)</h5>
                 </FlexItem>
                 <FlexItem shrink={{ default: "shrink" }}>
-                  <button onClick={() => onSelectModel(generateEmptyDmn15())}>Empty</button>
+                  <button onClick={() => onSelectModel(loanPreQualificationDmn)}>Ex: Loan Pre Qualification</button>
                   &nbsp; &nbsp;
-                  <button onClick={() => onSelectModel(loanPreQualificationDmn)}>Loan Pre Qualification</button>
-                  &nbsp; &nbsp;
-                  <button onClick={() => onSelectModel(emptyDrd)}>Empty DRD</button>
+                  <button onClick={() => onSelectModel(emptyDrd)}>Ex: Autolayout</button>
                   &nbsp; &nbsp; | &nbsp; &nbsp;
                   <button disabled={!isUndoEnabled} style={{ opacity: isUndoEnabled ? 1 : 0.5 }} onClick={undo}>
                     {`Undo (${state.pointer})`}
@@ -205,9 +197,9 @@ function DevWebApp(args: DmnEditorProps) {
                   &nbsp; &nbsp; | &nbsp; &nbsp;
                   <button onClick={reset}>Reset</button>
                   &nbsp; &nbsp;
-                  <button onClick={copyAsXml}>Copy as XML</button>
+                  <button onClick={copyAsXml}>Copy XML</button>
                   &nbsp; &nbsp;
-                  <button onClick={downloadAsXml}>Download as XML</button>
+                  <button onClick={downloadAsXml}>Download</button>
                 </FlexItem>
               </Flex>
               <a ref={downloadRef} />
@@ -256,24 +248,24 @@ function createId(length: number) {
 }
 
 // More on how to set up stories at: https://storybook.js.org/docs/writing-stories#default-export
-const meta: Meta<typeof DevWebApp> = {
-  title: "Dev/Web App",
-  component: DevWebApp,
+const meta: Meta<typeof DevPlayground> = {
+  title: "Dev/Playground",
+  component: DevPlayground,
 };
 
 export default meta;
-type Story = StoryObj<typeof DevWebApp>;
+type Story = StoryObj<typeof DevPlayground>;
 
 // More on writing stories with args: https://storybook.js.org/docs/writing-stories/args
-export const WebApp: Story = {
-  render: (args) => DevWebApp(args),
+export const Playground: Story = {
+  render: (args) => DevPlayground(args),
   args: {
     model: getMarshaller(initialModel, { upgradeTo: "latest" }).parser.parse(),
     originalVersion: "1.5",
     evaluationResultsByNodeId: new Map(),
     externalContextDescription:
-      "You're using the DMN Dev webapp, so there's only two simple external models that can be included.",
-    externalContextName: "Dev webapp",
+      "You're using the DMN Playground, so there's only two simple external models that can be included.",
+    externalContextName: "Playground",
     externalModelsByNamespace: {},
     issueTrackerHref: "https://github.com/apache/incubator-kie-issues/issues/new",
     validationMessages: {},

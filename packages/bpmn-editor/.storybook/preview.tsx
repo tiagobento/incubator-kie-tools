@@ -33,7 +33,7 @@ const preview: Preview = {
       storySort: {
         order: [
           "Dev",
-          "BPMN Editor",
+          "Reference",
           ["Overview", "*", ["Overview", "*", ["Overview", "*"]]],
           "Features",
           ["Overview", "*", ["Overview", "*", ["Overview", "*"]]],

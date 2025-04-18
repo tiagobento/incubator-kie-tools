@@ -15,10 +15,23 @@
 {/* specific language governing permissions and limitations */}
 {/* under the License. */}
 
-import { Meta } from "@storybook/blocks";
+import { useCallback, useState, useRef, useMemo, useEffect } from "react";
+import { Meta, Canvas } from "@storybook/blocks";
+import { DmnEditor } from "../../src/DmnEditor";
 
-<Meta title="DMN Editor/Overview" />
+import { getMarshaller } from "@kie-tools/dmn-marshaller";
 
-# DMN Editor
+<Meta title="Reference/Requirements" />
+
+# DMN Editor :: Requirements
 
 The DMN Editor lets you edit Decision models based on the DMN standard.
+
+<Canvas style={{ minHeight: "400px" }}>
+  <DmnEditor
+    isReadOnly={true}
+    model={getMarshaller(`<definitions xmlns="https://www.omg.org/spec/DMN/20230324/MODEL/" />`, {
+      upgradeTo: "latest",
+    }).parser.parse()}
+  />
+</Canvas>

@@ -99,7 +99,7 @@ function EmptyStoryWithIncludedModels(args: DmnEditorProps) {
         onModelChange,
         onRequestExternalModelByPath,
         onRequestExternalModelsAvailableToInclude,
-        externalModelsByNamespace: externalModelsByNamespace,
+        externalModelsByNamespace,
         externalContextName: args.externalContextName,
         externalContextDescription: args.externalContextDescription,
         validationMessages: args.validationMessages,
