@@ -59,7 +59,7 @@ export function Palette({ pulse }: { pulse: boolean }) {
     event.dataTransfer.effectAllowed = "move";
   }, []);
 
-  const { dmnEditorRootElementRef } = useDmnEditor();
+  const { dmnEditorRootElementRef, showDefaultDrdOnly } = useDmnEditor();
   const dmnEditorStoreApi = useDmnEditorStoreApi();
   const diagram = useDmnEditorStore((s) => s.diagram);
   const thisDmn = useDmnEditorStore((s) => s.dmn.model);
@@ -110,64 +110,69 @@ export function Palette({ pulse }: { pulse: boolean }) {
 
   return (
     <>
-      <RF.Panel position={"top-left"}>
-        <aside
-          data-testid={"kie-tools--dmn-editor--drd-selector"}
-          className={"kie-dmn-editor--drd-selector"}
-          style={{ position: "relative" }}
-        >
-          <div ref={drdSelectorPopoverRef} style={{ position: "absolute", left: "56px", height: "100%", zIndex: -1 }} />
-          <InlineFeelNameInput
-            validate={() => true}
-            allUniqueNames={() => new Map()}
-            name={drd?.["@_name"] ?? ""}
-            prefix={`${drdIndex + 1}.`}
-            id={getDrdId({ drdIndex: drdIndex })}
-            onRenamed={(newName) => {
-              dmnEditorStoreApi.setState((state) => {
-                const drd = addOrGetDrd({
-                  definitions: state.dmn.model.definitions,
-                  drdIndex: state.computed(state).getDrdIndex(),
-                });
-                drd.diagram["@_name"] = newName;
-              });
-            }}
-            placeholder={getDefaultDrdName({ drdIndex: drdIndex })}
-            isReadOnly={settings.isReadOnly}
-            isPlain={true}
-            shouldCommitOnBlur={true}
-          />
-          <Popover
-            className={"kie-dmn-editor--drd-selector-popover"}
-            key={DiagramLhsPanel.DRD_SELECTOR}
-            aria-label={"DRD Selector Popover"}
-            isVisible={diagram.openLhsPanel === DiagramLhsPanel.DRD_SELECTOR}
-            reference={() => drdSelectorPopoverRef.current!}
-            shouldClose={() => {
-              dmnEditorStoreApi.setState((state) => {
-                state.diagram.openLhsPanel = DiagramLhsPanel.NONE;
-              });
-            }}
-            showClose={false}
-            position={"bottom-start"}
-            hideOnOutsideClick={false}
-            bodyContent={<DrdSelectorPanel />}
-          />
-          <button
-            title={"Select or edit DRD"}
-            onClick={() => {
-              dmnEditorStoreApi.setState((state) => {
-                state.diagram.openLhsPanel =
-                  state.diagram.openLhsPanel === DiagramLhsPanel.DRD_SELECTOR
-                    ? DiagramLhsPanel.NONE
-                    : DiagramLhsPanel.DRD_SELECTOR;
-              });
-            }}
+      {!(showDefaultDrdOnly ?? false) && (
+        <RF.Panel position={"top-left"}>
+          <aside
+            data-testid={"kie-tools--dmn-editor--drd-selector"}
+            className={"kie-dmn-editor--drd-selector"}
+            style={{ position: "relative" }}
           >
-            <CaretDownIcon />
-          </button>
-        </aside>
-      </RF.Panel>
+            <div
+              ref={drdSelectorPopoverRef}
+              style={{ position: "absolute", left: "56px", height: "100%", zIndex: -1 }}
+            />
+            <InlineFeelNameInput
+              validate={() => true}
+              allUniqueNames={() => new Map()}
+              name={drd?.["@_name"] ?? ""}
+              prefix={`${drdIndex + 1}.`}
+              id={getDrdId({ drdIndex: drdIndex })}
+              onRenamed={(newName) => {
+                dmnEditorStoreApi.setState((state) => {
+                  const drd = addOrGetDrd({
+                    definitions: state.dmn.model.definitions,
+                    drdIndex: state.computed(state).getDrdIndex(),
+                  });
+                  drd.diagram["@_name"] = newName;
+                });
+              }}
+              placeholder={getDefaultDrdName({ drdIndex: drdIndex })}
+              isReadOnly={settings.isReadOnly}
+              isPlain={true}
+              shouldCommitOnBlur={true}
+            />
+            <Popover
+              className={"kie-dmn-editor--drd-selector-popover"}
+              key={DiagramLhsPanel.DRD_SELECTOR}
+              aria-label={"DRD Selector Popover"}
+              isVisible={diagram.openLhsPanel === DiagramLhsPanel.DRD_SELECTOR}
+              reference={() => drdSelectorPopoverRef.current!}
+              shouldClose={() => {
+                dmnEditorStoreApi.setState((state) => {
+                  state.diagram.openLhsPanel = DiagramLhsPanel.NONE;
+                });
+              }}
+              showClose={false}
+              position={"bottom-start"}
+              hideOnOutsideClick={false}
+              bodyContent={<DrdSelectorPanel />}
+            />
+            <button
+              title={"Select or edit DRD"}
+              onClick={() => {
+                dmnEditorStoreApi.setState((state) => {
+                  state.diagram.openLhsPanel =
+                    state.diagram.openLhsPanel === DiagramLhsPanel.DRD_SELECTOR
+                      ? DiagramLhsPanel.NONE
+                      : DiagramLhsPanel.DRD_SELECTOR;
+                });
+              }}
+            >
+              <CaretDownIcon />
+            </button>
+          </aside>
+        </RF.Panel>
+      )}
       {!settings.isReadOnly && (
         <RF.Panel
           position={"top-left"}

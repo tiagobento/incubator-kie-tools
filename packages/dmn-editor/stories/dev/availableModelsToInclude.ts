@@ -22,24 +22,23 @@ import { normalize } from "@kie-tools/dmn-marshaller/dist/normalization/normaliz
 import { XML2PMML } from "@kie-tools/pmml-editor-marshaller";
 import * as DmnEditor from "../../src/DmnEditor";
 import { getPmmlNamespace } from "../../src/pmml/pmml";
-import { sumBkm, sumDiffDs, testTreePmml } from "./externalModels";
+import { USE_CASE_MODELS } from "../useCases/models/models";
+import { testTreePmml } from "../misc/emptyWithAvailableExternalModels/testTreePmml";
 
-export const sumBkmModel = normalize(getMarshaller(sumBkm, { upgradeTo: "latest" }).parser.parse());
-export const sumDiffDsModel = normalize(getMarshaller(sumDiffDs, { upgradeTo: "latest" }).parser.parse());
 export const testTreePmmlModel = XML2PMML(testTreePmml);
 
 export const avaiableModels: DmnEditor.ExternalModel[] = [
   {
     type: "dmn",
-    model: sumBkmModel,
+    model: normalize(USE_CASE_MODELS.sumBkm.model),
+    normalizedPosixPathRelativeToTheOpenFile: "playground/available-models-to-include/SumBkm.dmn",
     svg: "",
-    normalizedPosixPathRelativeToTheOpenFile: "playground/available-models-to-include/sumBkm.dmn",
   },
   {
     type: "dmn",
-    model: sumDiffDsModel,
+    model: normalize(USE_CASE_MODELS.sumDiffDs.model),
+    normalizedPosixPathRelativeToTheOpenFile: "playground/available-models-to-include/SumDiffDs.dmn",
     svg: "",
-    normalizedPosixPathRelativeToTheOpenFile: "playground/available-models-to-include/sumDiffDs.dmn",
   },
   {
     type: "dmn",
@@ -48,8 +47,8 @@ export const avaiableModels: DmnEditor.ExternalModel[] = [
         upgradeTo: "latest",
       }).parser.parse()
     ),
+    normalizedPosixPathRelativeToTheOpenFile: "playground/available-models-to-include/Empty.dmn",
     svg: "",
-    normalizedPosixPathRelativeToTheOpenFile: "playground/available-models-to-include/empty.dmn",
   },
   {
     type: "pmml",

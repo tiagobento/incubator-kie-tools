@@ -17,44 +17,39 @@
  * under the License.
  */
 
-import { getMarshaller } from "@kie-tools/dmn-marshaller";
 import { normalize } from "@kie-tools/dmn-marshaller/dist/normalization/normalize";
 import { XML2PMML } from "@kie-tools/pmml-editor-marshaller";
 import * as DmnEditor from "@kie-tools/dmn-editor/dist/DmnEditor";
 import { getPmmlNamespace } from "@kie-tools/dmn-editor/dist/pmml/pmml";
-import { sumBkm, sumDiffDs, testTreePmml } from "./externalModels";
+import { USE_CASE_MODELS } from "../../useCases/models/models";
+import { REFERENCE_MODELS } from "../../reference/models/models";
+import { testTreePmml } from "./testTreePmml";
 
-export const sumBkmModel = normalize(getMarshaller(sumBkm, { upgradeTo: "latest" }).parser.parse());
-export const sumDiffDsModel = normalize(getMarshaller(sumDiffDs, { upgradeTo: "latest" }).parser.parse());
 export const testTreePmmlModel = XML2PMML(testTreePmml);
 
 export const availableModels: DmnEditor.ExternalModel[] = [
   {
     type: "dmn",
-    model: sumBkmModel,
+    model: normalize(USE_CASE_MODELS.sumBkm.model),
+    normalizedPosixPathRelativeToTheOpenFile: "storybook/useCases/sumBkm.dmn",
     svg: "",
-    normalizedPosixPathRelativeToTheOpenFile: "playground/available-models-to-include/sumBkm.dmn",
   },
   {
     type: "dmn",
-    model: sumDiffDsModel,
+    model: normalize(USE_CASE_MODELS.sumDiffDs.model),
+    normalizedPosixPathRelativeToTheOpenFile: "storybook/useCases/sumDiffDs.dmn",
     svg: "",
-    normalizedPosixPathRelativeToTheOpenFile: "playground/available-models-to-include/sumDiffDs.dmn",
   },
   {
     type: "dmn",
-    model: normalize(
-      getMarshaller(`<definitions xmlns="https://www.omg.org/spec/DMN/20230324/MODEL/" />`, {
-        upgradeTo: "latest",
-      }).parser.parse()
-    ),
+    model: normalize(REFERENCE_MODELS.empty.model),
+    normalizedPosixPathRelativeToTheOpenFile: "storybook/reference/empty.dmn",
     svg: "",
-    normalizedPosixPathRelativeToTheOpenFile: "playground/available-models-to-include/empty.dmn",
   },
   {
     type: "pmml",
     model: testTreePmmlModel,
-    normalizedPosixPathRelativeToTheOpenFile: "playground/available-models-to-include/testTree.pmml",
+    normalizedPosixPathRelativeToTheOpenFile: "storybook/useCases/testTree.pmml",
   },
 ];
 

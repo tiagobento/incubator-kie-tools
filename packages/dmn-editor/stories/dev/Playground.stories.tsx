@@ -28,7 +28,6 @@ import { DmnLatestModel, DmnMarshaller, getMarshaller } from "@kie-tools/dmn-mar
 import { normalize, Normalized } from "@kie-tools/dmn-marshaller/dist/normalization/normalize";
 import { availableModelsByPath, modelsByNamespace } from "./availableModelsToInclude";
 import { generateEmptyDmn15 } from "../misc/empty/Empty.stories";
-import { loanPreQualificationDmn } from "../useCases/loanPreQualification/LoanPreQualification.stories";
 import { DmnEditorWrapper } from "../dmnEditorStoriesWrapper";
 import {
   DmnEditorProps,
@@ -38,28 +37,9 @@ import {
   OnRequestExternalModelsAvailableToInclude,
   OnRequestToJumpToPath,
 } from "../../src/DmnEditor";
+import { USE_CASE_MODELS } from "../useCases/models/models";
 
 const initialModel = generateEmptyDmn15();
-
-const emptyDrd = `<?xml version="1.0" encoding="UTF-8" ?>
-<definitions xmlns="https://www.omg.org/spec/DMN/20230324/MODEL/" xmlns:dmndi="https://www.omg.org/spec/DMN/20230324/DMNDI/" xmlns:dc="http://www.omg.org/spec/DMN/20180521/DC/" xmlns:di="http://www.omg.org/spec/DMN/20180521/DI/" xmlns:kie="https://kie.org/dmn/extensions/1.0" xmlns:included0="https://kie.org/dmn/_125A5475-65CE-4574-822C-9CB2268F1393" expressionLanguage="https://www.omg.org/spec/DMN/20230324/FEEL/" namespace="https://kie.org/dmn/_2B849D68-E816-42F9-898A-1938B5D6B297" id="_A06623F7-6F03-49B9-9215-B9F99817C3ED" name="DMN_48A8D068-DBF3-4AE6-94E2-496DFC4B3E46">
-  <inputData name="My Input" id="_9392B01E-8C6B-4E29-9CC4-21C16EFB2F6B">
-    <variable name="My Input" id="_9483BABF-708A-4357-AD78-18C7A770E292" typeRef="&lt;Undefined&gt;" />
-  </inputData>
-  <decision name="My Decision" id="_83A0C6FA-0951-4E1E-9DF1-74A9D2A95E98">
-    <variable id="_01C70F45-2955-474A-9FAC-14967ABAF475" typeRef="&lt;Undefined&gt;" name="My Decision" />
-    <informationRequirement id="_E4FE78BB-996B-46C4-9F9B-018163E9017A">
-      <requiredInput href="#_9392B01E-8C6B-4E29-9CC4-21C16EFB2F6B" />
-    </informationRequirement>
-    <informationRequirement id="_E52D5C34-172E-4E33-B2FE-7B2A7AFDF52C">
-      <requiredInput href="#_4072ADC3-E7CF-4D22-8179-7494EE22157C" />
-    </informationRequirement>
-  </decision>
-  <inputData name="Another Input" id="_4072ADC3-E7CF-4D22-8179-7494EE22157C">
-    <variable name="Another Input" id="_7490876B-8FA9-4FEC-B078-7563EF04F52B" typeRef="&lt;Undefined&gt;" />
-  </inputData>
-</definitions>
-`;
 
 function DevPlayground(args: DmnEditorProps) {
   const [state, setState] = useState<{
@@ -144,8 +124,8 @@ function DevPlayground(args: DmnEditorProps) {
   }, []);
 
   const onSelectModel = useCallback(
-    (newModel) => {
-      onModelChange(normalize(getMarshaller(newModel, { upgradeTo: "latest" }).parser.parse()));
+    (newModel: DmnLatestModel) => {
+      onModelChange(normalize(newModel));
     },
     [onModelChange]
   );
@@ -183,9 +163,11 @@ function DevPlayground(args: DmnEditorProps) {
                   <h5>(Drag & drop a file anywhere to open it)</h5>
                 </FlexItem>
                 <FlexItem shrink={{ default: "shrink" }}>
-                  <button onClick={() => onSelectModel(loanPreQualificationDmn)}>Ex: Loan Pre Qualification</button>
+                  <button onClick={() => onSelectModel(USE_CASE_MODELS.loanPreQualification.model)}>
+                    Ex: Loan Pre-Qualification
+                  </button>
                   &nbsp; &nbsp;
-                  <button onClick={() => onSelectModel(emptyDrd)}>Ex: Autolayout</button>
+                  <button onClick={() => onSelectModel(USE_CASE_MODELS.autolayout.model)}>Ex: Autolayout</button>
                   &nbsp; &nbsp; | &nbsp; &nbsp;
                   <button disabled={!isUndoEnabled} style={{ opacity: isUndoEnabled ? 1 : 0.5 }} onClick={undo}>
                     {`Undo (${state.pointer})`}
@@ -264,8 +246,8 @@ export const Playground: Story = {
     originalVersion: "1.5",
     evaluationResultsByNodeId: new Map(),
     externalContextDescription:
-      "You're using the DMN Playground, so there's only two simple external models that can be included.",
-    externalContextName: "Playground",
+      "You're using the DMN Editor Playground, so there's only two simple external models that can be included.",
+    externalContextName: "Apache KIE :: DMN Editor :: Storybook :: Playground",
     externalModelsByNamespace: {},
     issueTrackerHref: "https://github.com/apache/incubator-kie-issues/issues/new",
     validationMessages: {},

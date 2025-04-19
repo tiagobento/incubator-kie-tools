@@ -49,8 +49,8 @@ export const Empty: Story = {
   args: {
     model: model,
     originalVersion: "2.0",
-    externalContextDescription: "",
-    externalContextName: "Storybook - BPMN Editor",
+    externalContextDescription: "The Storybook for the BPMN Editor",
+    externalContextName: "Apache KIE :: BPMN Editor :: Storybook",
     issueTrackerHref: "",
     xml: marshaller.builder.build(model),
   },

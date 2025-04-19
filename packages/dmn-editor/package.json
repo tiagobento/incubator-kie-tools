@@ -105,6 +105,7 @@
     "jest-junit": "^16.0.0",
     "jest-when": "^3.6.0",
     "lodash": "^4.17.21",
+    "raw-loader": "^4.0.2",
     "rimraf": "^3.0.2",
     "run-script-os": "^1.1.6",
     "start-server-and-test": "^2.0.3",

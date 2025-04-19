@@ -31,8 +31,8 @@
       <requiredInput href="#_293712D5-B39E-4830-875A-2E44C98C9483" />
     </informationRequirement>
   </decision>
-  <decision name="Decision Node" id="_0A16F847-37BA-400E-B4DD-B1D110BCF38D">
-    <variable name="Decision Node" id="_DB942CFE-4CCD-42B4-944A-5C1528C4BAAA" typeRef="Data Type" />
+  <decision name="Decision node" id="_0A16F847-37BA-400E-B4DD-B1D110BCF38D">
+    <variable name="Decision node" id="_DB942CFE-4CCD-42B4-944A-5C1528C4BAAA" typeRef="Data Type" />
   </decision>
   <dmndi:DMNDI>
     <dmndi:DMNDiagram

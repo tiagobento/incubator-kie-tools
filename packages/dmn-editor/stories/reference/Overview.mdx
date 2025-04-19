@@ -16,10 +16,9 @@
 {/* under the License. */}
 
 import { useCallback, useState, useRef, useMemo, useEffect } from "react";
-import { Meta, Canvas } from "@storybook/blocks";
+import { Meta } from "@storybook/blocks";
 import { DmnEditor } from "../../src/DmnEditor";
-
-import { getMarshaller } from "@kie-tools/dmn-marshaller";
+import { USE_CASE_MODELS } from "../useCases/models/models";
 
 <Meta title="Reference/Overview" />
 
@@ -27,11 +26,4 @@ import { getMarshaller } from "@kie-tools/dmn-marshaller";
 
 The DMN Editor lets you edit Decision models based on the DMN standard.
 
-<Canvas style={{ minHeight: "400px" }}>
-  <DmnEditor
-    isReadOnly={true}
-    model={getMarshaller(`<definitions xmlns="https://www.omg.org/spec/DMN/20230324/MODEL/" />`, {
-      upgradeTo: "latest",
-    }).parser.parse()}
-  />
-</Canvas>
+<DmnEditor isReadOnly={true} model={USE_CASE_MODELS.loanPreQualification.model} />

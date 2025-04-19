@@ -16,22 +16,38 @@
 {/* under the License. */}
 
 import { useCallback, useState, useRef, useMemo, useEffect } from "react";
-import { Meta, Canvas } from "@storybook/blocks";
+import { Meta } from "@storybook/blocks";
 import { DmnEditor } from "../../src/DmnEditor";
-
-import { getMarshaller } from "@kie-tools/dmn-marshaller";
+import { REFERENCE_MODELS } from "./models/models";
 
 <Meta title="Reference/Nodes" />
 
-# DMN Editor :: Nodes
-
-The DMN Editor lets you edit Decision models based on the DMN standard.
-
-<Canvas style={{ minHeight: "400px" }}>
+<div
+  style={{
+    position: "absolute",
+    left: "0",
+    width: "100vw",
+    height: "calc(100% - 70px)",
+    boxShadow: "inset 0px 0px 20px 0px black",
+  }}
+>
   <DmnEditor
     isReadOnly={true}
-    model={getMarshaller(`<definitions xmlns="https://www.omg.org/spec/DMN/20230324/MODEL/" />`, {
-      upgradeTo: "latest",
-    }).parser.parse()}
+    showDefaultDrdOnly={true}
+    externalModelsByNamespace={{
+      [REFERENCE_MODELS.externalDmn.model.definitions["@_namespace"]]: {
+        type: "dmn",
+        model: REFERENCE_MODELS.externalDmn.model,
+        normalizedPosixPathRelativeToTheOpenFile: `./${REFERENCE_MODELS.externalDmn.filename}`,
+        svg: "",
+      },
+      [REFERENCE_MODELS.externalDmnDefault.model.definitions["@_namespace"]]: {
+        type: "dmn",
+        model: REFERENCE_MODELS.externalDmnDefault.model,
+        normalizedPosixPathRelativeToTheOpenFile: `./${REFERENCE_MODELS.externalDmnDefault.filename}`,
+        svg: "",
+      },
+    }}
+    model={REFERENCE_MODELS.nodes.model}
   />
-</Canvas>
+</div>

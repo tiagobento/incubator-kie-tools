@@ -208,9 +208,8 @@ export const Playground: Story = {
   args: {
     model: getMarshaller(initialModel, { upgradeTo: "latest" }).parser.parse(),
     originalVersion: "2.0",
-    externalContextDescription:
-      "You're using the BPMN Playground, so there's only two simple external models that can be included.",
-    externalContextName: "Playground",
+    externalContextDescription: "You're using the BPMN Editor Playground.",
+    externalContextName: "Apache KIE :: BPMN Editor :: Storybook :: Playground",
     issueTrackerHref: "https://github.com/apache/incubator-kie-issues/issues/new",
   },
 };

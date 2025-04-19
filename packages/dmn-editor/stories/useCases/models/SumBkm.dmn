@@ -1,0 +1,42 @@
+<definitions
+  xmlns="https://www.omg.org/spec/DMN/20230324/MODEL/"
+  xmlns:dmndi="https://www.omg.org/spec/DMN/20230324/DMNDI/"
+  xmlns:dc="http://www.omg.org/spec/DMN/20180521/DC/"
+  xmlns:di="http://www.omg.org/spec/DMN/20180521/DI/"
+  xmlns:kie="https://kie.apache.org/dmn/extensions/1.0"
+  expressionLanguage="https://www.omg.org/spec/DMN/20211108/FEEL/"
+  typeLanguage="http://www.omg.org/spec/DMN/20211108/FEEL/"
+  namespace="https://kie.apache.org/dmn/_923784BD-CD31-488A-9C31-C1A83C5483C0"
+  id="_0E6F4D88-B955-404B-A31A-72BB7E1E6A77"
+  name="Sum BKM"
+>
+  <businessKnowledgeModel name="Sum BKM" id="_3646600D-035F-47B9-8DC6-3FABE844234F">
+    <variable name="New BKM" id="_94BAC9FD-8519-49F9-855A-F4FCBACD2A04" typeRef="number" />
+    <functionDefinition label="Sum BKM" kind="FEEL" typeRef="number">
+      <formalParameter id="_F3A70A69-09FF-417C-8F6C-BD9129231377" name="a" typeRef="number" />
+      <formalParameter id="_E51B1C6E-896B-41C0-B03E-85B3CD7B6655" name="b" typeRef="number" />
+      <literalExpression id="_FA1EE22B-CC6B-499F-95EE-68158A2F233B" label="Expression Name" typeRef="&lt;Undefined&gt;">
+        <text>a + b</text>
+      </literalExpression>
+    </functionDefinition>
+  </businessKnowledgeModel>
+  <dmndi:DMNDI>
+    <dmndi:DMNDiagram>
+      <dmndi:DMNShape
+        id="_3506A087-AB60-428D-9C75-1E5F5D6F0947"
+        dmnElementRef="_3646600D-035F-47B9-8DC6-3FABE844234F"
+        isCollapsed="false"
+        isListedInputData="false"
+      >
+        <dc:Bounds x="40" y="60" width="160" height="80" />
+      </dmndi:DMNShape>
+      <di:extension>
+        <kie:ComponentsWidthsExtension>
+          <kie:ComponentWidths dmnElementRef="_FA1EE22B-CC6B-499F-95EE-68158A2F233B">
+            <kie:width>190</kie:width>
+          </kie:ComponentWidths>
+        </kie:ComponentsWidthsExtension>
+      </di:extension>
+    </dmndi:DMNDiagram>
+  </dmndi:DMNDI>
+</definitions>

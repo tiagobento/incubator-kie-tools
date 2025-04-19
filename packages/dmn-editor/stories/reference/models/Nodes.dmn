@@ -27,6 +27,14 @@
     locationURI="./External DMN (default).dmn"
   />
   <itemDefinition
+    id="_42BFE7A7-FC22-4F27-8688-1AE73512C9A0"
+    name="Collection Data Type"
+    isCollection="true"
+    typeLanguage="https://www.omg.org/spec/DMN/20230324/FEEL/"
+  >
+    <typeRef>Any</typeRef>
+  </itemDefinition>
+  <itemDefinition
     id="_94170863-70E9-4147-81F6-423B886F8B10"
     name="Data Type"
     isCollection="false"
@@ -81,6 +89,20 @@
   </decisionService>
   <decision name="Decision node" id="_1F0CE06C-68E2-4001-8DCC-93A40BA08D83">
     <variable name="Decision node" id="_8FA911C1-6DC9-4766-8CC6-2EC4488566F0" typeRef="Data Type" />
+  </decision>
+  <inputData name="Input Data node - wtih collection" id="_7AC22C97-E502-41B3-99FA-9C1F76646530">
+    <variable
+      name="Input Data node - wtih collection"
+      id="_1D74ECB1-6DBF-48DB-A922-12F06B668A69"
+      typeRef="Collection Data Type"
+    />
+  </inputData>
+  <decision name="Decision node - with collection" id="_A733687F-5395-4A71-9614-DAA02CBDB6D3">
+    <variable
+      name="Decision node - with collection"
+      id="_2E13398D-2C44-4EDB-81C3-67DDBEEBC170"
+      typeRef="Collection Data Type"
+    />
   </decision>
   <group id="_C5D359AA-8F95-4D76-8ADA-2D00725E558B" name="Group node" />
   <textAnnotation id="_6ACAB240-05B8-4447-B66D-8BA8AD51EBDC">
@@ -157,15 +179,15 @@ Learn more in the dedicated Included models chapter.</text>
   <textAnnotation id="_6B229BB7-3706-4A76-BA7D-A5DD1C85BEED">
     <text>Nodes can be styled with different fonts and colors.
 
-You can toggle this beahvior on and off int he overlays panel at the top-right corner.</text>
+You can toggle this beahvior on and off in the overlays panel at the top-right corner.</text>
   </textAnnotation>
   <association id="_B829CC1B-15C0-47EE-BFDC-968E2980B5FE" associationDirection="Both">
     <sourceRef href="#_14A6A481-724C-41D2-9F36-D19C72919737" />
     <targetRef href="#_6B229BB7-3706-4A76-BA7D-A5DD1C85BEED" />
   </association>
-  <group id="_E3DA4AEF-343B-4ADC-96C0-EBEF8C4CEF13" name="Special depictions" />
-  <group id="_4EABF434-1D32-4C26-8098-3223528E2EDE" name="Non-executable nodes" />
-  <group id="_980945C5-DBD4-4736-B638-4E7A7B09A0CC" name="Executable nodes" />
+  <group id="_E3DA4AEF-343B-4ADC-96C0-EBEF8C4CEF13" name="👀 Special depictions" />
+  <group id="_4EABF434-1D32-4C26-8098-3223528E2EDE" name="📃 Non-executable nodes" />
+  <group id="_980945C5-DBD4-4736-B638-4E7A7B09A0CC" name="🚀 Executable nodes" />
   <association id="_1B0858B9-2108-45CB-BF5F-EA3D98CFE0F5" associationDirection="Both">
     <sourceRef href="#_1F0CE06C-68E2-4001-8DCC-93A40BA08D83" />
     <targetRef href="#_0D3622C3-4E59-45AB-BD3A-481D40E41F70" />
@@ -194,6 +216,21 @@ You can toggle this beahvior on and off int he overlays panel at the top-right c
     <sourceRef href="#_93546B81-C7C3-499B-B24D-2E2413A64761" />
     <targetRef href="#_81C86C51-64C5-4181-B432-6E2D458784F5" />
   </association>
+  <textAnnotation id="_FDCF0B86-BA93-43E9-A450-E216530E12CB">
+    <text>DMN NODES REFERENCE</text>
+  </textAnnotation>
+  <textAnnotation id="_5DCD63BC-CBDA-454C-BA52-4D5A5A1C1181">
+    <text
+    >When Decisions and Input Data nodes have a collection Data Type, a special marker appears directly in the node.</text>
+  </textAnnotation>
+  <association id="_17CBC034-523E-4C22-8A71-5E5E78C37C4C" associationDirection="Both">
+    <sourceRef href="#_A733687F-5395-4A71-9614-DAA02CBDB6D3" />
+    <targetRef href="#_5DCD63BC-CBDA-454C-BA52-4D5A5A1C1181" />
+  </association>
+  <association id="_A3E69C0C-A3B4-4ADF-8F03-46D8E1FEDBB7" associationDirection="Both">
+    <sourceRef href="#_7AC22C97-E502-41B3-99FA-9C1F76646530" />
+    <targetRef href="#_5DCD63BC-CBDA-454C-BA52-4D5A5A1C1181" />
+  </association>
   <dmndi:DMNDI>
     <dmndi:DMNDiagram
       id="_DB30AC30-8528-4889-B17D-43E87627A7D9"
@@ -211,7 +248,7 @@ You can toggle this beahvior on and off int he overlays panel at the top-right c
         isCollapsed="false"
         isListedInputData="false"
       >
-        <dc:Bounds x="140" y="80" width="160" height="80" />
+        <dc:Bounds x="40" y="100" width="160" height="80" />
       </dmndi:DMNShape>
       <dmndi:DMNShape
         id="_6A42A53E-F731-4E8D-9473-255CBCC15BA4"
@@ -219,7 +256,7 @@ You can toggle this beahvior on and off int he overlays panel at the top-right c
         isCollapsed="false"
         isListedInputData="false"
       >
-        <dc:Bounds x="860" y="80" width="160" height="80" />
+        <dc:Bounds x="760" y="100" width="160" height="80" />
       </dmndi:DMNShape>
       <dmndi:DMNShape
         id="_BC2BB914-B0FC-439D-9E3B-78CD6AF12214"
@@ -227,7 +264,7 @@ You can toggle this beahvior on and off int he overlays panel at the top-right c
         isCollapsed="false"
         isListedInputData="false"
       >
-        <dc:Bounds x="1300" y="80" width="160" height="80" />
+        <dc:Bounds x="1200" y="100" width="160" height="80" />
       </dmndi:DMNShape>
       <dmndi:DMNShape
         id="_8D521F22-C268-43AC-9617-BC11A3DA8D92"
@@ -235,10 +272,10 @@ You can toggle this beahvior on and off int he overlays panel at the top-right c
         isCollapsed="false"
         isListedInputData="false"
       >
-        <dc:Bounds x="220" y="580" width="300" height="320" />
+        <dc:Bounds x="120" y="600" width="300" height="320" />
         <dmndi:DMNDecisionServiceDividerLine id="_CF867856-B3B6-4DD7-9CBE-5F7CF148F7ED">
-          <di:waypoint x="220" y="748.1275634765625" />
-          <di:waypoint x="540" y="748.1275634765625" />
+          <di:waypoint x="120" y="768.1275634765625" />
+          <di:waypoint x="440" y="768.1275634765625" />
         </dmndi:DMNDecisionServiceDividerLine>
       </dmndi:DMNShape>
       <dmndi:DMNShape
@@ -247,7 +284,7 @@ You can toggle this beahvior on and off int he overlays panel at the top-right c
         isCollapsed="false"
         isListedInputData="false"
       >
-        <dc:Bounds x="1620" y="80" width="280" height="200" />
+        <dc:Bounds x="1520" y="100" width="280" height="200" />
       </dmndi:DMNShape>
       <dmndi:DMNShape
         id="_217CCCAD-A919-4029-BBCA-F8E3935F4AE0"
@@ -255,7 +292,10 @@ You can toggle this beahvior on and off int he overlays panel at the top-right c
         isCollapsed="false"
         isListedInputData="false"
       >
-        <dc:Bounds x="80" y="240" width="280" height="200" />
+        <dmndi:DMNStyle id="_220B816D-168A-432F-B260-81A8BC3E274F">
+          <dmndi:FontColor blue="1" green="126" red="3" />
+        </dmndi:DMNStyle>
+        <dc:Bounds x="-20" y="260" width="280" height="200" />
       </dmndi:DMNShape>
       <dmndi:DMNShape
         id="_88EBE1E5-E80D-4CDD-9460-9EF2FC19C88A"
@@ -263,7 +303,10 @@ You can toggle this beahvior on and off int he overlays panel at the top-right c
         isCollapsed="false"
         isListedInputData="false"
       >
-        <dc:Bounds x="420" y="240" width="320" height="240" />
+        <dmndi:DMNStyle id="_8DFF4C53-E2F4-485B-B339-3D08821EA16D">
+          <dmndi:FontColor blue="1" green="126" red="3" />
+        </dmndi:DMNStyle>
+        <dc:Bounds x="320" y="260" width="320" height="240" />
       </dmndi:DMNShape>
       <dmndi:DMNShape
         id="_413AEF56-125C-43BB-AD6C-D51AA51F3F5C"
@@ -271,7 +314,10 @@ You can toggle this beahvior on and off int he overlays panel at the top-right c
         isCollapsed="false"
         isListedInputData="false"
       >
-        <dc:Bounds x="780" y="240" width="320" height="220" />
+        <dmndi:DMNStyle id="_F44E74B8-4C36-4406-93A0-347584E56AE5">
+          <dmndi:FontColor blue="1" green="126" red="3" />
+        </dmndi:DMNStyle>
+        <dc:Bounds x="680" y="260" width="320" height="220" />
       </dmndi:DMNShape>
       <dmndi:DMNShape
         id="_F33C7EB2-A8BA-4E45-B9CA-9202286F6299"
@@ -279,7 +325,10 @@ You can toggle this beahvior on and off int he overlays panel at the top-right c
         isCollapsed="false"
         isListedInputData="false"
       >
-        <dc:Bounds x="600" y="580" width="360" height="480" />
+        <dmndi:DMNStyle id="_AC932354-24E3-46F0-8C13-E668658DB0AC">
+          <dmndi:FontColor blue="1" green="126" red="3" />
+        </dmndi:DMNStyle>
+        <dc:Bounds x="500" y="600" width="360" height="480" />
       </dmndi:DMNShape>
       <dmndi:DMNShape
         id="_4B94186A-8479-427A-B2D4-0774188EA57B"
@@ -287,7 +336,10 @@ You can toggle this beahvior on and off int he overlays panel at the top-right c
         isCollapsed="false"
         isListedInputData="false"
       >
-        <dc:Bounds x="1260" y="240" width="240" height="180" />
+        <dmndi:DMNStyle id="_ADBA59A9-E246-48E5-8925-B42ED3514498">
+          <dmndi:FontColor blue="1" green="126" red="3" />
+        </dmndi:DMNStyle>
+        <dc:Bounds x="1160" y="260" width="240" height="180" />
       </dmndi:DMNShape>
       <dmndi:DMNEdge
         id="_A7CAD3EF-5D41-4A53-8F35-5772F7E0455F-AUTO-TARGET"
@@ -295,8 +347,8 @@ You can toggle this beahvior on and off int he overlays panel at the top-right c
         sourceElement="_BC2BB914-B0FC-439D-9E3B-78CD6AF12214"
         targetElement="_4B94186A-8479-427A-B2D4-0774188EA57B"
       >
-        <di:waypoint x="1380" y="120" />
-        <di:waypoint x="1380" y="330" />
+        <di:waypoint x="1280" y="140" />
+        <di:waypoint x="1280" y="350" />
       </dmndi:DMNEdge>
       <dmndi:DMNShape
         id="_5571313A-B684-4125-AE13-BF4ECBE8C74C"
@@ -304,7 +356,10 @@ You can toggle this beahvior on and off int he overlays panel at the top-right c
         isCollapsed="false"
         isListedInputData="false"
       >
-        <dc:Bounds x="1580" y="320" width="360" height="200" />
+        <dmndi:DMNStyle id="_F1F7C724-9DF5-4E04-9323-44BB8DD161AC">
+          <dmndi:FontColor blue="1" green="126" red="3" />
+        </dmndi:DMNStyle>
+        <dc:Bounds x="1480" y="340" width="360" height="200" />
       </dmndi:DMNShape>
       <dmndi:DMNEdge
         id="_EAA67CD3-67C1-4354-86BA-02B72D9403FA-AUTO-TARGET"
@@ -312,8 +367,8 @@ You can toggle this beahvior on and off int he overlays panel at the top-right c
         sourceElement="_52087E42-A195-41B6-85AB-3641984F1D3B"
         targetElement="_5571313A-B684-4125-AE13-BF4ECBE8C74C"
       >
-        <di:waypoint x="1760" y="180" />
-        <di:waypoint x="1760" y="420" />
+        <di:waypoint x="1660" y="200" />
+        <di:waypoint x="1660" y="440" />
       </dmndi:DMNEdge>
       <dmndi:DMNShape
         id="_FA4678AF-F240-4CB5-8AA2-7C522938EBB7"
@@ -321,7 +376,7 @@ You can toggle this beahvior on and off int he overlays panel at the top-right c
         isCollapsed="false"
         isListedInputData="false"
       >
-        <dc:Bounds x="280" y="640" width="180" height="80" />
+        <dc:Bounds x="180" y="660" width="180" height="80" />
       </dmndi:DMNShape>
       <dmndi:DMNShape
         id="_53E09657-F5AC-4BAF-BC4F-6C87991997EE"
@@ -329,7 +384,7 @@ You can toggle this beahvior on and off int he overlays panel at the top-right c
         isCollapsed="false"
         isListedInputData="false"
       >
-        <dc:Bounds x="280" y="780" width="180" height="80" />
+        <dc:Bounds x="180" y="800" width="180" height="80" />
       </dmndi:DMNShape>
       <dmndi:DMNEdge
         id="_07FABEA0-6D75-40AC-AB62-F0D362FE628D"
@@ -337,8 +392,8 @@ You can toggle this beahvior on and off int he overlays panel at the top-right c
         sourceElement="_53E09657-F5AC-4BAF-BC4F-6C87991997EE"
         targetElement="_FA4678AF-F240-4CB5-8AA2-7C522938EBB7"
       >
-        <di:waypoint x="370" y="820" />
-        <di:waypoint x="370" y="720" />
+        <di:waypoint x="270" y="840" />
+        <di:waypoint x="270" y="740" />
       </dmndi:DMNEdge>
       <dmndi:DMNShape
         id="_06B8749C-EFF4-4BC5-83F5-100CBBDDB09B"
@@ -346,7 +401,7 @@ You can toggle this beahvior on and off int he overlays panel at the top-right c
         isCollapsed="false"
         isListedInputData="false"
       >
-        <dc:Bounds x="1980" y="80" width="300" height="140" />
+        <dc:Bounds x="1880" y="100" width="300" height="140" />
       </dmndi:DMNShape>
       <dmndi:DMNShape
         id="_3F2A1645-8762-44B3-B158-318829274FE3"
@@ -354,13 +409,13 @@ You can toggle this beahvior on and off int he overlays panel at the top-right c
         isCollapsed="false"
         isListedInputData="false"
       >
-        <dc:Bounds x="1760" y="1220" width="160" height="80" />
+        <dc:Bounds x="1660" y="1320" width="160" height="80" />
       </dmndi:DMNShape>
       <dmndi:DMNShape
         id="_5A063C9E-CC8D-4B6E-B568-D300154B089B"
         dmnElementRef="included0:_0A16F847-37BA-400E-B4DD-B1D110BCF38D"
       >
-        <dc:Bounds x="1740" y="840" width="200" height="100" />
+        <dc:Bounds x="1640" y="880" width="200" height="100" />
       </dmndi:DMNShape>
       <dmndi:DMNShape
         id="_0BC18340-BF4A-49C3-815D-BD207D81FE9B"
@@ -368,7 +423,7 @@ You can toggle this beahvior on and off int he overlays panel at the top-right c
         isCollapsed="false"
         isListedInputData="false"
       >
-        <dc:Bounds x="1740" y="700" width="200" height="100" />
+        <dc:Bounds x="1640" y="720" width="200" height="100" />
       </dmndi:DMNShape>
       <dmndi:DMNShape
         id="_9B08E4B2-ED48-4C35-99A3-B12B36A66B36"
@@ -376,7 +431,10 @@ You can toggle this beahvior on and off int he overlays panel at the top-right c
         isCollapsed="false"
         isListedInputData="false"
       >
-        <dc:Bounds x="2020" y="700" width="260" height="260" />
+        <dmndi:DMNStyle id="_0DF8AF53-D764-41C9-8796-E96494DF63FA">
+          <dmndi:FontColor blue="1" green="126" red="3" />
+        </dmndi:DMNStyle>
+        <dc:Bounds x="1920" y="720" width="260" height="260" />
       </dmndi:DMNShape>
       <dmndi:DMNEdge
         id="_62D4A5AB-96CB-4D78-BC38-2EFC0DDE8AB1-AUTO-TARGET"
@@ -384,8 +442,8 @@ You can toggle this beahvior on and off int he overlays panel at the top-right c
         sourceElement="_0BC18340-BF4A-49C3-815D-BD207D81FE9B"
         targetElement="_9B08E4B2-ED48-4C35-99A3-B12B36A66B36"
       >
-        <di:waypoint x="1840" y="750" />
-        <di:waypoint x="2150" y="830" />
+        <di:waypoint x="1740" y="770" />
+        <di:waypoint x="2050" y="850" />
       </dmndi:DMNEdge>
       <dmndi:DMNShape
         id="_4BC27BC1-5B52-4D36-BECA-B83B7788FA5A"
@@ -393,7 +451,10 @@ You can toggle this beahvior on and off int he overlays panel at the top-right c
         isCollapsed="false"
         isListedInputData="false"
       >
-        <dc:Bounds x="1260" y="820" width="380" height="240" />
+        <dmndi:DMNStyle id="_837511EC-FBB7-438D-BAB1-0425E59F6D13">
+          <dmndi:FontColor blue="1" green="126" red="3" />
+        </dmndi:DMNStyle>
+        <dc:Bounds x="1160" y="860" width="380" height="240" />
       </dmndi:DMNShape>
       <dmndi:DMNEdge
         id="_06E1563B-7A7C-4182-A26C-66DD50BD5314-AUTO-TARGET"
@@ -401,14 +462,14 @@ You can toggle this beahvior on and off int he overlays panel at the top-right c
         sourceElement="_5A063C9E-CC8D-4B6E-B568-D300154B089B"
         targetElement="_4BC27BC1-5B52-4D36-BECA-B83B7788FA5A"
       >
-        <di:waypoint x="1840" y="890" />
-        <di:waypoint x="1450" y="940" />
+        <di:waypoint x="1740" y="930" />
+        <di:waypoint x="1350" y="980" />
       </dmndi:DMNEdge>
       <dmndi:DMNShape
         id="_62C47700-5BB2-40F1-9197-B55CAC7F205C"
         dmnElementRef="included1:_D7FF2684-DE46-483B-9423-1505610B708A"
       >
-        <dc:Bounds x="1740" y="980" width="200" height="80" />
+        <dc:Bounds x="1640" y="1000" width="200" height="100" />
       </dmndi:DMNShape>
       <dmndi:DMNEdge
         id="_F1389C2D-B67C-482E-A0E8-6A24D60D1839"
@@ -416,8 +477,8 @@ You can toggle this beahvior on and off int he overlays panel at the top-right c
         sourceElement="_62C47700-5BB2-40F1-9197-B55CAC7F205C"
         targetElement="_4BC27BC1-5B52-4D36-BECA-B83B7788FA5A"
       >
-        <di:waypoint x="1840" y="1020" />
-        <di:waypoint x="1640" y="940" />
+        <di:waypoint x="1740" y="1050" />
+        <di:waypoint x="1540" y="980" />
       </dmndi:DMNEdge>
       <dmndi:DMNShape
         id="_6781855B-065B-4664-BF89-BF373210C6B1"
@@ -438,7 +499,7 @@ You can toggle this beahvior on and off int he overlays panel at the top-right c
           <dmndi:StrokeColor blue="156" green="126" red="38" />
           <dmndi:FontColor blue="10" green="255" red="51" />
         </dmndi:DMNStyle>
-        <dc:Bounds x="1740" y="1100" width="200" height="80" />
+        <dc:Bounds x="1640" y="1160" width="200" height="100" />
       </dmndi:DMNShape>
       <dmndi:DMNShape
         id="_83774FD0-2F73-4C29-894E-B362AB94604C"
@@ -446,7 +507,10 @@ You can toggle this beahvior on and off int he overlays panel at the top-right c
         isCollapsed="false"
         isListedInputData="false"
       >
-        <dc:Bounds x="1260" y="1140" width="380" height="160" />
+        <dmndi:DMNStyle id="_C110A36E-BBD5-4318-B9F7-D9D99FA7259F">
+          <dmndi:FontColor blue="1" green="126" red="3" />
+        </dmndi:DMNStyle>
+        <dc:Bounds x="1160" y="1160" width="380" height="160" />
       </dmndi:DMNShape>
       <dmndi:DMNEdge
         id="_128206B9-C6A4-48EA-9B72-F2449D9D4F06-AUTO-TARGET"
@@ -454,18 +518,18 @@ You can toggle this beahvior on and off int he overlays panel at the top-right c
         sourceElement="_6781855B-065B-4664-BF89-BF373210C6B1"
         targetElement="_83774FD0-2F73-4C29-894E-B362AB94604C"
       >
-        <di:waypoint x="1840" y="1140" />
-        <di:waypoint x="1450" y="1220" />
+        <di:waypoint x="1740" y="1210" />
+        <di:waypoint x="1350" y="1240" />
       </dmndi:DMNEdge>
       <dmndi:DMNShape
         id="_C2755145-3CA5-4D35-A1F9-47F8308A935F"
         dmnElementRef="_7F53EDE7-9217-4027-84C5-D0A2606CB1BB"
         isCollapsed="true"
       >
-        <dc:Bounds x="220" y="960" width="300" height="150" />
+        <dc:Bounds x="120" y="980" width="300" height="150" />
         <dmndi:DMNDecisionServiceDividerLine id="_53385831-4953-4BC1-97FB-F19B68AD2D3B">
-          <di:waypoint x="220" y="1010" />
-          <di:waypoint x="320" y="1010" />
+          <di:waypoint x="120" y="1030" />
+          <di:waypoint x="220" y="1030" />
         </dmndi:DMNDecisionServiceDividerLine>
       </dmndi:DMNShape>
       <dmndi:DMNShape
@@ -474,7 +538,8 @@ You can toggle this beahvior on and off int he overlays panel at the top-right c
         isCollapsed="false"
         isListedInputData="false"
       >
-        <dc:Bounds x="1200" y="600" width="1120" height="760" />
+        <dmndi:DMNStyle id="_96D0BBA2-32E2-46AD-B317-B026267CB7A3" fontSize="24" fontBold="true" />
+        <dc:Bounds x="1100" y="620" width="1120" height="1080" />
       </dmndi:DMNShape>
       <dmndi:DMNShape
         id="_F15D3C1C-0C9A-49A9-AFB7-01382DA9BA2D"
@@ -482,7 +547,8 @@ You can toggle this beahvior on and off int he overlays panel at the top-right c
         isCollapsed="false"
         isListedInputData="false"
       >
-        <dc:Bounds x="1200" y="0" width="1120" height="560" />
+        <dmndi:DMNStyle id="_DF79DA67-94D2-46C8-A47D-883BACB719C8" fontSize="24" fontBold="true" />
+        <dc:Bounds x="1100" y="20" width="1120" height="560" />
       </dmndi:DMNShape>
       <dmndi:DMNShape
         id="_22FDFC94-6A61-46E8-A96F-FF6DDBE63E6D"
@@ -490,7 +556,8 @@ You can toggle this beahvior on and off int he overlays panel at the top-right c
         isCollapsed="false"
         isListedInputData="false"
       >
-        <dc:Bounds x="20" y="0" width="1140" height="1120" />
+        <dmndi:DMNStyle id="_F4D3413D-3E9C-46CA-AA5B-23DA7796AB9A" fontSize="24" fontBold="true" />
+        <dc:Bounds x="-80" y="20" width="1140" height="1120" />
       </dmndi:DMNShape>
       <dmndi:DMNShape
         id="_F3ED032B-BEF9-41BA-8C57-2AFB02FD4F93"
@@ -498,7 +565,7 @@ You can toggle this beahvior on and off int he overlays panel at the top-right c
         isCollapsed="false"
         isListedInputData="false"
       >
-        <dc:Bounds x="500" y="80" width="160" height="80" />
+        <dc:Bounds x="400" y="100" width="160" height="80" />
       </dmndi:DMNShape>
       <dmndi:DMNEdge
         id="_43E300A5-1906-4D03-9676-BACF827782B5"
@@ -506,8 +573,8 @@ You can toggle this beahvior on and off int he overlays panel at the top-right c
         sourceElement="_F3ED032B-BEF9-41BA-8C57-2AFB02FD4F93"
         targetElement="_88EBE1E5-E80D-4CDD-9460-9EF2FC19C88A"
       >
-        <di:waypoint x="580" y="120" />
-        <di:waypoint x="580" y="360" />
+        <di:waypoint x="480" y="140" />
+        <di:waypoint x="480" y="380" />
       </dmndi:DMNEdge>
       <dmndi:DMNEdge
         id="_467914B2-14AB-49C3-80C0-0652D909BBE4"
@@ -515,8 +582,8 @@ You can toggle this beahvior on and off int he overlays panel at the top-right c
         sourceElement="_413AEF56-125C-43BB-AD6C-D51AA51F3F5C"
         targetElement="_6A42A53E-F731-4E8D-9473-255CBCC15BA4"
       >
-        <di:waypoint x="940" y="240" />
-        <di:waypoint x="940" y="160" />
+        <di:waypoint x="840" y="260" />
+        <di:waypoint x="840" y="180" />
       </dmndi:DMNEdge>
       <dmndi:DMNEdge
         id="_2685DE88-9BAC-4A04-AA1A-392278C40348"
@@ -524,8 +591,8 @@ You can toggle this beahvior on and off int he overlays panel at the top-right c
         sourceElement="_217CCCAD-A919-4029-BBCA-F8E3935F4AE0"
         targetElement="_05D64B2A-B56E-4278-A466-1B4A653CE174"
       >
-        <di:waypoint x="220" y="340" />
-        <di:waypoint x="220" y="120" />
+        <di:waypoint x="120" y="360" />
+        <di:waypoint x="120" y="140" />
       </dmndi:DMNEdge>
       <dmndi:DMNEdge
         id="_62A462EB-33AF-42A8-BAA3-8361443212EB"
@@ -533,8 +600,8 @@ You can toggle this beahvior on and off int he overlays panel at the top-right c
         sourceElement="_8D521F22-C268-43AC-9617-BC11A3DA8D92"
         targetElement="_F33C7EB2-A8BA-4E45-B9CA-9202286F6299"
       >
-        <di:waypoint x="370" y="740" />
-        <di:waypoint x="780" y="820" />
+        <di:waypoint x="270" y="760" />
+        <di:waypoint x="680" y="840" />
       </dmndi:DMNEdge>
       <dmndi:DMNEdge
         id="_A300686D-4C08-4B25-8275-FA8FAB3EC5D7"
@@ -542,8 +609,8 @@ You can toggle this beahvior on and off int he overlays panel at the top-right c
         sourceElement="_C2755145-3CA5-4D35-A1F9-47F8308A935F"
         targetElement="_F33C7EB2-A8BA-4E45-B9CA-9202286F6299"
       >
-        <di:waypoint x="370" y="1035" />
-        <di:waypoint x="780" y="820" />
+        <di:waypoint x="270" y="1055" />
+        <di:waypoint x="680" y="840" />
       </dmndi:DMNEdge>
       <dmndi:DMNShape
         id="_0E1C8BA2-4D3B-4615-BC11-10241B7C0B05"
@@ -551,7 +618,10 @@ You can toggle this beahvior on and off int he overlays panel at the top-right c
         isCollapsed="false"
         isListedInputData="false"
       >
-        <dc:Bounds x="2020" y="1100" width="260" height="200" />
+        <dmndi:DMNStyle id="_57A6588A-7644-4806-92C3-A85FAD5B3753">
+          <dmndi:FontColor blue="1" green="126" red="3" />
+        </dmndi:DMNStyle>
+        <dc:Bounds x="1920" y="1260" width="260" height="200" />
       </dmndi:DMNShape>
       <dmndi:DMNEdge
         id="_3C2F5965-DED4-4140-9D81-FE7803CED497-AUTO-TARGET"
@@ -559,8 +629,68 @@ You can toggle this beahvior on and off int he overlays panel at the top-right c
         sourceElement="_3F2A1645-8762-44B3-B158-318829274FE3"
         targetElement="_0E1C8BA2-4D3B-4615-BC11-10241B7C0B05"
       >
-        <di:waypoint x="1840" y="1260" />
-        <di:waypoint x="2150" y="1200" />
+        <di:waypoint x="1740" y="1360" />
+        <di:waypoint x="2050" y="1360" />
+      </dmndi:DMNEdge>
+      <dmndi:DMNShape
+        id="_AD47CF06-0D46-43E5-89C1-8DC75809FB2C"
+        dmnElementRef="_FDCF0B86-BA93-43E9-A450-E216530E12CB"
+        isCollapsed="false"
+        isListedInputData="false"
+      >
+        <dmndi:DMNStyle
+          id="_71A2D918-5D0B-4428-846E-240A8B7BEB03"
+          fontSize="32"
+          fontFamily="Trebuchet MS"
+          fontBold="true"
+          fontUnderline="false"
+        />
+        <dc:Bounds x="-80" y="-80" width="420" height="80" />
+      </dmndi:DMNShape>
+      <dmndi:DMNShape
+        id="_C731B111-C870-4A30-BE38-21235717EB4A"
+        dmnElementRef="_7AC22C97-E502-41B3-99FA-9C1F76646530"
+        isCollapsed="false"
+        isListedInputData="false"
+      >
+        <dc:Bounds x="1660" y="1560" width="160" height="80" />
+      </dmndi:DMNShape>
+      <dmndi:DMNShape
+        id="_40C0D5F9-0117-48C2-8ACD-DE137003D64F"
+        dmnElementRef="_A733687F-5395-4A71-9614-DAA02CBDB6D3"
+        isCollapsed="false"
+        isListedInputData="false"
+      >
+        <dc:Bounds x="1660" y="1460" width="160" height="80" />
+      </dmndi:DMNShape>
+      <dmndi:DMNShape
+        id="_5BA1371F-708C-41E3-A2ED-A62A6150A379"
+        dmnElementRef="_5DCD63BC-CBDA-454C-BA52-4D5A5A1C1181"
+        isCollapsed="false"
+        isListedInputData="false"
+      >
+        <dmndi:DMNStyle id="_16EFB38A-1C65-4D11-B161-094C84E9A90F">
+          <dmndi:FontColor blue="1" green="126" red="3" />
+        </dmndi:DMNStyle>
+        <dc:Bounds x="1160" y="1500" width="340" height="100" />
+      </dmndi:DMNShape>
+      <dmndi:DMNEdge
+        id="_70A75971-1B78-4932-AB56-6FA23F89411A-AUTO-TARGET"
+        dmnElementRef="_17CBC034-523E-4C22-8A71-5E5E78C37C4C"
+        sourceElement="_40C0D5F9-0117-48C2-8ACD-DE137003D64F"
+        targetElement="_5BA1371F-708C-41E3-A2ED-A62A6150A379"
+      >
+        <di:waypoint x="1740" y="1500" />
+        <di:waypoint x="1330" y="1550" />
+      </dmndi:DMNEdge>
+      <dmndi:DMNEdge
+        id="_99770E6D-98FE-421E-82DA-82EB34BA9CDC"
+        dmnElementRef="_A3E69C0C-A3B4-4ADF-8F03-46D8E1FEDBB7"
+        sourceElement="_C731B111-C870-4A30-BE38-21235717EB4A"
+        targetElement="_5BA1371F-708C-41E3-A2ED-A62A6150A379"
+      >
+        <di:waypoint x="1740" y="1600" />
+        <di:waypoint x="1500" y="1550" />
       </dmndi:DMNEdge>
     </dmndi:DMNDiagram>
     <dmndi:DMNDiagram

@@ -17,25 +17,8 @@
  * under the License.
  */
 
-import * as React from "react";
-import type { Meta, StoryObj } from "@storybook/react";
-import { Empty } from "../../misc/empty/Empty.stories";
-import { DmnEditor, DmnEditorProps } from "../../../src/DmnEditor";
-import { StorybookDmnEditorProps } from "../../dmnEditorStoriesWrapper";
-import { USE_CASE_MODELS } from "../models/models";
-
-const meta: Meta<DmnEditorProps> = {
-  title: "Use cases/Loan Pre-Qualification",
-  component: DmnEditor,
-  includeStories: /^[A-Z]/,
-};
-
-export default meta;
-type Story = StoryObj<StorybookDmnEditorProps>;
-
-export const LoanPreQualification: Story = {
-  render: Empty.render,
-  args: {
-    model: USE_CASE_MODELS.loanPreQualification.model,
-  },
-};
+// Allows importing .dmn files with Webpack's raw-loader.
+declare module "*.dmn" {
+  const content: string;
+  export default content;
+}
