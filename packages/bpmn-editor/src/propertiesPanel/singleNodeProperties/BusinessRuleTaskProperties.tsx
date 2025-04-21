@@ -36,8 +36,15 @@ import { ToggleGroup } from "@patternfly/react-core/dist/js/components/ToggleGro
 import { visitFlowElementsAndArtifacts } from "../../mutations/_elementVisitor";
 import { ToggleGroupItem } from "@patternfly/react-core/dist/js/components/ToggleGroup";
 import { addOrGetProcessAndDiagramElements } from "../../mutations/addOrGetProcessAndDiagramElements";
-import { FormSelect, FormSelectOption } from "@patternfly/react-core/dist/js/components/FormSelect";
 import { TextInput } from "@patternfly/react-core/dist/js/components/TextInput";
+import { useExternalModels } from "../../externalModels/BpmnEditorExternalModelsContext";
+import { useMemo, useState } from "react";
+import { Select, SelectOption, SelectVariant } from "@patternfly/react-core/dist/js/components/Select";
+import {
+  associateBusinessRuleTaskWithDmnModel,
+  getDmnModelBinding,
+} from "../../mutations/associateBusinessRuleTaskWithDmnModel";
+import { deassociateBusinessRuleTaskWithDmnModel } from "../../mutations/deassociateBusinessRuleTaskWithDmnModel";
 
 export function BusinessRuleTaskProperties({
   businessRuleTask,
@@ -46,7 +53,19 @@ export function BusinessRuleTaskProperties({
 }) {
   const isReadOnly = useBpmnEditorStore((s) => s.settings.isReadOnly);
 
+  const [
+    availableExternalModelsNormalizedPosixPathsRelativeToTheOpenFile,
+    setAvailableExternalModelsNormalizedPosixPathRelativeToTheOpenFile,
+  ] = useState<string[]>([]);
+
+  const [isDmnFilesSelectOpen, setDmnFilesSelectOpen] = useState<boolean>(false);
+
+  const { externalModelsByNamespace, onRequestExternalModelsAvailableToInclude, onRequestExternalModelByPath } =
+    useExternalModels();
+
   const bpmnEditorStoreApi = useBpmnEditorStoreApi();
+
+  const dmnModelBinding = useMemo(() => getDmnModelBinding(businessRuleTask), [businessRuleTask]);
 
   return (
     <>
@@ -58,10 +77,9 @@ export function BusinessRuleTaskProperties({
         <Divider inset={{ default: "insetXs" }} />
         <FormGroup
           label="Implementation"
-          // helperText={
-          //   "Consectetur adipiscing elit. Lorem ipsum dolor sit amet, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
-          // } // FIXME: Tiago -> Description
-        >
+          helperText={"Choose between Rules with DRL and Decisions with DMN."}
+        ></FormGroup>
+        <FormGroup>
           <ToggleGroup aria-label="Implementation">
             <ToggleGroupItem
               text="DRL"
@@ -72,6 +90,12 @@ export function BusinessRuleTaskProperties({
                   const { process } = addOrGetProcessAndDiagramElements({
                     definitions: s.bpmn.model.definitions,
                   });
+
+                  deassociateBusinessRuleTaskWithDmnModel({
+                    definitions: s.bpmn.model.definitions,
+                    __readonly_businessRuleTaskId: businessRuleTask["@_id"],
+                  });
+
                   visitFlowElementsAndArtifacts(process, ({ element: e }) => {
                     if (e["@_id"] === businessRuleTask["@_id"] && e.__$$element === businessRuleTask.__$$element) {
                       e["@_implementation"] = BUSINESS_RULE_TASK_IMPLEMENTATIONS.drools;
@@ -101,7 +125,7 @@ export function BusinessRuleTaskProperties({
         </FormGroup>
         {businessRuleTask["@_implementation"] === BUSINESS_RULE_TASK_IMPLEMENTATIONS.drools && (
           <>
-            <FormGroup label="Rule flow group">
+            <FormGroup label="DRL rule flow group">
               <TextInput
                 aria-label={"Signal"}
                 type={"text"}
@@ -119,63 +143,152 @@ export function BusinessRuleTaskProperties({
                     });
                   });
                 }}
-                placeholder={"-- None --"}
+                placeholder={"Enter a Rule flow group..."}
               />
             </FormGroup>
           </>
         )}{" "}
         {businessRuleTask["@_implementation"] === BUSINESS_RULE_TASK_IMPLEMENTATIONS.dmn && (
           <>
-            <FormGroup label="DMN File">
-              <FormSelect id={"select"} value={undefined} isDisabled={isReadOnly}>
-                <FormSelectOption id={"none"} isPlaceholder={true} label={"-- None --"} />
-                {/*//Use to get DMN files from workspace
-  // const workspacePromise = useWorkspacePromise(props.workspaceFile.workspaceId);
-*/}
-                {/* FIXME: Tiago */}
-              </FormSelect>
+            <FormGroup label="DMN model file">
+              <Select
+                variant={SelectVariant.typeahead}
+                id={"select-dmn-model-file"}
+                selections={[dmnModelBinding?.normalizedPosixPathRelativeToTheOpenFile.value ?? ""]}
+                isCreatable={true}
+                createText="Manually bind to path"
+                isDisabled={isReadOnly}
+                isOpen={isDmnFilesSelectOpen}
+                onCreateOption={(newOption) => {
+                  setDmnFilesSelectOpen(false);
+                  bpmnEditorStoreApi.setState((s) => {
+                    associateBusinessRuleTaskWithDmnModel({
+                      definitions: s.bpmn.model.definitions,
+                      __readonly_businessRuleTaskId: businessRuleTask["@_id"],
+                      __readonly_dmnModel: {
+                        normalizedPosixPathRelativeToTheOpenFile: newOption,
+                        namespace: dmnModelBinding?.modelNamespace.value ?? "",
+                        name: dmnModelBinding?.modelName.value ?? "",
+                      },
+                    });
+                  });
+                }}
+                shouldResetOnSelect={true}
+                onSelect={(e, value) => {
+                  setDmnFilesSelectOpen(false);
+                  if (!value) {
+                    bpmnEditorStoreApi.setState((s) => {
+                      deassociateBusinessRuleTaskWithDmnModel({
+                        definitions: s.bpmn.model.definitions,
+                        __readonly_businessRuleTaskId: businessRuleTask["@_id"],
+                      });
+                    });
+                  } else {
+                    onRequestExternalModelByPath?.(value as string).then((dmnModel) => {
+                      if (!dmnModel) {
+                        //FIXME: Tiago --> Treat error.
+                        return;
+                      }
+
+                      bpmnEditorStoreApi.setState((s) => {
+                        associateBusinessRuleTaskWithDmnModel({
+                          definitions: s.bpmn.model.definitions,
+                          __readonly_businessRuleTaskId: businessRuleTask["@_id"],
+                          __readonly_dmnModel: {
+                            normalizedPosixPathRelativeToTheOpenFile: value as string,
+                            namespace: dmnModel.model.definitions["@_namespace"],
+                            name: dmnModel.model.definitions["@_name"]!,
+                          },
+                        });
+                      });
+                    });
+                  }
+                }}
+                onToggle={(isOpen) => {
+                  if (isOpen) {
+                    setAvailableExternalModelsNormalizedPosixPathRelativeToTheOpenFile([]);
+                    onRequestExternalModelsAvailableToInclude?.()
+                      .then(setAvailableExternalModelsNormalizedPosixPathRelativeToTheOpenFile)
+                      .then(() => setDmnFilesSelectOpen(isOpen));
+                  } else {
+                    setDmnFilesSelectOpen(isOpen);
+                  }
+                }}
+                placeholderText={"-- None --"}
+              >
+                {[
+                  <SelectOption key={"none"} value={undefined}>
+                    <i>-- None --</i>
+                  </SelectOption>,
+                  ...(!dmnModelBinding?.normalizedPosixPathRelativeToTheOpenFile.value ||
+                  availableExternalModelsNormalizedPosixPathsRelativeToTheOpenFile.indexOf(
+                    dmnModelBinding?.normalizedPosixPathRelativeToTheOpenFile.value
+                  ) >= 0
+                    ? []
+                    : [
+                        <SelectOption
+                          isSelected={true}
+                          key={dmnModelBinding.normalizedPosixPathRelativeToTheOpenFile.value}
+                          value={dmnModelBinding.normalizedPosixPathRelativeToTheOpenFile.value}
+                        >
+                          {dmnModelBinding.normalizedPosixPathRelativeToTheOpenFile.value}
+                        </SelectOption>,
+                      ]),
+                  ...availableExternalModelsNormalizedPosixPathsRelativeToTheOpenFile.map((p) => (
+                    <SelectOption
+                      key={p}
+                      value={p}
+                      isSelected={p === dmnModelBinding?.normalizedPosixPathRelativeToTheOpenFile.value}
+                    >
+                      {p}
+                    </SelectOption>
+                  )),
+                ]}
+              </Select>
             </FormGroup>
 
-            <FormGroup label="DMN Namespace">
+            <FormGroup label="DMN model namespace">
               <TextInput
-                aria-label={"DMN Namespace"}
+                aria-label={"DMN model namespace"}
                 type={"text"}
                 isDisabled={isReadOnly}
                 placeholder={"Enter a Namespace..."}
-                value={""} // FIXME: Tiago
+                value={dmnModelBinding?.modelNamespace.value ?? ""}
                 onChange={(newNamespace) =>
                   bpmnEditorStoreApi.setState((s) => {
-                    const { process } = addOrGetProcessAndDiagramElements({
+                    associateBusinessRuleTaskWithDmnModel({
                       definitions: s.bpmn.model.definitions,
-                    });
-                    visitFlowElementsAndArtifacts(process, ({ element: e }) => {
-                      if (e["@_id"] === businessRuleTask["@_id"]) {
-                        // FIXME: Tiago
-                        console.log(newNamespace);
-                      }
+                      __readonly_businessRuleTaskId: businessRuleTask["@_id"],
+                      __readonly_dmnModel: {
+                        normalizedPosixPathRelativeToTheOpenFile:
+                          dmnModelBinding?.normalizedPosixPathRelativeToTheOpenFile.value ?? "",
+                        namespace: newNamespace,
+                        name: dmnModelBinding?.modelName.value ?? "",
+                      },
                     });
                   })
                 }
               />
             </FormGroup>
 
-            <FormGroup label="DMN Name">
+            <FormGroup label="DMN model name">
               <TextInput
-                aria-label={"DMN Name"}
+                aria-label={"DMN model name"}
                 type={"text"}
                 isDisabled={isReadOnly}
                 placeholder={"Enter a Name..."}
-                value={""} // FIXME: Tiago
+                value={dmnModelBinding?.modelName.value ?? ""}
                 onChange={(newName) =>
                   bpmnEditorStoreApi.setState((s) => {
-                    const { process } = addOrGetProcessAndDiagramElements({
+                    associateBusinessRuleTaskWithDmnModel({
                       definitions: s.bpmn.model.definitions,
-                    });
-                    visitFlowElementsAndArtifacts(process, ({ element: e }) => {
-                      if (e["@_id"] === businessRuleTask["@_id"]) {
-                        // FIXME: Tiago
-                        console.log(newName);
-                      }
+                      __readonly_businessRuleTaskId: businessRuleTask["@_id"],
+                      __readonly_dmnModel: {
+                        normalizedPosixPathRelativeToTheOpenFile:
+                          dmnModelBinding?.normalizedPosixPathRelativeToTheOpenFile.value ?? "",
+                        namespace: dmnModelBinding?.modelNamespace.value ?? "",
+                        name: newName,
+                      },
                     });
                   })
                 }

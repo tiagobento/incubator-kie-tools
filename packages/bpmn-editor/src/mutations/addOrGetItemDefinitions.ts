@@ -23,6 +23,14 @@ import { Unpacked } from "@kie-tools/xyflow-react-kie-diagram/dist/tsExt/tsExt";
 import { Normalized } from "../normalization/normalize";
 import { generateUuid } from "@kie-tools/xyflow-react-kie-diagram/dist/uuid/uuid";
 
+export const DEFAULT_DATA_TYPES = {
+  STRING: "String",
+  BOOLEAN: "boolean",
+  FLOAT: "Float",
+  INTEGER: "Integer",
+  OBJECT: "Object",
+};
+
 export function addOrGetItemDefinitions({
   definitions,
   dataType,

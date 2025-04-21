@@ -42,6 +42,12 @@ export const BUSINESS_RULE_TASK_IMPLEMENTATIONS = {
   dmn: "http://www.jboss.org/drools/dmn",
 };
 
+export const BUSINESS_RULE_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING = {
+  FILE_PATH: "fileName",
+  NAMESPACE: "namespace",
+  MODEL_NAME: "model",
+};
+
 export const SERVICE_TASK_IMPLEMENTATIONS = {
   java: "Java",
   webService: "WebService",

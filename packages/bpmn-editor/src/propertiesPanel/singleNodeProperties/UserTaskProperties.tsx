@@ -40,7 +40,6 @@ import { visitFlowElementsAndArtifacts } from "../../mutations/_elementVisitor";
 import { generateUuid } from "@kie-tools/xyflow-react-kie-diagram/dist/uuid/uuid";
 import { addOrGetProcessAndDiagramElements } from "../../mutations/addOrGetProcessAndDiagramElements";
 import { Checkbox } from "@patternfly/react-core/dist/js/components/Checkbox/Checkbox";
-import { addOrGetItemDefinitions } from "../../mutations/addOrGetItemDefinitions";
 import { TextInput } from "@patternfly/react-core/dist/js/components/TextInput";
 
 const priorityInputX = "PriorityInputX";

@@ -21,6 +21,7 @@ import "@patternfly/react-core/dist/styles/base.css";
 import "reactflow/dist/style.css";
 
 import { AllBpmnMarshallers, BpmnLatestModel } from "@kie-tools/bpmn-marshaller";
+import { DmnLatestModel } from "@kie-tools/dmn-marshaller";
 import { Drawer, DrawerContent, DrawerContentBody } from "@patternfly/react-core/dist/js/components/Drawer";
 import { original } from "immer";
 import * as React from "react";
@@ -86,8 +87,9 @@ export type ExternalModelsIndex = Record<
 export type ExternalModel = { type: "dmn" } & ExternalDmn;
 
 export type ExternalDmnsIndex = Map<string /** normalizedPosixPathRelativeToTheOpenFile */, ExternalDmn>;
+
 export type ExternalDmn = {
-  model: Normalized<BpmnLatestModel>;
+  model: DmnLatestModel;
   normalizedPosixPathRelativeToTheOpenFile: string;
   svg: string;
 };
@@ -105,6 +107,19 @@ export type BpmnEditorProps = {
    * Called when a change occurs on `model`, so the controlled flow of the component can be done.
    */
   onModelChange?: OnBpmnModelChange;
+  /**
+   * Called when the contents of a specific available model is necessary. Used by the "Business Rule Task" node for DMN model auto-detection.
+   */
+  onRequestExternalModelByPath?: OnRequestExternalModelByPath;
+  /**
+   * Called when the list of paths of available models to be included is needed. Used by the "Business Rule Task" node for DMN model auto-detection.
+   */
+  onRequestExternalModelsAvailableToInclude?: OnRequestExternalModelsAvailableToInclude;
+  /**
+   * When the DMN represented by `model` ("This DMN") contains `import`ed models, this prop needs to map their contents by namespace.
+   * The DMN model won't be correctly rendered if an included model is not found on this object.
+   */
+  externalModelsByNamespace?: ExternalModelsIndex;
   /**
    * The name of context in which this instance of BPMN Editor is running. For example, if this BPMN Editor instance
    * is displaying a model from a project called "My project", you could use `externalContextName={"My project"}`

@@ -32,13 +32,13 @@ export type Bpmn20KnownMetaDataKey =
   | "customScope"; // Used for "Signal Scope" flag on intermediateThrowEvent and endEvent Signal nodes
 
 export type Bpmn20ProcessVariableTags =
-  | "internal" // TODO: Used for?
-  | "required" // TODO: Used for?
-  | "readonly" // TODO: Used for?
-  | "input" // TODO: Used for?
-  | "output" // TODO: Used for?
-  | "business_relevant" // TODO: Used for?
-  | "tracked"; // TODO: Used for?
+  | "internal" // TODO: Tiago --> Used for?
+  | "required" // TODO: Tiago --> Used for?
+  | "readonly" // TODO: Tiago --> Used for?
+  | "input" // TODO: Tiago --> Used for?
+  | "output" // TODO: Tiago --> Used for?
+  | "business_relevant" // TODO: Tiago --> Used for?
+  | "tracked"; // TODO: Tiago --> Used for?
 
 /**
  * Helps reading drools:metaData entries.
@@ -65,7 +65,7 @@ export function parseBpmn20Drools10MetaData(
  * Helps changing drools:metaData entries.
  *
  * @param obj The object to extract drools:metaData from. No-op if undefined.
- * @param key The drools:metaData entry name.
+ * @param keyOrIndex The drools:metaData entry name or entry index.
  * @param value The drools:metaData entry value.
  */
 export function setBpmn20Drools10MetaData(

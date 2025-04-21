@@ -56,11 +56,11 @@ import { TrashIcon } from "@patternfly/react-icons/dist/js/icons/trash-icon";
 import { useInViewSelect } from "../responsiveness/useInViewSelect";
 import { useCancelableEffect } from "@kie-tools-core/react-hooks/dist/useCancelableEffect";
 import { State } from "../store/Store";
-import "./IncludedModels.css";
 import { Popover, PopoverPosition } from "@patternfly/react-core/dist/js/components/Popover";
 import { AlertActionCloseButton, AlertActionLink } from "@patternfly/react-core/dist/js/components/Alert";
 import { useSettings } from "../settings/DmnEditorSettingsContext";
 import { DmnLatestModel } from "@kie-tools/dmn-marshaller";
+import "./IncludedModels.css";
 
 export const EMPTY_IMPORT_NAME_NAMESPACE_IDENTIFIER = "<Default>";
 

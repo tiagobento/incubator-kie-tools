@@ -83,6 +83,10 @@ export function BpmnEditorWrapper(props?: Partial<StorybookBpmnEditorProps>) {
           externalContextDescription={props?.externalContextDescription ?? args.externalContextDescription}
           issueTrackerHref={props?.issueTrackerHref ?? args.issueTrackerHref}
           onRequestToJumpToPath={props?.onRequestToJumpToPath ?? args.onRequestToJumpToPath}
+          onRequestExternalModelByPath={props?.onRequestExternalModelByPath ?? args.onRequestExternalModelByPath}
+          onRequestExternalModelsAvailableToInclude={
+            props?.onRequestExternalModelsAvailableToInclude ?? args.onRequestExternalModelsAvailableToInclude
+          }
           onModelDebounceStateChanged={onModelDebounceStateChanged}
         />
       </div>

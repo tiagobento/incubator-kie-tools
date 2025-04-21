@@ -24,10 +24,28 @@ import "@patternfly/react-core/dist/styles/base.css";
 import { Flex, FlexItem } from "@patternfly/react-core/dist/js/layouts/Flex";
 import { Page, PageSection } from "@patternfly/react-core/dist/js/components/Page";
 import { BpmnLatestModel, getMarshaller, BpmnMarshaller } from "@kie-tools/bpmn-marshaller";
+import * as DmnMarshaller from "@kie-tools/dmn-marshaller";
 import { Normalized, normalize } from "@kie-tools/bpmn-editor/dist/normalization/normalize";
 import { generateEmptyBpmn20 } from "../misc/empty/Empty.stories";
 import { BpmnEditorWrapper } from "../bpmnEditorStoriesWrapper";
-import { BpmnEditorProps, OnBpmnModelChange, OnRequestToJumpToPath } from "../../src/BpmnEditor";
+import {
+  BpmnEditorProps,
+  ExternalModelsIndex,
+  OnBpmnModelChange,
+  OnRequestExternalModelByPath,
+  OnRequestExternalModelsAvailableToInclude,
+  OnRequestToJumpToPath,
+} from "../../src/BpmnEditor";
+
+import "../tsDmnModule";
+import DecisionDmnRaw from "!!raw-loader!../useCases/models/decision.dmn";
+import AnotherDecisionDmnRaw from "!!raw-loader!../useCases/models/anotherDecision.dmn";
+
+const decisionDmnModel = DmnMarshaller.getMarshaller(DecisionDmnRaw, { upgradeTo: "latest" }).parser.parse();
+
+const anotherDecisionDmnModel = DmnMarshaller.getMarshaller(AnotherDecisionDmnRaw, {
+  upgradeTo: "latest",
+}).parser.parse();
 
 const initialModel = generateEmptyBpmn20();
 
@@ -124,6 +142,40 @@ function DevPlayground(args: BpmnEditorProps) {
     alert("Jumping to file " + path);
   }, []);
 
+  const onRequestExternalModelsAvailableToInclude = useCallback<OnRequestExternalModelsAvailableToInclude>(() => {
+    return Promise.resolve(["./decision.dmn", "../decisions/anotherDecision.dmn"]);
+  }, []);
+
+  const externalModelsByNamespace = useMemo<ExternalModelsIndex>(() => {
+    return {
+      [decisionDmnModel.definitions["@_namespace"]]: {
+        type: "dmn",
+        normalizedPosixPathRelativeToTheOpenFile: "./decision.dmn",
+        model: decisionDmnModel,
+        svg: "",
+      },
+      [anotherDecisionDmnModel.definitions["@_namespace"]]: {
+        type: "dmn",
+        normalizedPosixPathRelativeToTheOpenFile: "../decisions/anotherDecision.dmn",
+        model: anotherDecisionDmnModel,
+        svg: "",
+      },
+    };
+  }, []);
+
+  const onRequestExternalModelByPath = useCallback<OnRequestExternalModelByPath>(
+    async (normalizedPosixPathRelativeToTheOpenFile) => {
+      if (normalizedPosixPathRelativeToTheOpenFile === "./decision.dmn") {
+        return externalModelsByNamespace[decisionDmnModel.definitions["@_namespace"]]!;
+      } else if (normalizedPosixPathRelativeToTheOpenFile === "../decisions/anotherDecision.dmn") {
+        return externalModelsByNamespace[anotherDecisionDmnModel.definitions["@_namespace"]]!;
+      } else {
+        return null;
+      }
+    },
+    [externalModelsByNamespace]
+  );
+
   const isUndoEnabled = state.pointer > 0;
   const isRedoEnabled = state.pointer !== state.stack.length - 1;
 
@@ -172,6 +224,9 @@ function DevPlayground(args: BpmnEditorProps) {
                 externalContextDescription: args.externalContextDescription,
                 issueTrackerHref: args.issueTrackerHref,
                 onRequestToJumpToPath,
+                onRequestExternalModelsAvailableToInclude,
+                onRequestExternalModelByPath,
+                externalModelsByNamespace,
               })}
             </PageSection>
           </Page>

@@ -100,6 +100,7 @@ export type OnRequestExternalModelsAvailableToInclude = () => Promise<string[]>;
 export type OnRequestExternalModelByPath = (
   normalizedPosixPathRelativeToTheOpenFile: string
 ) => Promise<ExternalModel | null>;
+
 export type ExternalModelsIndex = Record<
   string /** normalizedPosixPathRelativeToTheOpenFile */,
   ExternalModel | undefined

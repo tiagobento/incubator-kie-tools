@@ -22,16 +22,16 @@ import { useBpmnEditorStore, useBpmnEditorStoreApi } from "../../store/StoreCont
 import { FormGroup } from "@patternfly/react-core/dist/js/components/Form";
 import { Select, SelectOption, SelectVariant } from "@patternfly/react-core/dist/js/components/Select";
 import { useCallback, useMemo, useState } from "react";
-import { addOrGetItemDefinitions } from "../../mutations/addOrGetItemDefinitions";
+import { addOrGetItemDefinitions, DEFAULT_DATA_TYPES } from "../../mutations/addOrGetItemDefinitions";
 import "./ItemDefinitionRefSelector.css";
 
-const DEFAULT_DATA_TYPES = [
+const DEFAULT_OPTIONS = [
   { itemDefinitionRef: undefined, dataType: "<Undefined>" },
-  { itemDefinitionRef: "String", dataType: "String" },
-  { itemDefinitionRef: "Boolean", dataType: "Boolean" },
-  { itemDefinitionRef: "Float", dataType: "Float" },
-  { itemDefinitionRef: "Integer", dataType: "Integer" },
-  { itemDefinitionRef: "Object", dataType: "Object" },
+  { itemDefinitionRef: "String", dataType: DEFAULT_DATA_TYPES.STRING },
+  { itemDefinitionRef: "Boolean", dataType: DEFAULT_DATA_TYPES.BOOLEAN },
+  { itemDefinitionRef: "Float", dataType: DEFAULT_DATA_TYPES.FLOAT },
+  { itemDefinitionRef: "Integer", dataType: DEFAULT_DATA_TYPES.INTEGER },
+  { itemDefinitionRef: "Object", dataType: DEFAULT_DATA_TYPES.OBJECT },
 ];
 
 export function ItemDefinitionRefSelector({
@@ -59,7 +59,7 @@ export function ItemDefinitionRefSelector({
 
   const allOptions = useMemo(() => {
     const itemDefinitionsByDataType = new Map(itemDefinitions.map((i) => [i.dataType, i]));
-    const defaultDataTypes = DEFAULT_DATA_TYPES.map((defaultDataType) => {
+    const defaultDataTypes = DEFAULT_OPTIONS.map((defaultDataType) => {
       if (!itemDefinitionsByDataType.has(defaultDataType.itemDefinitionRef)) {
         return defaultDataType;
       }
@@ -112,7 +112,7 @@ export function ItemDefinitionRefSelector({
           }
           // -- Default Data Type
           else if (
-            DEFAULT_DATA_TYPES.filter((ddt) => ddt.itemDefinitionRef === newItemDefinitionRef.toString()).length > 0
+            DEFAULT_OPTIONS.filter((ddt) => ddt.itemDefinitionRef === newItemDefinitionRef.toString()).length > 0
           ) {
             const ref = addOrGetItemDefinitionId({ newDataType: newItemDefinitionRef.toString() });
             onChange(ref, newItemDefinitionRef.toString());
