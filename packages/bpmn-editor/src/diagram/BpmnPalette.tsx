@@ -101,7 +101,7 @@ export function BpmnPalette({ pulse }: { pulse: boolean }) {
         const position = { x: bpmnShape["dc:Bounds"]["@_x"], y: bpmnShape["dc:Bounds"]["@_y"] };
         const dimensions = snapShapeDimensions(snapGrid, bpmnShape, MIN_NODE_SIZES[nodeType]({ snapGrid }));
 
-        s.xyFlowReactKieDiagram.newNodeShadow = {
+        s.xyFlowReactKieDiagram.newNodeProjection = {
           id: generateUuid(),
           type: nodeType,
           hidden: true,
@@ -132,7 +132,7 @@ export function BpmnPalette({ pulse }: { pulse: boolean }) {
 
   const onDragEnd = useCallback(() => {
     // Makes sure there's no leftovers even when user pressed Esc during drag.
-    bpmnEditorStoreApi.setState((s) => (s.xyFlowReactKieDiagram.newNodeShadow = undefined));
+    bpmnEditorStoreApi.setState((s) => (s.xyFlowReactKieDiagram.newNodeProjection = undefined));
   }, [bpmnEditorStoreApi]);
 
   const nodesPalletePopoverRef = React.useRef<HTMLDivElement>(null);

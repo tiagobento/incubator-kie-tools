@@ -91,6 +91,6 @@ export interface XyFlowDiagramState<
     edgeIdBeingUpdated: string | undefined;
     dropTarget: undefined | { node: RF.Node<NData, N>; containmentMode: ContainmentMode };
     ongoingConnection: RF.OnConnectStartParams | undefined;
-    newNodeShadow: undefined | RF.Node<NData, N>;
+    newNodeProjection: undefined | RF.Node<NData, N>;
   };
 }

@@ -512,7 +512,7 @@ export function XyFlowReactKieDiagram<
                 if (nodeIdBeingDraggedRef.current === change.id) {
                   const nodeBeingDragged =
                     state.computed(state).getDiagramData().nodesById.get(change.id) ??
-                    state.xyFlowReactKieDiagram.newNodeShadow!;
+                    state.xyFlowReactKieDiagram.newNodeProjection!;
 
                   let foundContainer = false;
                   for (const potentialContainer of reactFlowInstance?.getNodes().reverse() ??
@@ -560,8 +560,8 @@ export function XyFlowReactKieDiagram<
                     const allowedContainmentModes =
                       containmentMap.get(potentialContainer.type as N) ?? new Map<ContainmentMode, Set<N>>();
 
-                    const typesOfNodesBeingDragged = state.xyFlowReactKieDiagram.newNodeShadow?.type
-                      ? [state.xyFlowReactKieDiagram.newNodeShadow.type as N]
+                    const typesOfNodesBeingDragged = state.xyFlowReactKieDiagram.newNodeProjection?.type
+                      ? [state.xyFlowReactKieDiagram.newNodeProjection.type as N]
                       : [...diagramData.selectedNodeTypes];
 
                     const allSelectedNodesRespectContainmentMode = typesOfNodesBeingDragged.every((nodeType) =>
@@ -618,21 +618,21 @@ export function XyFlowReactKieDiagram<
                     ? snapToDropTargetsBorder(
                         dropTarget,
                         {
-                          ...(node ?? state.xyFlowReactKieDiagram.newNodeShadow).data.shape["dc:Bounds"],
+                          ...(node ?? state.xyFlowReactKieDiagram.newNodeProjection).data.shape["dc:Bounds"],
                           "@_x": change.positionAbsolute.x,
                           "@_y": change.positionAbsolute.y,
                         },
-                        (node ?? state.xyFlowReactKieDiagram.newNodeShadow).type!,
+                        (node ?? state.xyFlowReactKieDiagram.newNodeProjection).type!,
                         state.xyFlowReactKieDiagram.snapGrid,
                         minNodeSizes,
                         DEFAULT_BORDER_ALLOWANCE_IN_PX
                       )
                     : change.positionAbsolute;
 
-                if (!node && state.xyFlowReactKieDiagram.newNodeShadow) {
-                  state.xyFlowReactKieDiagram.newNodeShadow.position = newPosition;
-                  state.xyFlowReactKieDiagram.newNodeShadow.data.shape["dc:Bounds"]["@_x"] = newPosition.x;
-                  state.xyFlowReactKieDiagram.newNodeShadow.data.shape["dc:Bounds"]["@_y"] = newPosition.y;
+                if (!node && state.xyFlowReactKieDiagram.newNodeProjection) {
+                  state.xyFlowReactKieDiagram.newNodeProjection.position = newPosition;
+                  state.xyFlowReactKieDiagram.newNodeProjection.data.shape["dc:Bounds"]["@_x"] = newPosition.x;
+                  state.xyFlowReactKieDiagram.newNodeProjection.data.shape["dc:Bounds"]["@_y"] = newPosition.y;
                 } else {
                   onNodeRepositioned({
                     state,
@@ -882,7 +882,7 @@ export function XyFlowReactKieDiagram<
         xyFlowReactKieDiagramStoreApi.setState((state) => {
           const { newNodeId } = onNodeAdded({
             state,
-            dropPoint: state.xyFlowReactKieDiagram.newNodeShadow!.position,
+            dropPoint: state.xyFlowReactKieDiagram.newNodeProjection!.position,
             type: nodeType,
             element,
           });
@@ -893,7 +893,7 @@ export function XyFlowReactKieDiagram<
         onNodeDragStop(undefined as any, { dragging: true } as any, []);
 
         xyFlowReactKieDiagramStoreApi.setState((state) => {
-          state.xyFlowReactKieDiagram.newNodeShadow = undefined;
+          state.xyFlowReactKieDiagram.newNodeProjection = undefined;
         });
       }
     },
@@ -913,13 +913,13 @@ export function XyFlowReactKieDiagram<
 
         onNodeDragStart(
           undefined as any,
-          xyFlowReactKieDiagramStoreApi.getState().xyFlowReactKieDiagram.newNodeShadow!,
+          xyFlowReactKieDiagramStoreApi.getState().xyFlowReactKieDiagram.newNodeProjection!,
           []
         );
 
         xyFlowReactKieDiagramStoreApi.setState((s) => {
-          if (s.xyFlowReactKieDiagram.newNodeShadow) {
-            s.xyFlowReactKieDiagram.newNodeShadow.hidden = false;
+          if (s.xyFlowReactKieDiagram.newNodeProjection) {
+            s.xyFlowReactKieDiagram.newNodeProjection.hidden = false;
           }
         });
 
@@ -929,12 +929,12 @@ export function XyFlowReactKieDiagram<
             positionAbsolute: {
               x:
                 position.x -
-                (xyFlowReactKieDiagramStoreApi.getState().xyFlowReactKieDiagram.newNodeShadow?.width ?? 0) / 2,
+                (xyFlowReactKieDiagramStoreApi.getState().xyFlowReactKieDiagram.newNodeProjection?.width ?? 0) / 2,
               y:
                 position.y -
-                (xyFlowReactKieDiagramStoreApi.getState().xyFlowReactKieDiagram.newNodeShadow?.height ?? 0) / 2,
+                (xyFlowReactKieDiagramStoreApi.getState().xyFlowReactKieDiagram.newNodeProjection?.height ?? 0) / 2,
             },
-            id: xyFlowReactKieDiagramStoreApi.getState().xyFlowReactKieDiagram.newNodeShadow!.id,
+            id: xyFlowReactKieDiagramStoreApi.getState().xyFlowReactKieDiagram.newNodeProjection!.id,
           },
         ]);
       }
@@ -988,8 +988,8 @@ export function XyFlowReactKieDiagram<
   );
 
   const nodes = useXyFlowReactKieDiagramStore((s) => {
-    if (s.xyFlowReactKieDiagram.newNodeShadow) {
-      return [...s.computed(s).getDiagramData().nodes, s.xyFlowReactKieDiagram.newNodeShadow];
+    if (s.xyFlowReactKieDiagram.newNodeProjection) {
+      return [...s.computed(s).getDiagramData().nodes, s.xyFlowReactKieDiagram.newNodeProjection];
     } else {
       return s.computed(s).getDiagramData().nodes;
     }
