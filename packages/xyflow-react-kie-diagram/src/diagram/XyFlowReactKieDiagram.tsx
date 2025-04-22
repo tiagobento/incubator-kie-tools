@@ -330,50 +330,6 @@ export function XyFlowReactKieDiagram<
     [onEdgeAdded, xyFlowReactKieDiagramStoreApi]
   );
 
-  const onDragOver = useCallback(
-    (e: React.DragEvent) => {
-      if (!e.dataTransfer.types.find((t) => t === newNodeMimeType)) {
-        return;
-      }
-      e.preventDefault();
-      e.dataTransfer.dropEffect = "move";
-    },
-    [newNodeMimeType]
-  );
-
-  const onDrop = useCallback(
-    async (e: React.DragEvent) => {
-      console.log("XYFLOW KIE DIAGRAM: Node added (standalone)");
-      e.preventDefault();
-      if (!container.current || !reactFlowInstance) {
-        return;
-      }
-      // we need to remove the wrapper bounds, in order to get the correct position
-      const dropPoint = reactFlowInstance.screenToFlowPosition({
-        x: e.clientX,
-        y: e.clientY,
-      });
-      if (e.dataTransfer.getData(newNodeMimeType)) {
-        const { nodeType, element } = JSON.parse(e.dataTransfer.getData(newNodeMimeType)) as {
-          nodeType: N;
-          element: string;
-        };
-        e.stopPropagation();
-
-        xyFlowReactKieDiagramStoreApi.setState((state) => {
-          const { newNodeId } = onNodeAdded({
-            state,
-            dropPoint,
-            type: nodeType,
-            element,
-          });
-          state.xyFlowReactKieDiagram._selectedNodes = [newNodeId];
-        });
-      }
-    },
-    [container, newNodeMimeType, onNodeAdded, reactFlowInstance, xyFlowReactKieDiagramStoreApi]
-  );
-
   const ongoingConnection = useXyFlowReactKieDiagramStore((s) => s.xyFlowReactKieDiagram.ongoingConnection);
   useEffect(() => {
     const edgeUpdaterSource = document.querySelectorAll(
@@ -554,7 +510,9 @@ export function XyFlowReactKieDiagram<
                 const allNodes = state.computed(state).getDiagramData().nodes;
 
                 if (nodeIdBeingDraggedRef.current === change.id) {
-                  const nodeBeingDragged = state.computed(state).getDiagramData().nodesById.get(change.id)!;
+                  const nodeBeingDragged =
+                    state.computed(state).getDiagramData().nodesById.get(change.id) ??
+                    state.xyFlowReactKieDiagram.newNodeShadow!;
 
                   let foundContainer = false;
                   for (const potentialContainer of reactFlowInstance?.getNodes().reverse() ??
@@ -602,8 +560,12 @@ export function XyFlowReactKieDiagram<
                     const allowedContainmentModes =
                       containmentMap.get(potentialContainer.type as N) ?? new Map<ContainmentMode, Set<N>>();
 
-                    const allSelectedNodesRespectContainmentMode = [...diagramData.selectedNodeTypes].every(
-                      (nodeType) => allowedContainmentModes.get(containmentMode)?.has(nodeType)
+                    const typesOfNodesBeingDragged = state.xyFlowReactKieDiagram.newNodeShadow?.type
+                      ? [state.xyFlowReactKieDiagram.newNodeShadow.type as N]
+                      : [...diagramData.selectedNodeTypes];
+
+                    const allSelectedNodesRespectContainmentMode = typesOfNodesBeingDragged.every((nodeType) =>
+                      allowedContainmentModes.get(containmentMode)?.has(nodeType)
                     );
 
                     const newDropTarget = {
@@ -650,27 +612,36 @@ export function XyFlowReactKieDiagram<
 
                 const node = state.computed(state).getDiagramData().nodesById.get(change.id)!;
                 const dropTarget = state.xyFlowReactKieDiagram.dropTarget as S["xyFlowReactKieDiagram"]["dropTarget"];
-                onNodeRepositioned({
-                  state,
-                  controlWaypointsByEdge,
-                  node,
-                  newPosition:
-                    dropTarget?.containmentMode === ContainmentMode.BORDER
-                      ? snapToDropTargetsBorder(
-                          dropTarget,
-                          {
-                            ...node.data.shape["dc:Bounds"],
-                            "@_x": change.positionAbsolute.x,
-                            "@_y": change.positionAbsolute.y,
-                          },
-                          node.type!,
-                          state.xyFlowReactKieDiagram.snapGrid,
-                          minNodeSizes,
-                          DEFAULT_BORDER_ALLOWANCE_IN_PX
-                        )
-                      : change.positionAbsolute,
-                  childNodeIds: getDeepChildNodes([change.id], allNodes).get(change.id) ?? [],
-                });
+
+                const newPosition =
+                  dropTarget?.containmentMode === ContainmentMode.BORDER
+                    ? snapToDropTargetsBorder(
+                        dropTarget,
+                        {
+                          ...(node ?? state.xyFlowReactKieDiagram.newNodeShadow).data.shape["dc:Bounds"],
+                          "@_x": change.positionAbsolute.x,
+                          "@_y": change.positionAbsolute.y,
+                        },
+                        (node ?? state.xyFlowReactKieDiagram.newNodeShadow).type!,
+                        state.xyFlowReactKieDiagram.snapGrid,
+                        minNodeSizes,
+                        DEFAULT_BORDER_ALLOWANCE_IN_PX
+                      )
+                    : change.positionAbsolute;
+
+                if (!node && state.xyFlowReactKieDiagram.newNodeShadow) {
+                  state.xyFlowReactKieDiagram.newNodeShadow.position = newPosition;
+                  state.xyFlowReactKieDiagram.newNodeShadow.data.shape["dc:Bounds"]["@_x"] = newPosition.x;
+                  state.xyFlowReactKieDiagram.newNodeShadow.data.shape["dc:Bounds"]["@_y"] = newPosition.y;
+                } else {
+                  onNodeRepositioned({
+                    state,
+                    controlWaypointsByEdge,
+                    node,
+                    newPosition,
+                    childNodeIds: getDeepChildNodes([change.id], allNodes).get(change.id) ?? [],
+                  });
+                }
               }
               break;
             case "remove":
@@ -892,6 +863,85 @@ export function XyFlowReactKieDiagram<
     [xyFlowReactKieDiagramStoreApi]
   );
 
+  const onDrop = useCallback(
+    async (e: React.DragEvent) => {
+      console.log("XYFLOW KIE DIAGRAM: Node added (standalone)");
+      e.preventDefault();
+      if (!container.current || !reactFlowInstance) {
+        return;
+      }
+
+      if (e.dataTransfer.getData(newNodeMimeType)) {
+        const { nodeType, element } = JSON.parse(e.dataTransfer.getData(newNodeMimeType)) as {
+          nodeType: N;
+          element: string;
+        };
+
+        e.stopPropagation();
+
+        xyFlowReactKieDiagramStoreApi.setState((state) => {
+          const { newNodeId } = onNodeAdded({
+            state,
+            dropPoint: state.xyFlowReactKieDiagram.newNodeShadow!.position,
+            type: nodeType,
+            element,
+          });
+          state.xyFlowReactKieDiagram._selectedNodes = [newNodeId];
+          nodeIdBeingDraggedRef.current = newNodeId;
+        });
+
+        onNodeDragStop(undefined as any, { dragging: true } as any, []);
+
+        xyFlowReactKieDiagramStoreApi.setState((state) => {
+          state.xyFlowReactKieDiagram.newNodeShadow = undefined;
+        });
+      }
+    },
+    [container, newNodeMimeType, onNodeAdded, onNodeDragStop, reactFlowInstance, xyFlowReactKieDiagramStoreApi]
+  );
+
+  const onDragOver = useCallback(
+    (e: React.DragEvent) => {
+      if (!e.dataTransfer.types.find((t) => t === newNodeMimeType)) {
+        return;
+      }
+      e.preventDefault();
+      e.dataTransfer.dropEffect = "move";
+
+      if (reactFlowInstance) {
+        const position = reactFlowInstance.screenToFlowPosition({ x: e.clientX, y: e.clientY });
+
+        onNodeDragStart(
+          undefined as any,
+          xyFlowReactKieDiagramStoreApi.getState().xyFlowReactKieDiagram.newNodeShadow!,
+          []
+        );
+
+        xyFlowReactKieDiagramStoreApi.setState((s) => {
+          if (s.xyFlowReactKieDiagram.newNodeShadow) {
+            s.xyFlowReactKieDiagram.newNodeShadow.hidden = false;
+          }
+        });
+
+        onNodesChange([
+          {
+            type: "position",
+            positionAbsolute: {
+              x:
+                position.x -
+                (xyFlowReactKieDiagramStoreApi.getState().xyFlowReactKieDiagram.newNodeShadow?.width ?? 0) / 2,
+              y:
+                position.y -
+                (xyFlowReactKieDiagramStoreApi.getState().xyFlowReactKieDiagram.newNodeShadow?.height ?? 0) / 2,
+            },
+            id: xyFlowReactKieDiagramStoreApi.getState().xyFlowReactKieDiagram.newNodeShadow!.id,
+          },
+        ]);
+      }
+    },
+    [newNodeMimeType, onNodeDragStart, onNodesChange, reactFlowInstance, xyFlowReactKieDiagramStoreApi]
+  );
+
   // Override Reactflow's behavior by intercepting the keydown event using its `capture` variant.
   const handleRfKeyDownCapture = useCallback(
     (e: React.KeyboardEvent) => {
@@ -937,7 +987,13 @@ export function XyFlowReactKieDiagram<
     [xyFlowReactKieDiagramStoreApi, modelBeforeEditingRef, onResetToBeforeEditingBegan, onEscPressed]
   );
 
-  const nodes = useXyFlowReactKieDiagramStore((s) => s.computed(s).getDiagramData().nodes);
+  const nodes = useXyFlowReactKieDiagramStore((s) => {
+    if (s.xyFlowReactKieDiagram.newNodeShadow) {
+      return [...s.computed(s).getDiagramData().nodes, s.xyFlowReactKieDiagram.newNodeShadow];
+    } else {
+      return s.computed(s).getDiagramData().nodes;
+    }
+  });
   const edges = useXyFlowReactKieDiagramStore((s) => s.computed(s).getDiagramData().edges);
 
   const waypointActionsContextValue = useMemo<WaypointActionsContextType>(

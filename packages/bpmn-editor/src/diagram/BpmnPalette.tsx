@@ -20,7 +20,14 @@
 import * as React from "react";
 import { useCallback } from "react";
 import * as RF from "reactflow";
-import { BpmnNodeType, elementToNodeType, NODE_TYPES } from "./BpmnDiagramDomain";
+import {
+  BpmnNodeElement,
+  BpmnNodeType,
+  DEFAULT_NODE_SIZES,
+  elementToNodeType,
+  MIN_NODE_SIZES,
+  NODE_TYPES,
+} from "./BpmnDiagramDomain";
 import {
   CallActivityIcon,
   DataObjectIcon,
@@ -48,10 +55,15 @@ import { Title } from "@patternfly/react-core/dist/js/components/Title";
 import { Bullseye } from "@patternfly/react-core/dist/js/layouts/Bullseye";
 import { addVariable } from "../mutations/addVariable";
 import "./BpmnPalette.css";
+import { snapShapeDimensions } from "@kie-tools/xyflow-react-kie-diagram/dist/snapgrid/SnapGrid";
+import { generateUuid } from "@kie-tools/xyflow-react-kie-diagram/dist/uuid/uuid";
+import { NODE_LAYERS } from "@kie-tools/xyflow-react-kie-diagram/dist/nodes/Hooks";
 
 export const MIME_TYPE_FOR_BPMN_EDITOR_NEW_NODE_FROM_PALETTE = "application/kie-bpmn-editor--new-node-from-palette";
 
 export function BpmnPalette({ pulse }: { pulse: boolean }) {
+  const bpmnEditorStoreApi = useBpmnEditorStoreApi();
+
   const onDragStart = useCallback(
     <T extends BpmnNodeType>(
       event: React.DragEvent,
@@ -63,14 +75,69 @@ export function BpmnPalette({ pulse }: { pulse: boolean }) {
         JSON.stringify({ nodeType, element })
       );
       event.dataTransfer.effectAllowed = "move";
+
+      // Remove default effect of dragging elements.
+      const transparentDiv = document.createElement("div");
+      transparentDiv.style.width = "1px";
+      transparentDiv.style.height = "1px";
+      transparentDiv.style.opacity = "0";
+      document.body.appendChild(transparentDiv);
+      event.dataTransfer.setDragImage(transparentDiv, 0, 0);
+      setTimeout(() => {
+        document.body.removeChild(transparentDiv);
+      }, 0);
+
+      bpmnEditorStoreApi.setState((s) => {
+        const snapGrid = s.xyFlowReactKieDiagram.snapGrid;
+        const bpmnShape = {
+          "@_id": generateUuid(),
+          "dc:Bounds": {
+            ...DEFAULT_NODE_SIZES[nodeType]({ snapGrid }),
+            "@_x": 0,
+            "@_y": 0,
+          },
+        };
+
+        const position = { x: bpmnShape["dc:Bounds"]["@_x"], y: bpmnShape["dc:Bounds"]["@_y"] };
+        const dimensions = snapShapeDimensions(snapGrid, bpmnShape, MIN_NODE_SIZES[nodeType]({ snapGrid }));
+
+        s.xyFlowReactKieDiagram.newNodeShadow = {
+          id: generateUuid(),
+          type: nodeType,
+          hidden: true,
+          position,
+          width: dimensions.width,
+          height: dimensions.height,
+          data: {
+            parentXyFlowNode: undefined,
+            shape: bpmnShape,
+            shapeIndex: -1,
+            bpmnElement: {
+              "@_id": generateUuid(),
+              "@_name": "New " + nodeType.toUpperCase(), // FIXME: Tiago: Align labels with `addStandaloneNode` mutation.
+              __$$element: element as any,
+            },
+          },
+          zIndex: NODE_LAYERS.ATTACHED_NODES,
+          style: {
+            width: dimensions.width,
+            height: dimensions.height,
+            zIndex: NODE_LAYERS.ATTACHED_NODES,
+          },
+        };
+      });
     },
-    []
+    [bpmnEditorStoreApi]
   );
+
+  const onDragEnd = useCallback(() => {
+    // Makes sure there's no leftovers even when user pressed Esc during drag.
+    bpmnEditorStoreApi.setState((s) => (s.xyFlowReactKieDiagram.newNodeShadow = undefined));
+  }, [bpmnEditorStoreApi]);
 
   const nodesPalletePopoverRef = React.useRef<HTMLDivElement>(null);
 
   const openLhsPanel = useBpmnEditorStore((s) => s.diagram.openLhsPanel);
-  const bpmnEditorStoreApi = useBpmnEditorStoreApi();
 
   const process = useBpmnEditorStore((s) =>
     s.bpmn.model.definitions.rootElement?.find((s) => s.__$$element === "process")
@@ -139,6 +206,7 @@ export function BpmnPalette({ pulse }: { pulse: boolean }) {
             title={"Start Events"}
             className={"kie-bpmn-editor--palette-button dndnode start-event"}
             onDragStart={(event) => onDragStart(event, NODE_TYPES.startEvent, "startEvent")}
+            onDragEnd={onDragEnd}
             draggable={true}
           >
             <StartEventIcon />
@@ -147,6 +215,7 @@ export function BpmnPalette({ pulse }: { pulse: boolean }) {
             title={"Intermediate Catch Events"}
             className={"kie-bpmn-editor--palette-button dndnode intermediate-catch-event"}
             onDragStart={(event) => onDragStart(event, NODE_TYPES.intermediateCatchEvent, "intermediateCatchEvent")}
+            onDragEnd={onDragEnd}
             draggable={true}
           >
             <IntermediateCatchEventIcon />
@@ -155,6 +224,7 @@ export function BpmnPalette({ pulse }: { pulse: boolean }) {
             title={"Intermediate Throw Events"}
             className={"kie-bpmn-editor--palette-button dndnode intermediate-throw-event"}
             onDragStart={(event) => onDragStart(event, NODE_TYPES.intermediateThrowEvent, "intermediateThrowEvent")}
+            onDragEnd={onDragEnd}
             draggable={true}
           >
             <IntermediateThrowEventIcon />
@@ -163,6 +233,7 @@ export function BpmnPalette({ pulse }: { pulse: boolean }) {
             title={"End Events"}
             className={"kie-bpmn-editor--palette-button dndnode end-event"}
             onDragStart={(event) => onDragStart(event, NODE_TYPES.endEvent, "endEvent")}
+            onDragEnd={onDragEnd}
             draggable={true}
           >
             <EndEventIcon />
@@ -171,6 +242,7 @@ export function BpmnPalette({ pulse }: { pulse: boolean }) {
             title={"Tasks"}
             className={"kie-bpmn-editor--palette-button dndnode task"}
             onDragStart={(event) => onDragStart(event, NODE_TYPES.task, "task")}
+            onDragEnd={onDragEnd}
             draggable={true}
           >
             <TaskIcon />
@@ -179,6 +251,7 @@ export function BpmnPalette({ pulse }: { pulse: boolean }) {
             title={"Call Activity"}
             className={"kie-bpmn-editor--palette-button dndnode callActivity"}
             onDragStart={(event) => onDragStart(event, NODE_TYPES.task, "callActivity")}
+            onDragEnd={onDragEnd}
             draggable={true}
           >
             <CallActivityIcon />
@@ -187,6 +260,7 @@ export function BpmnPalette({ pulse }: { pulse: boolean }) {
             title={"Sub-processes"}
             className={"kie-bpmn-editor--palette-button dndnode subProcess"}
             onDragStart={(event) => onDragStart(event, NODE_TYPES.subProcess, "subProcess")}
+            onDragEnd={onDragEnd}
             draggable={true}
           >
             <SubProcessIcon />
@@ -195,6 +269,7 @@ export function BpmnPalette({ pulse }: { pulse: boolean }) {
             title={"Gateways"}
             className={"kie-bpmn-editor--palette-button dndnode gateway"}
             onDragStart={(event) => onDragStart(event, NODE_TYPES.gateway, "parallelGateway")}
+            onDragEnd={onDragEnd}
             draggable={true}
           >
             <GatewayIcon />
@@ -203,6 +278,7 @@ export function BpmnPalette({ pulse }: { pulse: boolean }) {
             title={"Lanes"}
             className={"kie-bpmn-editor--palette-button dndnode lane"}
             onDragStart={(event) => onDragStart(event, NODE_TYPES.lane, "lane")}
+            onDragEnd={onDragEnd}
             draggable={true}
           >
             <LaneIcon />
@@ -214,6 +290,7 @@ export function BpmnPalette({ pulse }: { pulse: boolean }) {
             title={"Data Object"}
             className={"kie-bpmn-editor--palette-button dndnode data-object"}
             onDragStart={(event) => onDragStart(event, NODE_TYPES.dataObject, "dataObject")}
+            onDragEnd={onDragEnd}
             draggable={true}
           >
             <DataObjectIcon />
@@ -225,6 +302,7 @@ export function BpmnPalette({ pulse }: { pulse: boolean }) {
             title={"Group"}
             className={"kie-bpmn-editor--palette-button dndnode group"}
             onDragStart={(event) => onDragStart(event, NODE_TYPES.group, "group")}
+            onDragEnd={onDragEnd}
             draggable={true}
           >
             <GroupIcon />
@@ -233,6 +311,7 @@ export function BpmnPalette({ pulse }: { pulse: boolean }) {
             title={"Text Annotation"}
             className={"kie-bpmn-editor--palette-button dndnode text-annotation"}
             onDragStart={(event) => onDragStart(event, NODE_TYPES.textAnnotation, "textAnnotation")}
+            onDragEnd={onDragEnd}
             draggable={true}
           >
             <TextAnnotationIcon />

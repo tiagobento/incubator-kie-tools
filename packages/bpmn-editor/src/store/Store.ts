@@ -116,6 +116,7 @@ export const getDefaultStaticState = (): Omit<State, "bpmn" | "computed" | "disp
     edgeIdBeingUpdated: undefined,
     dropTarget: undefined,
     ongoingConnection: undefined,
+    newNodeShadow: undefined,
   },
 });
 
