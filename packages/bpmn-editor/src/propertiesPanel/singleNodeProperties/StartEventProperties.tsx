@@ -17,16 +17,22 @@
  * under the License.
  */
 
-import { BPMN20__tStartEvent } from "@kie-tools/bpmn-marshaller/dist/schemas/bpmn-2_0/ts-gen/types";
 import * as React from "react";
+import { START_EVENT_NODE_ON_EVENT_SUB_PROCESSES_IS_INTERRUPTING_DEFAULT_VALUE } from "@kie-tools/bpmn-marshaller/dist/schemas/bpmn-2_0/Bpmn20Spec";
+import { BPMN20__tStartEvent } from "@kie-tools/bpmn-marshaller/dist/schemas/bpmn-2_0/ts-gen/types";
+import { Checkbox } from "@patternfly/react-core/dist/js/components/Checkbox";
+import { Divider } from "@patternfly/react-core/dist/js/components/Divider";
+import { BpmnNodeElement } from "../../diagram/BpmnDiagramDomain";
+import { EventDefinitionIcon } from "../../diagram/nodes/NodeIcons";
+import { NODE_COLORS } from "../../diagram/nodes/NodeSvgs";
+import { visitFlowElementsAndArtifacts } from "../../mutations/_elementVisitor";
+import { addOrGetProcessAndDiagramElements } from "../../mutations/addOrGetProcessAndDiagramElements";
 import { Normalized } from "../../normalization/normalize";
-import { NameDocumentationAndId } from "../nameDocumentationAndId/NameDocumentationAndId";
+import { useBpmnEditorStore, useBpmnEditorStoreApi } from "../../store/StoreContext";
 import { OutputOnlyAssociationFormSection } from "../dataMapping/DataMappingFormSection";
 import { EventDefinitionProperties } from "../eventDefinition/EventDefinitionProperties";
-import { EventDefinitionIcon, StartEventIcon } from "../../diagram/nodes/NodeIcons";
+import { NameDocumentationAndId } from "../nameDocumentationAndId/NameDocumentationAndId";
 import { PropertiesPanelHeaderFormSection } from "./_PropertiesPanelHeaderFormSection";
-import { Divider } from "@patternfly/react-core/dist/js/components/Divider";
-import { NODE_COLORS } from "../../diagram/nodes/NodeSvgs";
 
 export function StartEventProperties({
   startEvent,
@@ -34,6 +40,16 @@ export function StartEventProperties({
   startEvent: Normalized<BPMN20__tStartEvent> & { __$$element: "startEvent" };
 }) {
   const foregroundColor = NODE_COLORS.startEvent.foreground;
+
+  const bpmnEditorStoreApi = useBpmnEditorStoreApi();
+
+  const shouldDisplayIsInterrupingFlag = useBpmnEditorStore((s) =>
+    getShouldDisplayIsInterruptingFlag(
+      s.computed(s).getDiagramData().nodesById.get(startEvent["@_id"])?.data.parentXyFlowNode?.data.bpmnElement,
+      startEvent
+    )
+  );
+
   return (
     <>
       <PropertiesPanelHeaderFormSection
@@ -50,10 +66,47 @@ export function StartEventProperties({
 
         <Divider inset={{ default: "insetXs" }} />
 
+        {shouldDisplayIsInterrupingFlag && (
+          <Checkbox
+            id={"cancel-activity"}
+            label={"Interrupting"}
+            isChecked={
+              startEvent["@_isInterrupting"] ?? START_EVENT_NODE_ON_EVENT_SUB_PROCESSES_IS_INTERRUPTING_DEFAULT_VALUE
+            }
+            onChange={(isChecked) => {
+              bpmnEditorStoreApi.setState((s) => {
+                const { process } = addOrGetProcessAndDiagramElements({ definitions: s.bpmn.model.definitions });
+                visitFlowElementsAndArtifacts(process, ({ element }) => {
+                  if (element["@_id"] === startEvent["@_id"] && element.__$$element === "startEvent") {
+                    element["@_isInterrupting"] = isChecked;
+                  }
+                });
+              });
+            }}
+          />
+        )}
+
         <EventDefinitionProperties event={startEvent} />
       </PropertiesPanelHeaderFormSection>
 
       <OutputOnlyAssociationFormSection element={startEvent} />
     </>
+  );
+}
+
+export function getShouldDisplayIsInterruptingFlag(
+  parentBpmnElement: BpmnNodeElement | undefined,
+  startEvent: Normalized<BPMN20__tStartEvent> & { __$$element: "startEvent" }
+) {
+  const isParentNodeAnEventSubProcess =
+    !!parentBpmnElement &&
+    parentBpmnElement.__$$element === "subProcess" &&
+    (parentBpmnElement?.["@_triggeredByEvent"] ?? false);
+
+  return (
+    isParentNodeAnEventSubProcess &&
+    !!startEvent.eventDefinition?.[0]?.__$$element &&
+    startEvent.eventDefinition[0].__$$element !== "compensateEventDefinition" &&
+    startEvent.eventDefinition[0].__$$element !== "errorEventDefinition"
   );
 }

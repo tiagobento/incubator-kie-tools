@@ -17,8 +17,9 @@
  * under the License.
  */
 
-import { BPMN20__tBoundaryEvent } from "@kie-tools/bpmn-marshaller/dist/schemas/bpmn-2_0/ts-gen/types";
 import * as React from "react";
+import { BOUNDARY_EVENT_CANCEL_ACTIVITY_DEFAULT_VALUE } from "@kie-tools/bpmn-marshaller/dist/schemas/bpmn-2_0/Bpmn20Spec";
+import { BPMN20__tBoundaryEvent } from "@kie-tools/bpmn-marshaller/dist/schemas/bpmn-2_0/ts-gen/types";
 import { Normalized } from "../../normalization/normalize";
 import { useBpmnEditorStoreApi } from "../../store/StoreContext";
 import { NameDocumentationAndId } from "../nameDocumentationAndId/NameDocumentationAndId";
@@ -27,6 +28,9 @@ import { OutputOnlyAssociationFormSection } from "../dataMapping/DataMappingForm
 import { PropertiesPanelHeaderFormSection } from "./_PropertiesPanelHeaderFormSection";
 import { IntermediateCatchEventIcon } from "../../diagram/nodes/NodeIcons";
 import { Divider } from "@patternfly/react-core/dist/js/components/Divider";
+import { Checkbox } from "@patternfly/react-core/dist/js/components/Checkbox";
+import { visitFlowElementsAndArtifacts } from "../../mutations/_elementVisitor";
+import { addOrGetProcessAndDiagramElements } from "../../mutations/addOrGetProcessAndDiagramElements";
 
 export function BoundaryEventProperties({
   boundaryEvent,
@@ -44,6 +48,22 @@ export function BoundaryEventProperties({
         <NameDocumentationAndId element={boundaryEvent} />
 
         <Divider inset={{ default: "insetXs" }} />
+
+        <Checkbox
+          id={"cancel-activity"}
+          label={"Should cancel Activity?"}
+          isChecked={boundaryEvent["@_cancelActivity"] ?? BOUNDARY_EVENT_CANCEL_ACTIVITY_DEFAULT_VALUE}
+          onChange={(isChecked) => {
+            bpmnEditorStoreApi.setState((s) => {
+              const { process } = addOrGetProcessAndDiagramElements({ definitions: s.bpmn.model.definitions });
+              visitFlowElementsAndArtifacts(process, ({ element }) => {
+                if (element["@_id"] === boundaryEvent["@_id"] && element.__$$element === "boundaryEvent") {
+                  element["@_cancelActivity"] = isChecked;
+                }
+              });
+            });
+          }}
+        />
 
         <EventDefinitionProperties event={boundaryEvent} />
       </PropertiesPanelHeaderFormSection>

@@ -125,7 +125,7 @@ export const NODE_COLORS = {
   },
 } as const;
 
-export function StartEventNodeSvg(__props: NodeSvgProps & { variant: EventVariant | "none" }) {
+export function StartEventNodeSvg(__props: NodeSvgProps & { variant: EventVariant | "none"; isInterrupting: boolean }) {
   const {
     x,
     y,
@@ -135,7 +135,7 @@ export function StartEventNodeSvg(__props: NodeSvgProps & { variant: EventVarian
     props: { ..._props },
   } = normalize(__props);
 
-  const { variant, ...props } = { ..._props };
+  const { variant, isInterrupting, ...props } = { ..._props };
 
   const cx = x + width / 2;
   const cy = y + height / 2;
@@ -148,6 +148,7 @@ export function StartEventNodeSvg(__props: NodeSvgProps & { variant: EventVarian
         cx={cx}
         cy={cy}
         strokeWidth={strokeWidth}
+        strokeDasharray={isInterrupting ? undefined : "9px 9px"}
         width={width}
         height={height}
         fill={NODE_COLORS.startEvent.background}
@@ -172,7 +173,7 @@ export function StartEventNodeSvg(__props: NodeSvgProps & { variant: EventVarian
   );
 }
 export function IntermediateCatchEventNodeSvg(
-  __props: NodeSvgProps & { rimWidth?: number; variant: EventVariant | "none" }
+  __props: NodeSvgProps & { rimWidth?: number; variant: EventVariant | "none"; isInterrupting: boolean }
 ) {
   const {
     x,
@@ -183,7 +184,7 @@ export function IntermediateCatchEventNodeSvg(
     props: { ..._props },
   } = normalize(__props);
 
-  const { rimWidth, variant, ...props } = { ..._props };
+  const { rimWidth, variant, isInterrupting, ...props } = { ..._props };
 
   const outerCircleRadius = width / 2;
   const innerCircleRadius = outerCircleRadius - (rimWidth ?? 5);
@@ -199,6 +200,7 @@ export function IntermediateCatchEventNodeSvg(
         strokeWidth={strokeWidth}
         width={width}
         height={height}
+        strokeDasharray={isInterrupting ? undefined : "9px 9px"}
         fill={NODE_COLORS.intermediateCatchEvent.background}
         stroke={NODE_COLORS.intermediateCatchEvent.foreground}
         strokeLinejoin={"round"}
@@ -211,6 +213,7 @@ export function IntermediateCatchEventNodeSvg(
         strokeWidth={strokeWidth}
         width={width}
         height={height}
+        strokeDasharray={isInterrupting ? undefined : "6px 6px"}
         fill={NODE_COLORS.intermediateCatchEvent.background}
         stroke={NODE_COLORS.intermediateCatchEvent.foreground}
         strokeLinejoin={"round"}

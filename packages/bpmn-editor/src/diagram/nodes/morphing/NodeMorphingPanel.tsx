@@ -23,7 +23,6 @@ import { ProcessAutomationIcon } from "@patternfly/react-icons/dist/js/icons/pro
 import { TimesIcon } from "@patternfly/react-icons/dist/js/icons/times-icon";
 import { MorphingAction } from "./MorphingAction";
 import { useBpmnEditorStore } from "../../../store/StoreContext";
-import { useKeyboardShortcutsForMorphingActions } from "./useKeyboardShortcutsForMorphingActions";
 import "./NodeMorphingPanel.css";
 
 export function NodeMorphingPanel<A extends MorphingAction>({

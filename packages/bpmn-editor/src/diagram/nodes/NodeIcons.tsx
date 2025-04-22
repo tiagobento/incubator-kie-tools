@@ -38,6 +38,10 @@ import { BpmnNodeType, EventVariant, GatewayVariant, SubProcessVariant, TaskVari
 import { NODE_TYPES } from "../BpmnDiagramDomain";
 import { QuestionCircleIcon } from "@patternfly/react-icons/dist/js/icons/question-circle-icon";
 import { nodeSvgProps, RoundSvg } from "@kie-tools/xyflow-react-kie-diagram/dist/nodes/NodeIcons";
+import {
+  BOUNDARY_EVENT_CANCEL_ACTIVITY_DEFAULT_VALUE,
+  START_EVENT_NODE_ON_EVENT_SUB_PROCESSES_IS_INTERRUPTING_DEFAULT_VALUE,
+} from "@kie-tools/bpmn-marshaller/dist/schemas/bpmn-2_0/Bpmn20Spec";
 
 export function NodeIcon({ nodeType }: { nodeType: BpmnNodeType }) {
   return switchExpression(nodeType, {
@@ -89,7 +93,11 @@ export function EventDefinitionIcon({
 export function StartEventIcon({ variant }: { variant?: EventVariant }) {
   return (
     <RoundSvg>
-      <StartEventNodeSvg {...nodeSvgProps} variant={variant ?? "none"} />
+      <StartEventNodeSvg
+        {...nodeSvgProps}
+        variant={variant ?? "none"}
+        isInterrupting={START_EVENT_NODE_ON_EVENT_SUB_PROCESSES_IS_INTERRUPTING_DEFAULT_VALUE}
+      />
     </RoundSvg>
   );
 }
@@ -97,7 +105,12 @@ export function StartEventIcon({ variant }: { variant?: EventVariant }) {
 export function IntermediateCatchEventIcon({ variant }: { variant?: EventVariant }) {
   return (
     <RoundSvg>
-      <IntermediateCatchEventNodeSvg {...nodeSvgProps} rimWidth={40} variant={variant ?? "none"} />
+      <IntermediateCatchEventNodeSvg
+        {...nodeSvgProps}
+        rimWidth={40}
+        variant={variant ?? "none"}
+        isInterrupting={BOUNDARY_EVENT_CANCEL_ACTIVITY_DEFAULT_VALUE}
+      />
     </RoundSvg>
   );
 }

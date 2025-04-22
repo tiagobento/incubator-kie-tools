@@ -37,6 +37,10 @@ import {
   BPMN20__tTask,
   BPMN20__tTextAnnotation,
 } from "@kie-tools/bpmn-marshaller/dist/schemas/bpmn-2_0/ts-gen/types";
+import {
+  BOUNDARY_EVENT_CANCEL_ACTIVITY_DEFAULT_VALUE,
+  START_EVENT_NODE_ON_EVENT_SUB_PROCESSES_IS_INTERRUPTING_DEFAULT_VALUE,
+} from "@kie-tools/bpmn-marshaller/dist/schemas/bpmn-2_0/Bpmn20Spec";
 import { getContainmentRelationship } from "@kie-tools/xyflow-react-kie-diagram/dist/maths/DcMaths";
 import { propsHaveSameValuesDeep } from "@kie-tools/xyflow-react-kie-diagram/dist/memoization/memoization";
 import {
@@ -98,6 +102,7 @@ import { ElementFilter } from "@kie-tools/xml-parser-ts/dist/elementFilter";
 import { useTaskNodeMorphingActions } from "./morphing/useTaskNodeMorphingActions";
 import { useSubProcessNodeMorphingActions } from "./morphing/useSubProcessNodeMorphingActions";
 import { useKeyboardShortcutsForMorphingActions } from "./morphing/useKeyboardShortcutsForMorphingActions";
+import { getShouldDisplayIsInterruptingFlag } from "../../propertiesPanel/singleNodeProperties/StartEventProperties";
 
 export const StartEventNode = React.memo(
   ({
@@ -167,6 +172,12 @@ export const StartEventNode = React.memo(
             x={0}
             y={0}
             variant={startEvent.eventDefinition?.[0]?.__$$element ?? "none"}
+            isInterrupting={
+              getShouldDisplayIsInterruptingFlag(parentXyFlowNode?.data.bpmnElement, startEvent)
+                ? startEvent["@_isInterrupting"] ??
+                  START_EVENT_NODE_ON_EVENT_SUB_PROCESSES_IS_INTERRUPTING_DEFAULT_VALUE
+                : START_EVENT_NODE_ON_EVENT_SUB_PROCESSES_IS_INTERRUPTING_DEFAULT_VALUE
+            }
           />
         </svg>
         <PositionalNodeHandles isTargeted={isTargeted && isValidConnectionTarget} nodeId={id} />
@@ -312,6 +323,11 @@ export const IntermediateCatchEventNode = React.memo(
             x={0}
             y={0}
             variant={intermediateCatchEvent.eventDefinition?.[0].__$$element ?? "none"}
+            isInterrupting={
+              intermediateCatchEvent.__$$element === "boundaryEvent"
+                ? intermediateCatchEvent["@_cancelActivity"] ?? BOUNDARY_EVENT_CANCEL_ACTIVITY_DEFAULT_VALUE
+                : true
+            }
           />
         </svg>
         <PositionalNodeHandles isTargeted={isTargeted && isValidConnectionTarget} nodeId={id} />
@@ -812,20 +828,20 @@ export const SubProcessNode = React.memo(
     const renderCount = useRef<number>(0);
     renderCount.current++;
 
-    const ref = useRef<SVGRectElement>(null);
+    const svgRef = useRef<SVGRectElement>(null);
 
     const enableCustomNodeStyles = useBpmnEditorStore((s) => s.diagram.overlays.enableCustomNodeStyles);
     const isOnlySelectedNode = useBpmnEditorStore(
       (s) => s.xyFlowReactKieDiagram._selectedNodes.length === 1 && selected
     );
-    const isHovered = useIsHovered(ref);
+    const isHovered = useIsHovered(svgRef);
     const isResizing = useNodeResizing(id);
     const shouldActLikeHovered = useBpmnEditorStore(
       (s) => (isHovered || isResizing) && s.xyFlowReactKieDiagram.draggingNodes.length === 0
     );
 
     const { isEditingLabel, setEditingLabel, triggerEditing, triggerEditingIfEnter } = useEditableNodeLabel(id);
-    useHoveredNodeAlwaysOnTop(ref, zIndex, shouldActLikeHovered, dragging, selected, isEditingLabel);
+    useHoveredNodeAlwaysOnTop(svgRef, zIndex, shouldActLikeHovered, dragging, selected, isEditingLabel);
 
     const bpmnEditorStoreApi = useBpmnEditorStoreApi();
 
@@ -857,14 +873,14 @@ export const SubProcessNode = React.memo(
     useEffect(() => setMorphingPanelExpanded(false), [isHovered]);
     const morphingActions = useSubProcessNodeMorphingActions(subProcess);
     const disabledMorphingActionIds = useMemo<Set<Unpacked<typeof morphingActions>["id"]>>(() => new Set(), []);
-    useKeyboardShortcutsForMorphingActions(ref, morphingActions, disabledMorphingActionIds);
+    useKeyboardShortcutsForMorphingActions(svgRef, morphingActions, disabledMorphingActionIds);
 
     return (
       <>
         <svg className={`xyflow-react-kie-diagram--node-shape ${className} ${selected ? "selected" : ""}`}>
           <SubProcessNodeSvg
             {...nodeDimensions}
-            ref={ref}
+            ref={svgRef}
             x={0}
             y={0}
             icons={icons}

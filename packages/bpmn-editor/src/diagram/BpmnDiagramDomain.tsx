@@ -76,6 +76,10 @@ import {
 import { CONTAINER_NODES_DESIRABLE_PADDING } from "@kie-tools/xyflow-react-kie-diagram/dist/maths/DcMaths";
 import { NodeSizes } from "@kie-tools/xyflow-react-kie-diagram/dist/nodes/NodeSizes";
 import { SnapGrid, snapPoint } from "@kie-tools/xyflow-react-kie-diagram/dist/snapgrid/SnapGrid";
+import {
+  BOUNDARY_EVENT_CANCEL_ACTIVITY_DEFAULT_VALUE,
+  START_EVENT_NODE_ON_EVENT_SUB_PROCESSES_IS_INTERRUPTING_DEFAULT_VALUE,
+} from "@kie-tools/bpmn-marshaller/dist/schemas/bpmn-2_0/Bpmn20Spec";
 
 export const NODE_TYPES = {
   startEvent: "node_startEvent" as const,
@@ -460,11 +464,23 @@ export const bpmnNodesOutgoingStuffNodePanelMapping: OutgoingStuffNodePanelNodeM
 > = {
   [NODE_TYPES.startEvent]: {
     actionTitle: "Add Start Event",
-    icon: (nodeSvgProps) => <StartEventNodeSvg {...nodeSvgProps} variant={"none"} />,
+    icon: (nodeSvgProps) => (
+      <StartEventNodeSvg
+        {...nodeSvgProps}
+        variant={"none"}
+        isInterrupting={START_EVENT_NODE_ON_EVENT_SUB_PROCESSES_IS_INTERRUPTING_DEFAULT_VALUE}
+      />
+    ),
   },
   [NODE_TYPES.intermediateCatchEvent]: {
     actionTitle: "Add Intermediate Catch Event",
-    icon: (nodeSvgProps) => <IntermediateCatchEventNodeSvg {...nodeSvgProps} variant={"none"} />,
+    icon: (nodeSvgProps) => (
+      <IntermediateCatchEventNodeSvg
+        {...nodeSvgProps}
+        variant={"none"}
+        isInterrupting={BOUNDARY_EVENT_CANCEL_ACTIVITY_DEFAULT_VALUE}
+      />
+    ),
   },
   [NODE_TYPES.intermediateThrowEvent]: {
     actionTitle: "Add Intermediate Throw Event",
