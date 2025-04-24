@@ -19,11 +19,37 @@ import { useCallback, useState, useRef, useMemo, useEffect } from "react";
 import { Meta } from "@storybook/blocks";
 import { DmnEditor } from "../../src/DmnEditor";
 import { USE_CASE_MODELS } from "../useCases/models/models";
+import { DmnEditorInAPrettyBox } from "../misc/DmnEditorInAPrettyBox";
 
 <Meta title="Reference/Overview" />
 
 # DMN Editor :: Overview
 
-The DMN Editor lets you edit Decision models based on the DMN standard.
+> _Decision Model and Notation (DMN) is a modeling language and notation for the precise specification of business decisions and business rules. DMN is easily readable by the different types of people involved in decision management. These include: business people who specify the rules and monitor their application; business analysts._
 
-<DmnEditor isReadOnly={true} model={USE_CASE_MODELS.loanPreQualification.model} />
+> Source: [https://www.omg.org/dmn](https://www.omg.org/dmn)
+
+Apache KIE's DMN Editor lets you create, modify, and display DMN files in web-based environments–like web browsers, and Desktop applications like VS Code. The DMN Editor is crafted to be a [Controlled component](https://react.dev/learn/sharing-state-between-components#controlled-and-uncontrolled-components) in React, meaning you can expect it to render what you input, and be notified when something changes.
+
+The DMN Editor relies on the [@kie-tools/dmn-marshaller](https://www.npmjs.com/package/@kie-tools/dmn-marshaller) package's intermediate type-safe JSON-like representation of the model, auto-generated from the official DMN XSD files, and will automatically upgrade the input model to the latest version it supports.
+
+> > <small>
+> >   ℹ️ The DMN Editor is a modernized version of DMN Editor (classic), which has served the Apache KIE community so
+> >   well for many many years. The DMN Editor (classic) will still be available as a Standalone JavaScript library at
+> >   [@kie-tools/kie-editors-standalone](https://www.npmjs.com/package/@kie-tools/kie-editors-standalone), but won't be
+> >   getting updates. The latest version supported by DMN Editor (classic) is DMN 1.2.
+> > </small>
+
+> > <small>
+> >   Importing a DMN file created in DMN Editor (classic) into Apache KIE's DMN Editor will work out-of-the-box and
+> >   upon the first modification your DMN model will be migrated to the latest version supported by Apache KIE's DMN
+> >   Editor.
+> > </small>
+
+Besides the basic Inputs and Decisions capabilities, Apache KIE's DMN Editor is packed with interesting features and nuances, which you can discover in this Storybook at your own pace. When editing business logic contained in Decisions and Business Knowledge Models (BKMs), the DMN Editor will defer to Apache KIE's DMN Boxed Expression Editor, but since there a lot to cover on DMN Boxed Expressions, there's a separate Storybook dedicated to it 😉 You can see it in [Apache KIE's Storybook for the DMN Boxed Expression Editor]().
+
+You can play with a read-only rendering of Apache KIE's DMN Editor below.
+
+<DmnEditorInAPrettyBox model={USE_CASE_MODELS.loanPreQualification.model} />
+
+To learn more, visit the other sections in this Storybook using the left-hand-side panel.
