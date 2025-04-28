@@ -83,21 +83,22 @@ const entryStyle = {
   width: "calc(100% - 2 * 4px - 2 * 8px)",
 };
 
-const namesFromOtherTypes = [
+const NAMES_FROM_OTHER_TYPES = new Set([
   "TaskName",
   "Skippable",
-  "NotStartedReassign",
-  "NotCompletedReassign",
-  "NotStartedNotify",
-  "NotCompletedNotify",
   "GroupId",
   "Comment",
   "Description",
   "Priority",
   "CreatedBy",
   "Content",
+
+  "NotStartedReassign",
+  "NotCompletedReassign",
+  "NotStartedNotify",
+  "NotCompletedNotify",
   "multiInstanceItemType",
-];
+]);
 
 export function DataMappingFormSection({
   sectionLabel,
@@ -112,6 +113,7 @@ export function DataMappingFormSection({
   useEffect(() => {
     onModalStateChange?.(showDataMappingModal);
   }, [showDataMappingModal, onModalStateChange]);
+
   return (
     <>
       <FormSection
@@ -152,13 +154,13 @@ export function BidirectionalDataMappingFormSection({ element }: { element: With
   const [isDataMappingModalOpen, setDataMappingModalOpen] = useState(false);
 
   const inputCount = element?.ioSpecification?.dataInput?.filter(
-    (dataInput) =>
-      !namesFromOtherTypes.some((namesFromOtherTypes) => dataInput["@_itemSubjectRef"]?.includes(namesFromOtherTypes))
+    (dataInput) => !NAMES_FROM_OTHER_TYPES.has(dataInput["@_name"]!)
   ).length;
+
   const outputCount = element?.ioSpecification?.dataOutput?.filter(
-    (dataOutput) =>
-      !namesFromOtherTypes.some((namesFromOtherTypes) => dataOutput["@_itemSubjectRef"]?.includes(namesFromOtherTypes))
+    (dataOutput) => !NAMES_FROM_OTHER_TYPES.has(dataOutput["@_name"]!)
   ).length;
+
   const sectionLabel = useMemo(() => {
     if (inputCount && inputCount > 0 && outputCount && outputCount > 0) {
       return ` (in: ${inputCount}, out: ${outputCount})`;
@@ -170,6 +172,7 @@ export function BidirectionalDataMappingFormSection({ element }: { element: With
       return "";
     }
   }, [inputCount, outputCount]);
+
   return (
     <DataMappingFormSection sectionLabel={sectionLabel} onModalStateChange={setDataMappingModalOpen}>
       <div className="kie-bpmn-editor--data-mappings--modal-section" style={{ height: "50%" }}>
@@ -262,6 +265,15 @@ export function DataMappingsList({
     [section]
   );
 
+  const itemDefinitionIdByDataTypes = useBpmnEditorStore(
+    (s) =>
+      new Map(
+        s.bpmn.model.definitions.rootElement
+          ?.filter((r) => r.__$$element === "itemDefinition")
+          .map((i) => [i["@_structureRef"], i["@_id"]])
+      )
+  );
+
   const { title, lastColumnLabel, entryTitle } = useMemo(() => {
     if (section === "input") {
       return {
@@ -299,11 +311,13 @@ export function DataMappingsList({
     [inputDataMapping, outputDataMapping, section]
   );
 
-  //populates intermediary `assignments` state from the model
+  // populates intermediary `assignments` state from the model
   useEffect(() => {
     if (isOpen || !element) {
       return;
     }
+
+    // activities
     if (
       element.__$$element === "callActivity" ||
       element.__$$element === "businessRuleTask" ||
@@ -312,116 +326,167 @@ export function DataMappingsList({
       element.__$$element === "scriptTask"
     ) {
       if (section === "input") {
-        const extractedInputDataMappings = element?.ioSpecification?.dataInput
-          ?.filter(
-            (dataInput) =>
-              !namesFromOtherTypes.some((namesFromOtherTypes) =>
-                dataInput["@_itemSubjectRef"]?.includes(namesFromOtherTypes)
-              )
-          )
-          ?.flatMap((dataInput) => {
-            const association = element.dataInputAssociation?.find(
+        setInputDataMapping(
+          element?.ioSpecification?.dataInput?.flatMap((dataInput) => {
+            const assignment = element.dataInputAssociation?.find(
               (association) => association.targetRef?.__$$text === dataInput["@_id"]
-            );
-            const assignment = association?.assignment?.[0];
-            if (!assignment) {
-              return [];
-            }
+            )?.assignment?.[0];
 
-            const value = assignment.from.__$$text || "";
-            const name = dataInput?.["@_name"] || "";
-            const dtype = dataInput?.["@_drools:dtype"] || "";
-
-            return {
-              name: name,
-              dtype: dtype,
-              value: value,
-            };
-          });
-        setInputDataMapping(extractedInputDataMappings || []);
-      }
-      if (section === "output") {
-        const extractedOutputDataMapping = element?.dataOutputAssociation
-          ?.filter(
-            (association) =>
-              !namesFromOtherTypes.some((namesFromOtherTypes) =>
-                association.targetRef?.__$$text.includes(namesFromOtherTypes)
-              )
-          )
-          ?.flatMap((association) => {
+            return !assignment
+              ? []
+              : {
+                  name: dataInput?.["@_name"] || "",
+                  dtype: dataInput?.["@_drools:dtype"] || "",
+                  value: assignment.from.__$$text || "",
+                };
+          }) || []
+        );
+      } else if (section === "output") {
+        setOutputDataMapping(
+          element?.dataOutputAssociation?.flatMap((association) => {
             const assignment = association.assignment?.[0];
             if (!assignment) {
               return [];
             }
-            const value = assignment.to.__$$text || "";
 
             const dataOutput = element.ioSpecification?.dataOutput?.find(
               (output) => output["@_id"] === association.targetRef?.__$$text
             );
 
-            const name = dataOutput?.["@_name"] || "";
-            const dtype = dataOutput?.["@_drools:dtype"] || "";
-
             return {
-              name: name,
-              dtype: dtype,
-              value: value,
+              name: dataOutput?.["@_name"] || "",
+              dtype: dataOutput?.["@_drools:dtype"] || "",
+              value: assignment.to.__$$text || "",
             };
-          });
-        setOutputDataMapping(extractedOutputDataMapping || []);
+          }) || []
+        );
       }
-    } else if (element.__$$element === "endEvent" || element.__$$element === "intermediateThrowEvent") {
-      const extractedInputDataMapping = element?.dataInputAssociation?.flatMap((association) => {
-        const assignment = association.assignment?.[0];
-        if (!assignment) {
-          return [];
-        }
-        const value = assignment.from.__$$text || "";
+    }
 
-        const dataInput = element.dataInput?.find((input) => input["@_id"] === association.targetRef?.__$$text);
+    // end/throw
+    else if (element.__$$element === "endEvent" || element.__$$element === "intermediateThrowEvent") {
+      setInputDataMapping(
+        element?.dataInputAssociation?.flatMap((association) => {
+          const assignment = association.assignment?.[0];
+          if (!assignment) {
+            return [];
+          }
 
-        const name = dataInput?.["@_name"] || "";
-        const dtype = dataInput?.["@_drools:dtype"] || "";
+          const dataInput = element.dataInput?.find((input) => input["@_id"] === association.targetRef?.__$$text);
+          return {
+            name: dataInput?.["@_name"] || "",
+            dtype: dataInput?.["@_drools:dtype"] || "",
+            value: assignment.from.__$$text || "",
+          };
+        }) || []
+      );
+    }
 
-        return {
-          name: name,
-          dtype: dtype,
-          value: value,
-        };
-      });
-      setInputDataMapping(extractedInputDataMapping || []);
-    } else if (
+    // start/catch/boundary
+    else if (
       element.__$$element === "startEvent" ||
       element.__$$element === "intermediateCatchEvent" ||
       element.__$$element === "boundaryEvent"
     ) {
-      const extractedOutputDataMapping = element?.dataOutputAssociation?.flatMap((association) => {
-        const assignment = association.assignment?.[0];
-        if (!assignment) {
-          return [];
-        }
-        const value = assignment.to.__$$text || "";
+      setOutputDataMapping(
+        element?.dataOutputAssociation?.flatMap((association) => {
+          const assignment = association.assignment?.[0];
+          if (!assignment) {
+            return [];
+          }
 
-        const dataOutput = element.dataOutput?.find((output) => output["@_id"] === association.targetRef?.__$$text);
-
-        const name = dataOutput?.["@_name"] || "";
-        const dtype = dataOutput?.["@_drools:dtype"] || "";
-
-        return {
-          name: name,
-          dtype: dtype,
-          value: value,
-        };
-      });
-      setOutputDataMapping(extractedOutputDataMapping || []);
+          const dataOutput = element.dataOutput?.find((output) => output["@_id"] === association.targetRef?.__$$text);
+          return {
+            name: dataOutput?.["@_name"] || "",
+            dtype: dataOutput?.["@_drools:dtype"] || "",
+            value: assignment.to.__$$text || "",
+          };
+        }) || []
+      );
     }
   }, [element, isOpen, section]);
 
+  const handleSubmitForNodesWithInputDataMapping = useCallback(
+    (
+      elementWithData: WithInputDataMapping | NonNullable<WithDataMapping["ioSpecification"]>,
+      elementWithAssociation: WithInputDataMapping | WithDataMapping
+    ) => {
+      elementWithData.dataInput = [];
+      elementWithAssociation.dataInputAssociation = [];
+
+      inputDataMapping.forEach((dataMapping) => {
+        const dataInput = {
+          "@_id": generateUuid(),
+          "@_drools:dtype": dataMapping.dtype,
+          "@_itemSubjectRef": itemDefinitionIdByDataTypes.get(dataMapping.dtype),
+          "@_name": dataMapping.name,
+        };
+
+        elementWithData.dataInput?.push(dataInput);
+
+        elementWithAssociation.dataInputAssociation?.push({
+          "@_id": generateUuid(),
+          targetRef: { __$$text: dataInput["@_id"] },
+          assignment: [
+            {
+              "@_id": generateUuid(),
+              from: { "@_id": generateUuid(), __$$text: dataMapping.value },
+              to: { "@_id": generateUuid(), __$$text: dataInput["@_id"] },
+            },
+          ],
+        });
+      });
+
+      setOnSaveMessage("Input Data Mapping saved successfully!");
+      setTimeout(() => {
+        setOnSaveMessage(null);
+      }, 1500);
+    },
+    [inputDataMapping, itemDefinitionIdByDataTypes]
+  );
+
+  const handleSubmitForNodesWithOutputDataMapping = useCallback(
+    (
+      elementWithData: WithOutputDataMapping | NonNullable<WithDataMapping["ioSpecification"]>,
+      elementWithAssociation: WithOutputDataMapping | WithDataMapping
+    ) => {
+      elementWithData.dataOutput = [];
+      elementWithAssociation.dataOutputAssociation = [];
+
+      outputDataMapping.forEach((dataMapping) => {
+        const dataOutput = {
+          "@_id": generateUuid(),
+          "@_drools:dtype": dataMapping.dtype,
+          "@_itemSubjectRef": itemDefinitionIdByDataTypes.get(dataMapping.dtype),
+          "@_name": dataMapping.name,
+        };
+
+        elementWithData.dataOutput?.push(dataOutput);
+
+        elementWithAssociation.dataOutputAssociation?.push({
+          "@_id": generateUuid(),
+          targetRef: { __$$text: dataOutput["@_id"] },
+          assignment: [
+            {
+              "@_id": generateUuid(),
+              from: { "@_id": generateUuid(), __$$text: dataOutput["@_id"] },
+              to: { "@_id": generateUuid(), __$$text: dataMapping.value },
+            },
+          ],
+        });
+      });
+
+      setOnSaveMessage("Output Data Mapping saved successfully!");
+      setTimeout(() => {
+        setOnSaveMessage(null);
+      }, 1500);
+    },
+    [itemDefinitionIdByDataTypes, outputDataMapping]
+  );
+
   const handleSubmitForNodesWithInputAndOutputDataMapping = useCallback(
     (e: WithDataMapping) => {
-      setBpmn20Drools10MetaData(e, "elementname", e["@_name"] || "");
-
-      e.ioSpecification ??= {
+      e.ioSpecification = {
         "@_id": generateUuid(),
         inputSet: [],
         outputSet: [],
@@ -429,269 +494,43 @@ export function DataMappingsList({
         dataOutput: [],
       };
 
-      e.dataInputAssociation ??= [];
-      e.dataOutputAssociation ??= [];
-
       if (section === "input") {
-        const matchingDataInputIds = e.ioSpecification?.dataInput
-          ?.filter((dataInput) => namesFromOtherTypes.some((name) => dataInput["@_itemSubjectRef"]?.includes(name)))
-          .map((dataInput) => dataInput["@_id"]);
+        handleSubmitForNodesWithInputDataMapping(e.ioSpecification, e);
 
-        e.ioSpecification.dataInput = e.ioSpecification?.dataInput?.filter((dataInput) =>
-          matchingDataInputIds?.some((matchingDataInputIds) => dataInput["@_id"]?.includes(matchingDataInputIds))
-        );
+        e.ioSpecification!.inputSet[0] ??= {
+          "@_id": generateUuid(),
+          dataInputRefs: [],
+        };
 
-        if (e.ioSpecification?.inputSet?.[0]?.dataInputRefs) {
-          e.ioSpecification.inputSet[0].dataInputRefs = e.ioSpecification?.inputSet[0].dataInputRefs?.filter(
-            (dataInputRefs) =>
-              matchingDataInputIds?.some((matchingDataInputIds) =>
-                dataInputRefs.__$$text.includes(matchingDataInputIds)
-              )
-          );
+        for (let i = 0; i < (e.ioSpecification.dataInput ?? []).length; i++) {
+          const dataInput = e.ioSpecification.dataInput![i];
+          e.ioSpecification.inputSet[0].dataInputRefs!.push({ __$$text: dataInput["@_id"] });
         }
 
-        e.dataInputAssociation = e.dataInputAssociation?.filter((dataInputAssociation) =>
-          matchingDataInputIds?.some((matchingDataInputIds) =>
-            dataInputAssociation.targetRef.__$$text.includes(matchingDataInputIds)
-          )
-        );
-
-        inputDataMapping.forEach((dataMapping, index) => {
-          let dataInput = e.ioSpecification?.dataInput?.[index];
-
-          if (!dataInput) {
-            dataInput = {
-              "@_id": `${e["@_id"]}_${dataMapping.name}InputX`,
-            };
-          }
-          dataInput = {
-            "@_id": `${e["@_id"]}_${dataMapping.name}InputX`,
-            "@_drools:dtype": dataMapping.dtype,
-            "@_itemSubjectRef": `_${e["@_id"]}_${dataMapping.name}InputXItem`,
-            "@_name": dataMapping.name,
-          };
-          e.ioSpecification?.dataInput?.push(dataInput);
-
-          let inputSet = e.ioSpecification?.inputSet[0];
-          if (!inputSet) {
-            inputSet = {
-              "@_id": generateUuid(),
-              dataInputRefs: [
-                {
-                  __$$text: `${e["@_id"]}_${dataMapping.name}InputX`,
-                },
-              ],
-            };
-            e.ioSpecification?.inputSet.push(inputSet);
-          } else {
-            e.ioSpecification?.inputSet[0].dataInputRefs?.push({
-              ...e.ioSpecification?.inputSet[0].dataInputRefs,
-              __$$text: `${e["@_id"]}_${dataMapping.name}InputX`,
-            });
-          }
-
-          let dataInputAssociation = e.dataInputAssociation?.find(
-            (association) => association.targetRef.__$$text === dataInput["@_id"]
-          );
-
-          if (!dataInputAssociation) {
-            dataInputAssociation = {
-              "@_id": `${e["@_id"]}_dataInputAssociation_${dataMapping.name}`,
-              targetRef: { __$$text: dataInput["@_id"] },
-              assignment: [],
-            };
-            e.dataInputAssociation?.push(dataInputAssociation);
-          }
-          dataInputAssociation.assignment = [
-            {
-              "@_id": `${e["@_id"]}_assignment_${dataMapping.name}`,
-              from: { "@_id": `${e["@_id"]}`, __$$text: dataMapping.value },
-              to: { "@_id": dataInput["@_id"], __$$text: dataInput["@_id"] },
-            },
-          ];
-        });
         setOnSaveMessage("Input Data Mapping saved successfully!");
         setTimeout(() => {
           setOnSaveMessage(null);
         }, 1500);
       } else if (section === "output") {
-        const matchingDataOutputIds = e.ioSpecification?.dataOutput
-          ?.filter((dataOutput) => namesFromOtherTypes.some((name) => dataOutput["@_itemSubjectRef"]?.includes(name)))
-          .map((dataOutput) => dataOutput["@_id"]);
+        handleSubmitForNodesWithOutputDataMapping(e.ioSpecification, e);
 
-        e.ioSpecification.dataOutput = e.ioSpecification?.dataOutput?.filter((dataOutput) =>
-          matchingDataOutputIds?.some((matchingDataOutputIds) => dataOutput["@_id"]?.includes(matchingDataOutputIds))
-        );
+        e.ioSpecification!.outputSet[0] ??= {
+          "@_id": generateUuid(),
+          dataOutputRefs: [],
+        };
 
-        if (e.ioSpecification?.outputSet?.[0]?.dataOutputRefs) {
-          e.ioSpecification.outputSet[0].dataOutputRefs = e.ioSpecification?.outputSet[0].dataOutputRefs?.filter(
-            (dataOutputRefs) =>
-              matchingDataOutputIds?.some((matchingDataOutputIds) =>
-                dataOutputRefs.__$$text.includes(matchingDataOutputIds)
-              )
-          );
+        for (let i = 0; i < (e.ioSpecification.dataOutput ?? []).length; i++) {
+          const dataOutput = e.ioSpecification.dataOutput![i];
+          e.ioSpecification.outputSet[0].dataOutputRefs!.push({ __$$text: dataOutput["@_id"] });
         }
 
-        e.dataOutputAssociation = e.dataOutputAssociation?.filter((dataOutputAssociation) =>
-          matchingDataOutputIds?.some(
-            (matchingDataOutputIds) =>
-              Array.isArray(dataOutputAssociation.sourceRef) &&
-              dataOutputAssociation.sourceRef![0].__$$text.includes(matchingDataOutputIds)
-          )
-        );
-
-        outputDataMapping.forEach((dataMapping, index) => {
-          let dataOutput = e.ioSpecification?.dataOutput?.[index];
-          if (!dataOutput) {
-            dataOutput = {
-              "@_id": `${e["@_id"]}_${dataMapping.name}OutputX`,
-            };
-          }
-          dataOutput = {
-            "@_id": `${e["@_id"]}_${dataMapping.name}OutputX`,
-            "@_drools:dtype": dataMapping.dtype,
-            "@_itemSubjectRef": `_${e["@_id"]}_${dataMapping.name}OutputXItem`,
-            "@_name": dataMapping.name,
-          };
-          e.ioSpecification?.dataOutput?.push(dataOutput);
-
-          let outputSet = e.ioSpecification?.outputSet[0];
-          if (!outputSet) {
-            outputSet = {
-              "@_id": generateUuid(),
-              dataOutputRefs: [
-                {
-                  __$$text: `${e["@_id"]}_${dataMapping.name}OutputX`,
-                },
-              ],
-            };
-            e.ioSpecification?.outputSet.push(outputSet);
-          } else {
-            e.ioSpecification?.outputSet[0].dataOutputRefs?.push({
-              __$$text: `${e["@_id"]}_${dataMapping.name}OutputX`,
-            });
-          }
-
-          let dataOutputAssociation = e.dataOutputAssociation?.find(
-            (association) => association.targetRef.__$$text === dataOutput["@_id"]
-          );
-
-          if (!dataOutputAssociation) {
-            dataOutputAssociation = {
-              "@_id": `${e["@_id"]}_dataOutputAssociation_${dataMapping.name}`,
-              targetRef: { __$$text: dataOutput["@_id"] },
-              assignment: [],
-            };
-            e.dataOutputAssociation?.push(dataOutputAssociation);
-          }
-          dataOutputAssociation.assignment = [
-            {
-              "@_id": `${e["@_id"]}_assignment_${dataMapping.name}`,
-              from: { "@_id": dataOutput["@_id"], __$$text: dataOutput["@_id"] },
-              to: { "@_id": `${e["@_id"]}`, __$$text: dataMapping.value },
-            },
-          ];
-        });
         setOnSaveMessage("Output Data Mapping saved successfully!");
         setTimeout(() => {
           setOnSaveMessage(null);
         }, 1500);
       }
     },
-    [inputDataMapping, outputDataMapping, section]
-  );
-
-  const handleSubmitForNodesWithInputDataMapping = useCallback(
-    (e: WithInputDataMapping) => {
-      e.dataInputAssociation = [];
-      e.dataInput = [];
-      inputDataMapping.forEach((dataMapping, index) => {
-        let dataInput = e.dataInput?.[index];
-        if (!dataInput) {
-          dataInput = {
-            "@_id": `${e["@_id"]}_${dataMapping.name}InputX`,
-          };
-        }
-        dataInput = {
-          "@_id": `${e["@_id"]}_${dataMapping.name}InputX`,
-          "@_drools:dtype": dataMapping.dtype,
-          "@_itemSubjectRef": `_${e["@_id"]}_${dataMapping.name}InputXItem`,
-          "@_name": dataMapping.name,
-        };
-        e.dataInput?.push(dataInput);
-
-        let dataInputAssociation = e.dataInputAssociation?.find(
-          (association) => association.targetRef.__$$text === dataInput["@_id"]
-        );
-
-        if (!dataInputAssociation) {
-          dataInputAssociation = {
-            "@_id": `${e["@_id"]}_dataInputAssociation_${dataMapping.name}`,
-            targetRef: { __$$text: dataInput["@_id"] },
-            assignment: [],
-          };
-          e.dataInputAssociation?.push(dataInputAssociation);
-        }
-        dataInputAssociation.assignment = [
-          {
-            "@_id": `${e["@_id"]}_assignment_${dataMapping.name}`,
-            from: { "@_id": `${e["@_id"]}`, __$$text: dataMapping.value },
-            to: { "@_id": dataInput["@_id"], __$$text: dataInput["@_id"] },
-          },
-        ];
-      });
-      setOnSaveMessage("Input Data Mapping saved successfully!");
-      setTimeout(() => {
-        setOnSaveMessage(null);
-      }, 1500);
-    },
-    [inputDataMapping]
-  );
-
-  const handleSubmitForNodesWithOutputDataMapping = useCallback(
-    (e: WithOutputDataMapping) => {
-      e.dataOutputAssociation = [];
-      e.dataOutput = [];
-      outputDataMapping.forEach((dataMapping, index) => {
-        let dataOutput = e.dataOutput?.[index];
-        if (!dataOutput) {
-          dataOutput = {
-            "@_id": `${e["@_id"]}_${dataMapping.name}OutputX`,
-          };
-        }
-        dataOutput = {
-          "@_id": `${e["@_id"]}_${dataMapping.name}OutputX`,
-          "@_drools:dtype": dataMapping.dtype,
-          "@_itemSubjectRef": `_${e["@_id"]}_${dataMapping.name}OutputXItem`,
-          "@_name": dataMapping.name,
-        };
-        e.dataOutput?.push(dataOutput);
-        let dataOutputAssociation = e.dataOutputAssociation?.find(
-          (association) => association.targetRef.__$$text === dataOutput["@_id"]
-        );
-
-        if (!dataOutputAssociation) {
-          dataOutputAssociation = {
-            "@_id": `${e["@_id"]}_dataOutputAssociation_${dataMapping.name}`,
-            targetRef: { __$$text: dataOutput["@_id"] },
-            assignment: [],
-          };
-          e.dataOutputAssociation?.push(dataOutputAssociation);
-        }
-        dataOutputAssociation.assignment = [
-          {
-            "@_id": `${e["@_id"]}_assignment_${dataMapping.name}`,
-            from: { "@_id": dataOutput["@_id"], __$$text: dataOutput["@_id"] },
-            to: { "@_id": `${e["@_id"]}`, __$$text: dataMapping.value },
-          },
-        ];
-      });
-      setOnSaveMessage("Output Data Mapping saved successfully!");
-      setTimeout(() => {
-        setOnSaveMessage(null);
-      }, 1500);
-    },
-    [outputDataMapping]
+    [section, handleSubmitForNodesWithInputDataMapping, handleSubmitForNodesWithOutputDataMapping]
   );
 
   const handleSubmit = useCallback(
@@ -701,6 +540,7 @@ export function DataMappingsList({
         event.target.reportValidity();
         return;
       }
+
       bpmnEditorStoreApi.setState((s) => {
         const { process } = addOrGetProcessAndDiagramElements({
           definitions: s.bpmn.model.definitions,
@@ -717,13 +557,13 @@ export function DataMappingsList({
             ) {
               handleSubmitForNodesWithInputAndOutputDataMapping(e as WithDataMapping);
             } else if (element.__$$element === "endEvent" || element.__$$element === "intermediateThrowEvent") {
-              handleSubmitForNodesWithInputDataMapping(e as WithInputDataMapping);
+              handleSubmitForNodesWithInputDataMapping(e as WithInputDataMapping, e as WithInputDataMapping);
             } else if (
               element.__$$element === "startEvent" ||
               element.__$$element === "intermediateCatchEvent" ||
               element.__$$element === "boundaryEvent"
             ) {
-              handleSubmitForNodesWithOutputDataMapping(e as WithOutputDataMapping);
+              handleSubmitForNodesWithOutputDataMapping(e as WithOutputDataMapping, e as WithOutputDataMapping);
             }
           }
         });
@@ -737,14 +577,6 @@ export function DataMappingsList({
       handleSubmitForNodesWithOutputDataMapping,
     ]
   );
-
-  const itemDefinitionIdByDataTypes = useBpmnEditorStore((s) => {
-    return new Map(
-      s.bpmn.model.definitions.rootElement
-        ?.filter((r) => r.__$$element === "itemDefinition")
-        .map((i) => [i["@_structureRef"], i["@_id"]])
-    );
-  });
 
   return (
     <>
@@ -784,59 +616,61 @@ export function DataMappingsList({
             </div>
           </div>
           {section === "input" &&
-            inputDataMapping.map((entry, i) => (
-              <div key={i} style={{ padding: "0 8px" }}>
-                <Grid
-                  md={6}
-                  className={"kie-bpmn-editor--properties-panel--data-mapping-entry"}
-                  onMouseEnter={() => setHoveredIndex(i)}
-                  onMouseLeave={() => setHoveredIndex(undefined)}
-                >
-                  <GridItem span={5}>
-                    <TextInput
-                      aria-label={"name"}
-                      autoFocus={true}
-                      style={entryStyle}
-                      type="text"
-                      isRequired={true}
-                      placeholder="Name..."
-                      value={entry.name}
-                      onChange={(e) => handleInputChange(i, "name", e)}
-                    />
-                  </GridItem>
-                  <GridItem span={3}>
-                    <ItemDefinitionRefSelector
-                      value={itemDefinitionIdByDataTypes.get(entry.dtype) ?? entry.dtype}
-                      onChange={(_, newDataType) => {
-                        handleInputChange(i, "dtype", newDataType!);
-                      }}
-                    />
-                  </GridItem>
-                  <GridItem span={3}>
-                    <TextInput
-                      aria-label={"value"}
-                      style={entryStyle}
-                      type="text"
-                      placeholder={`${lastColumnLabel}...`}
-                      value={entry.value}
-                      onChange={(e) => handleInputChange(i, "value", e)}
-                    />
-                  </GridItem>
-                  <GridItem span={1} style={{ textAlign: "right" }}>
-                    {hoveredIndex === i && (
-                      <Button
-                        tabIndex={9999} // Prevent tab from going to this button
-                        variant={ButtonVariant.plain}
-                        style={{ paddingLeft: 0 }}
-                        onClick={() => removeDataMapping(i)}
-                      >
-                        <TimesIcon />
-                      </Button>
-                    )}
-                  </GridItem>
-                </Grid>
-              </div>
-            ))}
+            inputDataMapping
+              .filter((i) => !NAMES_FROM_OTHER_TYPES.has(i.name))
+              .map((entry, i) => (
+                <div key={i} style={{ padding: "0 8px" }}>
+                  <Grid
+                    md={6}
+                    className={"kie-bpmn-editor--properties-panel--data-mapping-entry"}
+                    onMouseEnter={() => setHoveredIndex(i)}
+                    onMouseLeave={() => setHoveredIndex(undefined)}
+                  >
+                    <GridItem span={5}>
+                      <TextInput
+                        aria-label={"name"}
+                        autoFocus={true}
+                        style={entryStyle}
+                        type="text"
+                        isRequired={true}
+                        placeholder="Name..."
+                        value={entry.name}
+                        onChange={(e) => handleInputChange(i, "name", e)}
+                      />
+                    </GridItem>
+                    <GridItem span={3}>
+                      <ItemDefinitionRefSelector
+                        value={itemDefinitionIdByDataTypes.get(entry.dtype) ?? entry.dtype}
+                        onChange={(_, newDataType) => {
+                          handleInputChange(i, "dtype", newDataType!);
+                        }}
+                      />
+                    </GridItem>
+                    <GridItem span={3}>
+                      <TextInput
+                        aria-label={"value"}
+                        style={entryStyle}
+                        type="text"
+                        placeholder={`${lastColumnLabel}...`}
+                        value={entry.value}
+                        onChange={(e) => handleInputChange(i, "value", e)}
+                      />
+                    </GridItem>
+                    <GridItem span={1} style={{ textAlign: "right" }}>
+                      {hoveredIndex === i && (
+                        <Button
+                          tabIndex={9999} // Prevent tab from going to this button
+                          variant={ButtonVariant.plain}
+                          style={{ paddingLeft: 0 }}
+                          onClick={() => removeDataMapping(i)}
+                        >
+                          <TimesIcon />
+                        </Button>
+                      )}
+                    </GridItem>
+                  </Grid>
+                </div>
+              ))}
           {section === "output" &&
             outputDataMapping.map((entry, i) => (
               <div key={i} style={{ padding: "0 8px" }}>

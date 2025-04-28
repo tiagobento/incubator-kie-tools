@@ -324,7 +324,9 @@ export function Reassignments({ element }: { element: Normalized<BPMN20__tUserTa
           }
         });
       });
+
       setOnSaveMessage("Reassignments saved successfully!");
+
       setTimeout(() => {
         setOnSaveMessage(null);
       }, 1500);

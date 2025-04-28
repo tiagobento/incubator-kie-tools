@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { BPMN20__tUserTask } from "@kie-tools/bpmn-marshaller/dist/schemas/bpmn-2_0/ts-gen/types";
 import * as React from "react";
+import { BPMN20__tUserTask } from "@kie-tools/bpmn-marshaller/dist/schemas/bpmn-2_0/ts-gen/types";
 import { Normalized } from "../../normalization/normalize";
 import { NameDocumentationAndId } from "../nameDocumentationAndId/NameDocumentationAndId";
 import { BidirectionalDataMappingFormSection } from "../dataMapping/DataMappingFormSection";
@@ -41,15 +41,17 @@ import { generateUuid } from "@kie-tools/xyflow-react-kie-diagram/dist/uuid/uuid
 import { addOrGetProcessAndDiagramElements } from "../../mutations/addOrGetProcessAndDiagramElements";
 import { Checkbox } from "@patternfly/react-core/dist/js/components/Checkbox/Checkbox";
 import { TextInput } from "@patternfly/react-core/dist/js/components/TextInput";
+import { useCallback } from "react";
+import { addOrGetItemDefinitions } from "../../mutations/addOrGetItemDefinitions";
 
-const priorityInputX = "PriorityInputX";
-const contentInputX = "ContentInputX";
-const subjectInputX = "CommentInputX";
-const taskNameInputX = "TaskNameInputX";
-const descriptionInputX = "DescriptionInputX";
-const skippableInputX = "SkippableInputX";
-const createdByInputX = "CreatedByInputX";
-const groupIdInputX = "GroupIdInputX";
+const USER_TASK__TASK_NAME_DATA_INPUT_NAME = "TaskName";
+const USER_TASK__SUBJECT_DATA_INPUT_NAME = "Comment"; // Subject
+const USER_TASK__PRIORITY_DATA_INPUT_NAME = "Priority";
+const USER_TASK__CONTENT_DATA_INPUT_NAME = "Content";
+const USER_TASK__DESCRIPTION_DATA_INPUT_NAME = "Description";
+const USER_TASK__SKIPPABLE_DATA_INPUT_NAME = "Skippable";
+const USER_TASK__CREATED_BY_DATA_INPUT_NAME = "CreatedBy";
+const USER_TASK__GROUP_ID_DATA_INPUT_NAME = "GroupId";
 
 export function UserTaskProperties({
   userTask,
@@ -69,75 +71,62 @@ export function UserTaskProperties({
       visitFlowElementsAndArtifacts(process, ({ element: e }) => {
         if (e["@_id"] === userTask?.["@_id"] && e.__$$element === userTask.__$$element) {
           e.ioSpecification ??= {
-            "@_id": "",
+            "@_id": generateUuid(),
             inputSet: [],
             outputSet: [],
-            dataInput: [],
-          };
-
-          e.ioSpecification.inputSet[0] ??= {
-            "@_id": "",
-            dataInputRefs: [],
           };
 
           e.ioSpecification.dataInput ??= [];
 
-          let dataInput = e.ioSpecification.dataInput.find((input) => input["@_name"] === fieldName);
+          const objectItemDefinition = addOrGetItemDefinitions({
+            definitions: s.bpmn.model.definitions,
+            dataType: "Object",
+          }).itemDefinition;
 
+          let dataInput = e.ioSpecification.dataInput.find((s) => s["@_name"] === fieldName);
           if (!dataInput) {
             dataInput = {
-              "@_id": `${e["@_id"]}_${fieldName}InputX`,
+              "@_id": generateUuid(),
               "@_drools:dtype": "Object",
-              "@_itemSubjectRef": `_${e["@_id"]}_${fieldName}InputXItem`,
+              "@_itemSubjectRef": objectItemDefinition["@_id"],
               "@_name": fieldName,
             };
             e.ioSpecification.dataInput.push(dataInput);
           }
 
-          e.ioSpecification.inputSet[0].dataInputRefs = e.ioSpecification.dataInput.map((input) => ({
-            __$$text: input["@_id"],
-          }));
+          e.dataInputAssociation ??= [];
+          let association = e.dataInputAssociation.find((s) => s.targetRef.__$$text === dataInput?.["@_id"]);
 
-          let dataInputAssociation = e.dataInputAssociation?.find(
-            (association) => association.targetRef.__$$text === dataInput["@_id"]
-          );
+          const assignment = {
+            "@_id": generateUuid(),
+            from: { "@_id": generateUuid(), __$$text: valueAsString },
+            to: { "@_id": generateUuid(), __$$text: dataInput["@_id"] },
+          };
 
-          if (!dataInputAssociation) {
-            dataInputAssociation = {
-              "@_id": `${e["@_id"]}_dataInputAssociation_${fieldName}`,
+          if (!association) {
+            association = {
+              "@_id": generateUuid(),
               targetRef: { __$$text: dataInput["@_id"] },
-              assignment: [
-                {
-                  "@_id": `${e["@_id"]}_assignment_${fieldName}`,
-                  from: {
-                    "@_id": `${e["@_id"]}`,
-                    __$$text: valueAsString,
-                  },
-                  to: { "@_id": e["@_id"], __$$text: `${e["@_id"]}_to_${fieldName}InputXItem` },
-                },
-              ],
+              assignment: [assignment],
             };
-            e.dataInputAssociation ??= [];
-            e.dataInputAssociation.push(dataInputAssociation);
+            e.dataInputAssociation.push(association);
           } else {
-            if (dataInputAssociation.assignment?.[0]) {
-              dataInputAssociation.assignment[0].from.__$$text = valueAsString;
-            }
+            association.assignment ??= [assignment];
+            association.assignment[0].from.__$$text = valueAsString;
           }
         }
       });
     });
   };
 
-  function setValue(fieldName: string) {
-    return (
-      userTask?.dataInputAssociation
-        ?.find((association) =>
-          association.assignment?.some((a) => a.from.__$$text && association.targetRef.__$$text.includes(fieldName))
-        )
-        ?.assignment?.find((a) => a.from.__$$text)?.from.__$$text || ""
-    );
-  }
+  const getValue = useCallback(
+    (fieldName: string) => {
+      const dataInput = userTask.ioSpecification?.dataInput?.find((s) => s["@_name"] === fieldName);
+      const association = userTask.dataInputAssociation?.find((s) => s.targetRef.__$$text === dataInput?.["@_id"]);
+      return association?.assignment?.[0].from.__$$text || "";
+    },
+    [userTask.dataInputAssociation, userTask.ioSpecification?.dataInput]
+  );
 
   return (
     <>
@@ -154,8 +143,8 @@ export function UserTaskProperties({
             aria-label={"Task Name"}
             type={"text"}
             isDisabled={settings.isReadOnly}
-            value={setValue(taskNameInputX)}
-            onChange={(newTaskName) => handleChange("TaskName", newTaskName)}
+            value={getValue(USER_TASK__TASK_NAME_DATA_INPUT_NAME)}
+            onChange={(newTaskName) => handleChange(USER_TASK__TASK_NAME_DATA_INPUT_NAME, newTaskName)}
             placeholder={"Enter task name..."}
           />
         </FormGroup>
@@ -164,8 +153,8 @@ export function UserTaskProperties({
             aria-label={"Subject"}
             type={"text"}
             isDisabled={settings.isReadOnly}
-            value={setValue(subjectInputX)}
-            onChange={(newSubject) => handleChange("Comment", newSubject)}
+            value={getValue(USER_TASK__SUBJECT_DATA_INPUT_NAME)}
+            onChange={(newSubject) => handleChange(USER_TASK__SUBJECT_DATA_INPUT_NAME, newSubject)}
             placeholder={"Enter subject..."}
           />
         </FormGroup>
@@ -174,8 +163,8 @@ export function UserTaskProperties({
             aria-label={"Content"}
             type={"text"}
             isDisabled={settings.isReadOnly}
-            value={setValue(contentInputX)}
-            onChange={(newContent) => handleChange("Content", newContent)}
+            value={getValue(USER_TASK__CONTENT_DATA_INPUT_NAME)}
+            onChange={(newContent) => handleChange(USER_TASK__CONTENT_DATA_INPUT_NAME, newContent)}
             placeholder={"Enter content..."}
           />
         </FormGroup>
@@ -185,8 +174,8 @@ export function UserTaskProperties({
             aria-label={"Task Priority"}
             type={"text"}
             isDisabled={settings.isReadOnly}
-            value={setValue(priorityInputX)}
-            onChange={(newPriority) => handleChange("Priority", newPriority)}
+            value={getValue(USER_TASK__PRIORITY_DATA_INPUT_NAME)}
+            onChange={(newPriority) => handleChange(USER_TASK__PRIORITY_DATA_INPUT_NAME, newPriority)}
             placeholder={"Enter priority..."}
           />
         </FormGroup>
@@ -195,8 +184,8 @@ export function UserTaskProperties({
             aria-label={"Description"}
             type={"text"}
             isDisabled={settings.isReadOnly}
-            value={setValue(descriptionInputX)}
-            onChange={(newDescription) => handleChange("Description", newDescription)}
+            value={getValue(USER_TASK__DESCRIPTION_DATA_INPUT_NAME)}
+            onChange={(newDescription) => handleChange(USER_TASK__DESCRIPTION_DATA_INPUT_NAME, newDescription)}
             placeholder={"Enter description..."}
             style={{ resize: "vertical", minHeight: "40px" }}
             rows={3}
@@ -208,8 +197,8 @@ export function UserTaskProperties({
             aria-label={"Skippable"}
             id="kie-bpmn-editor--properties-panel--skippable-checkbox"
             isDisabled={settings.isReadOnly}
-            isChecked={setValue(skippableInputX) === "true" ? true : false}
-            onChange={(newSkippable) => handleChange("Skippable", newSkippable)}
+            isChecked={getValue(USER_TASK__SKIPPABLE_DATA_INPUT_NAME) === "true" ? true : false}
+            onChange={(newSkippable) => handleChange(USER_TASK__SKIPPABLE_DATA_INPUT_NAME, newSkippable)}
           />
         </FormGroup>
 
@@ -261,8 +250,8 @@ export function UserTaskProperties({
             aria-label={"Groups"}
             type={"text"}
             isDisabled={settings.isReadOnly}
-            value={setValue(groupIdInputX)}
-            onChange={(newGroups) => handleChange("GroupId", newGroups)}
+            value={getValue(USER_TASK__GROUP_ID_DATA_INPUT_NAME)}
+            onChange={(newGroups) => handleChange(USER_TASK__GROUP_ID_DATA_INPUT_NAME, newGroups)}
             placeholder={"Enter groups..."}
           />
         </FormGroup>
@@ -272,8 +261,8 @@ export function UserTaskProperties({
             aria-label={"Created by"}
             type={"text"}
             isDisabled={settings.isReadOnly}
-            value={setValue(createdByInputX)}
-            onChange={(newCreatedBy) => handleChange("CreatedBy", newCreatedBy)}
+            value={getValue(USER_TASK__CREATED_BY_DATA_INPUT_NAME)}
+            onChange={(newCreatedBy) => handleChange(USER_TASK__CREATED_BY_DATA_INPUT_NAME, newCreatedBy)}
             placeholder={"Enter creator..."}
           />
         </FormGroup>

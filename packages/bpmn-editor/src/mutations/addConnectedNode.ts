@@ -70,12 +70,22 @@ export function addConnectedNode({
           [NODE_TYPES.intermediateCatchEvent]: {
             "@_id": newBpmnElementId,
             __$$element: "intermediateCatchEvent",
-            eventDefinition: [{ "@_id": generateUuid(), __$$element: "timerEventDefinition" }],
+            eventDefinition: [
+              {
+                "@_id": generateUuid(),
+                __$$element: "timerEventDefinition",
+              },
+            ],
           },
           [NODE_TYPES.intermediateThrowEvent]: {
             "@_id": newBpmnElementId,
             __$$element: "intermediateThrowEvent",
-            eventDefinition: [{ "@_id": generateUuid(), __$$element: "signalEventDefinition" }],
+            eventDefinition: [
+              {
+                "@_id": generateUuid(),
+                __$$element: "signalEventDefinition",
+              },
+            ],
           },
           [NODE_TYPES.endEvent]: {
             "@_id": newBpmnElementId,

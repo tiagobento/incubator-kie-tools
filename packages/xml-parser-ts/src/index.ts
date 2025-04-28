@@ -181,6 +181,11 @@ export function getParser<T extends object>(args: {
         [args.root.element]: { type: args.root.type, fromType: "root", isArray: false, xsdType: "// root" },
       };
 
+      const declaredElementsOrder = [];
+      for (const e in args.elements ?? {}) {
+        declaredElementsOrder.push(e);
+      }
+
       const xml = build({
         json: __json,
         ns: args.ns,
@@ -188,6 +193,7 @@ export function getParser<T extends object>(args: {
         elements: args.elements,
         meta: args.meta,
         metaType: rootMetaType,
+        declaredElementsOrder,
         indent: "",
       });
       // console.timeEnd("building took");
@@ -461,6 +467,7 @@ export function build(args: {
   elements: Elements;
   meta: Meta;
   metaType: MetaType | undefined;
+  declaredElementsOrder: string[];
   indent: string;
 }): string {
   const { json, ns, instanceNs, indent, metaType } = args;
@@ -471,7 +478,7 @@ export function build(args: {
 
   let xml = "";
 
-  // We want to respect a certain order here given xsd:sequence declarations.
+  // We want to respect a certain order here given xsd:sequence, xsd:choice, and xsd:all declarations
   const sortedJsonProps: string[] = [];
   for (const p in json) {
     sortedJsonProps.push(p);
@@ -517,7 +524,15 @@ export function build(args: {
     }
     // array
     else if (Array.isArray(jsonPropValue)) {
-      for (const item of jsonPropValue) {
+      // In order to keep the order of elements of xsd:sequences in a `substituionGroup`
+      // we need to sort elements by their declaration order.
+      const elemOrder = args.declaredElementsOrder;
+      const arr =
+        jsonPropValue?.[0]?.__$$element === undefined
+          ? jsonPropValue
+          : jsonPropValue.toSorted((a, b) => elemOrder.indexOf(a.__$$element) - elemOrder.indexOf(b.__$$element));
+
+      for (const item of arr) {
         const elementName = applyInstanceNs({ ns, instanceNs, propName: item?.["__$$element"] ?? jsonPropName });
         const { attrs, isEmpty, hasText } = buildAttrs(item, args);
         xml += `${indent}<${elementName}${attrs}`;
