@@ -434,6 +434,8 @@ export function BpmnDiagram({
         ];
       }
     }
+
+    return { id: newBpmnEdge["@_bpmnElement"]! };
   }, []);
 
   const onEdgeDeleted = useCallback<

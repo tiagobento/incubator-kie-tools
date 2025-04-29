@@ -144,7 +144,7 @@ export type OnEdgeUpdated<
   sourceHandle: PositionalNodeHandleId;
   firstWaypoint: DC__Point;
   lastWaypoint: DC__Point;
-}) => void;
+}) => { id: string };
 
 export type OnEdgeDeleted<
   S extends XyFlowDiagramState<S, N, NData, EData>,
@@ -821,7 +821,7 @@ export function XyFlowReactKieDiagram<
           : getDiBoundsCenterPoint(sourceBounds);
 
         console.log("XYFLOW KIE DIAGRAM: Edge updated");
-        onEdgeUpdated({
+        const { id } = onEdgeUpdated({
           state,
           sourceNode,
           targetNode,
@@ -831,6 +831,8 @@ export function XyFlowReactKieDiagram<
           firstWaypoint,
           edge: oldEdge,
         });
+
+        state.xyFlowReactKieDiagram._selectedEdges = [id]; // Keep the updated edge selected
 
         // Finish edge update atomically.
         state.xyFlowReactKieDiagram.ongoingConnection = undefined;
