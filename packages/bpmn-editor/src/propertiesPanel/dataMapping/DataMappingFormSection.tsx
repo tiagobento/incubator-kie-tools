@@ -616,9 +616,10 @@ export function DataMappingsList({
             </div>
           </div>
           {section === "input" &&
-            inputDataMapping
-              .filter((i) => !NAMES_FROM_OTHER_TYPES.has(i.name))
-              .map((entry, i) => (
+            inputDataMapping.flatMap((entry, i) =>
+              NAMES_FROM_OTHER_TYPES.has(entry.name) ? (
+                []
+              ) : (
                 <div key={i} style={{ padding: "0 8px" }}>
                   <Grid
                     md={6}
@@ -670,7 +671,8 @@ export function DataMappingsList({
                     </GridItem>
                   </Grid>
                 </div>
-              ))}
+              )
+            )}
           {section === "output" &&
             outputDataMapping.map((entry, i) => (
               <div key={i} style={{ padding: "0 8px" }}>
