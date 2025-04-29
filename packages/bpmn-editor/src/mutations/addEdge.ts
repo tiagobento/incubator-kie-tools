@@ -43,6 +43,7 @@ import {
   getPointForHandle,
 } from "@kie-tools/xyflow-react-kie-diagram/dist/maths/DcMaths";
 import { Unpacked } from "@kie-tools/xyflow-react-kie-diagram/dist/tsExt/tsExt";
+import { visitFlowElementsAndArtifacts } from "./_elementVisitor";
 
 export function addEdge({
   definitions,
@@ -54,14 +55,12 @@ export function addEdge({
   definitions: Normalized<BPMN20__tDefinitions>;
   __readonly_sourceNode: {
     type: BpmnNodeType;
-    data: BpmnDiagramNodeData;
     href: string;
     bounds: DC__Bounds;
     shapeId: string | undefined;
   };
   __readonly_targetNode: {
     type: BpmnNodeType;
-    data: BpmnDiagramNodeData;
     href: string;
     bounds: DC__Bounds;
     shapeId: string | undefined;
@@ -136,6 +135,36 @@ export function addEdge({
       __$$element: "sequenceFlow",
       ...newSequenceFlow,
       "@_id": tryKeepingEdgeId(existingEdgeId, newEdgeId),
+    });
+
+    // <incoming> and <outgoing> elements of Flow Elements
+    visitFlowElementsAndArtifacts(process, ({ element }) => {
+      if (
+        element.__$$element !== "association" &&
+        element.__$$element !== "group" &&
+        element.__$$element !== "textAnnotation" &&
+        element.__$$element !== "sequenceFlow" &&
+        element.__$$element !== "dataStoreReference" &&
+        element.__$$element !== "dataObject" &&
+        element.__$$element !== "dataObjectReference"
+      ) {
+        // outgoing
+        if (element["@_id"] === newSequenceFlow["@_sourceRef"]) {
+          element.outgoing ??= [];
+          element.outgoing.push({ __$$text: newSequenceFlow["@_targetRef"] });
+        }
+
+        // incoming
+        else if (element["@_id"] === newSequenceFlow["@_targetRef"]) {
+          element.incoming ??= [];
+          element.incoming.push({ __$$text: newSequenceFlow["@_sourceRef"] });
+        }
+
+        // ignore
+        else {
+          // empty on purpose
+        }
+      }
     });
   }
 

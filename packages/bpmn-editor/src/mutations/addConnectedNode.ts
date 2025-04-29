@@ -23,10 +23,12 @@ import { BPMN20__tDefinitions } from "@kie-tools/bpmn-marshaller/dist/schemas/bp
 import { AutoPositionedEdgeMarker } from "@kie-tools/xyflow-react-kie-diagram/dist/edges/AutoPositionedEdgeMarker";
 import { getDiBoundsCenterPoint } from "@kie-tools/xyflow-react-kie-diagram/dist/maths/DcMaths";
 import { DC__Bounds } from "@kie-tools/xyflow-react-kie-diagram/dist/maths/model";
-import { BpmnNodeType, NODE_TYPES } from "../diagram/BpmnDiagramDomain";
+import { BpmnNodeType, EDGE_TYPES, NODE_TYPES } from "../diagram/BpmnDiagramDomain";
 import { Normalized } from "../normalization/normalize";
 import { addOrGetProcessAndDiagramElements } from "./addOrGetProcessAndDiagramElements";
 import { NodeNature, nodeNatures } from "./_NodeNature";
+import { addEdge } from "./addEdge";
+import { PositionalNodeHandleId } from "@kie-tools/xyflow-react-kie-diagram/dist/nodes/PositionalNodeHandles";
 
 export function addConnectedNode({
   definitions,
@@ -45,12 +47,7 @@ export function addConnectedNode({
 
   if (nature === NodeNature.PROCESS_FLOW_ELEMENT) {
     process.flowElement ??= [];
-    process.flowElement.push({
-      __$$element: "sequenceFlow",
-      "@_id": newEdgeId,
-      "@_sourceRef": __readonly_sourceNode.id,
-      "@_targetRef": newBpmnElementId,
-    });
+
     process.flowElement?.push(
       switchExpression(
         __readonly_newNode.type as Exclude<
@@ -153,6 +150,29 @@ export function addConnectedNode({
       getDiBoundsCenterPoint(__readonly_sourceNode.bounds),
       getDiBoundsCenterPoint(__readonly_newNode.bounds),
     ],
+  });
+
+  addEdge({
+    definitions,
+    __readonly_edge: {
+      autoPositionedEdgeMarker: AutoPositionedEdgeMarker.BOTH,
+      sourceHandle: PositionalNodeHandleId.Center,
+      targetHandle: PositionalNodeHandleId.Center,
+      type: EDGE_TYPES.sequenceFlow,
+    },
+    __readonly_keepWaypoints: false,
+    __readonly_sourceNode: {
+      bounds: __readonly_sourceNode.bounds,
+      type: __readonly_sourceNode.type,
+      href: __readonly_sourceNode.id,
+      shapeId: __readonly_sourceNode.shapeId,
+    },
+    __readonly_targetNode: {
+      bounds: __readonly_newNode.bounds,
+      type: __readonly_newNode.type,
+      href: newBpmnElementId,
+      shapeId: newShapeId,
+    },
   });
 
   return { id: newBpmnElementId, href: newBpmnElementId };

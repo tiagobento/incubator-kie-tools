@@ -43,8 +43,8 @@ export function checkIsValidConnection<N extends string, E extends string, NData
 
 export function _checkIsValidConnection<N extends string, E extends string, NData>(
   graphStructure: GraphStructure<N, E>,
-  sourceNode: { type?: string; data: NData } | undefined,
-  targetNode: { type?: string; data: NData } | undefined,
+  sourceNode: { type?: string } | undefined,
+  targetNode: { type?: string } | undefined,
   edgeType: string | null | undefined
 ) {
   if (!sourceNode?.type || !targetNode?.type || !edgeType) {

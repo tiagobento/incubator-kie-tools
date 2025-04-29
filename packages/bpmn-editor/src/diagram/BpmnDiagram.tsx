@@ -369,7 +369,6 @@ export function BpmnDiagram({
       },
       __readonly_sourceNode: {
         type: sourceNode.type as BpmnNodeType,
-        data: sourceNode.data,
         href: sourceNode.id,
         bounds: sourceNode.data.shape["dc:Bounds"],
         shapeId: sourceNode.data.shape["@_id"],
@@ -377,7 +376,6 @@ export function BpmnDiagram({
       __readonly_targetNode: {
         type: targetNode.type as BpmnNodeType,
         href: targetNode.id,
-        data: targetNode.data,
         bounds: targetNode.data.shape["dc:Bounds"],
         shapeId: targetNode.data.shape["@_id"],
       },
@@ -404,14 +402,12 @@ export function BpmnDiagram({
       __readonly_sourceNode: {
         type: sourceNode.type!,
         href: sourceNode.id,
-        data: sourceNode.data,
         bounds: sourceNode.data.shape["dc:Bounds"],
         shapeId: sourceNode.data.shape["@_id"],
       },
       __readonly_targetNode: {
         type: targetNode.type!,
         href: targetNode.id,
-        data: targetNode.data,
         bounds: targetNode.data.shape["dc:Bounds"],
         shapeId: targetNode.data.shape["@_id"],
       },

@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { switchExpression } from "@kie-tools-core/switch-expression-ts";
 import { Normalized } from "../normalization/normalize";
 import { BpmnDiagramEdgeData } from "../diagram/BpmnDiagramDomain";
 import {
@@ -65,6 +64,13 @@ export function deleteEdge({
 
   foundBpmnElement.array.splice(foundBpmnElement.index, 1);
 
+  // BPMNEdge
+  const bpmnEdgeIndex = (diagramElements ?? []).findIndex((e) => e["@_bpmnElement"] === __readonly_edgeId);
+  if (bpmnEdgeIndex < 0) {
+    throw new Error(`BPMN MUTATION: Can't find BPMNEdge with referencing a BPMN element with ID ${__readonly_edgeId}`);
+  }
+  const deletedBpmnEdge = diagramElements?.splice(bpmnEdgeIndex, 1)[0] as BPMNDI__BPMNEdge | undefined;
+
   // <incoming> and <outgoing> elements of Flow Elements
   visitFlowElementsAndArtifacts(process, ({ element, ...args }) => {
     if (
@@ -90,16 +96,9 @@ export function deleteEdge({
       else {
         // empty on purpose
       }
-      element.outgoing = element.outgoing?.filter((s) => s.__$$text !== deletedBpmnEdge?.["@_sourceElement"]);
+      element.outgoing = element.outgoing?.filter((s) => s.__$$text !== deletedBpmnEdge?.["@_sourceElement"]) ?? [];
     }
   });
-
-  // BPMNEdge
-  const bpmnEdgeIndex = (diagramElements ?? []).findIndex((e) => e["@_bpmnElement"] === __readonly_edgeId);
-  if (bpmnEdgeIndex < 0) {
-    throw new Error(`BPMN MUTATION: Can't find BPMNEdge with referencing a BPMN element with ID ${__readonly_edgeId}`);
-  }
-  const deletedBpmnEdge = diagramElements?.splice(bpmnEdgeIndex, 1)[0] as BPMNDI__BPMNEdge | undefined;
 
   return {
     deletedBpmnEdge,
