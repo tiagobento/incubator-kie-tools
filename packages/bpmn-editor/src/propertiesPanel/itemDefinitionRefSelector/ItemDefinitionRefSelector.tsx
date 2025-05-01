@@ -93,67 +93,65 @@ export function ItemDefinitionRefSelector({
   const [isOpen, setOpen] = useState(false);
 
   return (
-    <FormGroup>
-      <Select
-        isDisabled={isReadOnly}
-        variant={SelectVariant.typeahead}
-        typeAheadAriaLabel="Select a Data Type"
-        onSelect={(e, newItemDefinitionRef) => {
-          setOpen(false);
+    <Select
+      isDisabled={isReadOnly}
+      variant={SelectVariant.typeahead}
+      typeAheadAriaLabel="Select a Data Type"
+      onSelect={(e, newItemDefinitionRef) => {
+        setOpen(false);
 
-          if (typeof newItemDefinitionRef === "string") {
-            // Ignore. Coming from `onCreateOption`.
-            return;
-          }
+        if (typeof newItemDefinitionRef === "string") {
+          // Ignore. Coming from `onCreateOption`.
+          return;
+        }
 
-          // -- None --
-          if ((newItemDefinitionRef.toString() ?? "") === "") {
-            onChange(undefined, undefined);
-          }
-          // -- Default Data Type
-          else if (
-            DEFAULT_OPTIONS.filter((ddt) => ddt.itemDefinitionRef === newItemDefinitionRef.toString()).length > 0
-          ) {
-            const ref = addOrGetItemDefinitionId({ newDataType: newItemDefinitionRef.toString() });
-            onChange(ref, newItemDefinitionRef.toString());
-          }
-          // -- Custom Data Type
-          else {
-            onChange(
-              newItemDefinitionRef.toString(),
-              itemDefinitions.filter((s) => s.itemDefinitionRef === newItemDefinitionRef.toString())?.[0].dataType
-            );
-          }
-        }}
-        onToggle={setOpen}
-        isOpen={isOpen}
-        selections={selections}
-        placeholderText="Select a Data Type"
-        isCreateOptionOnTop={true}
-        isGrouped={false}
-        menuAppendTo={document.body}
-        isCreatable={true}
-        shouldResetOnSelect={true}
-        isCreateSelectOptionObject={false}
-        onCreateOption={(newDataType) => {
-          const ref = addOrGetItemDefinitionId({ newDataType });
-          onChange(ref!, newDataType);
-        }}
-      >
-        {allOptions.map(({ dataType, itemDefinitionRef }) => (
-          <SelectOption
-            isSelected={value === itemDefinitionRef}
-            key={itemDefinitionRef}
-            value={{
-              compareTo: (a) =>
-                (itemDefinitionRef ?? "").toLowerCase().trim() == (a?.toString?.() ?? "").toLowerCase().trim(),
-              toString: () => itemDefinitionRef ?? "",
-            }}
-          >
-            {dataType}
-          </SelectOption>
-        ))}
-      </Select>
-    </FormGroup>
+        // -- None --
+        if ((newItemDefinitionRef.toString() ?? "") === "") {
+          onChange(undefined, undefined);
+        }
+        // -- Default Data Type
+        else if (
+          DEFAULT_OPTIONS.filter((ddt) => ddt.itemDefinitionRef === newItemDefinitionRef.toString()).length > 0
+        ) {
+          const ref = addOrGetItemDefinitionId({ newDataType: newItemDefinitionRef.toString() });
+          onChange(ref, newItemDefinitionRef.toString());
+        }
+        // -- Custom Data Type
+        else {
+          onChange(
+            newItemDefinitionRef.toString(),
+            itemDefinitions.filter((s) => s.itemDefinitionRef === newItemDefinitionRef.toString())?.[0].dataType
+          );
+        }
+      }}
+      onToggle={setOpen}
+      isOpen={isOpen}
+      selections={selections}
+      placeholderText="Select a Data Type"
+      isCreateOptionOnTop={true}
+      isGrouped={false}
+      menuAppendTo={document.body}
+      isCreatable={true}
+      shouldResetOnSelect={true}
+      isCreateSelectOptionObject={false}
+      onCreateOption={(newDataType) => {
+        const ref = addOrGetItemDefinitionId({ newDataType });
+        onChange(ref!, newDataType);
+      }}
+    >
+      {allOptions.map(({ dataType, itemDefinitionRef }) => (
+        <SelectOption
+          isSelected={value === itemDefinitionRef}
+          key={itemDefinitionRef}
+          value={{
+            compareTo: (a) =>
+              (itemDefinitionRef ?? "").toLowerCase().trim() == (a?.toString?.() ?? "").toLowerCase().trim(),
+            toString: () => itemDefinitionRef ?? "",
+          }}
+        >
+          {dataType}
+        </SelectOption>
+      ))}
+    </Select>
   );
 }

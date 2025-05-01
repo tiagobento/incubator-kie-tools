@@ -48,6 +48,22 @@ export const BUSINESS_RULE_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_B
   MODEL_NAME: "model",
 };
 
+export const USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING = {
+  TASK_NAME: "TaskName",
+  SKIPPABLE: "Skippable",
+  GROUP_ID: "GroupId",
+  COMMENT: "Comment",
+  DESCRIPTION: "Description",
+  PRIORITY: "Priority",
+  CREATED_BY: "CreatedBy",
+  CONTENT: "Content",
+  NOT_STARTED_REASSIGN: "NotStartedReassign",
+  NOT_COMPLETED_REASSIGN: "NotCompletedReassign",
+  NOT_STARTED_NOTIFY: "NotStartedNotify",
+  NOT_COMPLETELY_NOTIFY: "NotCompletedNotify",
+  MULTI_INSTANCE_ITEM_TYPE: "multiInstanceItemType",
+};
+
 export const SERVICE_TASK_IMPLEMENTATIONS = {
   java: "Java",
   webService: "WebService",

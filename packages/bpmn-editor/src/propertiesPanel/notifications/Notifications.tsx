@@ -47,6 +47,7 @@ import { BellIcon } from "@patternfly/react-icons/dist/js/icons/bell-icon";
 import { EyeIcon } from "@patternfly/react-icons/dist/js/icons/eye-icon";
 import { EditIcon } from "@patternfly/react-icons/dist/js/icons/edit-icon";
 import { Alert } from "@patternfly/react-core/dist/js/components/Alert/Alert";
+import { USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING } from "@kie-tools/bpmn-marshaller/dist/drools-extension";
 import "./Notifications.css";
 
 type Notification = {
@@ -62,8 +63,14 @@ type Notification = {
 };
 
 const typeOptions = [
-  { value: "NotStartedNotify", label: "Not Started" },
-  { value: "NotCompletedNotify", label: "Not Completed" },
+  {
+    value: USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING.NOT_STARTED_NOTIFY,
+    label: "Not Started",
+  },
+  {
+    value: USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING.NOT_COMPLETELY_NOTIFY,
+    label: "Not Completed",
+  },
 ];
 
 const entryStyle = {
@@ -84,8 +91,12 @@ export function NotificationsFormSection({
       element?.dataInputAssociation
         ?.filter(
           (dataInputAssociation) =>
-            dataInputAssociation.targetRef?.__$$text.includes("NotStartedNotify") ||
-            dataInputAssociation.targetRef?.__$$text.includes("NotCompletedNotify")
+            dataInputAssociation.targetRef?.__$$text.includes(
+              USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING.NOT_STARTED_NOTIFY
+            ) ||
+            dataInputAssociation.targetRef?.__$$text.includes(
+              USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING.NOT_COMPLETELY_NOTIFY
+            )
         )
         ?.reduce((acc, association) => {
           const assignment = association.assignment?.[0];
@@ -163,7 +174,7 @@ export function Notifications({ element }: { element: Normalized<BPMN20__tUserTa
         replyTo: "",
         subject: "",
         body: "",
-        type: "NotStartedNotify",
+        type: USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING.NOT_STARTED_NOTIFY,
         expiresAt: "",
       },
     ]);
@@ -193,8 +204,12 @@ export function Notifications({ element }: { element: Normalized<BPMN20__tUserTa
     const extractedNotifications = element?.dataInputAssociation
       ?.filter(
         (dataInputAssociation) =>
-          dataInputAssociation.targetRef?.__$$text.includes("NotStartedNotify") ||
-          dataInputAssociation.targetRef?.__$$text.includes("NotCompletedNotify")
+          dataInputAssociation.targetRef?.__$$text.includes(
+            USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING.NOT_STARTED_NOTIFY
+          ) ||
+          dataInputAssociation.targetRef?.__$$text.includes(
+            USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING.NOT_COMPLETELY_NOTIFY
+          )
       )
       ?.flatMap((association) => {
         const assignment = association.assignment?.[0];
@@ -232,9 +247,11 @@ export function Notifications({ element }: { element: Normalized<BPMN20__tUserTa
             subject: subject[i] || "",
             body: body[i] || "",
             expiresAt: expiresAt[i] || "",
-            type: association.targetRef.__$$text.includes("NotStartedNotify")
-              ? "NotStartedNotify"
-              : "NotCompletedNotify",
+            type: association.targetRef.__$$text.includes(
+              USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING.NOT_STARTED_NOTIFY
+            )
+              ? USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING.NOT_STARTED_NOTIFY
+              : USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING.NOT_COMPLETELY_NOTIFY,
           });
         }
         return notifications;
@@ -270,20 +287,32 @@ export function Notifications({ element }: { element: Normalized<BPMN20__tUserTa
 
             e.ioSpecification.dataInput = e.ioSpecification.dataInput?.filter(
               (dataInput) =>
-                !dataInput["@_name"]?.includes("NotStartedNotify") &&
-                !dataInput["@_name"]?.includes("NotCompletedNotify")
+                !dataInput["@_name"]?.includes(
+                  USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING.NOT_STARTED_NOTIFY
+                ) &&
+                !dataInput["@_name"]?.includes(
+                  USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING.NOT_COMPLETELY_NOTIFY
+                )
             );
             if (e.ioSpecification?.inputSet?.[0]?.dataInputRefs) {
               e.ioSpecification.inputSet[0].dataInputRefs = e.ioSpecification.inputSet[0].dataInputRefs?.filter(
                 (dataInputRefs) =>
-                  !dataInputRefs.__$$text.includes("NotStartedNotify") &&
-                  !dataInputRefs.__$$text?.includes("NotCompletedNotify")
+                  !dataInputRefs.__$$text.includes(
+                    USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING.NOT_STARTED_NOTIFY
+                  ) &&
+                  !dataInputRefs.__$$text?.includes(
+                    USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING.NOT_COMPLETELY_NOTIFY
+                  )
               );
             }
             e.dataInputAssociation = e.dataInputAssociation?.filter(
               (dataInputAssociation) =>
-                !dataInputAssociation.targetRef.__$$text.includes("NotStartedNotify") &&
-                !dataInputAssociation.targetRef.__$$text.includes("NotCompletedNotify")
+                !dataInputAssociation.targetRef.__$$text.includes(
+                  USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING.NOT_STARTED_NOTIFY
+                ) &&
+                !dataInputAssociation.targetRef.__$$text.includes(
+                  USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING.NOT_COMPLETELY_NOTIFY
+                )
             );
 
             notifications.forEach((notification) => {

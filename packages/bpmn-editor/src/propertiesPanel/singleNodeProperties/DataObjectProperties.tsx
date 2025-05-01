@@ -28,6 +28,7 @@ import { Divider } from "@patternfly/react-core/dist/js/components/Divider";
 import { useBpmnEditorStoreApi } from "../../store/StoreContext";
 import { visitFlowElementsAndArtifacts } from "../../mutations/_elementVisitor";
 import { addOrGetProcessAndDiagramElements } from "../../mutations/addOrGetProcessAndDiagramElements";
+import { FormGroup } from "@patternfly/react-core/dist/js/components/Form/FormGroup";
 
 export function DataObjectProperties({
   dataObject,
@@ -41,19 +42,21 @@ export function DataObjectProperties({
 
       <Divider inset={{ default: "insetXs" }} />
 
-      <ItemDefinitionRefSelector
-        value={dataObject["@_itemSubjectRef"]}
-        onChange={(newItemDefinitionRef) => {
-          bpmnEditorStoreApi.setState((s) => {
-            const { process } = addOrGetProcessAndDiagramElements({ definitions: s.bpmn.model.definitions });
-            visitFlowElementsAndArtifacts(process, ({ element }) => {
-              if (element["@_id"] === dataObject["@_id"] && element.__$$element === dataObject.__$$element) {
-                element["@_itemSubjectRef"] = newItemDefinitionRef;
-              }
+      <FormGroup label="Data Type">
+        <ItemDefinitionRefSelector
+          value={dataObject["@_itemSubjectRef"]}
+          onChange={(newItemDefinitionRef) => {
+            bpmnEditorStoreApi.setState((s) => {
+              const { process } = addOrGetProcessAndDiagramElements({ definitions: s.bpmn.model.definitions });
+              visitFlowElementsAndArtifacts(process, ({ element }) => {
+                if (element["@_id"] === dataObject["@_id"] && element.__$$element === dataObject.__$$element) {
+                  element["@_itemSubjectRef"] = newItemDefinitionRef;
+                }
+              });
             });
-          });
-        }}
-      />
+          }}
+        />
+      </FormGroup>
     </PropertiesPanelHeaderFormSection>
   );
 }

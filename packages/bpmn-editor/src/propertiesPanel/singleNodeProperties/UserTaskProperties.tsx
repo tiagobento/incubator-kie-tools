@@ -43,15 +43,7 @@ import { Checkbox } from "@patternfly/react-core/dist/js/components/Checkbox/Che
 import { TextInput } from "@patternfly/react-core/dist/js/components/TextInput";
 import { useCallback } from "react";
 import { addOrGetItemDefinitions } from "../../mutations/addOrGetItemDefinitions";
-
-const USER_TASK__TASK_NAME_DATA_INPUT_NAME = "TaskName";
-const USER_TASK__SUBJECT_DATA_INPUT_NAME = "Comment"; // Subject
-const USER_TASK__PRIORITY_DATA_INPUT_NAME = "Priority";
-const USER_TASK__CONTENT_DATA_INPUT_NAME = "Content";
-const USER_TASK__DESCRIPTION_DATA_INPUT_NAME = "Description";
-const USER_TASK__SKIPPABLE_DATA_INPUT_NAME = "Skippable";
-const USER_TASK__CREATED_BY_DATA_INPUT_NAME = "CreatedBy";
-const USER_TASK__GROUP_ID_DATA_INPUT_NAME = "GroupId";
+import { USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING } from "@kie-tools/bpmn-marshaller/dist/drools-extension";
 
 export function UserTaskProperties({
   userTask,
@@ -143,8 +135,10 @@ export function UserTaskProperties({
             aria-label={"Task Name"}
             type={"text"}
             isDisabled={settings.isReadOnly}
-            value={getValue(USER_TASK__TASK_NAME_DATA_INPUT_NAME)}
-            onChange={(newTaskName) => handleChange(USER_TASK__TASK_NAME_DATA_INPUT_NAME, newTaskName)}
+            value={getValue(USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING.TASK_NAME)}
+            onChange={(newTaskName) =>
+              handleChange(USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING.TASK_NAME, newTaskName)
+            }
             placeholder={"Enter task name..."}
           />
         </FormGroup>
@@ -153,8 +147,10 @@ export function UserTaskProperties({
             aria-label={"Subject"}
             type={"text"}
             isDisabled={settings.isReadOnly}
-            value={getValue(USER_TASK__SUBJECT_DATA_INPUT_NAME)}
-            onChange={(newSubject) => handleChange(USER_TASK__SUBJECT_DATA_INPUT_NAME, newSubject)}
+            value={getValue(USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING.COMMENT)}
+            onChange={(newSubject) =>
+              handleChange(USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING.COMMENT, newSubject)
+            }
             placeholder={"Enter subject..."}
           />
         </FormGroup>
@@ -163,8 +159,10 @@ export function UserTaskProperties({
             aria-label={"Content"}
             type={"text"}
             isDisabled={settings.isReadOnly}
-            value={getValue(USER_TASK__CONTENT_DATA_INPUT_NAME)}
-            onChange={(newContent) => handleChange(USER_TASK__CONTENT_DATA_INPUT_NAME, newContent)}
+            value={getValue(USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING.CONTENT)}
+            onChange={(newContent) =>
+              handleChange(USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING.CONTENT, newContent)
+            }
             placeholder={"Enter content..."}
           />
         </FormGroup>
@@ -174,8 +172,10 @@ export function UserTaskProperties({
             aria-label={"Task Priority"}
             type={"text"}
             isDisabled={settings.isReadOnly}
-            value={getValue(USER_TASK__PRIORITY_DATA_INPUT_NAME)}
-            onChange={(newPriority) => handleChange(USER_TASK__PRIORITY_DATA_INPUT_NAME, newPriority)}
+            value={getValue(USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING.PRIORITY)}
+            onChange={(newPriority) =>
+              handleChange(USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING.PRIORITY, newPriority)
+            }
             placeholder={"Enter priority..."}
           />
         </FormGroup>
@@ -184,8 +184,10 @@ export function UserTaskProperties({
             aria-label={"Description"}
             type={"text"}
             isDisabled={settings.isReadOnly}
-            value={getValue(USER_TASK__DESCRIPTION_DATA_INPUT_NAME)}
-            onChange={(newDescription) => handleChange(USER_TASK__DESCRIPTION_DATA_INPUT_NAME, newDescription)}
+            value={getValue(USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING.DESCRIPTION)}
+            onChange={(newDescription) =>
+              handleChange(USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING.DESCRIPTION, newDescription)
+            }
             placeholder={"Enter description..."}
             style={{ resize: "vertical", minHeight: "40px" }}
             rows={3}
@@ -197,8 +199,14 @@ export function UserTaskProperties({
             aria-label={"Skippable"}
             id="kie-bpmn-editor--properties-panel--skippable-checkbox"
             isDisabled={settings.isReadOnly}
-            isChecked={getValue(USER_TASK__SKIPPABLE_DATA_INPUT_NAME) === "true" ? true : false}
-            onChange={(newSkippable) => handleChange(USER_TASK__SKIPPABLE_DATA_INPUT_NAME, newSkippable)}
+            isChecked={
+              getValue(USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING.SKIPPABLE) === "true"
+                ? true
+                : false
+            }
+            onChange={(newSkippable) =>
+              handleChange(USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING.SKIPPABLE, newSkippable)
+            }
           />
         </FormGroup>
 
@@ -250,8 +258,10 @@ export function UserTaskProperties({
             aria-label={"Groups"}
             type={"text"}
             isDisabled={settings.isReadOnly}
-            value={getValue(USER_TASK__GROUP_ID_DATA_INPUT_NAME)}
-            onChange={(newGroups) => handleChange(USER_TASK__GROUP_ID_DATA_INPUT_NAME, newGroups)}
+            value={getValue(USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING.GROUP_ID)}
+            onChange={(newGroups) =>
+              handleChange(USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING.GROUP_ID, newGroups)
+            }
             placeholder={"Enter groups..."}
           />
         </FormGroup>
@@ -261,8 +271,10 @@ export function UserTaskProperties({
             aria-label={"Created by"}
             type={"text"}
             isDisabled={settings.isReadOnly}
-            value={getValue(USER_TASK__CREATED_BY_DATA_INPUT_NAME)}
-            onChange={(newCreatedBy) => handleChange(USER_TASK__CREATED_BY_DATA_INPUT_NAME, newCreatedBy)}
+            value={getValue(USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING.CREATED_BY)}
+            onChange={(newCreatedBy) =>
+              handleChange(USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING.CREATED_BY, newCreatedBy)
+            }
             placeholder={"Enter creator..."}
           />
         </FormGroup>

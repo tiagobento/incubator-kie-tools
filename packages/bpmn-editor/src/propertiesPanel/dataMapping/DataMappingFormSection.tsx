@@ -44,14 +44,16 @@ import { ElementFilter } from "@kie-tools/xml-parser-ts/dist/elementFilter";
 import { Unpacked } from "@kie-tools/xyflow-react-kie-diagram/dist/tsExt/tsExt";
 import { Normalized } from "../../normalization/normalize";
 import { Divider } from "@patternfly/react-core/dist/js/components/Divider";
-import { setBpmn20Drools10MetaData } from "@kie-tools/bpmn-marshaller/dist/drools-extension-metaData";
-import { FormSelect } from "@patternfly/react-core/dist/js/components/FormSelect/FormSelect";
-import { FormSelectOption } from "@patternfly/react-core/dist/js/components/FormSelect/FormSelectOption";
 import { Alert } from "@patternfly/react-core/dist/js/components/Alert/Alert";
 import { CubesIcon } from "@patternfly/react-icons/dist/js/icons/cubes-icon";
 import { TextInput } from "@patternfly/react-core/dist/js/components/TextInput";
-import "./DataMappingFormSection.css";
 import { ItemDefinitionRefSelector } from "../itemDefinitionRefSelector/ItemDefinitionRefSelector";
+import {
+  BUSINESS_RULE_TASK_IMPLEMENTATIONS,
+  BUSINESS_RULE_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING,
+  USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING,
+} from "@kie-tools/bpmn-marshaller/dist/drools-extension";
+import "./DataMappingFormSection.css";
 
 type WithDataMapping = Normalized<
   ElementFilter<
@@ -84,20 +86,22 @@ const entryStyle = {
 };
 
 const NAMES_FROM_OTHER_TYPES = new Set([
-  "TaskName",
-  "Skippable",
-  "GroupId",
-  "Comment",
-  "Description",
-  "Priority",
-  "CreatedBy",
-  "Content",
-
-  "NotStartedReassign",
-  "NotCompletedReassign",
-  "NotStartedNotify",
-  "NotCompletedNotify",
-  "multiInstanceItemType",
+  BUSINESS_RULE_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING.FILE_PATH,
+  BUSINESS_RULE_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING.NAMESPACE,
+  BUSINESS_RULE_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING.MODEL_NAME,
+  USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING.TASK_NAME,
+  USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING.SKIPPABLE,
+  USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING.GROUP_ID,
+  USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING.COMMENT,
+  USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING.DESCRIPTION,
+  USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING.PRIORITY,
+  USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING.CREATED_BY,
+  USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING.CONTENT,
+  USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING.NOT_STARTED_REASSIGN,
+  USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING.NOT_COMPLETED_REASSIGN,
+  USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING.NOT_STARTED_NOTIFY,
+  USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING.NOT_COMPLETELY_NOTIFY,
+  USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING.MULTI_INSTANCE_ITEM_TYPE,
 ]);
 
 export function DataMappingFormSection({

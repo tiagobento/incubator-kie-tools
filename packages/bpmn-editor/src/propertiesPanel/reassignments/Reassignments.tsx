@@ -31,7 +31,6 @@ import { Title } from "@patternfly/react-core/dist/js/components/Title";
 import { visitFlowElementsAndArtifacts } from "../../mutations/_elementVisitor";
 import { setBpmn20Drools10MetaData } from "@kie-tools/bpmn-marshaller/dist/drools-extension-metaData";
 import { addOrGetProcessAndDiagramElements } from "../../mutations/addOrGetProcessAndDiagramElements";
-import { addOrGetItemDefinitions } from "../../mutations/addOrGetItemDefinitions";
 import { BPMN20__tUserTask } from "@kie-tools/bpmn-marshaller/dist/schemas/bpmn-2_0/ts-gen/types";
 import { Normalized } from "../../normalization/normalize";
 import { FormSelect } from "@patternfly/react-core/dist/js/components/FormSelect/FormSelect";
@@ -47,6 +46,7 @@ import { FormSection } from "@patternfly/react-core/dist/js/components/Form/Form
 import { RedoIcon } from "@patternfly/react-icons/dist/js/icons/redo-icon";
 import { TextInput } from "@patternfly/react-core/dist/js/components/TextInput";
 import "./Reassignments.css";
+import { USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING } from "@kie-tools/bpmn-marshaller/dist/drools-extension";
 
 type Reassignment = {
   users: string;
@@ -57,8 +57,14 @@ type Reassignment = {
 };
 
 const typeOptions = [
-  { value: "NotStartedReassign", label: "Not Started" },
-  { value: "NotCompletedReassign", label: "Not Completed" },
+  {
+    value: USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING.NOT_STARTED_REASSIGN,
+    label: "Not Started",
+  },
+  {
+    value: USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING.NOT_COMPLETED_REASSIGN,
+    label: "Not Completed",
+  },
 ];
 
 const periodUnits = [
@@ -88,8 +94,12 @@ export function ReassignmentsFormSection({
       element?.dataInputAssociation
         ?.filter(
           (dataInputAssociation) =>
-            dataInputAssociation.targetRef?.__$$text.includes("NotStartedReassign") ||
-            dataInputAssociation.targetRef?.__$$text.includes("NotCompletedReassign")
+            dataInputAssociation.targetRef?.__$$text.includes(
+              USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING.NOT_STARTED_REASSIGN
+            ) ||
+            dataInputAssociation.targetRef?.__$$text.includes(
+              USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING.NOT_COMPLETED_REASSIGN
+            )
         )
         ?.reduce((acc, association) => {
           const assignment = association.assignment?.[0];
@@ -159,7 +169,13 @@ export function Reassignments({ element }: { element: Normalized<BPMN20__tUserTa
   const addReassignment = useCallback(() => {
     setReassignments([
       ...reassignments,
-      { users: "", groups: "", type: "NotStartedReassign", period: 0, periodUnit: "m" },
+      {
+        users: "",
+        groups: "",
+        type: USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING.NOT_STARTED_REASSIGN,
+        period: 0,
+        periodUnit: "m",
+      },
     ]);
   }, [reassignments]);
 
@@ -186,8 +202,12 @@ export function Reassignments({ element }: { element: Normalized<BPMN20__tUserTa
     const extractedReassignments = element?.dataInputAssociation
       ?.filter(
         (dataInputAssociation) =>
-          dataInputAssociation.targetRef?.__$$text.includes("NotStartedReassign") ||
-          dataInputAssociation.targetRef?.__$$text.includes("NotCompletedReassign")
+          dataInputAssociation.targetRef?.__$$text.includes(
+            USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING.NOT_STARTED_REASSIGN
+          ) ||
+          dataInputAssociation.targetRef?.__$$text.includes(
+            USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING.NOT_COMPLETED_REASSIGN
+          )
       )
       ?.flatMap((association) => {
         const assignment = association.assignment?.[0];
@@ -209,9 +229,11 @@ export function Reassignments({ element }: { element: Normalized<BPMN20__tUserTa
           reassignments.push({
             users: users[i] || "",
             groups: groups[i] || "",
-            type: association.targetRef.__$$text.includes("NotStartedReassign")
-              ? "NotStartedReassign"
-              : "NotCompletedReassign",
+            type: association.targetRef.__$$text.includes(
+              USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING.NOT_STARTED_REASSIGN
+            )
+              ? USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING.NOT_STARTED_REASSIGN
+              : USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING.NOT_COMPLETED_REASSIGN,
             period: periods[i] || 0,
             periodUnit: periodUnits[i] || "m",
           });
@@ -247,20 +269,32 @@ export function Reassignments({ element }: { element: Normalized<BPMN20__tUserTa
 
             e.ioSpecification.dataInput = e.ioSpecification.dataInput?.filter(
               (dataInput) =>
-                !dataInput["@_name"]?.includes("NotStartedReassign") &&
-                !dataInput["@_name"]?.includes("NotCompletedReassign")
+                !dataInput["@_name"]?.includes(
+                  USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING.NOT_STARTED_REASSIGN
+                ) &&
+                !dataInput["@_name"]?.includes(
+                  USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING.NOT_COMPLETED_REASSIGN
+                )
             );
             if (e.ioSpecification?.inputSet?.[0]?.dataInputRefs) {
               e.ioSpecification.inputSet[0].dataInputRefs = e.ioSpecification.inputSet[0].dataInputRefs?.filter(
                 (dataInputRefs) =>
-                  !dataInputRefs.__$$text.includes("NotStartedReassign") &&
-                  !dataInputRefs.__$$text?.includes("NotCompletedReassign")
+                  !dataInputRefs.__$$text.includes(
+                    USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING.NOT_STARTED_REASSIGN
+                  ) &&
+                  !dataInputRefs.__$$text?.includes(
+                    USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING.NOT_COMPLETED_REASSIGN
+                  )
               );
             }
             e.dataInputAssociation = e.dataInputAssociation?.filter(
               (dataInputAssociation) =>
-                !dataInputAssociation.targetRef.__$$text.includes("NotStartedReassign") &&
-                !dataInputAssociation.targetRef.__$$text.includes("NotCompletedReassign")
+                !dataInputAssociation.targetRef.__$$text.includes(
+                  USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING.NOT_STARTED_REASSIGN
+                ) &&
+                !dataInputAssociation.targetRef.__$$text.includes(
+                  USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING.NOT_COMPLETED_REASSIGN
+                )
             );
 
             reassignments.forEach((reassignment) => {

@@ -17,12 +17,12 @@
  * under the License.
  */
 
-import { BPMN20__tProcess } from "@kie-tools/bpmn-marshaller/dist/schemas/bpmn-2_0/ts-gen/types";
 import * as React from "react";
+import { BPMN20__tProcess } from "@kie-tools/bpmn-marshaller/dist/schemas/bpmn-2_0/ts-gen/types";
 import { Normalized } from "../../normalization/normalize";
 import { ElementFilter } from "@kie-tools/xml-parser-ts/dist/elementFilter";
 import { Unpacked } from "@kie-tools/xyflow-react-kie-diagram/dist/tsExt/tsExt";
-import { FormGroup } from "@patternfly/react-core/dist/js/components/Form";
+import { FormFieldGroup, FormFieldGroupHeader, FormGroup } from "@patternfly/react-core/dist/js/components/Form";
 import { CodeInput } from "../codeInput/CodeInput";
 import { ToggleGroup, ToggleGroupItem } from "@patternfly/react-core/dist/js/components/ToggleGroup";
 import { visitFlowElementsAndArtifacts } from "../../mutations/_elementVisitor";
@@ -32,7 +32,10 @@ import { TextInput } from "@patternfly/react-core/dist/js/components/TextInput";
 import { FormSelectOption } from "@patternfly/react-core/dist/js/components/FormSelect/FormSelectOption";
 import { FormSelect } from "@patternfly/react-core/dist/js/components/FormSelect/FormSelect";
 import { generateUuid } from "@kie-tools/xyflow-react-kie-diagram/dist/uuid/uuid";
+import { USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING } from "@kie-tools/bpmn-marshaller/dist/drools-extension";
 import "./MultiInstanceProperties.css";
+import { ItemDefinitionRefSelector } from "../itemDefinitionRefSelector/ItemDefinitionRefSelector";
+import { Divider } from "@patternfly/react-core/dist/js/components/Divider";
 
 export type WithMultiInstanceProperties = Normalized<
   ElementFilter<
@@ -44,10 +47,6 @@ export type WithMultiInstanceProperties = Normalized<
 export function MultiInstanceProperties({ element }: { element: WithMultiInstanceProperties }) {
   const isReadOnly = useBpmnEditorStore((s) => s.settings.isReadOnly);
   const bpmnEditorStoreApi = useBpmnEditorStoreApi();
-
-  const inputX = "InputX";
-  const outputX = "OutputX";
-  const multiInstanceItemType = "multiInstanceItemType";
 
   return (
     <>
@@ -137,6 +136,8 @@ export function MultiInstanceProperties({ element }: { element: WithMultiInstanc
         }}
       />
 
+      <Divider style={{ margin: "16px" }} />
+
       <FormGroup label={"Collection input"}>
         <FormSelect id={"select"} value={undefined} isDisabled={isReadOnly}>
           <FormSelectOption id={"none"} isPlaceholder={true} label={"-- Select a value --"} />
@@ -173,20 +174,20 @@ export function MultiInstanceProperties({ element }: { element: WithMultiInstanc
                   e.dataInputAssociation ??= [];
 
                   let multiInstanceDataInput = e.ioSpecification?.dataInput?.find((dataInput) =>
-                    dataInput["@_itemSubjectRef"]?.includes("multiInstanceItemType")
+                    dataInput["@_itemSubjectRef"]?.includes(
+                      USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING.MULTI_INSTANCE_ITEM_TYPE
+                    )
                   );
                   const previousValue = multiInstanceDataInput?.["@_id"] || "";
                   if (multiInstanceDataInput) {
-                    console.log("if");
-                    multiInstanceDataInput["@_id"] = `${e["@_id"]}_${newDataInput}${inputX}`;
+                    multiInstanceDataInput["@_id"] = generateUuid();
                     multiInstanceDataInput["@_itemSubjectRef"] =
-                      `${e["@_id"]}_${multiInstanceItemType}_${newDataInput}`;
+                      `${e["@_id"]}_${USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING.MULTI_INSTANCE_ITEM_TYPE}_${newDataInput}`;
                     multiInstanceDataInput["@_name"] = newDataInput;
                   } else {
-                    console.log("else");
                     multiInstanceDataInput = {
-                      "@_id": `${e["@_id"]}_${newDataInput}${inputX}`,
-                      "@_itemSubjectRef": `${e["@_id"]}_${multiInstanceItemType}_${newDataInput}`,
+                      "@_id": generateUuid(),
+                      "@_itemSubjectRef": `${e["@_id"]}_${USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING.MULTI_INSTANCE_ITEM_TYPE}_${newDataInput}`,
                       "@_name": newDataInput,
                     };
                     e.ioSpecification.dataInput.push(multiInstanceDataInput);
@@ -212,15 +213,15 @@ export function MultiInstanceProperties({ element }: { element: WithMultiInstanc
                   );
 
                   if (multiInstanceDataInputRef) {
-                    multiInstanceDataInputRef.__$$text = `${e["@_id"]}_${newDataInput}${inputX}`;
+                    multiInstanceDataInputRef.__$$text = multiInstanceDataInput["@_id"];
                   } else {
                     multiInstanceDataInputRef = {
-                      __$$text: `${e["@_id"]}_${newDataInput}${inputX}`,
+                      __$$text: multiInstanceDataInput["@_id"],
                     };
                     if (!e.ioSpecification?.inputSet[0].dataInputRefs) {
                       e.ioSpecification.inputSet[0].dataInputRefs = [
                         {
-                          __$$text: `${e["@_id"]}_${newDataInput}${inputX}`,
+                          __$$text: multiInstanceDataInput["@_id"],
                         },
                       ];
                     }
@@ -232,13 +233,13 @@ export function MultiInstanceProperties({ element }: { element: WithMultiInstanc
                   );
 
                   if (multiInstanceDataInputAssociation) {
-                    multiInstanceDataInputAssociation.targetRef.__$$text = `${e["@_id"]}_${newDataInput}${inputX}`;
+                    multiInstanceDataInputAssociation.targetRef.__$$text = multiInstanceDataInput["@_id"];
                     multiInstanceDataInputAssociation.sourceRef![0].__$$text = newDataInput;
                   } else {
                     multiInstanceDataInputAssociation = {
                       "@_id": generateUuid(),
-                      targetRef: { __$$text: `${e["@_id"]}_${newDataInput}${inputX}` || "" },
-                      sourceRef: [{ __$$text: newDataInput || "" }],
+                      targetRef: { __$$text: multiInstanceDataInput["@_id"] },
+                      sourceRef: [{ __$$text: newDataInput }],
                     };
                     e.dataInputAssociation?.push(multiInstanceDataInputAssociation);
                   }
@@ -249,7 +250,7 @@ export function MultiInstanceProperties({ element }: { element: WithMultiInstanc
                     };
                     e.loopCharacteristics.inputDataItem["@_id"] = newDataInput;
                     e.loopCharacteristics.inputDataItem["@_itemSubjectRef"] =
-                      `${e["@_id"]}_${multiInstanceItemType}_${newDataInput}`;
+                      `${e["@_id"]}_${USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING.MULTI_INSTANCE_ITEM_TYPE}_${newDataInput}`;
                     e.loopCharacteristics.inputDataItem["@_name"] = newDataInput;
                   }
                 }
@@ -258,6 +259,12 @@ export function MultiInstanceProperties({ element }: { element: WithMultiInstanc
           }
         />
       </FormGroup>
+
+      <FormGroup label="Data Type">
+        <ItemDefinitionRefSelector value={undefined} onChange={() => {}} />
+      </FormGroup>
+
+      <Divider style={{ margin: "16px" }} />
 
       <FormGroup label={"Collection output"}>
         <FormSelect id={"select"} value={undefined} isDisabled={isReadOnly}>
@@ -295,18 +302,20 @@ export function MultiInstanceProperties({ element }: { element: WithMultiInstanc
                   e.dataOutputAssociation ??= [];
 
                   let multiInstanceDataOutput = e.ioSpecification?.dataOutput?.find((dataOutput) =>
-                    dataOutput["@_itemSubjectRef"]?.includes("multiInstanceItemType")
+                    dataOutput["@_itemSubjectRef"]?.includes(
+                      USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING.MULTI_INSTANCE_ITEM_TYPE
+                    )
                   );
                   const previousValue = multiInstanceDataOutput?.["@_id"] || "";
                   if (multiInstanceDataOutput) {
-                    multiInstanceDataOutput["@_id"] = `${e["@_id"]}_${newDataOutput}${outputX}`;
+                    multiInstanceDataOutput["@_id"] = generateUuid();
                     multiInstanceDataOutput["@_itemSubjectRef"] =
-                      `${e["@_id"]}_${multiInstanceItemType}_${newDataOutput}`;
+                      `${e["@_id"]}_${USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING.MULTI_INSTANCE_ITEM_TYPE}_${newDataOutput}`;
                     multiInstanceDataOutput["@_name"] = newDataOutput;
                   } else {
                     multiInstanceDataOutput = {
-                      "@_id": `${e["@_id"]}_${newDataOutput}${outputX}`,
-                      "@_itemSubjectRef": `${e["@_id"]}_${multiInstanceItemType}_${newDataOutput}`,
+                      "@_id": generateUuid(),
+                      "@_itemSubjectRef": `${e["@_id"]}_${USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING.MULTI_INSTANCE_ITEM_TYPE}_${newDataOutput}`,
                       "@_name": newDataOutput,
                     };
                     e.ioSpecification.dataOutput.push(multiInstanceDataOutput);
@@ -332,15 +341,15 @@ export function MultiInstanceProperties({ element }: { element: WithMultiInstanc
                   );
 
                   if (multiInstanceDataOutputRef) {
-                    multiInstanceDataOutputRef.__$$text = `${e["@_id"]}_${newDataOutput}${outputX}`;
+                    multiInstanceDataOutputRef.__$$text = multiInstanceDataOutput["@_id"];
                   } else {
                     multiInstanceDataOutputRef = {
-                      __$$text: `${e["@_id"]}_${newDataOutput}${outputX}`,
+                      __$$text: multiInstanceDataOutput["@_id"],
                     };
                     if (!e.ioSpecification?.outputSet[0].dataOutputRefs) {
                       e.ioSpecification.outputSet[0].dataOutputRefs = [
                         {
-                          __$$text: `${e["@_id"]}_${newDataOutput}${outputX}`,
+                          __$$text: multiInstanceDataOutput["@_id"],
                         },
                       ];
                     }
@@ -354,12 +363,12 @@ export function MultiInstanceProperties({ element }: { element: WithMultiInstanc
                   );
 
                   if (multiInstanceDataOutputAssociation) {
-                    multiInstanceDataOutputAssociation.sourceRef![0].__$$text = `${e["@_id"]}_${newDataOutput}${outputX}`;
+                    multiInstanceDataOutputAssociation.sourceRef![0].__$$text = multiInstanceDataOutput["@_id"];
                     multiInstanceDataOutputAssociation.targetRef.__$$text = newDataOutput;
                   } else {
                     multiInstanceDataOutputAssociation = {
                       "@_id": generateUuid(),
-                      sourceRef: [{ __$$text: `${e["@_id"]}_${newDataOutput}${outputX}` || "" }],
+                      sourceRef: [{ __$$text: multiInstanceDataOutput["@_id"] || "" }],
                       targetRef: { __$$text: newDataOutput || "" },
                     };
                     e.dataOutputAssociation?.push(multiInstanceDataOutputAssociation);
@@ -371,7 +380,7 @@ export function MultiInstanceProperties({ element }: { element: WithMultiInstanc
                     };
                     e.loopCharacteristics.outputDataItem["@_id"] = newDataOutput;
                     e.loopCharacteristics.outputDataItem["@_itemSubjectRef"] =
-                      `${e["@_id"]}_${multiInstanceItemType}_${newDataOutput}`;
+                      `${e["@_id"]}_${USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING.MULTI_INSTANCE_ITEM_TYPE}_${newDataOutput}`;
                     e.loopCharacteristics.outputDataItem["@_name"] = newDataOutput;
                   }
                 }
@@ -379,6 +388,10 @@ export function MultiInstanceProperties({ element }: { element: WithMultiInstanc
             })
           }
         />
+      </FormGroup>
+
+      <FormGroup label="Data Type">
+        <ItemDefinitionRefSelector value={undefined} onChange={() => {}} />
       </FormGroup>
     </>
   );
