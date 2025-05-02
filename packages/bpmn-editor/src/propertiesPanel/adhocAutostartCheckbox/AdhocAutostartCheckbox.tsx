@@ -65,6 +65,7 @@ export function AdhocAutostartCheckbox({ element }: { element: WithAdhocAutostar
             visitFlowElementsAndArtifacts(process, ({ element: e }) => {
               if (e["@_id"] === element["@_id"] && e.__$$element === element.__$$element) {
                 setBpmn20Drools10MetaData(e, "customAutoStart", `${checked}`);
+                return false; // Will stop visiting.
               }
             });
           });

@@ -62,6 +62,8 @@ export function ConditionalEventSelector({ element }: { element: WithConditional
             };
             conditionalEventDefinition.condition.__$$text = newValue;
           }
+
+          return false; // Will stop visiting.
         }
       });
     });

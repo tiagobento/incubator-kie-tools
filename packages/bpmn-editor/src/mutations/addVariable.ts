@@ -56,6 +56,7 @@ export function addVariable({
           "@_name": "",
           "@_itemSubjectRef": "",
         });
+        return false; // Will stop visiting.
       }
     });
   }

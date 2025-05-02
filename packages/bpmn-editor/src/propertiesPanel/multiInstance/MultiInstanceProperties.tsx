@@ -181,13 +181,12 @@ export function MultiInstanceProperties({ element }: { element: WithMultiInstanc
                   const previousValue = multiInstanceDataInput?.["@_id"] || "";
                   if (multiInstanceDataInput) {
                     multiInstanceDataInput["@_id"] = generateUuid();
-                    multiInstanceDataInput["@_itemSubjectRef"] =
-                      `${e["@_id"]}_${USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING.MULTI_INSTANCE_ITEM_TYPE}_${newDataInput}`;
+                    multiInstanceDataInput["@_itemSubjectRef"] = ""; //FIXME: Tiago
                     multiInstanceDataInput["@_name"] = newDataInput;
                   } else {
                     multiInstanceDataInput = {
                       "@_id": generateUuid(),
-                      "@_itemSubjectRef": `${e["@_id"]}_${USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING.MULTI_INSTANCE_ITEM_TYPE}_${newDataInput}`,
+                      "@_itemSubjectRef": "", //FIXME: Tiago
                       "@_name": newDataInput,
                     };
                     e.ioSpecification.dataInput.push(multiInstanceDataInput);
@@ -309,13 +308,12 @@ export function MultiInstanceProperties({ element }: { element: WithMultiInstanc
                   const previousValue = multiInstanceDataOutput?.["@_id"] || "";
                   if (multiInstanceDataOutput) {
                     multiInstanceDataOutput["@_id"] = generateUuid();
-                    multiInstanceDataOutput["@_itemSubjectRef"] =
-                      `${e["@_id"]}_${USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING.MULTI_INSTANCE_ITEM_TYPE}_${newDataOutput}`;
+                    multiInstanceDataOutput["@_itemSubjectRef"] = ""; //FIXME: Tiago
                     multiInstanceDataOutput["@_name"] = newDataOutput;
                   } else {
                     multiInstanceDataOutput = {
                       "@_id": generateUuid(),
-                      "@_itemSubjectRef": `${e["@_id"]}_${USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING.MULTI_INSTANCE_ITEM_TYPE}_${newDataOutput}`,
+                      "@_itemSubjectRef": "", // FIXME: Tiago
                       "@_name": newDataOutput,
                     };
                     e.ioSpecification.dataOutput.push(multiInstanceDataOutput);
@@ -323,18 +321,10 @@ export function MultiInstanceProperties({ element }: { element: WithMultiInstanc
 
                   e.ioSpecification.outputSet[0] ??= {
                     "@_id": generateUuid(),
-                    dataOutputRefs: [
-                      {
-                        __$$text: "",
-                      },
-                    ],
+                    dataOutputRefs: [{ __$$text: "" }],
                   };
 
-                  e.ioSpecification.outputSet[0].dataOutputRefs ??= [
-                    {
-                      __$$text: "",
-                    },
-                  ];
+                  e.ioSpecification.outputSet[0].dataOutputRefs ??= [{ __$$text: "" }];
 
                   let multiInstanceDataOutputRef = e.ioSpecification?.outputSet?.[0].dataOutputRefs?.find(
                     (dataOutputRefs) => dataOutputRefs.__$$text === previousValue

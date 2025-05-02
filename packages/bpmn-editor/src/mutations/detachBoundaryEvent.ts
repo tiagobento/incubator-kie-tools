@@ -65,6 +65,7 @@ export function detachBoundaryEvent({
     if (element["@_id"] === __readonly_eventId) {
       if (element.__$$element === "boundaryEvent") {
         foundBoundaryEvent = { element, ...args };
+        return false; // Will stop visiting.
       } else {
         throw new Error("Provided id is not associated with a Boundary Event.");
       }
@@ -89,6 +90,7 @@ export function detachBoundaryEvent({
         element.__$$element === "transaction"
       ) {
         foundActivity = { element, ...args };
+        return false; // Will stop visiting.
       } else {
         throw new Error("'attachedToRef' is not associated with an Activity.");
       }

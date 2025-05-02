@@ -183,6 +183,8 @@ export function associateBusinessRuleTaskWithDmnModel({
           ],
         },
       ];
+
+      return false; // Will stop visiting.
     }
   });
 }

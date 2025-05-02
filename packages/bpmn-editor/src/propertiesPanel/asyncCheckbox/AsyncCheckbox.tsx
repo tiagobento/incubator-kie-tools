@@ -71,6 +71,7 @@ export function AsyncCheckbox({ element }: { element: WithAsync }) {
             visitFlowElementsAndArtifacts(process, ({ element: e }) => {
               if (e["@_id"] === element["@_id"] && e.__$$element === element.__$$element) {
                 setBpmn20Drools10MetaData(e, "customAsync", `${checked}`);
+                return false; // Will stop visiting.
               }
             });
           });

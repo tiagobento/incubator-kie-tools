@@ -136,7 +136,7 @@ export function Correlations() {
           definitions: s.bpmn.model.definitions,
         });
         visitFlowElementsAndArtifacts(process, ({ element: e }) => {
-          console.log("hey");
+          return false; // Will stop visiting.
         });
       });
     },

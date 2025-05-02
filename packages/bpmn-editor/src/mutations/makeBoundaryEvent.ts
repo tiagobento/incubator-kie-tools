@@ -69,6 +69,7 @@ export function makeBoundaryEvent({
     if (element["@_id"] === __readonly_eventId) {
       if (element.__$$element === "intermediateCatchEvent") {
         foundIntermediateCatchEvent = { element, ...args };
+        return false; // Will stop visiting.
       } else {
         throw new Error("Provided id is not associated with an Intermediate Catch Event");
       }
@@ -87,6 +88,7 @@ export function makeBoundaryEvent({
         element.__$$element === "transaction"
       ) {
         foundTargetActivity = { element, ...args };
+        return false; // Will stop visiting.
       } else {
         throw new Error("Provided id is not associated with an Activity.");
       }

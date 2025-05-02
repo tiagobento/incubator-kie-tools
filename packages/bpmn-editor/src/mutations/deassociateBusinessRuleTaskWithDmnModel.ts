@@ -85,6 +85,8 @@ export function deassociateBusinessRuleTaskWithDmnModel({
         .forEach((i) => {
           element.dataInputAssociation?.splice(i!, 1);
         });
+
+      return false; // Will stop visiting.
     }
   });
 }

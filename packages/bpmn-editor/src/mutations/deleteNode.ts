@@ -75,6 +75,7 @@ export function deleteNode({
       element.__$$element !== "association"
     ) {
       foundElement = { element, ...args };
+      return false; // Will stop visiting.
     }
   });
 

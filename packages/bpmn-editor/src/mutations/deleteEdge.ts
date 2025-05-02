@@ -55,6 +55,7 @@ export function deleteEdge({
       element["@_id"] === __readonly_edgeId
     ) {
       foundBpmnElement = { element, ...args };
+      return false; // Will stop visiting.
     }
   });
 
@@ -96,7 +97,9 @@ export function deleteEdge({
       else {
         // empty on purpose
       }
+
       element.outgoing = element.outgoing?.filter((s) => s.__$$text !== deletedBpmnEdge?.["@_sourceElement"]) ?? [];
+      return false; // Will stop visiting.
     }
   });
 
