@@ -27,6 +27,9 @@ import { addOrGetProcessAndDiagramElements } from "../../../mutations/addOrGetPr
 import { Normalized } from "../../../normalization/normalize";
 import { useBpmnEditorStoreApi } from "../../../store/StoreContext";
 import { CallActivityIcon, TaskIcon } from "../NodeIcons";
+import { keepIntersection } from "./keepIntersection";
+import { DATA_INPUT_RESERVED_NAMES } from "@kie-tools/bpmn-marshaller/dist/drools-extension";
+import { removeDataInputsFromActivity } from "../../../mutations/removeDataInput";
 
 export type Task = Normalized<
   ElementFilter<
@@ -52,11 +55,30 @@ export function useTaskNodeMorphingActions(task: Task) {
         });
         visitFlowElementsAndArtifacts(process, ({ array, index, owner, element }) => {
           if (element["@_id"] === task["@_id"] && element.__$$element === task.__$$element) {
-            array[index] = {
-              "@_id": element["@_id"], // keeps old ID
-              "@_name": element["@_name"], // keeps old Name
-              __$$element: taskElement,
-            };
+            keepIntersection({
+              fromElement: element.__$$element,
+              toElement: taskElement,
+              srcObj: element,
+              targetObj: array[index],
+            });
+
+            if (
+              array[index].__$$element === "businessRuleTask" ||
+              array[index].__$$element === "userTask" ||
+              array[index].__$$element === "serviceTask"
+            ) {
+              // cleanup implementation between these types because the value is not comptabible between them.
+              array[index]["@_implementation"] = undefined;
+            }
+
+            removeDataInputsFromActivity({
+              definitions: s.bpmn.model.definitions,
+              names: [...DATA_INPUT_RESERVED_NAMES],
+              element: taskElement,
+              elementId: task["@_id"],
+            });
+
+            array[index].__$$element = taskElement;
             return false; // Will stop visiting.
           }
         });

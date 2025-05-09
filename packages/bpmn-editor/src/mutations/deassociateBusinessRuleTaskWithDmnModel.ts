@@ -22,6 +22,7 @@ import { Normalized } from "../normalization/normalize";
 import { visitFlowElementsAndArtifacts } from "./_elementVisitor";
 import { addOrGetProcessAndDiagramElements } from "./addOrGetProcessAndDiagramElements";
 import { getDmnModelBinding } from "./associateBusinessRuleTaskWithDmnModel";
+import { BUSINESS_RULE_TASK_IMPLEMENTATIONS } from "@kie-tools/bpmn-marshaller/dist/drools-extension";
 
 export function deassociateBusinessRuleTaskWithDmnModel({
   definitions,
@@ -34,6 +35,11 @@ export function deassociateBusinessRuleTaskWithDmnModel({
 
   visitFlowElementsAndArtifacts(process, ({ element }) => {
     if (element["@_id"] === __readonly_businessRuleTaskId && element.__$$element === "businessRuleTask") {
+      if (element["@_implementation"] !== BUSINESS_RULE_TASK_IMPLEMENTATIONS.dmn) {
+        // Doesn't have a DMN association.
+        return false; // Will stop visiting;
+      }
+
       const b = getDmnModelBinding(element);
       if (!b) {
         throw new Error("BPMN MUTATION: Can't remove a DMN binding that doesn't exist");

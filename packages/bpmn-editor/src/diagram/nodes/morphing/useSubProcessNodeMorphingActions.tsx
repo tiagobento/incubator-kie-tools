@@ -29,6 +29,7 @@ import { useBpmnEditorStoreApi } from "../../../store/StoreContext";
 import { SubProcessIcon } from "../NodeIcons";
 import { generateUuid } from "@kie-tools/xyflow-react-kie-diagram/dist/uuid/uuid";
 import { AdHocSubProcessIconSvg, MultiInstanceParallelIconSvg } from "../NodeSvgs";
+import { keepIntersection } from "./keepIntersection";
 
 export type SubProcess = Normalized<
   ElementFilter<Unpacked<NonNullable<BPMN20__tProcess["flowElement"]>>, "adHocSubProcess" | "subProcess">
@@ -47,31 +48,43 @@ export function useSubProcessNodeMorphingActions(subProcess: SubProcess) {
           definitions: s.bpmn.model.definitions,
         });
         visitFlowElementsAndArtifacts(process, ({ array, index, owner, element }) => {
-          if (element["@_id"] === subProcess["@_id"] && element.__$$element === subProcess.__$$element) {
+          if (element["@_id"] === subProcess["@_id"] && array[index].__$$element === subProcess.__$$element) {
             if (subProcessElement === "eventSubProcess") {
-              array[index] = {
-                "@_id": element["@_id"], // keeps old ID
-                "@_name": element["@_name"], // keeps old Name
-                __$$element: "subProcess",
-                "@_triggeredByEvent": true,
-              };
+              keepIntersection({
+                fromElement: element.__$$element,
+                toElement: "subProcess",
+                srcObj: element,
+                targetObj: array[index],
+              });
+              array[index].__$$element = "subProcess";
+              array[index]["@_triggeredByEvent"] = true;
+              array[index].loopCharacteristics = undefined;
             } else if (subProcessElement === "multiInstanceSubProcess") {
-              array[index] = {
-                "@_id": element["@_id"], // keeps old ID
-                "@_name": element["@_name"], // keeps old Name
-                __$$element: "subProcess",
-                loopCharacteristics: {
-                  "@_id": generateUuid(),
-                  __$$element: "multiInstanceLoopCharacteristics",
-                },
+              keepIntersection({
+                fromElement: element.__$$element,
+                toElement: "subProcess",
+                srcObj: element,
+                targetObj: array[index],
+              });
+
+              array[index].__$$element = "subProcess";
+              array[index]["@_triggeredByEvent"] = false;
+              array[index].loopCharacteristics = {
+                "@_id": generateUuid(),
+                __$$element: "multiInstanceLoopCharacteristics",
               };
             } else {
-              array[index] = {
-                "@_id": element["@_id"], // keeps old ID
-                "@_name": element["@_name"], // keeps old Name
-                __$$element: subProcessElement,
-              };
+              keepIntersection({
+                fromElement: element.__$$element,
+                toElement: subProcessElement,
+                srcObj: element,
+                targetObj: array[index],
+              });
+              array[index].__$$element = subProcessElement;
+              array[index]["@_triggeredByEvent"] = false;
+              array[index].loopCharacteristics = undefined;
             }
+
             return false; // Will stop visiting.
           }
         });

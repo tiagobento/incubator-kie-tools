@@ -47,12 +47,8 @@ import { Divider } from "@patternfly/react-core/dist/js/components/Divider";
 import { Alert } from "@patternfly/react-core/dist/js/components/Alert/Alert";
 import { CubesIcon } from "@patternfly/react-icons/dist/js/icons/cubes-icon";
 import { TextInput } from "@patternfly/react-core/dist/js/components/TextInput";
+import { DATA_INPUT_RESERVED_NAMES } from "@kie-tools/bpmn-marshaller/dist/drools-extension";
 import { ItemDefinitionRefSelector } from "../itemDefinitionRefSelector/ItemDefinitionRefSelector";
-import {
-  BUSINESS_RULE_TASK_IMPLEMENTATIONS,
-  BUSINESS_RULE_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING,
-  USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING,
-} from "@kie-tools/bpmn-marshaller/dist/drools-extension";
 import "./DataMappingFormSection.css";
 
 type WithDataMapping = Normalized<
@@ -84,25 +80,6 @@ const entryStyle = {
   margin: "8px",
   width: "calc(100% - 2 * 4px - 2 * 8px)",
 };
-
-const NAMES_FROM_OTHER_TYPES = new Set([
-  BUSINESS_RULE_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING.FILE_PATH,
-  BUSINESS_RULE_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING.NAMESPACE,
-  BUSINESS_RULE_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING.MODEL_NAME,
-  USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING.TASK_NAME,
-  USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING.SKIPPABLE,
-  USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING.GROUP_ID,
-  USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING.COMMENT,
-  USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING.DESCRIPTION,
-  USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING.PRIORITY,
-  USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING.CREATED_BY,
-  USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING.CONTENT,
-  USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING.NOT_STARTED_REASSIGN,
-  USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING.NOT_COMPLETED_REASSIGN,
-  USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING.NOT_STARTED_NOTIFY,
-  USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING.NOT_COMPLETELY_NOTIFY,
-  USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING.MULTI_INSTANCE_ITEM_TYPE,
-]);
 
 export function DataMappingFormSection({
   sectionLabel,
@@ -158,11 +135,11 @@ export function BidirectionalDataMappingFormSection({ element }: { element: With
   const [isDataMappingModalOpen, setDataMappingModalOpen] = useState(false);
 
   const inputCount = element?.ioSpecification?.dataInput?.filter(
-    (dataInput) => !NAMES_FROM_OTHER_TYPES.has(dataInput["@_name"]!)
+    (dataInput) => !DATA_INPUT_RESERVED_NAMES.has(dataInput["@_name"]!)
   ).length;
 
   const outputCount = element?.ioSpecification?.dataOutput?.filter(
-    (dataOutput) => !NAMES_FROM_OTHER_TYPES.has(dataOutput["@_name"]!)
+    (dataOutput) => !DATA_INPUT_RESERVED_NAMES.has(dataOutput["@_name"]!)
   ).length;
 
   const sectionLabel = useMemo(() => {
@@ -621,7 +598,7 @@ export function DataMappingsList({
           </div>
           {section === "input" &&
             inputDataMapping.flatMap((entry, i) =>
-              NAMES_FROM_OTHER_TYPES.has(entry.name) ? (
+              DATA_INPUT_RESERVED_NAMES.has(entry.name) ? (
                 []
               ) : (
                 <div key={i} style={{ padding: "0 8px" }}>

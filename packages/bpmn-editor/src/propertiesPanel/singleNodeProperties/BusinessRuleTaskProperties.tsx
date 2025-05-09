@@ -99,6 +99,7 @@ export function BusinessRuleTaskProperties({
                   visitFlowElementsAndArtifacts(process, ({ element: e }) => {
                     if (e["@_id"] === businessRuleTask["@_id"] && e.__$$element === businessRuleTask.__$$element) {
                       e["@_implementation"] = BUSINESS_RULE_TASK_IMPLEMENTATIONS.drools;
+                      return false; // Will stop visiting.
                     }
                   });
                 });
@@ -116,6 +117,7 @@ export function BusinessRuleTaskProperties({
                   visitFlowElementsAndArtifacts(process, ({ element: e }) => {
                     if (e["@_id"] === businessRuleTask["@_id"] && e.__$$element === businessRuleTask.__$$element) {
                       e["@_implementation"] = BUSINESS_RULE_TASK_IMPLEMENTATIONS.dmn;
+                      return false; // Will stop visiting.
                     }
                   });
                 });
@@ -139,6 +141,7 @@ export function BusinessRuleTaskProperties({
                     visitFlowElementsAndArtifacts(process, ({ element: e }) => {
                       if (e["@_id"] === businessRuleTask["@_id"] && e.__$$element === businessRuleTask.__$$element) {
                         e["@_drools:ruleFlowGroup"] = newRuleFlowGroup;
+                        return false; // Will stop visiting.
                       }
                     });
                   });
