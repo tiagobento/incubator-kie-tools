@@ -34,12 +34,17 @@ const DEFAULT_OPTIONS = [
   { itemDefinitionRef: "Object", dataType: DEFAULT_DATA_TYPES.OBJECT },
 ];
 
+export type OnChangeItemDefinitionRefSelector = (
+  newItemDefinitionRef: string | undefined,
+  dataType: string | undefined
+) => void;
+
 export function ItemDefinitionRefSelector({
   value,
   onChange,
 }: {
   value: string | undefined;
-  onChange: (newItemDefinitionRef: string | undefined, dataType: string | undefined) => void;
+  onChange: OnChangeItemDefinitionRefSelector;
 }) {
   const isReadOnly = useBpmnEditorStore((s) => s.settings.isReadOnly);
 

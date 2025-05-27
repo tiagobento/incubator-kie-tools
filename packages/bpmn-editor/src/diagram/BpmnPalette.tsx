@@ -179,10 +179,7 @@ export function BpmnPalette({ pulse }: { pulse: boolean }) {
           style={{ position: "relative", pointerEvents: "all" }}
         >
           {openLhsPanel === BpmnDiagramLhsPanel.CORRELATIONS && (
-            <div
-              className={"kie-bpmn-editor--palette-nodes-popover correlations"}
-              // style={{ maxHeight }}
-            >
+            <div className={"kie-bpmn-editor--palette-nodes-popover correlations"}>
               <Correlations />
             </div>
           )}

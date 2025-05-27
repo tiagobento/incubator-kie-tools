@@ -17,10 +17,12 @@
  * under the License.
  */
 
-.kie-bpmn-editor--correlations--modal {
-  height: 80%;
-  width: 80%;
-  position: relative;
+.kie-bpmn-editor--correlations .pf-c-form__section {
+  margin-top: 0;
+}
+
+.kie-bpmn-editor--correlations--properties--spacer .pf-c-form__label {
+  visibility: hidden;
 }
 
 .kie-bpmn-editor--correlations--empty-state {
@@ -30,21 +32,69 @@
   text-align: center;
   height: 100%;
 }
-
-.kie-bpmn-editor--properties-panel--correlation-entry {
-  align-items: center;
-  border-radius: 10px;
+.kie-bpmn-editor--correlations--empty-state .pf-c-empty-state {
+  height: 100%;
+}
+.kie-bpmn-editor--correlations--empty-state .pf-c-empty-state__body {
+  padding: 0 !important;
+  width: 400px;
 }
 
-.kie-bpmn-editor--properties-panel--correlation-entry:hover,
-.kie-bpmn-editor--properties-panel--correlation-entry:focus-within {
-  background: #eee;
+.kie-bpmn-editor--correlations--properties,
+.kie-bpmn-editor--correlations--keys,
+.kie-bpmn-editor--correlations--keys--properties {
+  width: 200px;
 }
 
-.kie-bpmn-editor--properties-panel--correlation-entry div > input {
-  border: 0;
+.kie-bpmn-editor--correlations--properties--data-type {
+  width: 300px;
 }
 
-.kie-bpmn-editor--properties-panel--correlation-entry div:not(:nth-last-child(2)) > input {
-  border-right: 1px dotted black;
+.kie-bpmn-editor--correlations--properties li,
+.kie-bpmn-editor--correlations--keys li,
+.kie-bpmn-editor--correlations--keys--properties li {
+  font-size: 1.1em;
+  padding: 4px 12px;
+  margin: 2px 0;
+  border-radius: 12px;
+}
+
+.kie-bpmn-editor--correlations--properties li:active,
+.kie-bpmn-editor--correlations--keys li:active {
+  font-size: bold;
+}
+
+.kie-bpmn-editor--correlations--properties li:hover,
+.kie-bpmn-editor--correlations--keys li:hover,
+.kie-bpmn-editor--correlations--keys--properties li:hover,
+.kie-bpmn-editor--correlations--keys--properties li:last-child {
+  cursor: pointer;
+  backdrop-filter: brightness(0.95);
+}
+
+.kie-bpmn-editor--correlations--properties li.selected,
+.kie-bpmn-editor--correlations--keys li.selected {
+  backdrop-filter: brightness(0.9);
+}
+
+.kie-bpmn-editor--correlations--properties li.selected:hover,
+.kie-bpmn-editor--correlations--keys li.selected:hover {
+  backdrop-filter: brightness(0.85);
+}
+
+.kie-bpmn-editor--correlations--properties .pf-c-form__group-label span,
+.kie-bpmn-editor--correlations--keys .pf-c-form__group-label span {
+  font-size: 1.4em;
+}
+
+/* bindings */
+.kie-bpmn-editor--correlations--properties--bindings--binding .pf-c-input-group * {
+  border: 0 !important;
+}
+
+/* bindings */
+.kie-bpmn-editor--correlations--properties--bindings--binding .expression-label {
+  color: black;
+  font-size: 1.4em;
+  padding: 0 15px 0 24px;
 }

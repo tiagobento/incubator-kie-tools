@@ -32,6 +32,7 @@ import { ActivitySelector } from "../activitySelector/ActivitySelector";
 import { SignalScopeSelector } from "../signalScopeSelector/SignalScopeSelector";
 import { ConditionalEventSelector } from "../conditionalExpression/ConditionalExpressionSelector";
 import { LinkSelector } from "../linkSelector/LinkSelector";
+import { FormGroup, FormSection } from "@patternfly/react-core/dist/js/components/Form";
 
 export type Event = Normalized<
   ElementFilter<
@@ -60,7 +61,11 @@ export function EventDefinitionProperties({ event }: { event: Event }) {
         {/* all */}
         {eventDefinition?.__$$element === "messageEventDefinition" && ( //
           <>
-            <MessageSelector element={event} />
+            <FormSection>
+              <FormGroup label="Message">
+                <MessageSelector element={event} />
+              </FormGroup>
+            </FormSection>
           </>
         )}
 

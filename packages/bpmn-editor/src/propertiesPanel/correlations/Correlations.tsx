@@ -19,7 +19,10 @@
 
 import * as React from "react";
 import "@kie-tools/bpmn-marshaller/dist/drools-extension";
-import { BPMN20__tProcess } from "@kie-tools/bpmn-marshaller/dist/schemas/bpmn-2_0/ts-gen/types";
+import {
+  BPMN20__tCorrelationProperty,
+  BPMN20__tProcess,
+} from "@kie-tools/bpmn-marshaller/dist/schemas/bpmn-2_0/ts-gen/types";
 import { Button, ButtonVariant } from "@patternfly/react-core/dist/js/components/Button/Button";
 import { useBpmnEditorStore, useBpmnEditorStoreApi } from "../../store/StoreContext";
 import { addOrGetProcessAndDiagramElements } from "../../mutations/addOrGetProcessAndDiagramElements";
@@ -34,10 +37,29 @@ import { EmptyState, EmptyStateBody, EmptyStateIcon } from "@patternfly/react-co
 import { generateUuid } from "@kie-tools/xyflow-react-kie-diagram/dist/uuid/uuid";
 import { Bullseye } from "@patternfly/react-core/dist/js/layouts/Bullseye";
 import { Form } from "@patternfly/react-core/dist/js/components/Form/Form";
+import { Card, CardBody, CardHeader } from "@patternfly/react-core/dist/js/components/Card";
 import { FormSelect } from "@patternfly/react-core/dist/js/components/FormSelect/FormSelect";
 import { FormSelectOption } from "@patternfly/react-core/dist/js/components/FormSelect/FormSelectOption";
 import { PeopleCarryIcon } from "@patternfly/react-icons/dist/js/icons/people-carry-icon";
+import { ObjectGroupIcon } from "@patternfly/react-icons/dist/js/icons/object-group-icon";
+import { FormGroup, FormSection } from "@patternfly/react-core/dist/js/components/Form";
+import { Flex } from "@patternfly/react-core/dist/js/layouts/Flex/Flex";
+import { Gallery } from "@patternfly/react-core/dist/js/layouts/Gallery";
+import { Stack } from "@patternfly/react-core/dist/js/layouts/Stack";
+import { FlexItem } from "@patternfly/react-core/dist/js/layouts/Flex/FlexItem";
+import { Divider, DividerVariant } from "@patternfly/react-core/dist/js/components/Divider";
 import "./Correlations.css";
+import {
+  ItemDefinitionRefSelector,
+  OnChangeItemDefinitionRefSelector,
+} from "../itemDefinitionRefSelector/ItemDefinitionRefSelector";
+import { useBpmnEditor } from "../../BpmnEditorContext";
+import { GroupIcon } from "../../diagram/nodes/NodeIcons";
+import { MessageSelector } from "../messageSelector/MessageSelector";
+import { InputGroup } from "@patternfly/react-core/dist/js/components/InputGroup/InputGroup";
+import { InputGroupText } from "@patternfly/react-core/dist/js/components/InputGroup";
+import { TextInput } from "@patternfly/react-core/dist/js/components/TextInput";
+import { MessageEventSymbolSvg } from "../../diagram/nodes/NodeSvgs";
 
 type Correlation = {
   id: string;
@@ -47,15 +69,6 @@ type Correlation = {
   propertyType: string;
 };
 
-const dataType = [
-  { value: "Custom", label: "Custom..." },
-  { value: "Boolean", label: "Boolean" },
-  { value: "Float", label: "Float" },
-  { value: "Integer", label: "Integer" },
-  { value: "Object", label: "Object" },
-  { value: "String", label: "String" },
-];
-
 const entryStyle = {
   padding: "4px",
   margin: "8px",
@@ -64,256 +77,508 @@ const entryStyle = {
 
 export function Correlations() {
   const bpmnEditorStoreApi = useBpmnEditorStoreApi();
-  const [correlations, setCorrelations] = useState<Correlation[]>([]);
-  const [hoveredIndex, setHoveredIndex] = useState<number | undefined>(undefined);
 
   const isReadOnly = useBpmnEditorStore((s) => s.settings.isReadOnly);
 
-  const addCorrelation = useCallback(() => {
-    setCorrelations([...correlations, { id: "", name: "", propertyId: "", propertyName: "", propertyType: "Custom" }]);
-  }, [correlations]);
+  const addProperty = useCallback(() => {
+    const newPropertyId = generateUuid();
 
-  const removeCorrelation = useCallback(
-    (index: number) => {
-      setCorrelations(correlations.filter((_, i) => i !== index));
-    },
-    [correlations]
-  );
-
-  const addAtEnd = React.useCallback(() => {
     bpmnEditorStoreApi.setState((s) => {
-      const { process } = addOrGetProcessAndDiagramElements({ definitions: s.bpmn.model.definitions });
-      const correlationPropertyId = generateUuid();
-
       s.bpmn.model.definitions.rootElement ??= [];
       s.bpmn.model.definitions.rootElement.push({
         __$$element: "correlationProperty",
-        "@_id": correlationPropertyId,
-        "@_name": "",
-        "@_type": "",
+        "@_id": newPropertyId,
+        "@_name": generateUuid(),
+        "@_type": undefined,
         correlationPropertyRetrievalExpression: [],
       });
-
-      process.correlationSubscription ??= [];
-      process.correlationSubscription.push({
-        "@_id": generateUuid(),
-        "@_correlationKeyRef": correlationPropertyId,
-        correlationPropertyBinding: [
-          {
-            "@_id": generateUuid(),
-            "@_correlationPropertyRef": correlationPropertyId,
-            dataPath: undefined as any, // FIXME: Tiago
-          },
-        ],
-      });
     });
+
+    setSelectedPropertyId(newPropertyId);
   }, [bpmnEditorStoreApi]);
 
-  const addButton = useMemo(
-    () => (
-      <Button variant={ButtonVariant.plain} style={{ paddingLeft: 0 }} onClick={addCorrelation}>
-        <PlusCircleIcon color="var(--pf-c-button--m-primary--BackgroundColor)" />
-      </Button>
-    ),
-    [addCorrelation]
-  );
+  const addKey = useCallback(() => {
+    const newKeyId = generateUuid();
+    bpmnEditorStoreApi.setState((s) => {
+      const { process } = addOrGetProcessAndDiagramElements({ definitions: s.bpmn.model.definitions });
 
-  const process: undefined | Normalized<BPMN20__tProcess> = useBpmnEditorStore((s) =>
-    s.bpmn.model.definitions.rootElement?.find((s) => s.__$$element === "process")
-  );
-
-  const correlationCount = process?.correlationSubscription?.length ?? 0;
-
-  const handleSubmit = useCallback(
-    (event) => {
-      event.preventDefault();
-      if (!event.target.checkValidity()) {
-        event.target.reportValidity();
-        return;
+      s.bpmn.model.definitions.rootElement ??= [];
+      let collaboration = s.bpmn.model.definitions.rootElement.find((e) => e.__$$element === "collaboration");
+      if (!collaboration) {
+        collaboration = {
+          "@_id": generateUuid(),
+          __$$element: "collaboration",
+          participant: [
+            {
+              "@_id": generateUuid(),
+              "@_name": "Pool Participant",
+              "@_processRef": process["@_id"],
+            },
+          ],
+        };
+        s.bpmn.model.definitions.rootElement.push(collaboration);
       }
+
+      collaboration.correlationKey ??= [];
+      collaboration.correlationKey.push({
+        "@_id": newKeyId,
+        "@_name": generateUuid(),
+      });
+    });
+
+    setSelectedKeyId(newKeyId);
+  }, [bpmnEditorStoreApi]);
+
+  const properties = useBpmnEditorStore(
+    (s) => s.bpmn.model.definitions.rootElement?.filter((e) => e.__$$element === "correlationProperty") ?? []
+  );
+
+  const propertiesById = useBpmnEditorStore((s) =>
+    (s.bpmn.model.definitions.rootElement ?? []).reduce((acc, e) => {
+      if (e.__$$element === "correlationProperty") {
+        acc.set(e["@_id"], e);
+      }
+      return acc;
+    }, new Map<string, BPMN20__tCorrelationProperty>())
+  );
+
+  const keys = useBpmnEditorStore(
+    (s) =>
+      s.bpmn.model.definitions.rootElement
+        ?.filter((e) => e.__$$element === "collaboration")
+        .flatMap((k) => k.correlationKey ?? []) ?? []
+  );
+
+  const [selectedPropertyId, setSelectedPropertyId] = useState(properties[0]?.["@_id"]);
+  const [selectedKeyId, setSelectedKeyId] = useState(keys[0]?.["@_id"]);
+
+  const selectedProperty = useBpmnEditorStore((s) =>
+    s.bpmn.model.definitions.rootElement
+      ?.filter((e) => e.__$$element === "correlationProperty")
+      .find((p) => p["@_id"] === selectedPropertyId)
+  );
+
+  const selectedKey = useBpmnEditorStore((s) =>
+    s.bpmn.model.definitions.rootElement
+      ?.find((e) => e.__$$element === "collaboration")
+      ?.correlationKey?.find((k) => k["@_id"] === selectedKeyId)
+  );
+
+  const availablePropertiesToAddToKey = useMemo(() => {
+    return properties.filter(
+      (p) => !selectedKey?.correlationPropertyRef?.map((propertyRef) => propertyRef.__$$text).includes(p["@_id"])
+    );
+  }, [properties, selectedKey?.correlationPropertyRef]);
+
+  const changeSelectedPropertyType = useCallback<OnChangeItemDefinitionRefSelector>(
+    (newItemDefinitionRef) => {
       bpmnEditorStoreApi.setState((s) => {
-        const { process } = addOrGetProcessAndDiagramElements({
-          definitions: s.bpmn.model.definitions,
+        const property = s.bpmn.model.definitions.rootElement
+          ?.filter((e) => e.__$$element === "correlationProperty")
+          .find((p) => p["@_id"] === selectedPropertyId);
+
+        if (property) {
+          property["@_type"] = newItemDefinitionRef;
+        }
+      });
+    },
+    [bpmnEditorStoreApi, selectedPropertyId]
+  );
+
+  const addMessageBindingToProperty = useCallback(() => {
+    bpmnEditorStoreApi.setState((s) => {
+      const property = s.bpmn.model.definitions.rootElement
+        ?.filter((e) => e.__$$element === "correlationProperty")
+        .find((p) => p["@_id"] === selectedPropertyId);
+
+      if (property) {
+        property.correlationPropertyRetrievalExpression.push({
+          "@_id": generateUuid(),
+          "@_messageRef": undefined as any, // SPEC DISCREPANCY!,
+          messagePath: {
+            "@_id": generateUuid(),
+            "@_evaluatesToTypeRef": property["@_type"],
+            __$$text: "",
+          },
         });
-        visitFlowElementsAndArtifacts(process, ({ element: e }) => {
-          return false; // Will stop visiting.
-        });
+      }
+    });
+  }, [bpmnEditorStoreApi, selectedPropertyId]);
+
+  const onChangeMessageBindingExpression = useCallback(
+    (i: number) => (newExpression: string) => {
+      bpmnEditorStoreApi.setState((s) => {
+        const property = s.bpmn.model.definitions.rootElement
+          ?.filter((p) => p.__$$element === "correlationProperty")
+          .find((p) => p["@_id"] === selectedPropertyId);
+
+        if (property) {
+          property.correlationPropertyRetrievalExpression[i].messagePath.__$$text = newExpression;
+        }
+      });
+    },
+    [bpmnEditorStoreApi, selectedPropertyId]
+  );
+
+  const addPropertyToCorrelationKey = useCallback(
+    (propertyId: string) => {
+      bpmnEditorStoreApi.setState((s) => {
+        const key = s.bpmn.model.definitions.rootElement
+          ?.find((e) => e.__$$element === "collaboration")
+          ?.correlationKey?.find((k) => k["@_id"] === selectedKeyId);
+
+        if (key) {
+          key.correlationPropertyRef ??= [];
+          key.correlationPropertyRef.push({ __$$text: propertyId });
+
+          const { process } = addOrGetProcessAndDiagramElements({ definitions: s.bpmn.model.definitions });
+          for (const subs of process.correlationSubscription ?? []) {
+            if (subs["@_correlationKeyRef"] === selectedKeyId) {
+              subs.correlationPropertyBinding ??= [];
+              subs.correlationPropertyBinding?.push({
+                "@_id": generateUuid(),
+                "@_correlationPropertyRef": propertyId,
+                dataPath: {
+                  "@_id": generateUuid(),
+                  __$$text: "",
+                },
+              });
+            }
+          }
+        }
+      });
+    },
+    [bpmnEditorStoreApi, selectedKeyId]
+  );
+
+  const subscriptions = useBpmnEditorStore(
+    (s) =>
+      s.bpmn.model.definitions.rootElement
+        ?.find((s) => s.__$$element === "process")
+        ?.correlationSubscription?.filter((s) => s["@_correlationKeyRef"] === selectedKeyId) ?? []
+  );
+
+  const addSubscription = useCallback(() => {
+    bpmnEditorStoreApi.setState((s) => {
+      const { process } = addOrGetProcessAndDiagramElements({ definitions: s.bpmn.model.definitions });
+      process.correlationSubscription ??= [];
+      process.correlationSubscription?.push({
+        "@_id": generateUuid(),
+        "@_correlationKeyRef": selectedKeyId,
+        correlationPropertyBinding: (selectedKey!.correlationPropertyRef ?? []).map((propRef) => ({
+          "@_id": generateUuid(),
+          "@_correlationPropertyRef": propRef.__$$text,
+          dataPath: {
+            "@_id": generateUuid(),
+            __$$text: "",
+          },
+        })),
+      });
+    });
+  }, [bpmnEditorStoreApi, selectedKey, selectedKeyId]);
+
+  const changeValueOfSubscription = useCallback(
+    (subscriptionIndex: number, propertyBindingIndex: number) => (newValue: string) => {
+      bpmnEditorStoreApi.setState((s) => {
+        const { process } = addOrGetProcessAndDiagramElements({ definitions: s.bpmn.model.definitions });
+        process.correlationSubscription ??= [];
+        process.correlationSubscription[subscriptionIndex]!.correlationPropertyBinding![
+          propertyBindingIndex
+        ].dataPath.__$$text = newValue;
       });
     },
     [bpmnEditorStoreApi]
   );
 
+  const hasAtLeastOnePropertyWithMessageBinding = useMemo(() => {
+    return properties.some((p) => p.correlationPropertyRetrievalExpression.length > 0);
+  }, [properties]);
+
+  const hasAtLeastOneKeyWithSubscriptions = useBpmnEditorStore(
+    (s) =>
+      (s.bpmn.model.definitions.rootElement?.find((s) => s.__$$element === "process")?.correlationSubscription ?? [])
+        .length > 0
+  );
+
   return (
-    <div>
-      {(correlations.length > 0 && (
-        <Form onSubmit={handleSubmit}>
-          <div style={{ padding: "0 8px", position: "sticky", top: "-16px", backdropFilter: "blur(8px)" }}>
-            <Grid md={6} style={{ alignItems: "center" }}>
-              <GridItem span={2}>
-                <div style={entryStyle}>
-                  <b>ID</b>
-                </div>
-              </GridItem>
-              <GridItem span={3}>
-                <div style={entryStyle}>
-                  <b>Name</b>
-                </div>
-              </GridItem>
-              <GridItem span={2}>
-                <div style={entryStyle}>
-                  <b>Property ID</b>
-                </div>
-              </GridItem>
-              <GridItem span={2}>
-                <div style={entryStyle}>
-                  <b>Property name</b>
-                </div>
-              </GridItem>
-              <GridItem span={2}>
-                <div style={entryStyle}>
-                  <b>Property type</b>
-                </div>
-              </GridItem>
-              <GridItem span={1}>
-                <div style={{ textAlign: "right" }}>{!isReadOnly && addButton}</div>
-              </GridItem>
-            </Grid>
-          </div>
-          {correlations.map((entry, i) => (
-            <div key={i} style={{ padding: "0 8px" }}>
-              <Grid
-                md={6}
-                className={"kie-bpmn-editor--properties-panel--correlation-entry"}
-                onMouseEnter={() => setHoveredIndex(i)}
-                onMouseLeave={() => setHoveredIndex(undefined)}
-              >
-                <GridItem span={2}>
-                  <input
-                    autoFocus={true}
-                    style={entryStyle}
-                    type="text"
-                    required
-                    placeholder="ID..."
-                    value={entry.id}
-                    onChange={(e) =>
-                      bpmnEditorStoreApi.setState((s) => {
-                        const { process } = addOrGetProcessAndDiagramElements({
-                          definitions: s.bpmn.model.definitions,
-                        });
-                      })
-                    }
-                  />
-                </GridItem>
-                <GridItem span={3}>
-                  <input
-                    style={entryStyle}
-                    type="text"
-                    required
-                    placeholder="Name..."
-                    value={entry.name}
-                    onChange={(e) =>
-                      bpmnEditorStoreApi.setState((s) => {
-                        const { process } = addOrGetProcessAndDiagramElements({
-                          definitions: s.bpmn.model.definitions,
-                        });
-                      })
-                    }
-                  />
-                </GridItem>
-                <GridItem span={2}>
-                  <input
-                    style={entryStyle}
-                    type="text"
-                    required
-                    placeholder="Property ID..."
-                    value={entry.propertyId}
-                    onChange={(e) =>
-                      bpmnEditorStoreApi.setState((s) => {
-                        const { process } = addOrGetProcessAndDiagramElements({
-                          definitions: s.bpmn.model.definitions,
-                        });
-                      })
-                    }
-                  />
-                </GridItem>
-                <GridItem span={2}>
-                  <input
-                    style={entryStyle}
-                    type="text"
-                    required
-                    placeholder="Property name..."
-                    value={entry.propertyName}
-                    onChange={(e) =>
-                      bpmnEditorStoreApi.setState((s) => {
-                        const { process } = addOrGetProcessAndDiagramElements({
-                          definitions: s.bpmn.model.definitions,
-                        });
-                      })
-                    }
-                  />
-                </GridItem>
-                <GridItem span={2}>
-                  <FormSelect
-                    aria-label={"property type"}
-                    type={"text"}
-                    value={entry.propertyType}
-                    style={entryStyle}
-                    rows={1}
-                    onChange={(e) =>
-                      bpmnEditorStoreApi.setState((s) => {
-                        const { process } = addOrGetProcessAndDiagramElements({
-                          definitions: s.bpmn.model.definitions,
-                        });
-                      })
-                    }
-                  >
-                    {dataType.map((option) => (
-                      <FormSelectOption key={option.label} label={option.label} value={option.value} />
-                    ))}
-                  </FormSelect>
-                </GridItem>
-                <GridItem span={1} style={{ textAlign: "right" }}>
-                  {hoveredIndex === i && (
-                    <Button
-                      tabIndex={9999} // Prevent tab from going to this button
-                      variant={ButtonVariant.plain}
-                      style={{ paddingLeft: 0 }}
-                      onClick={() => removeCorrelation(i)}
-                    >
-                      <TimesIcon />
-                    </Button>
+    <div className={"kie-bpmn-editor--correlations"}>
+      <>
+        <Form>
+          {(selectedProperty && (
+            <>
+              <Flex alignItems={{ default: "alignItemsFlexStart" }}>
+                <FlexItem>
+                  <Flex style={{ height: "100%" }}>
+                    <FormSection>
+                      <FormGroup
+                        label={
+                          <Flex
+                            justifyContent={{ default: "justifyContentSpaceBetween" }}
+                            alignItems={{ default: "alignItemsCenter" }}
+                          >
+                            <span>Properties</span>
+                            {!isReadOnly && (
+                              <div>
+                                <Button variant={ButtonVariant.link} onClick={addProperty}>
+                                  <PlusCircleIcon />
+                                </Button>
+                              </div>
+                            )}
+                          </Flex>
+                        }
+                        className={"kie-bpmn-editor--correlations--properties"}
+                      >
+                        <ul>
+                          {properties.map((p) => (
+                            <li
+                              key={p["@_id"]}
+                              className={p["@_id"] === selectedPropertyId ? "selected" : ""}
+                              onClick={() => setSelectedPropertyId(p["@_id"])}
+                            >
+                              {p["@_name"]}
+                            </li>
+                          ))}
+                        </ul>
+                      </FormGroup>
+                    </FormSection>
+                    <FormSection>
+                      <FormGroup label="Data Type" className={"kie-bpmn-editor--correlations--properties--data-type"}>
+                        <ItemDefinitionRefSelector
+                          value={selectedProperty?.["@_type"]}
+                          onChange={changeSelectedPropertyType}
+                        />
+                      </FormGroup>
+                      <FormGroup
+                        label="Message bindings"
+                        className={"kie-bpmn-editor--correlations--properties--bindings"}
+                      >
+                        <Stack hasGutter={true} style={{ gap: "12px" }}>
+                          {selectedProperty.correlationPropertyRetrievalExpression.map((cpre, i) => (
+                            <Card
+                              key={cpre["@_id"]}
+                              isCompact={true}
+                              className={"kie-bpmn-editor--correlations--properties--bindings--binding"}
+                            >
+                              <MessageSelector element={undefined} />
+                              <InputGroup>
+                                <InputGroupText className={"expression-label"}>{`↳`}</InputGroupText>
+                                <TextInput
+                                  value={cpre.messagePath.__$$text}
+                                  onChange={onChangeMessageBindingExpression(i)}
+                                  placeholder={"Enter an expression (MVEL)..."}
+                                />
+                              </InputGroup>
+                            </Card>
+                          ))}
+                          <Button
+                            variant={
+                              !hasAtLeastOnePropertyWithMessageBinding ? ButtonVariant.primary : ButtonVariant.tertiary
+                            }
+                            isLarge={true}
+                            style={{ width: "100%", lineHeight: "1" }}
+                            onClick={addMessageBindingToProperty}
+                          >
+                            <svg width={30} height={30}>
+                              <MessageEventSymbolSvg
+                                stroke={!hasAtLeastOnePropertyWithMessageBinding ? "white" : "black"}
+                                cx={15}
+                                cy={15}
+                                innerCircleRadius={15}
+                                fill={"transparent"}
+                                filled={false}
+                              />
+                            </svg>
+                            <br />
+                            Add Message binding
+                          </Button>
+                        </Stack>
+                      </FormGroup>
+                    </FormSection>
+                  </Flex>
+                </FlexItem>
+                <Divider
+                  inset={{ default: "insetMd" }}
+                  orientation={{ default: "vertical" }}
+                  style={{ margin: "20px" }}
+                />
+                <FlexItem grow={{ default: "grow" }} style={{ height: "100%" }}>
+                  {(selectedKey && (
+                    <>
+                      <Flex style={{ gap: "18px" }}>
+                        <FlexItem>
+                          <FormSection>
+                            <FormGroup
+                              label={
+                                <Flex
+                                  justifyContent={{ default: "justifyContentSpaceBetween" }}
+                                  alignItems={{ default: "alignItemsCenter" }}
+                                >
+                                  <span>Keys</span>
+                                  {!isReadOnly && (
+                                    <div>
+                                      <Button variant={ButtonVariant.link} onClick={addKey}>
+                                        <PlusCircleIcon />
+                                      </Button>
+                                    </div>
+                                  )}
+                                </Flex>
+                              }
+                              className={"kie-bpmn-editor--correlations--keys"}
+                            >
+                              <ul>
+                                {keys.map((k) => (
+                                  <li
+                                    key={k["@_id"]}
+                                    className={k["@_id"] === selectedKeyId ? "selected" : ""}
+                                    onClick={() => setSelectedKeyId(k["@_id"])}
+                                  >
+                                    {k["@_name"]}
+                                  </li>
+                                ))}
+                              </ul>
+                            </FormGroup>
+                          </FormSection>
+                        </FlexItem>
+                        <FlexItem>
+                          <FormSection>
+                            <FormGroup label="Properties" className={"kie-bpmn-editor--correlations--keys--properties"}>
+                              <ul>
+                                {selectedKey.correlationPropertyRef?.map((propertyRef) => (
+                                  <li key={propertyRef.__$$text}>
+                                    {propertiesById.get(propertyRef.__$$text)?.["@_name"]}
+                                  </li>
+                                ))}
+                                <li>
+                                  <FormSelect
+                                    onChange={addPropertyToCorrelationKey}
+                                    isDisabled={availablePropertiesToAddToKey.length <= 0}
+                                  >
+                                    <FormSelectOption
+                                      key={"select"}
+                                      isDisabled={true}
+                                      isPlaceholder={true}
+                                      label={availablePropertiesToAddToKey.length > 0 ? "+ Add..." : "All included"}
+                                    />
+                                    {availablePropertiesToAddToKey.map((p) => (
+                                      <FormSelectOption key={p["@_id"]} label={p["@_name"] ?? "-"} value={p["@_id"]} />
+                                    ))}
+                                  </FormSelect>
+                                </li>
+                              </ul>
+                            </FormGroup>
+                          </FormSection>
+                        </FlexItem>
+                        <FlexItem grow={{ default: "grow" }}>
+                          <FormSection>
+                            <FormGroup
+                              label="Subscriptions"
+                              className={"kie-bpmn-editor--correlations--keys--subscriptions"}
+                            >
+                              {((selectedKey.correlationPropertyRef ?? []).length > 0 && (
+                                <Stack hasGutter={true}>
+                                  {subscriptions.map((subs, i) => (
+                                    <Card key={subs["@_id"]} isCompact={true}>
+                                      {subs.correlationPropertyBinding?.map((cpb, j) => (
+                                        <InputGroup key={cpb["@_id"]}>
+                                          <InputGroupText>
+                                            {propertiesById.get(cpb["@_correlationPropertyRef"])?.["@_name"] ?? "-"}
+                                          </InputGroupText>
+                                          <InputGroupText>=</InputGroupText>
+                                          <TextInput
+                                            value={cpb.dataPath.__$$text}
+                                            onChange={changeValueOfSubscription(i, j)}
+                                          />
+                                        </InputGroup>
+                                      ))}
+                                    </Card>
+                                  ))}
+
+                                  <Button
+                                    variant={
+                                      !hasAtLeastOneKeyWithSubscriptions
+                                        ? ButtonVariant.primary
+                                        : ButtonVariant.tertiary
+                                    }
+                                    icon={<PlusCircleIcon />}
+                                    isLarge={true}
+                                    style={{ width: "100%" }}
+                                    onClick={addSubscription}
+                                  >
+                                    <br />
+                                    Add Subscription
+                                  </Button>
+                                </Stack>
+                              )) || (
+                                <>
+                                  <div className={"kie-bpmn-editor--correlations--empty-state"}>
+                                    <EmptyState>
+                                      <EmptyStateIcon icon={ObjectGroupIcon} />
+                                      <Title headingLevel="h4">
+                                        {"Can't add Subscriptions without any Property on Correlation Key."}
+                                      </Title>
+                                      <EmptyStateBody style={{ padding: "0 25%" }}>
+                                        {"Start by adding Properties to this Key."}
+                                      </EmptyStateBody>
+                                    </EmptyState>
+                                  </div>
+                                </>
+                              )}
+                            </FormGroup>
+                          </FormSection>
+                        </FlexItem>
+                      </Flex>
+                    </>
+                  )) || (
+                    <>
+                      <div className={"kie-bpmn-editor--correlations--empty-state"}>
+                        <EmptyState>
+                          <EmptyStateIcon icon={ObjectGroupIcon} />
+                          <Title headingLevel="h4">
+                            {isReadOnly ? "No Correlation Keys" : "No Correlation Keys yet"}
+                          </Title>
+                          <EmptyStateBody style={{ padding: "0 25%" }}>
+                            {
+                              "Correlations Keys lets you group Correlation Properties into subscriptions that bind Process Instances to certain values on observed Message."
+                            }
+                          </EmptyStateBody>
+                          <Button
+                            style={{
+                              marginTop: hasAtLeastOnePropertyWithMessageBinding ? undefined : "2rem",
+                            }}
+                            variant={
+                              hasAtLeastOnePropertyWithMessageBinding ? ButtonVariant.primary : ButtonVariant.tertiary
+                            }
+                            onClick={addKey}
+                          >
+                            {"Add Correlation Key"}
+                          </Button>
+                        </EmptyState>
+                      </div>
+                    </>
                   )}
-                </GridItem>
-              </Grid>
-            </div>
-          ))}
-          <br />
-          <br />
-          <br />
-          <Button
-            type="submit"
-            className="kie-bpmn-editor--properties-panel--reassignment-submit-save-button"
-            onMouseUp={(e) => e.currentTarget.blur()}
-          >
-            Save
-          </Button>
+                </FlexItem>
+              </Flex>
+            </>
+          )) || (
+            <>
+              <div className={"kie-bpmn-editor--correlations--empty-state"}>
+                <EmptyState>
+                  <EmptyStateIcon icon={PeopleCarryIcon} />
+                  <Title headingLevel="h4">{isReadOnly ? "No correlations" : "No correlations yet"}</Title>
+                  <EmptyStateBody style={{ padding: "0 25%" }}>
+                    {
+                      "Correlations let you bind Process Instances to Messages containing specific property values. Start by creating a Correlation Property."
+                    }
+                  </EmptyStateBody>
+                  <Button variant={ButtonVariant.primary} onClick={addProperty}>
+                    {"Add Correlation Property"}
+                  </Button>
+                </EmptyState>
+              </div>
+            </>
+          )}
         </Form>
-      )) || (
-        <div className={"kie-bpmn-editor--correlations--empty-state"}>
-          <Bullseye>
-            <EmptyState>
-              <EmptyStateIcon icon={PeopleCarryIcon} />
-              <Title headingLevel="h4">{isReadOnly ? "No correlations" : "No correlations yet"}</Title>
-              <EmptyStateBody style={{ padding: "0 25%" }}>
-                {"Correlations let you bind a Process Instance to Messages containing specific property values."}
-              </EmptyStateBody>
-              <Button variant="primary" onClick={addCorrelation}>
-                {"Add Correlation"}
-              </Button>
-            </EmptyState>
-          </Bullseye>
-        </div>
-      )}
+      </>
     </div>
   );
 }

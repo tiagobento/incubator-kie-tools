@@ -5,10 +5,12 @@
 .kie-bpmn-editor--palette-nodes-popover.variables {
   top: 115px;
   padding: 32px;
+  max-height: calc(100vh - 200px - 115px);
 }
 .kie-bpmn-editor--palette-nodes-popover.correlations {
   top: 57px;
   padding: 32px;
+  max-height: calc(100vh - 200px - 57px);
 }
 
 .kie-bpmn-editor--palette-nodes-popover {
@@ -18,7 +20,7 @@
   box-shadow: 0px 5px 10px 0px lightgray;
   background: rgb(255, 255, 255, 90%);
   backdrop-filter: blur(4px);
-  width: 50vw;
+  width: 60vw;
 }
 
 /* (begin) drg/external nodes panel toggle */

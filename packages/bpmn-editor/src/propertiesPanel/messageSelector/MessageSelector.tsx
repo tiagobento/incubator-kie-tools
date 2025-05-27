@@ -33,11 +33,14 @@ import { addOrGetProcessAndDiagramElements } from "../../mutations/addOrGetProce
 import { visitFlowElementsAndArtifacts } from "../../mutations/_elementVisitor";
 import { TextArea } from "@patternfly/react-core/dist/js/components/TextArea/TextArea";
 import { TextInput } from "@patternfly/react-core/dist/js/components/TextInput";
+import { InputGroup, InputGroupText } from "@patternfly/react-core/dist/js/components/InputGroup";
 import { generateUuid } from "@kie-tools/xyflow-react-kie-diagram/dist/uuid/uuid";
 import { updateFlowElement } from "../../mutations/renameNode";
 import { addOrGetItemDefinitions } from "../../mutations/addOrGetItemDefinitions";
 import { addOrGetMessages } from "../../mutations/addOrGetMessages";
 import "./MessageSelector.css";
+import { MessageEventSymbolSvg } from "../../diagram/nodes/NodeSvgs";
+import { Button, ButtonVariant } from "@patternfly/react-core/dist/js/components/Button";
 
 export type WithMessage =
   | undefined
@@ -53,8 +56,20 @@ export function MessageSelector({ element }: { element: WithMessage }) {
   const settings = useBpmnEditorStore((s) => s.settings);
 
   return (
-    <FormSection>
-      <FormGroup label="Message">
+    <>
+      <InputGroup>
+        <InputGroupText>
+          <svg width={40} height={40}>
+            <MessageEventSymbolSvg
+              stroke={"black"}
+              cx={20}
+              cy={20}
+              innerCircleRadius={20}
+              fill={"white"}
+              filled={false}
+            />
+          </svg>
+        </InputGroupText>
         <TextInput
           aria-label={"Message"}
           type={"text"}
@@ -83,9 +98,9 @@ export function MessageSelector({ element }: { element: WithMessage }) {
               });
             })
           }
-          placeholder={"Enter message..."}
+          placeholder={"Enter Message..."}
         />
-      </FormGroup>
-    </FormSection>
+      </InputGroup>
+    </>
   );
 }
