@@ -29,7 +29,7 @@ import { addOrGetProcessAndDiagramElements } from "../../mutations/addOrGetProce
 import { visitFlowElementsAndArtifacts } from "../../mutations/_elementVisitor";
 import { Grid, GridItem } from "@patternfly/react-core/dist/js/layouts/Grid";
 import { PlusCircleIcon } from "@patternfly/react-icons/dist/js/icons/plus-circle-icon";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { TimesIcon } from "@patternfly/react-icons/dist/js/icons/times-icon";
 import { Normalized } from "../../normalization/normalize";
 import { Title } from "@patternfly/react-core/dist/js/components/Title";
@@ -60,6 +60,12 @@ import { InputGroup } from "@patternfly/react-core/dist/js/components/InputGroup
 import { InputGroupText } from "@patternfly/react-core/dist/js/components/InputGroup";
 import { TextInput } from "@patternfly/react-core/dist/js/components/TextInput";
 import { MessageEventSymbolSvg } from "../../diagram/nodes/NodeSvgs";
+import {
+  EditableNodeLabel,
+  OnEditableNodeLabelChange,
+  useEditableNodeLabel,
+} from "@kie-tools/xyflow-react-kie-diagram/dist/nodes/EditableNodeLabel";
+import { useFocusableElement } from "../../focus/useFocusableElement";
 
 type Correlation = {
   id: string;
@@ -84,11 +90,12 @@ export function Correlations() {
     const newPropertyId = generateUuid();
 
     bpmnEditorStoreApi.setState((s) => {
+      s.focus.consumableId = newPropertyId;
       s.bpmn.model.definitions.rootElement ??= [];
       s.bpmn.model.definitions.rootElement.push({
         __$$element: "correlationProperty",
         "@_id": newPropertyId,
-        "@_name": generateUuid(),
+        "@_name": "New Property",
         "@_type": undefined,
         correlationPropertyRetrievalExpression: [],
       });
@@ -100,6 +107,8 @@ export function Correlations() {
   const addKey = useCallback(() => {
     const newKeyId = generateUuid();
     bpmnEditorStoreApi.setState((s) => {
+      s.focus.consumableId = newKeyId;
+
       const { process } = addOrGetProcessAndDiagramElements({ definitions: s.bpmn.model.definitions });
 
       s.bpmn.model.definitions.rootElement ??= [];
@@ -122,7 +131,7 @@ export function Correlations() {
       collaboration.correlationKey ??= [];
       collaboration.correlationKey.push({
         "@_id": newKeyId,
-        "@_name": generateUuid(),
+        "@_name": "New Key",
       });
     });
 
@@ -164,6 +173,18 @@ export function Correlations() {
       ?.correlationKey?.find((k) => k["@_id"] === selectedKeyId)
   );
 
+  useEffect(() => {
+    if (!selectedProperty && properties.length > 0) {
+      setSelectedPropertyId(properties[0]["@_id"]);
+    }
+  }, [properties, selectedProperty]);
+
+  useEffect(() => {
+    if (!selectedKey && keys.length > 0) {
+      setSelectedKeyId(keys[0]["@_id"]);
+    }
+  }, [keys, selectedKey]);
+
   const availablePropertiesToAddToKey = useMemo(() => {
     return properties.filter(
       (p) => !selectedKey?.correlationPropertyRef?.map((propertyRef) => propertyRef.__$$text).includes(p["@_id"])
@@ -183,6 +204,20 @@ export function Correlations() {
       });
     },
     [bpmnEditorStoreApi, selectedPropertyId]
+  );
+  const changePropertyName = useCallback(
+    (propetyId: string) => (newName: string) => {
+      bpmnEditorStoreApi.setState((s) => {
+        const property = s.bpmn.model.definitions.rootElement
+          ?.filter((e) => e.__$$element === "correlationProperty")
+          .find((p) => p["@_id"] === propetyId);
+
+        if (property) {
+          property["@_name"] = newName;
+        }
+      });
+    },
+    [bpmnEditorStoreApi]
   );
 
   const addMessageBindingToProperty = useCallback(() => {
@@ -233,6 +268,21 @@ export function Correlations() {
       });
     },
     [bpmnEditorStoreApi, selectedPropertyId]
+  );
+
+  const changeKeyName = useCallback(
+    (keyId: string) => (newName: string) => {
+      bpmnEditorStoreApi.setState((s) => {
+        const key = s.bpmn.model.definitions.rootElement
+          ?.find((e) => e.__$$element === "collaboration")
+          ?.correlationKey?.find((k) => k["@_id"] === keyId);
+
+        if (key) {
+          key["@_name"] = newName;
+        }
+      });
+    },
+    [bpmnEditorStoreApi]
   );
 
   const addPropertyToCorrelationKey = useCallback(
@@ -349,13 +399,14 @@ export function Correlations() {
                       >
                         <ul>
                           {properties.map((p) => (
-                            <li
+                            <EditableNameListItem
                               key={p["@_id"]}
-                              className={p["@_id"] === selectedPropertyId ? "selected" : ""}
+                              id={p["@_id"]}
+                              value={p["@_name"]}
+                              isSelected={p["@_id"] === selectedPropertyId}
+                              onChange={changePropertyName(p["@_id"])}
                               onClick={() => setSelectedPropertyId(p["@_id"])}
-                            >
-                              {p["@_name"]}
-                            </li>
+                            />
                           ))}
                         </ul>
                       </FormGroup>
@@ -385,6 +436,7 @@ export function Correlations() {
                               <InputGroup>
                                 <InputGroupText className={"expression-label"}>{`↳`}</InputGroupText>
                                 <TextInput
+                                  style={{ fontFamily: "monospace" }}
                                   value={cpre.messagePath.__$$text}
                                   onChange={onChangeMessageBindingExpression(i)}
                                   placeholder={"Enter an expression (MVEL)..."}
@@ -426,7 +478,7 @@ export function Correlations() {
                 <FlexItem grow={{ default: "grow" }} style={{ height: "100%" }}>
                   {(selectedKey && (
                     <>
-                      <Flex style={{ gap: "18px" }}>
+                      <Flex alignItems={{ default: "alignItemsFlexStart" }} style={{ gap: "18px" }}>
                         <FlexItem>
                           <FormSection>
                             <FormGroup
@@ -449,13 +501,14 @@ export function Correlations() {
                             >
                               <ul>
                                 {keys.map((k) => (
-                                  <li
+                                  <EditableNameListItem
                                     key={k["@_id"]}
-                                    className={k["@_id"] === selectedKeyId ? "selected" : ""}
+                                    id={k["@_id"]}
+                                    value={k["@_name"]}
+                                    isSelected={k["@_id"] === selectedKeyId}
+                                    onChange={changeKeyName(k["@_id"])}
                                     onClick={() => setSelectedKeyId(k["@_id"])}
-                                  >
-                                    {k["@_name"]}
-                                  </li>
+                                  />
                                 ))}
                               </ul>
                             </FormGroup>
@@ -464,12 +517,12 @@ export function Correlations() {
                         <FlexItem>
                           <FormSection>
                             <FormGroup label="Properties" className={"kie-bpmn-editor--correlations--keys--properties"}>
+                              {selectedKey.correlationPropertyRef?.map((propertyRef) => (
+                                <li key={propertyRef.__$$text}>
+                                  {propertiesById.get(propertyRef.__$$text)?.["@_name"]}
+                                </li>
+                              ))}
                               <ul>
-                                {selectedKey.correlationPropertyRef?.map((propertyRef) => (
-                                  <li key={propertyRef.__$$text}>
-                                    {propertiesById.get(propertyRef.__$$text)?.["@_name"]}
-                                  </li>
-                                ))}
                                 <li>
                                   <FormSelect
                                     className={!hasAtLeastOneKeyWithProperties ? "primary" : ""}
@@ -480,6 +533,9 @@ export function Correlations() {
                                       key={"select"}
                                       isDisabled={true}
                                       isPlaceholder={true}
+                                      style={{
+                                        textAlign: availablePropertiesToAddToKey.length > 0 ? undefined : "center",
+                                      }}
                                       label={
                                         availablePropertiesToAddToKey.length > 0
                                           ? "+ Add Property..."
@@ -497,11 +553,11 @@ export function Correlations() {
                         </FlexItem>
                         <FlexItem grow={{ default: "grow" }}>
                           <FormSection>
-                            <FormGroup
-                              label="Subscriptions"
-                              className={"kie-bpmn-editor--correlations--keys--subscriptions"}
-                            >
-                              {((selectedKey.correlationPropertyRef ?? []).length > 0 && (
+                            {((selectedKey.correlationPropertyRef ?? []).length > 0 && (
+                              <FormGroup
+                                label="Subscriptions"
+                                className={"kie-bpmn-editor--correlations--keys--subscriptions"}
+                              >
                                 <Stack hasGutter={true}>
                                   {subscriptions.map((subs, i) => (
                                     <Card key={subs["@_id"]} isCompact={true}>
@@ -512,8 +568,10 @@ export function Correlations() {
                                           </InputGroupText>
                                           <InputGroupText>=</InputGroupText>
                                           <TextInput
+                                            style={{ fontFamily: "monospace" }}
                                             value={cpb.dataPath.__$$text}
                                             onChange={changeValueOfSubscription(i, j)}
+                                            placeholder="Enter a value or expression..."
                                           />
                                         </InputGroup>
                                       ))}
@@ -535,22 +593,22 @@ export function Correlations() {
                                     Add Subscription
                                   </Button>
                                 </Stack>
-                              )) || (
-                                <>
-                                  <div className={"kie-bpmn-editor--correlations--empty-state"}>
-                                    <EmptyState>
-                                      <EmptyStateIcon icon={ObjectGroupIcon} />
-                                      <Title headingLevel="h4">
-                                        {"Can't add Subscriptions without any Property on Correlation Key."}
-                                      </Title>
-                                      <EmptyStateBody style={{ padding: "0 25%" }}>
-                                        {"Start by adding Properties to this Key."}
-                                      </EmptyStateBody>
-                                    </EmptyState>
-                                  </div>
-                                </>
-                              )}
-                            </FormGroup>
+                              </FormGroup>
+                            )) || (
+                              <>
+                                <div className={"kie-bpmn-editor--correlations--empty-state"}>
+                                  <EmptyState>
+                                    <EmptyStateIcon icon={ObjectGroupIcon} />
+                                    <Title headingLevel="h4">
+                                      {`Can't add Subscriptions without any Property on '${selectedKey["@_name"]}'.`}
+                                    </Title>
+                                    <EmptyStateBody style={{ padding: "0 25%" }}>
+                                      {`Start by adding Properties to '${selectedKey["@_name"]}'.`}
+                                    </EmptyStateBody>
+                                  </EmptyState>
+                                </div>
+                              </>
+                            )}
                           </FormSection>
                         </FlexItem>
                       </Flex>
@@ -607,5 +665,37 @@ export function Correlations() {
         </Form>
       </>
     </div>
+  );
+}
+
+function EditableNameListItem({
+  id,
+  value,
+  isSelected,
+  onChange,
+  onClick,
+}: {
+  id: string;
+  value: string | undefined;
+  isSelected: boolean;
+  onChange: OnEditableNodeLabelChange;
+  onClick: React.MouseEventHandler<HTMLLIElement>;
+}) {
+  const { isEditingLabel, setEditingLabel, triggerEditing, triggerEditingIfEnter } = useEditableNodeLabel(id);
+
+  return (
+    <li key={id} className={isSelected ? "selected" : ""} onClick={onClick} onDoubleClick={triggerEditing}>
+      <EditableNodeLabel
+        id={id}
+        value={value}
+        name={value}
+        position={"center-left"}
+        isEditing={isEditingLabel}
+        setEditing={setEditingLabel}
+        onChange={onChange}
+        shouldCommitOnBlur={true}
+        validate={() => true}
+      />
+    </li>
   );
 }

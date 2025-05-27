@@ -92,6 +92,7 @@
 .kie-bpmn-editor--correlations--properties li.selected,
 .kie-bpmn-editor--correlations--keys li.selected {
   backdrop-filter: brightness(0.9);
+  color: #0067cc;
 }
 
 .kie-bpmn-editor--correlations--properties li.selected:hover,
