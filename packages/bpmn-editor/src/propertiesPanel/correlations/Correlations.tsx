@@ -299,6 +299,10 @@ export function Correlations() {
       (s.bpmn.model.definitions.rootElement?.find((s) => s.__$$element === "process")?.correlationSubscription ?? [])
         .length > 0
   );
+  const hasAtLeastOneKeyWithProperties = useMemo(
+    () => keys.some((k) => (k.correlationPropertyRef ?? []).length > 0),
+    [keys]
+  );
 
   return (
     <div className={"kie-bpmn-editor--correlations"}>
@@ -450,6 +454,7 @@ export function Correlations() {
                                 ))}
                                 <li>
                                   <FormSelect
+                                    className={!hasAtLeastOneKeyWithProperties ? "primary" : ""}
                                     onChange={addPropertyToCorrelationKey}
                                     isDisabled={availablePropertiesToAddToKey.length <= 0}
                                   >
@@ -457,7 +462,11 @@ export function Correlations() {
                                       key={"select"}
                                       isDisabled={true}
                                       isPlaceholder={true}
-                                      label={availablePropertiesToAddToKey.length > 0 ? "+ Add..." : "All included"}
+                                      label={
+                                        availablePropertiesToAddToKey.length > 0
+                                          ? "+ Add Property..."
+                                          : "All Properties included"
+                                      }
                                     />
                                     {availablePropertiesToAddToKey.map((p) => (
                                       <FormSelectOption key={p["@_id"]} label={p["@_name"] ?? "-"} value={p["@_id"]} />

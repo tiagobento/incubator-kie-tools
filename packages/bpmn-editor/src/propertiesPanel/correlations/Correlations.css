@@ -41,18 +41,18 @@
 }
 
 .kie-bpmn-editor--correlations--properties,
-.kie-bpmn-editor--correlations--keys,
-.kie-bpmn-editor--correlations--keys--properties {
+.kie-bpmn-editor--correlations--keys {
   width: 200px;
 }
 
+.kie-bpmn-editor--correlations--keys--properties,
 .kie-bpmn-editor--correlations--properties--data-type {
   width: 300px;
 }
 
 .kie-bpmn-editor--correlations--properties li,
 .kie-bpmn-editor--correlations--keys li,
-.kie-bpmn-editor--correlations--keys--properties li {
+.kie-bpmn-editor--correlations--keys--properties li:not(:last-child) {
   font-size: 1.1em;
   padding: 4px 12px;
   margin: 2px 0;
@@ -67,9 +67,26 @@
 .kie-bpmn-editor--correlations--properties li:hover,
 .kie-bpmn-editor--correlations--keys li:hover,
 .kie-bpmn-editor--correlations--keys--properties li:hover,
-.kie-bpmn-editor--correlations--keys--properties li:last-child {
+.kie-bpmn-editor--correlations--keys--properties li:not(:last-child) {
   cursor: pointer;
+  border-radius: 12px;
+}
+
+.kie-bpmn-editor--correlations--keys--properties li:last-child,
+.kie-bpmn-editor--correlations--keys--properties li:last-child select {
+  border-radius: 12px;
+  cursor: pointer;
+  border: 0;
   backdrop-filter: brightness(0.95);
+  font-weight: bold;
+}
+
+.kie-bpmn-editor--correlations--keys--properties li:last-child select.primary {
+  background: var(--pf-global--primary-color--100);
+  color: white;
+}
+.kie-bpmn-editor--correlations--keys--properties li:last-child select.primary:hover {
+  background: var(--pf-global--primary-color--200);
 }
 
 .kie-bpmn-editor--correlations--properties li.selected,
