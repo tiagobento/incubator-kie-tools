@@ -97,7 +97,7 @@ export function VariableTagSelector({ p, i }: { p: undefined | WithVariables; i:
           isExpanded={isOpen}
           isDisabled={isReadOnly}
         >
-          {selections?.[0]?.toString()}
+          {selections?.length ?? 0}
         </MenuToggle>
       )}
       popperProps={{
