@@ -100,6 +100,9 @@ export function VariableTagSelector({ p, i }: { p: undefined | WithVariables; i:
           {selections?.[0]?.toString()}
         </MenuToggle>
       )}
+      popperProps={{
+        appendTo: document.body,
+      }}
       selected={selections}
       isOpen={isOpen}
       onSelect={(event, selection) => ackSelectionsChanged(selection)}

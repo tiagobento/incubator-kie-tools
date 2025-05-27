@@ -138,10 +138,12 @@ export function ItemDefinitionRefSelector({
       }}
       isOpen={isOpen}
       selected={selections}
+      popperProps={{
+        appendTo: document.body,
+      }}
       // placeholderText="Select a Data Type"
       // isCreateOptionOnTop={true}
       // isGrouped={false}
-      // menuAppendTo={document.body}
       // isCreatable={true}
       // shouldResetOnSelect={true}
       // isCreateSelectOptionObject={false}
