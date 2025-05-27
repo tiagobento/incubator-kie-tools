@@ -51,7 +51,7 @@ export function MultiInstanceCheckbox({ element }: { element: WithMultipleInstan
         aria-label="Multi-instance"
         isDisabled={isReadOnly}
         isChecked={element.loopCharacteristics?.__$$element === "multiInstanceLoopCharacteristics"}
-        onChange={(checked) => {
+        onChange={(e, checked) => {
           bpmnEditorStoreApi.setState((s) => {
             const { process } = addOrGetProcessAndDiagramElements({
               definitions: s.bpmn.model.definitions,

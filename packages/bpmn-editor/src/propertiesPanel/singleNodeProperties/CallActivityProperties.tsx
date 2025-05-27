@@ -94,7 +94,7 @@ export function CallActivityProperties({
               name="should-abort-parent"
               aria-label="Abort parent"
               isChecked={(parseBpmn20Drools10MetaData(callActivity).get("customAbortParent") ?? "true") === "true"}
-              onChange={(checked) => {
+              onChange={(e, checked) => {
                 bpmnEditorStoreApi.setState((s) => {
                   const { process } = addOrGetProcessAndDiagramElements({
                     definitions: s.bpmn.model.definitions,

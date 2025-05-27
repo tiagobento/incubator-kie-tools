@@ -57,7 +57,7 @@ export function AdhocAutostartCheckbox({ element }: { element: WithAdhocAutostar
         aria-label="Ad-hoc auto-start"
         isDisabled={isReadOnly}
         isChecked={(parseBpmn20Drools10MetaData(element).get("customAutoStart") ?? "false") === "true"}
-        onChange={(checked) => {
+        onChange={(e, checked) => {
           bpmnEditorStoreApi.setState((s) => {
             const { process } = addOrGetProcessAndDiagramElements({
               definitions: s.bpmn.model.definitions,

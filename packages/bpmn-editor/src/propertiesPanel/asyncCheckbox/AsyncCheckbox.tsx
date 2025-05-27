@@ -63,7 +63,7 @@ export function AsyncCheckbox({ element }: { element: WithAsync }) {
         name="is-async"
         aria-label="Async"
         isChecked={(parseBpmn20Drools10MetaData(element).get("customAsync") ?? "false") === "true"}
-        onChange={(checked) => {
+        onChange={(e, checked) => {
           bpmnEditorStoreApi.setState((s) => {
             const { process } = addOrGetProcessAndDiagramElements({
               definitions: s.bpmn.model.definitions,
