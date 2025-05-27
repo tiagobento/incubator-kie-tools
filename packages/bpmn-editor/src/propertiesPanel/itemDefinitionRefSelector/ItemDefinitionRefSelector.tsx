@@ -19,10 +19,10 @@
 
 import * as React from "react";
 import { useBpmnEditorStore, useBpmnEditorStoreApi } from "../../store/StoreContext";
-import { FormGroup } from "@patternfly/react-core/dist/js/components/Form";
-import { Select, SelectOption, SelectVariant } from "@patternfly/react-core/dist/js/components/Select";
+import { Select, SelectOption } from "@patternfly/react-core/dist/js/components/Select";
 import { useCallback, useMemo, useState } from "react";
 import { addOrGetItemDefinitions, DEFAULT_DATA_TYPES } from "../../mutations/addOrGetItemDefinitions";
+import { MenuToggle } from "@patternfly/react-core/dist/js/components/MenuToggle";
 import "./ItemDefinitionRefSelector.css";
 
 const DEFAULT_OPTIONS = [
@@ -99,9 +99,16 @@ export function ItemDefinitionRefSelector({
 
   return (
     <Select
-      isDisabled={isReadOnly}
-      variant={SelectVariant.typeahead}
-      typeAheadAriaLabel="Select a Data Type"
+      toggle={(toggleRef) => (
+        <MenuToggle
+          ref={toggleRef}
+          onClick={() => setOpen((prev) => !prev)}
+          isExpanded={isOpen}
+          isDisabled={isReadOnly}
+        >
+          {selections?.toString()}
+        </MenuToggle>
+      )}
       onSelect={(e, newItemDefinitionRef) => {
         setOpen(false);
 
@@ -111,45 +118,44 @@ export function ItemDefinitionRefSelector({
         }
 
         // -- None --
-        if ((newItemDefinitionRef.toString() ?? "") === "") {
+        if ((newItemDefinitionRef?.toString() ?? "") === "") {
           onChange(undefined, undefined);
         }
         // -- Default Data Type
         else if (
-          DEFAULT_OPTIONS.filter((ddt) => ddt.itemDefinitionRef === newItemDefinitionRef.toString()).length > 0
+          DEFAULT_OPTIONS.filter((ddt) => ddt.itemDefinitionRef === newItemDefinitionRef?.toString()).length > 0
         ) {
-          const ref = addOrGetItemDefinitionId({ newDataType: newItemDefinitionRef.toString() });
-          onChange(ref, newItemDefinitionRef.toString());
+          const ref = addOrGetItemDefinitionId({ newDataType: newItemDefinitionRef!.toString() });
+          onChange(ref, newItemDefinitionRef?.toString());
         }
         // -- Custom Data Type
         else {
           onChange(
-            newItemDefinitionRef.toString(),
-            itemDefinitions.filter((s) => s.itemDefinitionRef === newItemDefinitionRef.toString())?.[0].dataType
+            newItemDefinitionRef?.toString(),
+            itemDefinitions.filter((s) => s.itemDefinitionRef === newItemDefinitionRef?.toString())?.[0].dataType
           );
         }
       }}
-      onToggle={setOpen}
       isOpen={isOpen}
-      selections={selections}
-      placeholderText="Select a Data Type"
-      isCreateOptionOnTop={true}
-      isGrouped={false}
-      menuAppendTo={document.body}
-      isCreatable={true}
-      shouldResetOnSelect={true}
-      isCreateSelectOptionObject={false}
-      onCreateOption={(newDataType) => {
-        const ref = addOrGetItemDefinitionId({ newDataType });
-        onChange(ref!, newDataType);
-      }}
+      selected={selections}
+      // placeholderText="Select a Data Type"
+      // isCreateOptionOnTop={true}
+      // isGrouped={false}
+      // menuAppendTo={document.body}
+      // isCreatable={true}
+      // shouldResetOnSelect={true}
+      // isCreateSelectOptionObject={false}
+      // onCreateOption={(newDataType) => {
+      //   const ref = addOrGetItemDefinitionId({ newDataType });
+      //   onChange(ref!, newDataType);
+      // }}
     >
       {allOptions.map(({ dataType, itemDefinitionRef }) => (
         <SelectOption
           isSelected={value === itemDefinitionRef}
           key={itemDefinitionRef}
           value={{
-            compareTo: (a) =>
+            compareTo: (a: any) =>
               (itemDefinitionRef ?? "").toLowerCase().trim() == (a?.toString?.() ?? "").toLowerCase().trim(),
             toString: () => itemDefinitionRef ?? "",
           }}

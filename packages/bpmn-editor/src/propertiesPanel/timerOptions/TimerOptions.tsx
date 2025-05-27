@@ -26,6 +26,7 @@ import { visitFlowElementsAndArtifacts } from "../../mutations/_elementVisitor";
 import { Radio } from "@patternfly/react-core/dist/js/components/Radio";
 import { TextInput } from "@patternfly/react-core/dist/js/components/TextInput";
 import { Select, SelectOption } from "@patternfly/react-core/dist/js/components/Select";
+import { MenuToggle } from "@patternfly/react-core/dist/js/components/MenuToggle";
 import { Normalized } from "../../normalization/normalize";
 import { BPMN20__tProcess } from "@kie-tools/bpmn-marshaller/dist/schemas/bpmn-2_0/ts-gen/types";
 import { ElementFilter } from "@kie-tools/xml-parser-ts/dist/elementFilter";
@@ -158,15 +159,23 @@ export function TimerOptions({ element }: { element: WithTimer }) {
           <div className="timer-options-multiple">
             <div className="dropdown-group">
               <Select
+                toggle={(toggleRef) => (
+                  <MenuToggle
+                    ref={toggleRef}
+                    onClick={handleDropdownToggle}
+                    isExpanded={isDropdownOpen}
+                    isDisabled={isReadOnly}
+                  >
+                    {isoCronType}
+                  </MenuToggle>
+                )}
                 id="iso-cron-select"
                 isOpen={isDropdownOpen}
-                onToggle={handleDropdownToggle}
                 onSelect={(event, selection) => {
                   setIsoCronType(selection as string);
                   setIsDropdownOpen(false);
                 }}
-                selections={isoCronType}
-                isDisabled={isReadOnly}
+                selected={isoCronType}
                 className="iso-cron-select"
               >
                 <SelectOption value="ISO" />

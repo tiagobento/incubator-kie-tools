@@ -26,11 +26,12 @@ import { BidirectionalDataMappingFormSection } from "../dataMapping/DataMappingF
 import { OnEntryAndExitScriptsFormSection } from "../onEntryAndExitScripts/OnEntryAndExitScriptsFormSection";
 import { PropertiesPanelHeaderFormSection } from "./_PropertiesPanelHeaderFormSection";
 import { TaskIcon } from "../../diagram/nodes/NodeIcons";
+import { HelperText, HelperTextItem } from "@patternfly/react-core/dist/js/components/HelperText";
 import { Divider } from "@patternfly/react-core/dist/js/components/Divider";
 import { AdhocAutostartCheckbox } from "../adhocAutostartCheckbox/AdhocAutostartCheckbox";
 import { AsyncCheckbox } from "../asyncCheckbox/AsyncCheckbox";
 import { SlaDueDateInput } from "../slaDueDate/SlaDueDateInput";
-import { FormGroup } from "@patternfly/react-core/dist/js/components/Form";
+import { FormGroup, FormHelperText } from "@patternfly/react-core/dist/js/components/Form";
 import { BUSINESS_RULE_TASK_IMPLEMENTATIONS } from "@kie-tools/bpmn-marshaller/dist/drools-extension";
 import { ToggleGroup } from "@patternfly/react-core/dist/js/components/ToggleGroup/ToggleGroup";
 import { visitFlowElementsAndArtifacts } from "../../mutations/_elementVisitor";
@@ -39,12 +40,13 @@ import { addOrGetProcessAndDiagramElements } from "../../mutations/addOrGetProce
 import { TextInput } from "@patternfly/react-core/dist/js/components/TextInput";
 import { useExternalModels } from "../../externalModels/BpmnEditorExternalModelsContext";
 import { useMemo, useState } from "react";
-import { Select, SelectOption, SelectVariant } from "@patternfly/react-core/dist/js/components/Select";
+import { Select, SelectOption } from "@patternfly/react-core/dist/js/components/Select";
 import {
   associateBusinessRuleTaskWithDmnModel,
   getDmnModelBinding,
 } from "../../mutations/associateBusinessRuleTaskWithDmnModel";
 import { deassociateBusinessRuleTaskWithDmnModel } from "../../mutations/deassociateBusinessRuleTaskWithDmnModel";
+import { MenuToggle } from "@patternfly/react-core/dist/js/components/MenuToggle";
 
 export function BusinessRuleTaskProperties({
   businessRuleTask,
@@ -75,10 +77,13 @@ export function BusinessRuleTaskProperties({
       >
         <NameDocumentationAndId element={businessRuleTask} />
         <Divider inset={{ default: "insetXs" }} />
-        <FormGroup
-          label="Implementation"
-          helperText={"Choose between Rules with DRL and Decisions with DMN."}
-        ></FormGroup>
+        <FormGroup label="Implementation">
+          <FormHelperText>
+            <HelperText>
+              <HelperTextItem>{"Choose between Rules with DRL and Decisions with DMN."}</HelperTextItem>
+            </HelperText>
+          </FormHelperText>
+        </FormGroup>
         <FormGroup>
           <ToggleGroup aria-label="Implementation">
             <ToggleGroupItem
@@ -155,28 +160,49 @@ export function BusinessRuleTaskProperties({
           <>
             <FormGroup label="DMN model file">
               <Select
-                variant={SelectVariant.typeahead}
+                toggle={(toggleRef) => (
+                  <MenuToggle
+                    ref={toggleRef}
+                    onClick={(e) => {
+                      setDmnFilesSelectOpen((isOpen) => {
+                        if (!(isOpen ?? false)) {
+                          setAvailableExternalModelsNormalizedPosixPathRelativeToTheOpenFile([]);
+                          onRequestExternalModelsAvailableToInclude?.()
+                            .then(setAvailableExternalModelsNormalizedPosixPathRelativeToTheOpenFile)
+                            .then(() => setDmnFilesSelectOpen(true));
+                          return false;
+                        } else {
+                          return false;
+                        }
+                      });
+                    }}
+                    isExpanded={isDmnFilesSelectOpen}
+                    isDisabled={isReadOnly}
+                  >
+                    {dmnModelBinding?.normalizedPosixPathRelativeToTheOpenFile.value ?? ""}
+                  </MenuToggle>
+                )}
                 id={"select-dmn-model-file"}
-                selections={[dmnModelBinding?.normalizedPosixPathRelativeToTheOpenFile.value ?? ""]}
-                isCreatable={true}
-                createText="Manually bind to path"
-                isDisabled={isReadOnly}
+                selected={[dmnModelBinding?.normalizedPosixPathRelativeToTheOpenFile.value ?? ""]}
+                // isCreatable={true}
+                // createText="Manually bind to path"
+                // isDisabled={isReadOnly}
                 isOpen={isDmnFilesSelectOpen}
-                onCreateOption={(newOption) => {
-                  setDmnFilesSelectOpen(false);
-                  bpmnEditorStoreApi.setState((s) => {
-                    associateBusinessRuleTaskWithDmnModel({
-                      definitions: s.bpmn.model.definitions,
-                      __readonly_businessRuleTaskId: businessRuleTask["@_id"],
-                      __readonly_dmnModel: {
-                        normalizedPosixPathRelativeToTheOpenFile: newOption,
-                        namespace: dmnModelBinding?.modelNamespace.value ?? "",
-                        name: dmnModelBinding?.modelName.value ?? "",
-                      },
-                    });
-                  });
-                }}
-                shouldResetOnSelect={true}
+                // onCreateOption={(newOption) => {
+                //   setDmnFilesSelectOpen(false);
+                //   bpmnEditorStoreApi.setState((s) => {
+                //     associateBusinessRuleTaskWithDmnModel({
+                //       definitions: s.bpmn.model.definitions,
+                //       __readonly_businessRuleTaskId: businessRuleTask["@_id"],
+                //       __readonly_dmnModel: {
+                //         normalizedPosixPathRelativeToTheOpenFile: newOption,
+                //         namespace: dmnModelBinding?.modelNamespace.value ?? "",
+                //         name: dmnModelBinding?.modelName.value ?? "",
+                //       },
+                //     });
+                //   });
+                // }}
+                // shouldResetOnSelect={true}
                 onSelect={(e, value) => {
                   setDmnFilesSelectOpen(false);
                   if (!value) {
@@ -207,17 +233,7 @@ export function BusinessRuleTaskProperties({
                     });
                   }
                 }}
-                onToggle={(isOpen) => {
-                  if (isOpen) {
-                    setAvailableExternalModelsNormalizedPosixPathRelativeToTheOpenFile([]);
-                    onRequestExternalModelsAvailableToInclude?.()
-                      .then(setAvailableExternalModelsNormalizedPosixPathRelativeToTheOpenFile)
-                      .then(() => setDmnFilesSelectOpen(isOpen));
-                  } else {
-                    setDmnFilesSelectOpen(isOpen);
-                  }
-                }}
-                placeholderText={"-- None --"}
+                // placeholderText={"-- None --"}
               >
                 {[
                   <SelectOption key={"none"} value={undefined}>

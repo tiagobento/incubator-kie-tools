@@ -176,7 +176,7 @@ export function BpmnPalette({ pulse }: { pulse: boolean }) {
             <Icon size={"sm"}>
               <CodeIcon />
             </Icon>
-            Variables
+            &nbsp; Variables
           </button>
         </aside>
         <aside
@@ -203,7 +203,7 @@ export function BpmnPalette({ pulse }: { pulse: boolean }) {
             <Icon size={"sm"}>
               <PeopleCarryIcon />
             </Icon>
-            Correlations
+            &nbsp; Correlations
           </button>
         </aside>
         <aside className={`kie-bpmn-editor--palette ${pulse ? "pulse" : ""}`} style={{ pointerEvents: "all" }}>

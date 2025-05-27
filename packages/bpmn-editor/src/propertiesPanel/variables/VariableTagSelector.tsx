@@ -27,13 +27,8 @@ import { addOrGetProcessAndDiagramElements } from "../../mutations/addOrGetProce
 import { useMemo } from "react";
 import { WithVariables } from "./Variables";
 import { useBpmnEditorStore, useBpmnEditorStoreApi } from "../../store/StoreContext";
-import {
-  Select,
-  SelectGroupProps,
-  SelectOption,
-  SelectOptionObject,
-  SelectVariant,
-} from "@patternfly/react-core/dist/js/components/Select";
+import { Select, SelectOption } from "@patternfly/react-core/dist/js/components/Select";
+import { MenuToggle } from "@patternfly/react-core/dist/js/components/MenuToggle";
 
 const tags = ["internal", "required", "readonly", "input", "output", "business_relevant", "tracked"];
 
@@ -54,7 +49,7 @@ export function VariableTagSelector({ p, i }: { p: undefined | WithVariables; i:
   const [isOpen, setOpen] = React.useState(false);
 
   const ackSelectionsChanged = React.useCallback(
-    (selection: string | SelectOptionObject) => {
+    (selection: string | number | undefined) => {
       bpmnEditorStoreApi.setState((s) => {
         const { process } = addOrGetProcessAndDiagramElements({
           definitions: s.bpmn.model.definitions,
@@ -95,25 +90,25 @@ export function VariableTagSelector({ p, i }: { p: undefined | WithVariables; i:
 
   return (
     <Select
-      isDisabled={isReadOnly}
-      variant={SelectVariant.typeaheadMulti}
-      selections={selections}
-      onToggle={setOpen}
+      toggle={(toggleRef) => (
+        <MenuToggle
+          ref={toggleRef}
+          onClick={() => setOpen((prev) => !prev)}
+          isExpanded={isOpen}
+          isDisabled={isReadOnly}
+        >
+          {selections?.[0]?.toString()}
+        </MenuToggle>
+      )}
+      selected={selections}
       isOpen={isOpen}
-      menuAppendTo={document.body}
-      shouldResetOnSelect={false}
-      isCreatable={true}
-      chipGroupProps={{ numChips: 9999, isClosable: false }}
-      onCreateOption={(newTag) => ackSelectionsChanged(newTag.toString())}
       onSelect={(event, selection) => ackSelectionsChanged(selection)}
     >
-      {tags.map((tag) => {
-        return (
-          <SelectOption key={tag} value={tag}>
-            {tag}
-          </SelectOption>
-        );
-      })}
+      {tags.map((tag) => (
+        <SelectOption key={tag} value={tag}>
+          {tag}
+        </SelectOption>
+      ))}
     </Select>
   );
 }
