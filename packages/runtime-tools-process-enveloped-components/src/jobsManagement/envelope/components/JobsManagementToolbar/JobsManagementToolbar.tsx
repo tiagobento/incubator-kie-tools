@@ -17,9 +17,9 @@
  * under the License.
  */
 import React, { useState, useEffect, useCallback, useMemo } from "react";
-import { DropdownItem, Dropdown, KebabToggle } from "@patternfly/react-core/dist/js/components/Dropdown";
+import { DropdownItem, Dropdown, KebabToggle } from "@patternfly/react-core/deprecated";
 import { Button } from "@patternfly/react-core/dist/js/components/Button";
-import { Select, SelectOption, SelectVariant } from "@patternfly/react-core/dist/js/components/Select";
+import { Select, SelectOption, SelectVariant } from "@patternfly/react-core/deprecated";
 import {
   Toolbar,
   ToolbarContent,
@@ -36,7 +36,6 @@ import {
 import { SyncIcon } from "@patternfly/react-icons/dist/js/icons/sync-icon";
 
 import { JobStatus, Job } from "@kie-tools/runtime-tools-process-gateway-api/dist/types";
-import { JobsManagementDriver } from "../../../api";
 import "../styles.css";
 import { IOperations } from "@kie-tools/runtime-tools-components/dist/components/BulkList";
 import { OUIAProps, componentOuiaProps } from "@kie-tools/runtime-tools-components/dist/ouiaTools";
@@ -44,8 +43,6 @@ import { OperationType } from "@kie-tools/runtime-tools-shared-gateway-api/dist/
 
 interface JobsManagementToolbarProps {
   chips: JobStatus[];
-  driver: JobsManagementDriver;
-  doQueryJobs: (offset: number, limit: number) => Promise<void>;
   jobOperations: IOperations;
   onResetToDefault: () => void;
   onRefresh: () => void;
@@ -54,22 +51,16 @@ interface JobsManagementToolbarProps {
   setSelectedJobInstances: (selectedJobInstances: Job[]) => void;
   setSelectedStatus: (selectedStatus: ((selectedStatus: JobStatus[]) => JobStatus[]) | JobStatus[]) => void;
   setChips: (chips: ((chip: JobStatus[]) => JobStatus[]) | JobStatus[]) => void;
-  setDisplayTable: (displayTable: boolean) => void;
-  setIsLoading: (isLoading: boolean) => void;
   onApplyFilter: () => void;
 }
 const JobsManagementToolbar: React.FC<JobsManagementToolbarProps & OUIAProps> = ({
   chips,
-  driver,
-  doQueryJobs,
   onResetToDefault,
   jobOperations,
   onRefresh,
   selectedStatus,
   selectedJobInstances,
   setChips,
-  setDisplayTable,
-  setIsLoading,
   setSelectedStatus,
   setSelectedJobInstances,
   onApplyFilter,
@@ -247,7 +238,7 @@ const JobsManagementToolbar: React.FC<JobsManagementToolbarProps & OUIAProps> = 
           </ToolbarItem>
         </ToolbarGroup>
         <ToolbarItem variant="separator" />
-        <ToolbarGroup className="pf-u-ml-md" id="jobs-management-buttons">
+        <ToolbarGroup className="pf-v5-u-ml-md" id="jobs-management-buttons">
           {cancelJobsOption}
         </ToolbarGroup>
       </ToolbarContent>

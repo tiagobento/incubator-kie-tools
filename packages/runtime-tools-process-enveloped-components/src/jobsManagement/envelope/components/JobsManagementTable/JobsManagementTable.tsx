@@ -17,21 +17,15 @@
  * under the License.
  */
 import React, { useState, useEffect, useCallback } from "react";
-import {
-  Table,
-  TableHeader,
-  TableBody,
-  sortable,
-  IRow,
-  ISortBy,
-} from "@patternfly/react-table/dist/js/components/Table";
+import { sortable, IRow, ISortBy } from "@patternfly/react-table/dist/js/components/Table";
+import { Table, TableHeader, TableBody } from "@patternfly/react-table/dist/js/deprecated";
 import { Tooltip } from "@patternfly/react-core/dist/js/components/Tooltip";
 
 import { Job, JobsSortBy } from "@kie-tools/runtime-tools-process-gateway-api/dist/types";
 import Moment from "react-moment";
 import _ from "lodash";
 import { JobsIconCreator } from "../../../utils/utils";
-import { JobsManagementDriver } from "../../../api";
+import { JobsManagementChannelApi } from "../../../api";
 import { HistoryIcon } from "@patternfly/react-icons/dist/js/icons/history-icon";
 import "../styles.css";
 import { OUIAProps, componentOuiaProps } from "@kie-tools/runtime-tools-components/dist/ouiaTools";
@@ -57,7 +51,7 @@ interface RetrievedValueType {
 
 interface JobsManagementTableProps {
   jobs: Job[];
-  driver: JobsManagementDriver;
+  channelApi: JobsManagementChannelApi;
   doQueryJobs: (offset: number, limit: number) => Promise<void>;
   handleCancelModalToggle: () => void;
   handleDetailsToggle: () => void;
@@ -79,7 +73,7 @@ const editableJobStatus: string[] = ["SCHEDULED", "ERROR"];
 
 const JobsManagementTable: React.FC<JobsManagementTableProps & OUIAProps> = ({
   jobs,
-  driver,
+  channelApi,
   doQueryJobs,
   handleCancelModalToggle,
   handleDetailsToggle,
@@ -116,7 +110,7 @@ const JobsManagementTable: React.FC<JobsManagementTableProps & OUIAProps> = ({
   useEffect(() => {
     setColumns((currentColumns) => {
       return [...currentColumns].map((column) => {
-        column["props"] = { className: "pf-u-text-align-center" };
+        column["props"] = { className: "pf-v5-u-text-align-center" };
         checkNotEmpty() && column.title !== "Id" ? (column["transforms"] = [sortable]) : "";
         return column;
       });
@@ -169,7 +163,7 @@ const JobsManagementTable: React.FC<JobsManagementTableProps & OUIAProps> = ({
         const ele = {
           title: (
             <>
-              <HistoryIcon className="pf-u-mr-sm" /> Updated <Moment fromNow>{job.lastUpdate}</Moment>
+              <HistoryIcon className="pf-v5-u-mr-sm" /> Updated <Moment fromNow>{job.lastUpdate}</Moment>
             </>
           ),
         };
@@ -305,13 +299,13 @@ const JobsManagementTable: React.FC<JobsManagementTableProps & OUIAProps> = ({
   const handleCancelAction = useCallback(
     async (id): Promise<void> => {
       const job: any = jobs.find((job) => job.id === id);
-      const cancelResponse = await driver.cancelJob(job);
+      const cancelResponse = await channelApi.jobList__cancelJob(job);
       const title: JSX.Element = setTitle(cancelResponse.modalTitle, "Job cancel");
       setModalTitle(title);
       setModalContent(cancelResponse.modalContent);
       handleCancelModalToggle();
     },
-    [driver, handleCancelModalToggle, jobs, setModalContent, setModalTitle]
+    [channelApi, handleCancelModalToggle, jobs, setModalContent, setModalTitle]
   );
 
   const dynamicActions = useCallback(
@@ -359,10 +353,10 @@ const JobsManagementTable: React.FC<JobsManagementTableProps & OUIAProps> = ({
       const obj: JobsSortBy = {};
       constructObject(obj, sortingColumn, direction.toUpperCase());
       setOrderBy(obj);
-      await driver.sortBy(obj);
+      await channelApi.jobList__sortBy(obj);
       await doQueryJobs(0, 10);
     },
-    [doQueryJobs, driver, setOrderBy, setSortBy]
+    [doQueryJobs, channelApi, setOrderBy, setSortBy]
   );
 
   useEffect(() => {

@@ -30,19 +30,20 @@ import { Alert, AlertActionCloseButton, AlertActionLink } from "@patternfly/reac
 import { Card, CardBody } from "@patternfly/react-core/dist/js/components/Card";
 import { Page, PageSection } from "@patternfly/react-core/dist/js/components/Page";
 import { Text, TextContent, TextVariants } from "@patternfly/react-core/dist/js/components/Text";
-import { useHistory } from "react-router";
+import { useLocation, useNavigate } from "react-router-dom";
 import { routes } from "../../../navigation/Routes";
 import { useGlobalAlert } from "../../../alerts/GlobalAlertsContext";
 
 const PAGE_TITLE = "Start new workflow";
 
 export function WorkflowFormPage() {
-  const history = useHistory();
+  const navigate = useNavigate();
+  const location = useLocation();
   const gatewayApi: WorkflowFormGatewayApi = useWorkflowFormGatewayApi();
 
   const inlineEditRef = useRef<InlineEditApi>(null);
 
-  const workflowDefinition: WorkflowDefinition = (history.location.state as any)["workflowDefinition"];
+  const workflowDefinition: WorkflowDefinition = (location.state as any)["workflowDefinition"];
 
   const onResetForm = useCallback(() => {
     gatewayApi.setBusinessKey("");
@@ -62,7 +63,7 @@ export function WorkflowFormPage() {
     useCallback(
       ({ close }, { workflowId }) => {
         const viewDetails = () => {
-          history.push({
+          navigate({
             pathname: routes.runtimeToolsWorkflowDetails.path({ workflowId }),
           });
           close();
@@ -70,7 +71,7 @@ export function WorkflowFormPage() {
 
         return (
           <Alert
-            className="pf-u-mb-md"
+            className="pf-v5-u-mb-md"
             variant="success"
             title={`A workflow with id ${workflowId} was started successfully.`}
             aria-live="polite"
@@ -84,7 +85,7 @@ export function WorkflowFormPage() {
           />
         );
       },
-      [history]
+      [navigate]
     ),
     { durationInSeconds: 5 }
   );
@@ -93,7 +94,7 @@ export function WorkflowFormPage() {
     useCallback(({ close }, { message }) => {
       return (
         <Alert
-          className="pf-u-mb-md"
+          className="pf-v5-u-mb-md"
           variant="danger"
           title={
             <>

@@ -28,7 +28,7 @@ import { CodeIcon } from "@patternfly/react-icons/dist/js/icons/code-icon";
 import { ExclamationCircleIcon } from "@patternfly/react-icons/dist/js/icons/exclamation-circle-icon";
 import * as React from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useHistory } from "react-router";
+import { useNavigate } from "react-router-dom";
 import { AccountsDispatchActionKind, useAccountsDispatch } from "../accounts/AccountsContext";
 import { useAuthProviders } from "../authProviders/AuthProvidersContext";
 import { AUTH_SESSION_NONE, AuthSession } from "../authSessions/AuthSessionApi";
@@ -38,10 +38,11 @@ import { useRoutes } from "../navigation/Hooks";
 import { AdvancedImportModal, AdvancedImportModalRef } from "./AdvancedImportModalContent";
 import { isPotentiallyGit, useClonableUrl, useImportableUrl, useImportableUrlValidation } from "./ImportableUrlHooks";
 import { AuthProviderGroup } from "../authProviders/AuthProvidersApi";
+import { HelperText, HelperTextItem } from "@patternfly/react-core/dist/js/components/HelperText";
 
 export function ImportFromUrlCard() {
   const routes = useRoutes();
-  const history = useHistory();
+  const navigate = useNavigate();
   const accountsDispatch = useAccountsDispatch();
 
   const [authSessionId, setAuthSessionId] = useState<string | undefined>(AUTH_SESSION_NONE.id);
@@ -111,7 +112,7 @@ export function ImportFromUrlCard() {
         return;
       }
 
-      history.push({
+      navigate({
         pathname: routes.import.path({}),
         search: routes.import.queryString({
           url,
@@ -121,7 +122,7 @@ export function ImportFromUrlCard() {
         }),
       });
     },
-    [authSessionId, gitRefName, history, isValid, routes.import, url, insecurelyDisableTlsCertificateValidation]
+    [authSessionId, gitRefName, navigate, isValid, routes.import, url, insecurelyDisableTlsCertificateValidation]
   );
 
   const buttonLabel = useMemo(() => {
@@ -154,7 +155,7 @@ export function ImportFromUrlCard() {
             </FlexItem>
             <FlexItem style={{ minWidth: 0 }}>
               <Button
-                isSmall={true}
+                size="sm"
                 variant={ButtonVariant.link}
                 style={{ paddingBottom: 0, fontWeight: "lighter" }}
                 onClick={() => advancedImportModalRef.current?.open()}
@@ -172,13 +173,7 @@ export function ImportFromUrlCard() {
           </TextContent>
           <br />
           <Form onSubmit={onSubmit}>
-            <FormGroup
-              helperTextInvalid={validation.helperTextInvalid}
-              helperText={validation.helperText}
-              helperTextInvalidIcon={<ExclamationCircleIcon />}
-              validated={validation.option}
-              fieldId="url"
-            >
+            <FormGroup fieldId="url">
               <TextInput
                 id={"url"}
                 ouiaId={"import-from-url-input"}
@@ -186,8 +181,17 @@ export function ImportFromUrlCard() {
                 isRequired={true}
                 placeholder={"URL"}
                 value={url}
-                onChange={setUrl}
+                onChange={(_event, val) => setUrl(val)}
               />
+              <HelperText>
+                {validation.option === "error" ? (
+                  <HelperTextItem variant="error" icon={<ExclamationCircleIcon />}>
+                    {validation.helperTextInvalid}
+                  </HelperTextItem>
+                ) : (
+                  validation.helperText
+                )}
+              </HelperText>
             </FormGroup>
           </Form>
         </CardBody>

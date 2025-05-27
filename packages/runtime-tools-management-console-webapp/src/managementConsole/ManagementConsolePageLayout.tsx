@@ -17,28 +17,23 @@
  * under the License.
  */
 
-import {
-  Page,
-  PageHeader,
-  PageHeaderTools,
-  PageSection,
-  PageSidebar,
-} from "@patternfly/react-core/dist/js/components/Page";
-import React, { useState, useMemo, useCallback, useEffect } from "react";
-import { Brand } from "@patternfly/react-core/dist/js/components/Brand";
+import React, { useState, useMemo, useCallback, ReactElement } from "react";
+import { Page, PageSection, PageSidebar, PageSidebarBody } from "@patternfly/react-core/dist/js/components/Page";
+import { PageHeader, PageHeaderTools } from "@patternfly/react-core/deprecated";
 import { useEnv } from "../env/hooks/EnvContext";
 import { useRoutes } from "../navigation/Hooks";
-import { useHistory } from "react-router";
+import { useNavigate } from "react-router-dom";
 import { ManagementConsoleToolbar } from "./ManagementConsoleToolbar";
 import { AboutButton } from "../aboutModal/AboutButton";
 import { PageSectionHeader } from "@kie-tools/runtime-tools-components/dist/components/PageSectionHeader";
 import { BreadcrumbPathType } from "../runtime/RuntimePageLayoutContext";
+import { MastheadBrand } from "@patternfly/react-core/dist/js/components/Masthead";
 
 type Props = {
   children: React.ReactNode;
   disabledHeader?: boolean;
-  currentPageTile?: string;
-  breadcrumbText?: string[];
+  currentPageTile?: string | ReactElement;
+  breadcrumbText?: (string | ReactElement)[];
   breadcrumbPath?: BreadcrumbPathType;
   nav?: React.ReactNode;
 };
@@ -53,7 +48,7 @@ export const ManagementConsolePageLayout: React.FC<Props> = ({
 }) => {
   const { env } = useEnv();
   const routes = useRoutes();
-  const history = useHistory();
+  const navigate = useNavigate();
   const [isNavOpen, setIsNavOpen] = useState(true);
 
   const onNavToggle = useCallback(() => {
@@ -61,19 +56,22 @@ export const ManagementConsolePageLayout: React.FC<Props> = ({
   }, []);
 
   const onClickBrand = useCallback(() => {
-    history.push(routes.home.path({}));
-  }, [history, routes.home]);
+    navigate(routes.home.path({}));
+  }, [navigate, routes.home]);
 
   const Header = useMemo(() => {
     return (
       <PageHeader
         logo={
           <>
-            <Brand
-              src={routes.static.images.appLogoReverse.path({})}
-              alt={env.RUNTIME_TOOLS_MANAGEMENT_CONSOLE_APP_NAME}
+            <MastheadBrand
+              component="a"
               onClick={onClickBrand}
-            />
+              style={{ textDecoration: "none" }}
+              alt={env.RUNTIME_TOOLS_MANAGEMENT_CONSOLE_APP_NAME}
+            >
+              <img alt={"Logo"} src={routes.static.images.appLogoReverse.path({})} style={{ height: "38px" }} />
+            </MastheadBrand>
             <AboutButton />
           </>
         }
@@ -101,7 +99,12 @@ export const ManagementConsolePageLayout: React.FC<Props> = ({
   ]);
 
   const Sidebar = useMemo(
-    () => nav && <PageSidebar nav={nav} isNavOpen={isNavOpen} theme="dark" data-testid="page-sidebar" />,
+    () =>
+      nav && (
+        <PageSidebar isSidebarOpen={isNavOpen} theme="dark" data-testid="page-sidebar">
+          <PageSidebarBody>{nav}</PageSidebarBody>
+        </PageSidebar>
+      ),
     [isNavOpen, nav]
   );
 

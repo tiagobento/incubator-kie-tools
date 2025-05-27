@@ -50,6 +50,7 @@ import { useDmnEditor } from "../DmnEditorContext";
 import { getDrdId } from "./drd/drdId";
 import { useSettings } from "../settings/DmnEditorSettingsContext";
 import { useExternalModels } from "../includedModels/DmnEditorDependenciesContext";
+import { Icon } from "@patternfly/react-core/dist/js/components/Icon";
 
 export const MIME_TYPE_FOR_DMN_EDITOR_NEW_NODE_FROM_PALETTE = "application/kie-dmn-editor--new-node-from-palette";
 
@@ -110,69 +111,64 @@ export function Palette({ pulse }: { pulse: boolean }) {
 
   return (
     <>
-      {!(showDefaultDrdOnly ?? false) && (
-        <RF.Panel position={"top-left"}>
-          <aside
-            data-testid={"kie-tools--dmn-editor--drd-selector"}
-            className={"kie-dmn-editor--drd-selector"}
-            style={{ position: "relative" }}
+      <RF.Panel position={"top-left"}>
+        <aside
+          data-testid={"kie-tools--dmn-editor--drd-selector"}
+          className={"kie-dmn-editor--drd-selector"}
+          style={{ position: "relative" }}
+        >
+          <div ref={drdSelectorPopoverRef} style={{ position: "absolute", left: "56px", height: "100%", zIndex: -1 }} />
+          <InlineFeelNameInput
+            validate={() => true}
+            allUniqueNames={() => new Map()}
+            name={drd?.["@_name"] ?? ""}
+            prefix={`${drdIndex + 1}.`}
+            id={getDrdId({ drdIndex: drdIndex })}
+            onRenamed={(newName) => {
+              dmnEditorStoreApi.setState((state) => {
+                const drd = addOrGetDrd({
+                  definitions: state.dmn.model.definitions,
+                  drdIndex: state.computed(state).getDrdIndex(),
+                });
+                drd.diagram["@_name"] = newName;
+              });
+            }}
+            placeholder={getDefaultDrdName({ drdIndex: drdIndex })}
+            isReadOnly={settings.isReadOnly}
+            isPlain={true}
+            shouldCommitOnBlur={true}
+          />
+          <Popover
+            className={"kie-dmn-editor--drd-selector-popover"}
+            key={DiagramLhsPanel.DRD_SELECTOR}
+            aria-label={"DRD Selector Popover"}
+            isVisible={diagram.openLhsPanel === DiagramLhsPanel.DRD_SELECTOR}
+            triggerRef={() => drdSelectorPopoverRef.current!}
+            shouldClose={() => {
+              dmnEditorStoreApi.setState((state) => {
+                state.diagram.openLhsPanel = DiagramLhsPanel.NONE;
+              });
+            }}
+            showClose={false}
+            position={"bottom-start"}
+            hideOnOutsideClick={false}
+            bodyContent={<DrdSelectorPanel />}
+          />
+          <button
+            title={"Select or edit DRD"}
+            onClick={() => {
+              dmnEditorStoreApi.setState((state) => {
+                state.diagram.openLhsPanel =
+                  state.diagram.openLhsPanel === DiagramLhsPanel.DRD_SELECTOR
+                    ? DiagramLhsPanel.NONE
+                    : DiagramLhsPanel.DRD_SELECTOR;
+              });
+            }}
           >
-            <div
-              ref={drdSelectorPopoverRef}
-              style={{ position: "absolute", left: "56px", height: "100%", zIndex: -1 }}
-            />
-            <InlineFeelNameInput
-              validate={() => true}
-              allUniqueNames={() => new Map()}
-              name={drd?.["@_name"] ?? ""}
-              prefix={`${drdIndex + 1}.`}
-              id={getDrdId({ drdIndex: drdIndex })}
-              onRenamed={(newName) => {
-                dmnEditorStoreApi.setState((state) => {
-                  const drd = addOrGetDrd({
-                    definitions: state.dmn.model.definitions,
-                    drdIndex: state.computed(state).getDrdIndex(),
-                  });
-                  drd.diagram["@_name"] = newName;
-                });
-              }}
-              placeholder={getDefaultDrdName({ drdIndex: drdIndex })}
-              isReadOnly={settings.isReadOnly}
-              isPlain={true}
-              shouldCommitOnBlur={true}
-            />
-            <Popover
-              className={"kie-dmn-editor--drd-selector-popover"}
-              key={DiagramLhsPanel.DRD_SELECTOR}
-              aria-label={"DRD Selector Popover"}
-              isVisible={diagram.openLhsPanel === DiagramLhsPanel.DRD_SELECTOR}
-              reference={() => drdSelectorPopoverRef.current!}
-              shouldClose={() => {
-                dmnEditorStoreApi.setState((state) => {
-                  state.diagram.openLhsPanel = DiagramLhsPanel.NONE;
-                });
-              }}
-              showClose={false}
-              position={"bottom-start"}
-              hideOnOutsideClick={false}
-              bodyContent={<DrdSelectorPanel />}
-            />
-            <button
-              title={"Select or edit DRD"}
-              onClick={() => {
-                dmnEditorStoreApi.setState((state) => {
-                  state.diagram.openLhsPanel =
-                    state.diagram.openLhsPanel === DiagramLhsPanel.DRD_SELECTOR
-                      ? DiagramLhsPanel.NONE
-                      : DiagramLhsPanel.DRD_SELECTOR;
-                });
-              }}
-            >
-              <CaretDownIcon />
-            </button>
-          </aside>
-        </RF.Panel>
-      )}
+            <CaretDownIcon />
+          </button>
+        </aside>
+      </RF.Panel>
       {!settings.isReadOnly && (
         <RF.Panel
           position={"top-left"}
@@ -267,7 +263,9 @@ export function Palette({ pulse }: { pulse: boolean }) {
                 });
               }}
             >
-              <BarsIcon size={"sm"} />
+              <Icon>
+                <BarsIcon />
+              </Icon>
             </button>
           </aside>
           <br />
@@ -296,7 +294,10 @@ export function Palette({ pulse }: { pulse: boolean }) {
                 });
               }}
             >
-              <MigrationIcon size={"sm"} />
+              <Icon>
+                {" "}
+                <MigrationIcon />
+              </Icon>
             </button>
           </aside>
         </RF.Panel>
