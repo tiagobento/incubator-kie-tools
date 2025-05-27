@@ -1477,9 +1477,7 @@ export const TextAnnotationNode = React.memo(
       isEnabled: enableCustomNodeStyles,
     });
 
-    const content = useMemo(() => {
-      return String(textAnnotation.text?.__$$text) || parseBpmn20Drools10MetaData(textAnnotation).get("elementname");
-    }, [textAnnotation]);
+    const content = useMemo(() => String(textAnnotation.text?.__$$text ?? ""), [textAnnotation]);
 
     return (
       <>
