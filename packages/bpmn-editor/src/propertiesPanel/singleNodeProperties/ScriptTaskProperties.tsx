@@ -50,7 +50,7 @@ export function ScriptTaskProperties({
           label="Script"
           languages={["Java"]}
           value={scriptTask?.script?.__$$text || ""}
-          onChange={(newScript) => {
+          onChange={(e, newScript) => {
             bpmnEditorStoreApi.setState((s) => {
               const { process } = addOrGetProcessAndDiagramElements({
                 definitions: s.bpmn.model.definitions,

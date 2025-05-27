@@ -42,6 +42,22 @@ export function activate(context: vscode.ExtensionContext) {
     ]),
   });
 
+  KogitoVsCode.startExtension({
+    extensionName: "kie-group.bpmn-vscode-extension",
+    context: context,
+    viewType: "kieToolsBpmnEditor",
+    generateSvgCommandId: "extension.kie.tools.generatePreviewSvgBpmn",
+    silentlyGenerateSvgCommandId: "extension.kie.tools.silentlyGenerateSvgBpmn",
+    editorEnvelopeLocator: new EditorEnvelopeLocator("vscode", [
+      new EnvelopeMapping({
+        type: "bpmn",
+        filePathGlob: "**/*.bpmn?(2)",
+        resourcesPathPrefix: "",
+        envelopeContent: { type: EnvelopeContentType.PATH, path: "dist/webview/NewBpmnEditorEnvelopeApp.js" },
+      }),
+    ]),
+  });
+
   context.subscriptions.push(
     vscode.commands.registerCommand("extension.apache.kie.bpmnEditor.generateFormCode", async (args: any) =>
       generateFormsCommand()

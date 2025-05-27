@@ -51,7 +51,7 @@ export function EventDefinitionProperties({ event }: { event: Event }) {
   const bpmnEditorStoreApi = useBpmnEditorStoreApi();
 
   const onMessageChange = React.useCallback<OnMessageChange>(
-    (newMessage) => {
+    (e, newMessage) => {
       bpmnEditorStoreApi.setState((s) => {
         const { process } = addOrGetProcessAndDiagramElements({ definitions: s.bpmn.model.definitions });
         visitFlowElementsAndArtifacts(process, ({ element: e }) => {

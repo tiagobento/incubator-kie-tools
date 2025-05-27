@@ -56,7 +56,7 @@ export function ErrorSelector({ element }: { element: WithError }) {
               "@_errorRef"
             ] || ""
           }
-          onChange={(newError: string) =>
+          onChange={(e, newError) =>
             bpmnEditorStoreApi.setState((s) => {
               const { process } = addOrGetProcessAndDiagramElements({
                 definitions: s.bpmn.model.definitions,

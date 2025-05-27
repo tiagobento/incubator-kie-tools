@@ -53,7 +53,7 @@ export function BoundaryEventProperties({
           id={"cancel-activity"}
           label={"Should cancel Activity?"}
           isChecked={boundaryEvent["@_cancelActivity"] ?? BOUNDARY_EVENT_CANCEL_ACTIVITY_DEFAULT_VALUE}
-          onChange={(isChecked) => {
+          onChange={(e, isChecked) => {
             bpmnEditorStoreApi.setState((s) => {
               const { process } = addOrGetProcessAndDiagramElements({ definitions: s.bpmn.model.definitions });
               visitFlowElementsAndArtifacts(process, ({ element }) => {

@@ -46,7 +46,7 @@ export function ConditionalEventSelector({ element }: { element: WithConditional
     element?.eventDefinition?.find((eventDef) => eventDef.__$$element === "conditionalEventDefinition")?.condition
       ?.__$$text || "";
 
-  const handleValueChange = (newValue: string | undefined) => {
+  const handleValueChange = (e: React.FormEvent, newValue: string | undefined) => {
     bpmnEditorStoreApi.setState((s) => {
       const { process } = addOrGetProcessAndDiagramElements({
         definitions: s.bpmn.model.definitions,

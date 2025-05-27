@@ -62,7 +62,7 @@ export function LinkSelector({ element }: { element: WithLinkExpression }) {
   //   });
   // };
 
-  const handleValueChange = (newValue: string | undefined) => {
+  const handleValueChange = (e: React.FormEvent, newValue: string | undefined) => {
     bpmnEditorStoreApi.setState((s) => {
       const { process } = addOrGetProcessAndDiagramElements({
         definitions: s.bpmn.model.definitions,

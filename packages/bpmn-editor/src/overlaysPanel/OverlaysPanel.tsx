@@ -62,7 +62,7 @@ export function OverlaysPanel({ availableHeight }: OverlaysPanelProps) {
           <Switch
             aria-label={"Snapping"}
             isChecked={snapGrid.isEnabled}
-            onChange={(newValue) =>
+            onChange={(e, newValue) =>
               bpmnEditorStoreApi.setState((state) => {
                 state.xyFlowReactKieDiagram.snapGrid.isEnabled = newValue;
               })
@@ -126,7 +126,7 @@ export function OverlaysPanel({ availableHeight }: OverlaysPanelProps) {
           <Switch
             aria-label={"Highlight selected node(s) hierarchy"}
             isChecked={diagram.overlays.enableNodeHierarchyHighlight}
-            onChange={(newValue) =>
+            onChange={(e, newValue) =>
               bpmnEditorStoreApi.setState((state) => {
                 state.diagram.overlays.enableNodeHierarchyHighlight = newValue;
               })
@@ -137,7 +137,7 @@ export function OverlaysPanel({ availableHeight }: OverlaysPanelProps) {
           <Switch
             aria-label={"Enable styles"}
             isChecked={diagram.overlays.enableCustomNodeStyles}
-            onChange={(newValue) =>
+            onChange={(e, newValue) =>
               bpmnEditorStoreApi.setState((state) => {
                 state.diagram.overlays.enableCustomNodeStyles = newValue;
               })

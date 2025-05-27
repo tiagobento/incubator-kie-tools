@@ -136,7 +136,7 @@ export function UserTaskProperties({
             type={"text"}
             isDisabled={settings.isReadOnly}
             value={getValue(USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING.TASK_NAME)}
-            onChange={(newTaskName) =>
+            onChange={(e, newTaskName) =>
               handleChange(USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING.TASK_NAME, newTaskName)
             }
             placeholder={"Enter task name..."}
@@ -148,7 +148,7 @@ export function UserTaskProperties({
             type={"text"}
             isDisabled={settings.isReadOnly}
             value={getValue(USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING.COMMENT)}
-            onChange={(newSubject) =>
+            onChange={(e, newSubject) =>
               handleChange(USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING.COMMENT, newSubject)
             }
             placeholder={"Enter subject..."}
@@ -160,7 +160,7 @@ export function UserTaskProperties({
             type={"text"}
             isDisabled={settings.isReadOnly}
             value={getValue(USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING.CONTENT)}
-            onChange={(newContent) =>
+            onChange={(e, newContent) =>
               handleChange(USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING.CONTENT, newContent)
             }
             placeholder={"Enter content..."}
@@ -173,7 +173,7 @@ export function UserTaskProperties({
             type={"text"}
             isDisabled={settings.isReadOnly}
             value={getValue(USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING.PRIORITY)}
-            onChange={(newPriority) =>
+            onChange={(e, newPriority) =>
               handleChange(USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING.PRIORITY, newPriority)
             }
             placeholder={"Enter priority..."}
@@ -185,7 +185,7 @@ export function UserTaskProperties({
             type={"text"}
             isDisabled={settings.isReadOnly}
             value={getValue(USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING.DESCRIPTION)}
-            onChange={(newDescription) =>
+            onChange={(e, newDescription) =>
               handleChange(USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING.DESCRIPTION, newDescription)
             }
             placeholder={"Enter description..."}
@@ -204,7 +204,7 @@ export function UserTaskProperties({
                 ? true
                 : false
             }
-            onChange={(newSkippable) =>
+            onChange={(e, newSkippable) =>
               handleChange(USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING.SKIPPABLE, newSkippable)
             }
           />
@@ -224,7 +224,7 @@ export function UserTaskProperties({
                     ?.resourceAssignmentExpression?.expression.__$$text ?? ""
                 : ""
             }
-            onChange={(newValue) =>
+            onChange={(e, newValue) =>
               bpmnEditorStoreApi.setState((s) => {
                 const { process } = addOrGetProcessAndDiagramElements({
                   definitions: s.bpmn.model.definitions,
@@ -259,7 +259,7 @@ export function UserTaskProperties({
             type={"text"}
             isDisabled={settings.isReadOnly}
             value={getValue(USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING.GROUP_ID)}
-            onChange={(newGroups) =>
+            onChange={(e, newGroups) =>
               handleChange(USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING.GROUP_ID, newGroups)
             }
             placeholder={"Enter groups..."}
@@ -272,7 +272,7 @@ export function UserTaskProperties({
             type={"text"}
             isDisabled={settings.isReadOnly}
             value={getValue(USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING.CREATED_BY)}
-            onChange={(newCreatedBy) =>
+            onChange={(e, newCreatedBy) =>
               handleChange(USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING.CREATED_BY, newCreatedBy)
             }
             placeholder={"Enter creator..."}

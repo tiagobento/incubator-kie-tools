@@ -73,7 +73,7 @@ export function OnEntryAndExitScriptsFormSection({ element }: { element: WithOnE
                 label={"onEntry"}
                 languages={["Java"]}
                 value={element?.extensionElements?.["drools:onEntry-script"]?.["drools:script"]?.__$$text || ""}
-                onChange={(newValue) => {
+                onChange={(e, newValue) => {
                   bpmnEditorStoreApi.setState((s) => {
                     const { process } = addOrGetProcessAndDiagramElements({
                       definitions: s.bpmn.model.definitions,
@@ -96,7 +96,7 @@ export function OnEntryAndExitScriptsFormSection({ element }: { element: WithOnE
                 label={"onExit"}
                 languages={["Java"]}
                 value={element?.extensionElements?.["drools:onExit-script"]?.["drools:script"]?.__$$text || ""}
-                onChange={(newValue) => {
+                onChange={(e, newValue) => {
                   bpmnEditorStoreApi.setState((s) => {
                     const { process } = addOrGetProcessAndDiagramElements({
                       definitions: s.bpmn.model.definitions,

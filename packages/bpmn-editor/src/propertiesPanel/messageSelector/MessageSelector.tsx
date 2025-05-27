@@ -37,7 +37,7 @@ export type EventWithMessage =
       >
     >;
 
-export type OnMessageChange = (newMessage: string) => void;
+export type OnMessageChange = (e: React.FormEvent, newMessage: string) => void;
 
 export function MessageSelector({
   value,

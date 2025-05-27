@@ -39,7 +39,7 @@ export function GroupProperties({ group }: { group: Normalized<BPMN20__tGroup> &
   const settings = useBpmnEditorStore((s) => s.settings);
 
   const onNameChanged = useCallback(
-    (newName: string) => {
+    (e: React.FormEvent, newName: string) => {
       bpmnEditorStoreApi.setState((s) => {
         const { category } = addOrGetCategory({
           definitions: s.bpmn.model.definitions,

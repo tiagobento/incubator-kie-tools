@@ -617,7 +617,7 @@ export function DataMappingsList({
                         isRequired={true}
                         placeholder="Name..."
                         value={entry.name}
-                        onChange={(e) => handleInputChange(i, "name", e)}
+                        onChange={(e, value) => handleInputChange(i, "name", value)}
                       />
                     </GridItem>
                     <GridItem span={3}>
@@ -635,7 +635,7 @@ export function DataMappingsList({
                         type="text"
                         placeholder={`${lastColumnLabel}...`}
                         value={entry.value}
-                        onChange={(e) => handleInputChange(i, "value", e)}
+                        onChange={(e, value) => handleInputChange(i, "value", value)}
                       />
                     </GridItem>
                     <GridItem span={1} style={{ textAlign: "right" }}>
@@ -672,7 +672,7 @@ export function DataMappingsList({
                       isRequired={true}
                       placeholder="Name..."
                       value={entry.name}
-                      onChange={(e) => handleInputChange(i, "name", e)}
+                      onChange={(e, value) => handleInputChange(i, "name", value)}
                     />
                   </GridItem>
                   <GridItem span={3}>
@@ -690,7 +690,7 @@ export function DataMappingsList({
                       type="text"
                       placeholder={`${lastColumnLabel}...`}
                       value={entry.value}
-                      onChange={(e) => handleInputChange(i, "value", e)}
+                      onChange={(e, value) => handleInputChange(i, "value", value)}
                     />
                   </GridItem>
                   <GridItem span={1} style={{ textAlign: "right" }}>

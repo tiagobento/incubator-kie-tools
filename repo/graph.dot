@@ -62,10 +62,10 @@ digraph G {
   "@kie-tools/bpmn-marshaller" [ color = "blue", fontcolor = "blue", style = "rounded" ];
   "@kie-tools/pmml-editor-marshaller" [ color = "blue", fontcolor = "blue", style = "rounded" ];
   "@kie-tools/xyflow-react-kie-diagram" [ color = "blue", fontcolor = "blue", style = "rounded" ];
+  "@kie-tools/bpmn-editor-envelope" [ color = "blue", fontcolor = "blue", style = "rounded" ];
   "@kie-tools/xml-parser-ts-codegen" [ color = "blue", fontcolor = "blue", style = "rounded" ];
   "bpmn-vscode-extension" [ color = "blue", fontcolor = "blue", style = "rounded" ];
   "@kie-tools/form-code-generator-vscode-command" [ color = "blue", fontcolor = "blue", style = "rounded" ];
-  "@kie-tools/vscode-java-code-completion-extension-plugin" [ color = "black", fontcolor = "black", style = "dashed, rounded" ];
   "chrome-extension-pack-kogito-kie-editors" [ color = "black", fontcolor = "black", style = "dashed, rounded" ];
   "@kie-tools/chrome-extension-test-helper" [ color = "blue", fontcolor = "blue", style = "rounded" ];
   "chrome-extension-serverless-workflow-editor" [ color = "black", fontcolor = "black", style = "dashed, rounded" ];
@@ -122,6 +122,7 @@ digraph G {
   "@kie-tools/extended-services-api" [ color = "blue", fontcolor = "blue", style = "rounded" ];
   "dmn-vscode-extension" [ color = "blue", fontcolor = "blue", style = "rounded" ];
   "@kie-tools/scesim-editor-envelope" [ color = "blue", fontcolor = "blue", style = "rounded" ];
+  "@kie-tools/vscode-java-code-completion-extension-plugin" [ color = "black", fontcolor = "black", style = "dashed, rounded" ];
   "@kie-tools-core/keyboard-shortcuts" [ color = "purple", fontcolor = "purple", style = "rounded" ];
   "@kie-tools-core/notifications" [ color = "purple", fontcolor = "purple", style = "rounded" ];
   "@kie-tools-core/envelope-bus" [ color = "purple", fontcolor = "purple", style = "rounded" ];
@@ -284,12 +285,14 @@ digraph G {
   "@kie-tools/bpmn-editor" -> "@kie-tools/bpmn-marshaller" [ style = "solid", color = "blue" ];
   "@kie-tools/bpmn-editor" -> "@kie-tools/pmml-editor-marshaller" [ style = "solid", color = "blue" ];
   "@kie-tools/bpmn-editor" -> "@kie-tools/xyflow-react-kie-diagram" [ style = "solid", color = "blue" ];
+  "@kie-tools/bpmn-editor-envelope" -> "@kie-tools-core/editor" [ style = "solid", color = "blue" ];
+  "@kie-tools/bpmn-editor-envelope" -> "@kie-tools/bpmn-editor" [ style = "solid", color = "blue" ];
   "@kie-tools/bpmn-marshaller" -> "@kie-tools/xml-parser-ts-codegen" [ style = "dashed", color = "blue" ];
   "bpmn-vscode-extension" -> "@kie-tools-core/vscode-extension" [ style = "solid", color = "blue" ];
+  "bpmn-vscode-extension" -> "@kie-tools/bpmn-editor-envelope" [ style = "solid", color = "blue" ];
   "bpmn-vscode-extension" -> "@kie-tools/form-code-generator-vscode-command" [ style = "solid", color = "blue" ];
   "bpmn-vscode-extension" -> "@kie-tools/kie-bc-editors" [ style = "solid", color = "blue" ];
   "bpmn-vscode-extension" -> "@kie-tools/stunner-editors" [ style = "dashed", color = "blue" ];
-  "bpmn-vscode-extension" -> "@kie-tools/vscode-java-code-completion-extension-plugin" [ style = "dashed", color = "blue" ];
   "@kie-tools-core/chrome-extension" -> "@kie-tools-core/editor" [ style = "solid", color = "purple" ];
   "chrome-extension-pack-kogito-kie-editors" -> "@kie-tools-core/chrome-extension" [ style = "solid", color = "black" ];
   "chrome-extension-pack-kogito-kie-editors" -> "@kie-tools/kie-bc-editors" [ style = "solid", color = "black" ];

@@ -59,7 +59,7 @@ export function SignalScopeSelector({ element }: { element: WithSignalScope }) {
           type={"text"}
           isDisabled={settings.isReadOnly}
           value={parseBpmn20Drools10MetaData(element).get("customScope")}
-          onChange={(newSignalScope) =>
+          onChange={(e, newSignalScope) =>
             bpmnEditorStoreApi.setState((s) => {
               const { process } = addOrGetProcessAndDiagramElements({
                 definitions: s.bpmn.model.definitions,

@@ -45,8 +45,8 @@ import { SectionHeader } from "@kie-tools/xyflow-react-kie-diagram/dist/properti
 import { FormSection } from "@patternfly/react-core/dist/js/components/Form/FormSection";
 import { RedoIcon } from "@patternfly/react-icons/dist/js/icons/redo-icon";
 import { TextInput } from "@patternfly/react-core/dist/js/components/TextInput";
-import "./Reassignments.css";
 import { USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING } from "@kie-tools/bpmn-marshaller/dist/drools-extension";
+import "./Reassignments.css";
 
 type Reassignment = {
   users: string;
@@ -420,7 +420,7 @@ export function Reassignments({ element }: { element: Normalized<BPMN20__tUserTa
                     type="text"
                     placeholder="Users..."
                     value={entry.users}
-                    onChange={(e) => handleInputChange(i, "users", e)}
+                    onChange={(e, value) => handleInputChange(i, "users", value)}
                   />
                 </GridItem>
                 <GridItem span={3}>
@@ -430,7 +430,7 @@ export function Reassignments({ element }: { element: Normalized<BPMN20__tUserTa
                     type="text"
                     placeholder="Groups..."
                     value={entry.groups}
-                    onChange={(e) => handleInputChange(i, "groups", e)}
+                    onChange={(e, value) => handleInputChange(i, "groups", value)}
                   />
                 </GridItem>
                 <GridItem span={2}>
@@ -438,7 +438,7 @@ export function Reassignments({ element }: { element: Normalized<BPMN20__tUserTa
                     aria-label={"type"}
                     type={"text"}
                     value={entry.type}
-                    onChange={(e) => handleInputChange(i, "type", e)}
+                    onChange={(e, value) => handleInputChange(i, "type", value)}
                     style={entryStyle}
                   >
                     {typeOptions.map((option) => (
@@ -461,7 +461,7 @@ export function Reassignments({ element }: { element: Normalized<BPMN20__tUserTa
                       aria-label={"period unit"}
                       type={"text"}
                       value={entry.periodUnit}
-                      onChange={(e) => handleInputChange(i, "periodUnit", e)}
+                      onChange={(e, value) => handleInputChange(i, "periodUnit", value)}
                       style={entryStyle}
                     >
                       {periodUnits.map((option) => (

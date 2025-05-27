@@ -50,6 +50,7 @@ import { addOrGetProcessAndDiagramElements } from "../mutations/addOrGetProcessA
 import { Correlations } from "../propertiesPanel/correlations/Correlations";
 import { Variables } from "../propertiesPanel/variables/Variables";
 import { Button } from "@patternfly/react-core/dist/js/components/Button";
+import { Icon } from "@patternfly/react-core/dist/js/components/Icon";
 import { EmptyState, EmptyStateIcon, EmptyStateBody } from "@patternfly/react-core/dist/js/components/EmptyState";
 import { Title } from "@patternfly/react-core/dist/js/components/Title";
 import { Bullseye } from "@patternfly/react-core/dist/js/layouts/Bullseye";
@@ -172,7 +173,10 @@ export function BpmnPalette({ pulse }: { pulse: boolean }) {
               });
             }}
           >
-            <CodeIcon size={"sm"} /> Variables
+            <Icon size={"sm"}>
+              <CodeIcon />
+            </Icon>
+            Variables
           </button>
         </aside>
         <aside
@@ -196,7 +200,10 @@ export function BpmnPalette({ pulse }: { pulse: boolean }) {
               });
             }}
           >
-            <PeopleCarryIcon size={"sm"} /> Correlations
+            <Icon size={"sm"}>
+              <PeopleCarryIcon />
+            </Icon>
+            Correlations
           </button>
         </aside>
         <aside className={`kie-bpmn-editor--palette ${pulse ? "pulse" : ""}`} style={{ pointerEvents: "all" }}>

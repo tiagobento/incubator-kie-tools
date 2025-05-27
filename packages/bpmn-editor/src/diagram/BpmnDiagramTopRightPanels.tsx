@@ -25,6 +25,7 @@ import { useCallback, useLayoutEffect } from "react";
 import * as RF from "reactflow";
 import { OverlaysPanel } from "../overlaysPanel/OverlaysPanel";
 import { useBpmnEditorStore, useBpmnEditorStoreApi } from "../store/StoreContext";
+import { Icon } from "@patternfly/react-core/dist/js/components/Icon";
 
 const AREA_ABOVE_OVERLAYS_PANEL = 120;
 
@@ -83,7 +84,9 @@ export function TopRightCornerPanels({ availableHeight }: TopRightCornerPanelsPr
               onClick={toggleOverlaysPanel}
               title={"Overlays"}
             >
-              <VirtualMachineIcon size={"sm"} />
+              <Icon size={"sm"}>
+                <VirtualMachineIcon />
+              </Icon>
             </button>
           </Popover>
         </aside>
@@ -94,7 +97,9 @@ export function TopRightCornerPanels({ availableHeight }: TopRightCornerPanelsPr
               onClick={togglePropertiesPanel}
               title={"Properties panel"}
             >
-              <InfoIcon size={"sm"} />
+              <Icon size={"sm"}>
+                <InfoIcon />
+              </Icon>
             </button>
           </aside>
         )}

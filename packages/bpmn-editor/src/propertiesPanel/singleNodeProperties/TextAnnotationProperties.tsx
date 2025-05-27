@@ -50,7 +50,7 @@ export function TextAnnotationProperties({
           isDisabled={settings.isReadOnly}
           value={textAnnotation["@_textFormat"]}
           placeholder={"Enter a text format..."}
-          onChange={(newTextFormat) => {
+          onChange={(e, newTextFormat) => {
             bpmnEditorStoreApi.setState((s) => {
               updateTextAnnotation({
                 definitions: s.bpmn.model.definitions,
@@ -68,7 +68,7 @@ export function TextAnnotationProperties({
           type={"text"}
           isDisabled={settings.isReadOnly}
           value={textAnnotation.text?.__$$text}
-          onChange={(newText) => {
+          onChange={(e, newText) => {
             bpmnEditorStoreApi.setState((s) => {
               updateTextAnnotation({
                 definitions: s.bpmn.model.definitions,
@@ -97,7 +97,7 @@ export function TextAnnotationProperties({
           type={"text"}
           isDisabled={settings.isReadOnly}
           value={textAnnotation?.documentation?.[0].__$$text || ""}
-          onChange={(newDocumentation) => {
+          onChange={(e, newDocumentation) => {
             bpmnEditorStoreApi.setState((s) => {
               const { process } = addOrGetProcessAndDiagramElements({
                 definitions: s.bpmn.model.definitions,
@@ -124,7 +124,7 @@ export function TextAnnotationProperties({
           isReadOnly={settings.isReadOnly}
           hoverTip="Copy"
           clickTip="Copied"
-          onChange={(newId: string) => {
+          onChange={(e, newId) => {
             bpmnEditorStoreApi.setState((s) => {
               updateTextAnnotation({
                 definitions: s.bpmn.model.definitions,

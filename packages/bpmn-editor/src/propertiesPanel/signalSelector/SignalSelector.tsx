@@ -54,7 +54,7 @@ export function SignalSelector({ element }: { element: WithSignal }) {
               "@_signalRef"
             ] || ""
           }
-          onChange={(newSignal: string | undefined) =>
+          onChange={(e, newSignal: string | undefined) =>
             bpmnEditorStoreApi.setState((s) => {
               const { process } = addOrGetProcessAndDiagramElements({
                 definitions: s.bpmn.model.definitions,

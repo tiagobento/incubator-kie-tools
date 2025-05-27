@@ -47,7 +47,7 @@ export function EscalationCodeSelector({ element }: { element: WithEscalationCod
       "@_drools:esccode"
     ] || "";
 
-  const handleValueChange = (newValue: string) => {
+  const handleValueChange = (e: React.FormEvent, newValue: string) => {
     bpmnEditorStoreApi.setState((s) => {
       const { process } = addOrGetProcessAndDiagramElements({
         definitions: s.bpmn.model.definitions,

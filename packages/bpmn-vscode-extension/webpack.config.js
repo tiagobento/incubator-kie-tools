@@ -20,7 +20,6 @@
 const CopyWebpackPlugin = require("copy-webpack-plugin");
 const patternflyBase = require("@kie-tools-core/patternfly-base");
 const stunnerEditors = require("@kie-tools/stunner-editors");
-const vscodeJavaCodeCompletionExtensionPlugin = require("@kie-tools/vscode-java-code-completion-extension-plugin");
 const { merge } = require("webpack-merge");
 const { ProvidePlugin } = require("webpack");
 const common = require("@kie-tools-core/webpack-base/webpack.common.config");
@@ -61,6 +60,7 @@ module.exports = async (webpackEnv) => [
     target: "web",
     entry: {
       "webview/BpmnEditorEnvelopeApp": "./src/webview/BpmnEditorEnvelopeApp.ts",
+      "webview/NewBpmnEditorEnvelopeApp": "./src/webview/NewBpmnEditorEnvelopeApp.ts",
     },
     module: {
       rules: [...patternflyBase.webpackModuleRules],
@@ -75,11 +75,6 @@ module.exports = async (webpackEnv) => [
           {
             from: stunnerEditors.bpmnEditorPath(),
             to: "webview/editors/bpmn",
-            globOptions: { ignore: ["**/WEB-INF/**/*", "**/*.html"] },
-          },
-          {
-            from: vscodeJavaCodeCompletionExtensionPlugin.path(),
-            to: "server/",
             globOptions: { ignore: ["**/WEB-INF/**/*", "**/*.html"] },
           },
         ],

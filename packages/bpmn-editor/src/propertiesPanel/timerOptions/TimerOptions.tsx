@@ -108,7 +108,7 @@ export function TimerOptions({ element }: { element: WithTimer }) {
               element?.eventDefinition?.find((eventDef) => eventDef.__$$element === "timerEventDefinition")
                 ?.timeDuration?.__$$text
             }
-            onChange={(newTimeDuration) =>
+            onChange={(e, newTimeDuration) =>
               bpmnEditorStoreApi.setState((s) => {
                 const { process } = addOrGetProcessAndDiagramElements({
                   definitions: s.bpmn.model.definitions,
@@ -178,7 +178,7 @@ export function TimerOptions({ element }: { element: WithTimer }) {
                   element?.eventDefinition?.find((eventDef) => eventDef.__$$element === "timerEventDefinition")
                     ?.timeCycle?.__$$text
                 }
-                onChange={(newTimeCycle) =>
+                onChange={(e, newTimeCycle) =>
                   bpmnEditorStoreApi.setState((s) => {
                     const { process } = addOrGetProcessAndDiagramElements({
                       definitions: s.bpmn.model.definitions,
@@ -234,7 +234,7 @@ export function TimerOptions({ element }: { element: WithTimer }) {
                 element?.eventDefinition?.find((eventDef) => eventDef.__$$element === "timerEventDefinition")?.timeDate
                   ?.__$$text
               }
-              onChange={(newTimeDate) =>
+              onChange={(e, newTimeDate) =>
                 bpmnEditorStoreApi.setState((s) => {
                   const { process } = addOrGetProcessAndDiagramElements({
                     definitions: s.bpmn.model.definitions,

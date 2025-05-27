@@ -133,7 +133,7 @@ export function BusinessRuleTaskProperties({
                 type={"text"}
                 isDisabled={isReadOnly}
                 value={businessRuleTask["@_drools:ruleFlowGroup"] || ""}
-                onChange={(newRuleFlowGroup: string) => {
+                onChange={(e, newRuleFlowGroup: string) => {
                   bpmnEditorStoreApi.setState((s) => {
                     const { process } = addOrGetProcessAndDiagramElements({
                       definitions: s.bpmn.model.definitions,
@@ -257,7 +257,7 @@ export function BusinessRuleTaskProperties({
                 isDisabled={isReadOnly}
                 placeholder={"Enter a Namespace..."}
                 value={dmnModelBinding?.modelNamespace.value ?? ""}
-                onChange={(newNamespace) =>
+                onChange={(e, newNamespace) =>
                   bpmnEditorStoreApi.setState((s) => {
                     associateBusinessRuleTaskWithDmnModel({
                       definitions: s.bpmn.model.definitions,
@@ -281,7 +281,7 @@ export function BusinessRuleTaskProperties({
                 isDisabled={isReadOnly}
                 placeholder={"Enter a Name..."}
                 value={dmnModelBinding?.modelName.value ?? ""}
-                onChange={(newName) =>
+                onChange={(e, newName) =>
                   bpmnEditorStoreApi.setState((s) => {
                     associateBusinessRuleTaskWithDmnModel({
                       definitions: s.bpmn.model.definitions,

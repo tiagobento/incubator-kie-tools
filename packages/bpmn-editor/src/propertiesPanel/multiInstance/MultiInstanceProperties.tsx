@@ -22,7 +22,7 @@ import { BPMN20__tProcess } from "@kie-tools/bpmn-marshaller/dist/schemas/bpmn-2
 import { Normalized } from "../../normalization/normalize";
 import { ElementFilter } from "@kie-tools/xml-parser-ts/dist/elementFilter";
 import { Unpacked } from "@kie-tools/xyflow-react-kie-diagram/dist/tsExt/tsExt";
-import { FormFieldGroup, FormFieldGroupHeader, FormGroup } from "@patternfly/react-core/dist/js/components/Form";
+import { FormGroup } from "@patternfly/react-core/dist/js/components/Form";
 import { CodeInput } from "../codeInput/CodeInput";
 import { ToggleGroup, ToggleGroupItem } from "@patternfly/react-core/dist/js/components/ToggleGroup";
 import { visitFlowElementsAndArtifacts } from "../../mutations/_elementVisitor";
@@ -33,9 +33,9 @@ import { FormSelectOption } from "@patternfly/react-core/dist/js/components/Form
 import { FormSelect } from "@patternfly/react-core/dist/js/components/FormSelect/FormSelect";
 import { generateUuid } from "@kie-tools/xyflow-react-kie-diagram/dist/uuid/uuid";
 import { USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING } from "@kie-tools/bpmn-marshaller/dist/drools-extension";
-import "./MultiInstanceProperties.css";
 import { ItemDefinitionRefSelector } from "../itemDefinitionRefSelector/ItemDefinitionRefSelector";
 import { Divider } from "@patternfly/react-core/dist/js/components/Divider";
+import "./MultiInstanceProperties.css";
 
 export type WithMultiInstanceProperties = Normalized<
   ElementFilter<
@@ -113,7 +113,7 @@ export function MultiInstanceProperties({ element }: { element: WithMultiInstanc
             ? element?.loopCharacteristics?.completionCondition?.__$$text || ""
             : ""
         }
-        onChange={(newCompletionCondition) => {
+        onChange={(e, newCompletionCondition) => {
           bpmnEditorStoreApi.setState((s) => {
             const { process } = addOrGetProcessAndDiagramElements({
               definitions: s.bpmn.model.definitions,
@@ -155,7 +155,7 @@ export function MultiInstanceProperties({ element }: { element: WithMultiInstanc
               ? element?.loopCharacteristics["inputDataItem"]?.["@_id"] || ""
               : ""
           }
-          onChange={(newDataInput) =>
+          onChange={(e, newDataInput) =>
             bpmnEditorStoreApi.setState((s) => {
               const { process } = addOrGetProcessAndDiagramElements({
                 definitions: s.bpmn.model.definitions,
@@ -282,7 +282,7 @@ export function MultiInstanceProperties({ element }: { element: WithMultiInstanc
               ? element?.loopCharacteristics["outputDataItem"]?.["@_id"] || ""
               : ""
           }
-          onChange={(newDataOutput) =>
+          onChange={(e, newDataOutput) =>
             bpmnEditorStoreApi.setState((s) => {
               const { process } = addOrGetProcessAndDiagramElements({
                 definitions: s.bpmn.model.definitions,

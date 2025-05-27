@@ -68,7 +68,7 @@ export function CallActivityProperties({
             name="is-independent"
             aria-label="Independent"
             isChecked={callActivity["@_drools:independent"] ?? false}
-            onChange={(checked) => {
+            onChange={(e, checked) => {
               bpmnEditorStoreApi.setState((s) => {
                 const { process } = addOrGetProcessAndDiagramElements({
                   definitions: s.bpmn.model.definitions,
@@ -120,7 +120,7 @@ export function CallActivityProperties({
             name="should-wait-for-completion"
             aria-label="Wait for completion"
             isChecked={callActivity["@_drools:waitForCompletion"] ?? true}
-            onChange={(checked) => {
+            onChange={(e, checked) => {
               bpmnEditorStoreApi.setState((s) => {
                 const { process } = addOrGetProcessAndDiagramElements({
                   definitions: s.bpmn.model.definitions,

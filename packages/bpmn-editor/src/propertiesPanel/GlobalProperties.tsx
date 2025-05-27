@@ -111,7 +111,7 @@ export function GlobalProperties() {
                     isDisabled={settings.isReadOnly}
                     placeholder={"Enter a name..."}
                     value={process?.["@_name"]}
-                    onChange={(newName) =>
+                    onChange={(e, newName) =>
                       bpmnEditorStoreApi.setState((s) => {
                         const { process } = addOrGetProcessAndDiagramElements({
                           definitions: s.bpmn.model.definitions,
@@ -130,7 +130,7 @@ export function GlobalProperties() {
                     rows={3}
                     placeholder={"Enter documentation..."}
                     value={process?.documentation?.[0].__$$text}
-                    onChange={(newDocumentation) =>
+                    onChange={(e, newDocumentation) =>
                       bpmnEditorStoreApi.setState((s) => {
                         const { process } = addOrGetProcessAndDiagramElements({
                           definitions: s.bpmn.model.definitions,
@@ -157,7 +157,7 @@ export function GlobalProperties() {
                     name="is-adhoc"
                     aria-label="Adhoc"
                     isChecked={process?.["@_drools:adHoc"] ?? false}
-                    onChange={(checked) => {
+                    onChange={(e, checked) => {
                       bpmnEditorStoreApi.setState((s) => {
                         const { process } = addOrGetProcessAndDiagramElements({
                           definitions: s.bpmn.model.definitions,
@@ -300,7 +300,7 @@ export function GlobalProperties() {
                     isDisabled={settings.isReadOnly}
                     placeholder={"Enter an expression language..."}
                     value={thisBpmn.model.definitions["@_expressionLanguage"]}
-                    onChange={(newExprLang) =>
+                    onChange={(e, newExprLang) =>
                       bpmnEditorStoreApi.setState((state) => {
                         state.bpmn.model.definitions["@_expressionLanguage"] = newExprLang;
                       })
@@ -354,7 +354,7 @@ export function GlobalProperties() {
                     name="is-executable"
                     aria-label="Executable"
                     isChecked={process?.["@_isExecutable"] ?? true}
-                    onChange={(checked) => {
+                    onChange={(e, checked) => {
                       bpmnEditorStoreApi.setState((s) => {
                         const { process } = addOrGetProcessAndDiagramElements({
                           definitions: s.bpmn.model.definitions,
@@ -375,7 +375,7 @@ export function GlobalProperties() {
                     isDisabled={settings.isReadOnly}
                     placeholder={"Enter a package name..."}
                     value={process?.["@_drools:packageName"]}
-                    onChange={(newPackageName) =>
+                    onChange={(e, newPackageName) =>
                       bpmnEditorStoreApi.setState((s) => {
                         const { process } = addOrGetProcessAndDiagramElements({
                           definitions: s.bpmn.model.definitions,
@@ -396,7 +396,7 @@ export function GlobalProperties() {
                     isDisabled={settings.isReadOnly}
                     placeholder={"Enter a version..."}
                     value={process?.["@_drools:version"]}
-                    onChange={(newVersion) =>
+                    onChange={(e, newVersion) =>
                       bpmnEditorStoreApi.setState((s) => {
                         const { process } = addOrGetProcessAndDiagramElements({
                           definitions: s.bpmn.model.definitions,
@@ -421,7 +421,7 @@ export function GlobalProperties() {
                     rows={3}
                     placeholder={"Enter a description..."}
                     value={parseBpmn20Drools10MetaData(process).get("customDescription")} // FIXME: Tiago
-                    onChange={(newDescription) =>
+                    onChange={(e, newDescription) =>
                       bpmnEditorStoreApi.setState((s) => {
                         const { process } = addOrGetProcessAndDiagramElements({
                           definitions: s.bpmn.model.definitions,

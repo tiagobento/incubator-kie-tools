@@ -19,67 +19,41 @@
 
 import * as React from "react";
 import "@kie-tools/bpmn-marshaller/dist/drools-extension";
-import {
-  BPMN20__tCorrelationProperty,
-  BPMN20__tProcess,
-} from "@kie-tools/bpmn-marshaller/dist/schemas/bpmn-2_0/ts-gen/types";
-import { Button, ButtonVariant } from "@patternfly/react-core/dist/js/components/Button/Button";
-import { useBpmnEditorStore, useBpmnEditorStoreApi } from "../../store/StoreContext";
-import { addOrGetProcessAndDiagramElements } from "../../mutations/addOrGetProcessAndDiagramElements";
-import { visitFlowElementsAndArtifacts } from "../../mutations/_elementVisitor";
-import { Grid, GridItem } from "@patternfly/react-core/dist/js/layouts/Grid";
-import { PlusCircleIcon } from "@patternfly/react-icons/dist/js/icons/plus-circle-icon";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { TimesIcon } from "@patternfly/react-icons/dist/js/icons/times-icon";
-import { Normalized } from "../../normalization/normalize";
-import { Title } from "@patternfly/react-core/dist/js/components/Title";
-import { EmptyState, EmptyStateBody, EmptyStateIcon } from "@patternfly/react-core/dist/js/components/EmptyState";
-import { generateUuid } from "@kie-tools/xyflow-react-kie-diagram/dist/uuid/uuid";
-import { Bullseye } from "@patternfly/react-core/dist/js/layouts/Bullseye";
-import { Form } from "@patternfly/react-core/dist/js/components/Form/Form";
-import { Card, CardBody, CardHeader } from "@patternfly/react-core/dist/js/components/Card";
-import { FormSelect } from "@patternfly/react-core/dist/js/components/FormSelect/FormSelect";
-import { FormSelectOption } from "@patternfly/react-core/dist/js/components/FormSelect/FormSelectOption";
-import { PeopleCarryIcon } from "@patternfly/react-icons/dist/js/icons/people-carry-icon";
-import { ObjectGroupIcon } from "@patternfly/react-icons/dist/js/icons/object-group-icon";
-import { FormGroup, FormSection } from "@patternfly/react-core/dist/js/components/Form";
-import { Flex } from "@patternfly/react-core/dist/js/layouts/Flex/Flex";
-import { Gallery } from "@patternfly/react-core/dist/js/layouts/Gallery";
-import { Stack } from "@patternfly/react-core/dist/js/layouts/Stack";
-import { FlexItem } from "@patternfly/react-core/dist/js/layouts/Flex/FlexItem";
-import { Divider, DividerVariant } from "@patternfly/react-core/dist/js/components/Divider";
-import "./Correlations.css";
-import {
-  ItemDefinitionRefSelector,
-  OnChangeItemDefinitionRefSelector,
-} from "../itemDefinitionRefSelector/ItemDefinitionRefSelector";
-import { useBpmnEditor } from "../../BpmnEditorContext";
-import { GroupIcon } from "../../diagram/nodes/NodeIcons";
-import { MessageSelector } from "../messageSelector/MessageSelector";
-import { InputGroup } from "@patternfly/react-core/dist/js/components/InputGroup/InputGroup";
-import { InputGroupText } from "@patternfly/react-core/dist/js/components/InputGroup";
-import { TextInput } from "@patternfly/react-core/dist/js/components/TextInput";
-import { MessageEventSymbolSvg } from "../../diagram/nodes/NodeSvgs";
+import { BPMN20__tCorrelationProperty } from "@kie-tools/bpmn-marshaller/dist/schemas/bpmn-2_0/ts-gen/types";
 import {
   EditableNodeLabel,
   OnEditableNodeLabelChange,
   useEditableNodeLabel,
 } from "@kie-tools/xyflow-react-kie-diagram/dist/nodes/EditableNodeLabel";
-import { useFocusableElement } from "../../focus/useFocusableElement";
-
-type Correlation = {
-  id: string;
-  name: string;
-  propertyId: string;
-  propertyName: string;
-  propertyType: string;
-};
-
-const entryStyle = {
-  padding: "4px",
-  margin: "8px",
-  width: "calc(100% - 2 * 4px - 2 * 8px)",
-};
+import { generateUuid } from "@kie-tools/xyflow-react-kie-diagram/dist/uuid/uuid";
+import { Button, ButtonVariant } from "@patternfly/react-core/dist/js/components/Button/Button";
+import { Card } from "@patternfly/react-core/dist/js/components/Card";
+import { Divider } from "@patternfly/react-core/dist/js/components/Divider";
+import { EmptyState, EmptyStateBody, EmptyStateIcon } from "@patternfly/react-core/dist/js/components/EmptyState";
+import { FormGroup, FormSection } from "@patternfly/react-core/dist/js/components/Form";
+import { Form } from "@patternfly/react-core/dist/js/components/Form/Form";
+import { FormSelect } from "@patternfly/react-core/dist/js/components/FormSelect/FormSelect";
+import { FormSelectOption } from "@patternfly/react-core/dist/js/components/FormSelect/FormSelectOption";
+import { InputGroupText } from "@patternfly/react-core/dist/js/components/InputGroup";
+import { InputGroup } from "@patternfly/react-core/dist/js/components/InputGroup/InputGroup";
+import { TextInput } from "@patternfly/react-core/dist/js/components/TextInput";
+import { Title } from "@patternfly/react-core/dist/js/components/Title";
+import { Flex } from "@patternfly/react-core/dist/js/layouts/Flex/Flex";
+import { FlexItem } from "@patternfly/react-core/dist/js/layouts/Flex/FlexItem";
+import { Stack } from "@patternfly/react-core/dist/js/layouts/Stack";
+import { ObjectGroupIcon } from "@patternfly/react-icons/dist/js/icons/object-group-icon";
+import { PeopleCarryIcon } from "@patternfly/react-icons/dist/js/icons/people-carry-icon";
+import { PlusCircleIcon } from "@patternfly/react-icons/dist/js/icons/plus-circle-icon";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { MessageEventSymbolSvg } from "../../diagram/nodes/NodeSvgs";
+import { addOrGetProcessAndDiagramElements } from "../../mutations/addOrGetProcessAndDiagramElements";
+import { useBpmnEditorStore, useBpmnEditorStoreApi } from "../../store/StoreContext";
+import {
+  ItemDefinitionRefSelector,
+  OnChangeItemDefinitionRefSelector,
+} from "../itemDefinitionRefSelector/ItemDefinitionRefSelector";
+import { MessageSelector } from "../messageSelector/MessageSelector";
+import "./Correlations.css";
 
 export function Correlations() {
   const bpmnEditorStoreApi = useBpmnEditorStoreApi();
@@ -241,7 +215,7 @@ export function Correlations() {
   }, [bpmnEditorStoreApi, selectedPropertyId]);
 
   const onChangeMessageBindingExpression = useCallback(
-    (i: number) => (newExpression: string) => {
+    (i: number) => (e: React.FormEvent, newExpression: string) => {
       bpmnEditorStoreApi.setState((s) => {
         const property = s.bpmn.model.definitions.rootElement
           ?.filter((p) => p.__$$element === "correlationProperty")
@@ -256,7 +230,7 @@ export function Correlations() {
   );
 
   const onChangeMessageBindingMessage = useCallback(
-    (i: number) => (newMessaage: string) => {
+    (i: number) => (e: React.FormEvent, newMessaage: string) => {
       bpmnEditorStoreApi.setState((s) => {
         const property = s.bpmn.model.definitions.rootElement
           ?.filter((p) => p.__$$element === "correlationProperty")
@@ -286,7 +260,7 @@ export function Correlations() {
   );
 
   const addPropertyToCorrelationKey = useCallback(
-    (propertyId: string) => {
+    (e: React.FormEvent, propertyId: string) => {
       bpmnEditorStoreApi.setState((s) => {
         const key = s.bpmn.model.definitions.rootElement
           ?.find((e) => e.__$$element === "collaboration")
@@ -343,7 +317,7 @@ export function Correlations() {
   }, [bpmnEditorStoreApi, selectedKey, selectedKeyId]);
 
   const changeValueOfSubscription = useCallback(
-    (subscriptionIndex: number, propertyBindingIndex: number) => (newValue: string) => {
+    (subscriptionIndex: number, propertyBindingIndex: number) => (e: React.FormEvent, newValue: string) => {
       bpmnEditorStoreApi.setState((s) => {
         const { process } = addOrGetProcessAndDiagramElements({ definitions: s.bpmn.model.definitions });
         process.correlationSubscription ??= [];
@@ -448,7 +422,7 @@ export function Correlations() {
                             variant={
                               !hasAtLeastOnePropertyWithMessageBinding ? ButtonVariant.primary : ButtonVariant.tertiary
                             }
-                            isLarge={true}
+                            size={"lg"}
                             style={{ width: "100%", lineHeight: "1" }}
                             onClick={addMessageBindingToProperty}
                           >
@@ -585,7 +559,7 @@ export function Correlations() {
                                         : ButtonVariant.tertiary
                                     }
                                     icon={<PlusCircleIcon />}
-                                    isLarge={true}
+                                    size={"lg"}
                                     style={{ width: "100%" }}
                                     onClick={addSubscription}
                                   >

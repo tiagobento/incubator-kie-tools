@@ -73,7 +73,7 @@ export function StartEventProperties({
             isChecked={
               startEvent["@_isInterrupting"] ?? START_EVENT_NODE_ON_EVENT_SUB_PROCESSES_IS_INTERRUPTING_DEFAULT_VALUE
             }
-            onChange={(isChecked) => {
+            onChange={(e, isChecked) => {
               bpmnEditorStoreApi.setState((s) => {
                 const { process } = addOrGetProcessAndDiagramElements({ definitions: s.bpmn.model.definitions });
                 visitFlowElementsAndArtifacts(process, ({ element }) => {

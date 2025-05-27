@@ -119,7 +119,7 @@ export function ServiceTaskProperties({
             isDisabled={isReadOnly}
             placeholder={"Enter an interface..."}
             value={serviceTask["@_drools:serviceinterface"]}
-            onChange={(newInterface) =>
+            onChange={(e, newInterface) =>
               bpmnEditorStoreApi.setState((s) => {
                 const { process } = addOrGetProcessAndDiagramElements({
                   definitions: s.bpmn.model.definitions,
@@ -141,7 +141,7 @@ export function ServiceTaskProperties({
             isDisabled={isReadOnly}
             placeholder={"Enter an operation..."}
             value={serviceTask["@_drools:serviceoperation"]}
-            onChange={(newOperation) =>
+            onChange={(e, newOperation) =>
               bpmnEditorStoreApi.setState((s) => {
                 const { process } = addOrGetProcessAndDiagramElements({
                   definitions: s.bpmn.model.definitions,

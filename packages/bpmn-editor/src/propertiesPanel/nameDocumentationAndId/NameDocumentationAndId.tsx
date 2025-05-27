@@ -52,7 +52,7 @@ export function NameDocumentationAndId({
   const settings = useBpmnEditorStore((s) => s.settings);
 
   const onNameChanged = useCallback(
-    (newName: string) => {
+    (e: React.FormEvent, newName: string) => {
       bpmnEditorStoreApi.setState((s) => {
         if (element.__$$element === "lane") {
           updateLane({

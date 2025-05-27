@@ -46,7 +46,7 @@ export function SequenceFlowProperties({
           type={"number"}
           isDisabled={isReadOnly}
           value={sequenceFlow["@_drools:priority"] || ""}
-          onChange={(newPriority) =>
+          onChange={(e, newPriority) =>
             bpmnEditorStoreApi.setState((s) => {
               const { process } = addOrGetProcessAndDiagramElements({
                 definitions: s.bpmn.model.definitions,
@@ -65,7 +65,7 @@ export function SequenceFlowProperties({
         label={"Condition Expression"}
         languages={["Java", "MVEL", "DROOLS", "FEEL"]}
         value={sequenceFlow.conditionExpression?.__$$text || ""}
-        onChange={(newPriority) =>
+        onChange={(e, newPriority) =>
           bpmnEditorStoreApi.setState((s) => {
             const { process } = addOrGetProcessAndDiagramElements({
               definitions: s.bpmn.model.definitions,

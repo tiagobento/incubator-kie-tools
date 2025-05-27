@@ -461,7 +461,7 @@ export function Notifications({ element }: { element: Normalized<BPMN20__tUserTa
                     aria-label={"type"}
                     type={"text"}
                     value={entry.type}
-                    onChange={(e) => handleInputChange(i, "type", e)}
+                    onChange={(e, value) => handleInputChange(i, "type", value)}
                     style={entryStyle}
                   >
                     {typeOptions.map((option) => (
@@ -477,7 +477,7 @@ export function Notifications({ element }: { element: Normalized<BPMN20__tUserTa
                     placeholder="Expires at..."
                     isRequired={true}
                     value={entry.expiresAt}
-                    onChange={(e) => handleInputChange(i, "expiresAt", e)}
+                    onChange={(e, value) => handleInputChange(i, "expiresAt", value)}
                   />
                 </GridItem>
                 <GridItem span={1}>
@@ -487,7 +487,7 @@ export function Notifications({ element }: { element: Normalized<BPMN20__tUserTa
                     type="text"
                     placeholder="From..."
                     value={entry.from}
-                    onChange={(e) => handleInputChange(i, "from", e)}
+                    onChange={(e, value) => handleInputChange(i, "from", value)}
                   />
                 </GridItem>
                 <GridItem span={1}>
@@ -497,7 +497,7 @@ export function Notifications({ element }: { element: Normalized<BPMN20__tUserTa
                     type="text"
                     placeholder="To Users..."
                     value={entry.tousers}
-                    onChange={(e) => handleInputChange(i, "tousers", e)}
+                    onChange={(e, value) => handleInputChange(i, "tousers", value)}
                   />
                 </GridItem>
                 <GridItem span={1}>
@@ -507,7 +507,7 @@ export function Notifications({ element }: { element: Normalized<BPMN20__tUserTa
                     type="text"
                     placeholder="To Groups..."
                     value={entry.togroups}
-                    onChange={(e) => handleInputChange(i, "togroups", e)}
+                    onChange={(e, value) => handleInputChange(i, "togroups", value)}
                   />
                 </GridItem>
                 <GridItem span={1}>
@@ -517,7 +517,7 @@ export function Notifications({ element }: { element: Normalized<BPMN20__tUserTa
                     type="email"
                     placeholder="To Emails..."
                     value={entry.toemails}
-                    onChange={(e) => handleInputChange(i, "toemails", e)}
+                    onChange={(e, value) => handleInputChange(i, "toemails", value)}
                   />
                 </GridItem>
                 <GridItem span={1}>
@@ -527,7 +527,7 @@ export function Notifications({ element }: { element: Normalized<BPMN20__tUserTa
                     type="text"
                     placeholder="Reply to..."
                     value={entry.replyTo}
-                    onChange={(e) => handleInputChange(i, "replyTo", e)}
+                    onChange={(e, value) => handleInputChange(i, "replyTo", value)}
                   />
                 </GridItem>
                 <GridItem span={1}>
@@ -537,7 +537,7 @@ export function Notifications({ element }: { element: Normalized<BPMN20__tUserTa
                     type="text"
                     placeholder="Subject..."
                     value={entry.subject}
-                    onChange={(e) => handleInputChange(i, "subject", e)}
+                    onChange={(e, value) => handleInputChange(i, "subject", value)}
                   />
                 </GridItem>
                 <GridItem span={2}>
@@ -548,7 +548,7 @@ export function Notifications({ element }: { element: Normalized<BPMN20__tUserTa
                     placeholder="Body..."
                     resizeOrientation={"vertical"}
                     value={entry.body}
-                    onChange={(e) => handleInputChange(i, "body", e)}
+                    onChange={(e, value) => handleInputChange(i, "body", value)}
                   />
                 </GridItem>
                 <GridItem span={1} style={{ textAlign: "right" }}>

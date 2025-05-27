@@ -80,7 +80,7 @@ export function AdHocSubProcessProperties({
             type={"text"}
             isDisabled={isReadOnly}
             value={adHocSubProcess?.["@_ordering"] ?? "Parallel"}
-            onChange={(newOrderingValue) => {
+            onChange={(e, newOrderingValue) => {
               bpmnEditorStoreApi.setState((s) => {
                 const { process } = addOrGetProcessAndDiagramElements({
                   definitions: s.bpmn.model.definitions,
@@ -105,7 +105,7 @@ export function AdHocSubProcessProperties({
           label={"Ad-hoc activation condition"}
           languages={["Drools"]}
           value={parseBpmn20Drools10MetaData(adHocSubProcess).get("customActivationCondition") ?? ""}
-          onChange={(newCode) => {
+          onChange={(e, newCode) => {
             bpmnEditorStoreApi.setState((s) => {
               const { process } = addOrGetProcessAndDiagramElements({
                 definitions: s.bpmn.model.definitions,
@@ -123,7 +123,7 @@ export function AdHocSubProcessProperties({
           label={"Ad-hoc completion condition"}
           languages={["MVEL", "Drools"]}
           value={adHocSubProcess.completionCondition?.__$$text ?? ""}
-          onChange={(newCompletionConnditionValue) => {
+          onChange={(e, newCompletionConnditionValue) => {
             bpmnEditorStoreApi.setState((s) => {
               const { process } = addOrGetProcessAndDiagramElements({
                 definitions: s.bpmn.model.definitions,

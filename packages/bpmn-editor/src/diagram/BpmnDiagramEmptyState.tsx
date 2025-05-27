@@ -22,7 +22,7 @@ import {
   EmptyState,
   EmptyStateBody,
   EmptyStateIcon,
-  EmptyStatePrimary,
+  EmptyStateActions,
 } from "@patternfly/react-core/dist/js/components/EmptyState";
 import { Title } from "@patternfly/react-core/dist/js/components/Title";
 import { Bullseye } from "@patternfly/react-core/dist/js/layouts/Bullseye";
@@ -73,7 +73,7 @@ export function BpmnDiagramEmptyState({
           <EmptyStateBody>Start by dragging nodes from the Palette</EmptyStateBody>
           <br />
           <EmptyStateBody>or</EmptyStateBody>
-          <EmptyStatePrimary>
+          <EmptyStateActions>
             <Button
               variant={ButtonVariant.link}
               icon={<UserIcon />}
@@ -103,7 +103,7 @@ export function BpmnDiagramEmptyState({
             >
               New Straight-Through Process (STP)...
             </Button>
-          </EmptyStatePrimary>
+          </EmptyStateActions>
         </EmptyState>
       </div>
     </Bullseye>

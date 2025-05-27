@@ -22,9 +22,9 @@ import { useBpmnEditor } from "./BpmnEditorContext";
 import { Flex } from "@patternfly/react-core/dist/js/layouts/Flex";
 import {
   EmptyState,
+  EmptyStateActions,
   EmptyStateBody,
   EmptyStateIcon,
-  EmptyStatePrimary,
 } from "@patternfly/react-core/dist/js/components/EmptyState";
 import { Title } from "@patternfly/react-core/dist/js/components/Title";
 import { Button, ButtonVariant } from "@patternfly/react-core/dist/js/components/Button";
@@ -75,7 +75,7 @@ export function BpmnEditorErrorFallback({ error, resetErrorBoundary }: FallbackP
           ).replaceAll("\\n", "\n")}
         </ClipboardCopy>
         <br />
-        <EmptyStatePrimary>
+        <EmptyStateActions>
           <Button variant={ButtonVariant.link} onClick={resetToLastWorkingState}>
             Try undoing last action
           </Button>
@@ -86,7 +86,7 @@ export function BpmnEditorErrorFallback({ error, resetErrorBoundary }: FallbackP
               </Button>
             </a>
           )}
-        </EmptyStatePrimary>
+        </EmptyStateActions>
       </EmptyState>
     </Flex>
   );
