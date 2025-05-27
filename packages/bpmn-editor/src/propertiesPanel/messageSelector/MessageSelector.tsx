@@ -18,31 +18,17 @@
  */
 
 import * as React from "react";
-import { useBpmnEditorStore, useBpmnEditorStoreApi } from "../../store/StoreContext";
-import { FormGroup, FormSection } from "@patternfly/react-core/dist/js/components/Form";
-import { FormSelect, FormSelectOption } from "@patternfly/react-core/dist/js/components/FormSelect";
-import { Normalized } from "../../normalization/normalize";
-import {
-  BPMN20__tMessageEventDefinition,
-  BPMN20__tProcess,
-} from "@kie-tools/bpmn-marshaller/dist/schemas/bpmn-2_0/ts-gen/types";
+import { BPMN20__tProcess } from "@kie-tools/bpmn-marshaller/dist/schemas/bpmn-2_0/ts-gen/types";
 import { ElementFilter } from "@kie-tools/xml-parser-ts/dist/elementFilter";
 import { Unpacked } from "@kie-tools/xyflow-react-kie-diagram/dist/tsExt/tsExt";
-import { BPMN20__tMessage, BPMN20__tDefinitions } from "@kie-tools/bpmn-marshaller/dist/schemas/bpmn-2_0/ts-gen/types";
-import { addOrGetProcessAndDiagramElements } from "../../mutations/addOrGetProcessAndDiagramElements";
-import { visitFlowElementsAndArtifacts } from "../../mutations/_elementVisitor";
-import { TextArea } from "@patternfly/react-core/dist/js/components/TextArea/TextArea";
-import { TextInput } from "@patternfly/react-core/dist/js/components/TextInput";
 import { InputGroup, InputGroupText } from "@patternfly/react-core/dist/js/components/InputGroup";
-import { generateUuid } from "@kie-tools/xyflow-react-kie-diagram/dist/uuid/uuid";
-import { updateFlowElement } from "../../mutations/renameNode";
-import { addOrGetItemDefinitions } from "../../mutations/addOrGetItemDefinitions";
-import { addOrGetMessages } from "../../mutations/addOrGetMessages";
-import "./MessageSelector.css";
+import { TextInput } from "@patternfly/react-core/dist/js/components/TextInput";
 import { MessageEventSymbolSvg } from "../../diagram/nodes/NodeSvgs";
-import { Button, ButtonVariant } from "@patternfly/react-core/dist/js/components/Button";
+import { Normalized } from "../../normalization/normalize";
+import { useBpmnEditorStore, useBpmnEditorStoreApi } from "../../store/StoreContext";
+import "./MessageSelector.css";
 
-export type WithMessage =
+export type EventWithMessage =
   | undefined
   | Normalized<
       ElementFilter<
@@ -51,9 +37,18 @@ export type WithMessage =
       >
     >;
 
-export function MessageSelector({ element }: { element: WithMessage }) {
-  const bpmnEditorStoreApi = useBpmnEditorStoreApi();
-  const settings = useBpmnEditorStore((s) => s.settings);
+export type OnMessageChange = (newMessage: string) => void;
+
+export function MessageSelector({
+  value,
+  onChange,
+  omitIds,
+}: {
+  value: string | undefined;
+  onChange: OnMessageChange;
+  omitIds?: string[];
+}) {
+  const isReadOnly = useBpmnEditorStore((s) => s.settings.isReadOnly);
 
   return (
     <>
@@ -73,31 +68,9 @@ export function MessageSelector({ element }: { element: WithMessage }) {
         <TextInput
           aria-label={"Message"}
           type={"text"}
-          isDisabled={settings.isReadOnly}
-          value={
-            element?.eventDefinition?.find((eventDef) => eventDef.__$$element === "messageEventDefinition")?.[
-              "@_drools:msgref"
-            ] || ""
-          }
-          onChange={(newMessage: string) =>
-            bpmnEditorStoreApi.setState((s) => {
-              const { process } = addOrGetProcessAndDiagramElements({
-                definitions: s.bpmn.model.definitions,
-              });
-              visitFlowElementsAndArtifacts(process, ({ element: e }) => {
-                if (e["@_id"] === element?.["@_id"] && e.__$$element === element.__$$element) {
-                  const messageEventDefinition = e.eventDefinition?.find(
-                    (event) => event.__$$element === "messageEventDefinition"
-                  );
-                  addOrGetMessages({ definitions: s.bpmn.model.definitions, id: e["@_id"], message: newMessage });
-                  if (messageEventDefinition) {
-                    messageEventDefinition["@_drools:msgref"] = newMessage;
-                    messageEventDefinition["@_messageRef"] = e["@_id"];
-                  }
-                }
-              });
-            })
-          }
+          isDisabled={isReadOnly}
+          value={value}
+          onChange={onChange}
           placeholder={"Enter Message..."}
         />
       </InputGroup>

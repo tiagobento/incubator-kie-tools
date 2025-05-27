@@ -220,6 +220,21 @@ export function Correlations() {
     [bpmnEditorStoreApi, selectedPropertyId]
   );
 
+  const onChangeMessageBindingMessage = useCallback(
+    (i: number) => (newMessaage: string) => {
+      bpmnEditorStoreApi.setState((s) => {
+        const property = s.bpmn.model.definitions.rootElement
+          ?.filter((p) => p.__$$element === "correlationProperty")
+          .find((p) => p["@_id"] === selectedPropertyId);
+
+        if (property) {
+          property.correlationPropertyRetrievalExpression[i]["@_messageRef"] = newMessaage;
+        }
+      });
+    },
+    [bpmnEditorStoreApi, selectedPropertyId]
+  );
+
   const addPropertyToCorrelationKey = useCallback(
     (propertyId: string) => {
       bpmnEditorStoreApi.setState((s) => {
@@ -363,7 +378,10 @@ export function Correlations() {
                               isCompact={true}
                               className={"kie-bpmn-editor--correlations--properties--bindings--binding"}
                             >
-                              <MessageSelector element={undefined} />
+                              <MessageSelector
+                                value={cpre["@_messageRef"]}
+                                onChange={onChangeMessageBindingMessage(i)}
+                              />
                               <InputGroup>
                                 <InputGroupText className={"expression-label"}>{`↳`}</InputGroupText>
                                 <TextInput
