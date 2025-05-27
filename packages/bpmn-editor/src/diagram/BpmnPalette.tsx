@@ -58,6 +58,7 @@ import "./BpmnPalette.css";
 import { snapShapeDimensions } from "@kie-tools/xyflow-react-kie-diagram/dist/snapgrid/SnapGrid";
 import { generateUuid } from "@kie-tools/xyflow-react-kie-diagram/dist/uuid/uuid";
 import { NODE_LAYERS } from "@kie-tools/xyflow-react-kie-diagram/dist/nodes/Hooks";
+import { getNewNodeDefaultName } from "../mutations/addStandaloneNode";
 
 export const MIME_TYPE_FOR_BPMN_EDITOR_NEW_NODE_FROM_PALETTE = "application/kie-bpmn-editor--new-node-from-palette";
 
@@ -114,7 +115,7 @@ export function BpmnPalette({ pulse }: { pulse: boolean }) {
             shapeIndex: -1,
             bpmnElement: {
               "@_id": generateUuid(),
-              "@_name": "New " + nodeType.toUpperCase(), // FIXME: Tiago: Align labels with `addStandaloneNode` mutation.
+              "@_name": getNewNodeDefaultName({ type: nodeType, element }),
               __$$element: element as any,
             },
           },

@@ -25,6 +25,56 @@ import { BpmnNodeType, elementToNodeType, NODE_TYPES } from "../diagram/BpmnDiag
 import { DC__Bounds } from "@kie-tools/xyflow-react-kie-diagram/dist/maths/model";
 import { NodeNature, nodeNatures } from "./_NodeNature";
 import { addOrGetProcessAndDiagramElements } from "./addOrGetProcessAndDiagramElements";
+import { assertUnreachable } from "../ts-ext/assertUnreachable";
+
+export function getNewNodeDefaultName({
+  type,
+  element,
+}: {
+  type: BpmnNodeType;
+  element: keyof typeof elementToNodeType;
+}) {
+  switch (type) {
+    case NODE_TYPES.subProcess:
+      if (element === "transaction") {
+        return "New Transaction";
+      } else {
+        return "New Sub-process";
+      }
+    case NODE_TYPES.startEvent:
+    case NODE_TYPES.intermediateCatchEvent:
+    case NODE_TYPES.intermediateThrowEvent:
+    case NODE_TYPES.endEvent:
+    case NODE_TYPES.gateway:
+    case NODE_TYPES.group:
+    case NODE_TYPES.textAnnotation:
+    case NODE_TYPES.unknown:
+      return undefined;
+    case NODE_TYPES.dataObject:
+      return "New Data Object";
+    case NODE_TYPES.lane:
+      return "New Lane";
+    case NODE_TYPES.task:
+      switch (element) {
+        case "callActivity":
+          return "New Call Activity";
+        case "task":
+          return "New Task";
+        case "userTask":
+          return "New User Task";
+        case "businessRuleTask":
+          return "New Business Rule Task";
+        case "scriptTask":
+          return "New Script Task";
+        case "serviceTask":
+          return "New Service Task";
+        default:
+          return undefined;
+      }
+    default:
+      assertUnreachable(type);
+  }
+}
 
 export function addStandaloneNode({
   definitions,
@@ -53,12 +103,12 @@ export function addStandaloneNode({
             __readonly_element === "callActivity"
               ? {
                   "@_id": newBpmnElementId,
-                  "@_name": "New Call Activity",
+                  "@_name": getNewNodeDefaultName({ type: __readonly_newNode.type, element: __readonly_element }),
                   __$$element: "callActivity",
                 }
               : {
                   "@_id": newBpmnElementId,
-                  "@_name": "New task",
+                  "@_name": getNewNodeDefaultName({ type: __readonly_newNode.type, element: __readonly_element }),
                   __$$element: "task",
                 },
           [NODE_TYPES.startEvent]: {
@@ -89,7 +139,7 @@ export function addStandaloneNode({
           },
           [NODE_TYPES.dataObject]: {
             "@_id": newBpmnElementId,
-            "@_name": "New Data Object",
+            "@_name": getNewNodeDefaultName({ type: __readonly_newNode.type, element: __readonly_element }),
             __$$element: "dataObject",
           },
         }
@@ -120,12 +170,12 @@ export function addStandaloneNode({
       __readonly_element === "transaction"
         ? {
             "@_id": newBpmnElementId,
-            "@_name": "New transaction",
+            "@_name": getNewNodeDefaultName({ type: __readonly_newNode.type, element: __readonly_element }),
             __$$element: "transaction",
           }
         : {
             "@_id": newBpmnElementId,
-            "@_name": "New sub-process",
+            "@_name": getNewNodeDefaultName({ type: __readonly_newNode.type, element: __readonly_element }),
             __$$element: "subProcess",
           }
     );
@@ -134,7 +184,7 @@ export function addStandaloneNode({
     process.laneSet[0].lane ??= [];
     process.laneSet[0].lane.push({
       "@_id": newBpmnElementId,
-      "@_name": "New Lane",
+      "@_name": getNewNodeDefaultName({ type: __readonly_newNode.type, element: __readonly_element }),
     });
   }
   //
