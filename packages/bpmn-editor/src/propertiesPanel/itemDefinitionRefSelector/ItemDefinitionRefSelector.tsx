@@ -51,7 +51,7 @@ export function ItemDefinitionRefSelector({
   const selections = useMemo(() => {
     return {
       compareTo: (a: any) => (value ?? "").toLowerCase().trim() == (a?.toString?.() ?? "").toLowerCase().trim(),
-      toString: () => value ?? "",
+      toString: () => value,
     };
   }, [value]);
 
@@ -62,8 +62,12 @@ export function ItemDefinitionRefSelector({
         .map((s) => ({ itemDefinitionRef: s["@_id"], dataType: s["@_structureRef"] })) ?? []
   );
 
+  const itemDefinitionsByDataType = useMemo(
+    () => new Map(itemDefinitions.map((i) => [i.dataType, i])),
+    [itemDefinitions]
+  );
+
   const allOptions = useMemo(() => {
-    const itemDefinitionsByDataType = new Map(itemDefinitions.map((i) => [i.dataType, i]));
     const defaultDataTypes = DEFAULT_OPTIONS.map((defaultDataType) => {
       if (!itemDefinitionsByDataType.has(defaultDataType.itemDefinitionRef)) {
         return defaultDataType;
@@ -75,7 +79,9 @@ export function ItemDefinitionRefSelector({
     });
 
     return [...defaultDataTypes, ...itemDefinitionsByDataType.values()];
-  }, [itemDefinitions]);
+  }, [itemDefinitionsByDataType]);
+
+  const allOptionsById = useMemo(() => new Map(allOptions.map((i) => [i.itemDefinitionRef, i])), [allOptions]);
 
   const bpmnEditorStoreApi = useBpmnEditorStoreApi();
 
@@ -102,11 +108,12 @@ export function ItemDefinitionRefSelector({
       toggle={(toggleRef) => (
         <MenuToggle
           ref={toggleRef}
+          style={{ width: "100%", background: "white" }}
           onClick={() => setOpen((prev) => !prev)}
           isExpanded={isOpen}
           isDisabled={isReadOnly}
         >
-          {selections?.toString()}
+          {allOptionsById.get(selections?.toString() || undefined)?.dataType}
         </MenuToggle>
       )}
       onSelect={(e, newItemDefinitionRef) => {
@@ -159,7 +166,7 @@ export function ItemDefinitionRefSelector({
           value={{
             compareTo: (a: any) =>
               (itemDefinitionRef ?? "").toLowerCase().trim() == (a?.toString?.() ?? "").toLowerCase().trim(),
-            toString: () => itemDefinitionRef ?? "",
+            toString: () => itemDefinitionRef,
           }}
         >
           {dataType}

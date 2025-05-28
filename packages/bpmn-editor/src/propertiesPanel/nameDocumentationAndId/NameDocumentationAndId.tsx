@@ -138,6 +138,7 @@ export function NameDocumentationAndId({
       <FormGroup label="Documentation">
         <TextArea
           aria-label={"Documentation"}
+          resizeOrientation={"vertical"}
           type={"text"}
           isDisabled={settings.isReadOnly}
           value={element?.documentation?.[0].__$$text || ""}

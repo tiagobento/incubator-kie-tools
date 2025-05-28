@@ -26,7 +26,12 @@ import { Grid, GridItem } from "@patternfly/react-core/dist/js/layouts/Grid";
 import { PlusCircleIcon } from "@patternfly/react-icons/dist/js/icons/plus-circle-icon";
 import { TimesIcon } from "@patternfly/react-icons/dist/js/icons/times-icon";
 import { Bullseye } from "@patternfly/react-core/dist/js/layouts/Bullseye";
-import { EmptyState, EmptyStateBody, EmptyStateIcon } from "@patternfly/react-core/dist/js/components/EmptyState";
+import {
+  EmptyState,
+  EmptyStateActions,
+  EmptyStateBody,
+  EmptyStateIcon,
+} from "@patternfly/react-core/dist/js/components/EmptyState";
 import { Title } from "@patternfly/react-core/dist/js/components/Title";
 import { visitFlowElementsAndArtifacts } from "../../mutations/_elementVisitor";
 import { setBpmn20Drools10MetaData } from "@kie-tools/bpmn-marshaller/dist/drools-extension-metaData";
@@ -502,9 +507,12 @@ export function Reassignments({ element }: { element: Normalized<BPMN20__tUserTa
               <EmptyStateBody>
                 {"This represents the empty state for reassignments. You can add reassignments to get started."}
               </EmptyStateBody>
-              <Button variant="primary" onClick={addReassignment}>
-                Add reassignment
-              </Button>
+              <br />
+              <EmptyStateActions>
+                <Button variant="primary" onClick={addReassignment}>
+                  Add reassignment
+                </Button>
+              </EmptyStateActions>
             </EmptyState>
           </Bullseye>
           <Button

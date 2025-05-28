@@ -609,49 +609,49 @@ export const MIN_NODE_SIZES: NodeSizes<BpmnNodeType> = {
 
 export const DEFAULT_NODE_SIZES: NodeSizes<BpmnNodeType> = {
   [NODE_TYPES.startEvent]: ({ snapGrid }) => {
-    const snappedMinSize = MIN_SIZE_FOR_NODES(snapGrid, 60, 60);
+    const snappedMinSize = MIN_SIZE_FOR_NODES(snapGrid, 80, 80);
     return {
       "@_width": snappedMinSize.width,
       "@_height": snappedMinSize.height,
     };
   },
   [NODE_TYPES.intermediateCatchEvent]: ({ snapGrid }) => {
-    const snappedMinSize = MIN_SIZE_FOR_NODES(snapGrid, 60, 60);
+    const snappedMinSize = MIN_SIZE_FOR_NODES(snapGrid, 80, 80);
     return {
       "@_width": snappedMinSize.width,
       "@_height": snappedMinSize.height,
     };
   },
   [NODE_TYPES.intermediateThrowEvent]: ({ snapGrid }) => {
-    const snappedMinSize = MIN_SIZE_FOR_NODES(snapGrid, 60, 60);
+    const snappedMinSize = MIN_SIZE_FOR_NODES(snapGrid, 80, 80);
     return {
       "@_width": snappedMinSize.width,
       "@_height": snappedMinSize.height,
     };
   },
   [NODE_TYPES.endEvent]: ({ snapGrid }) => {
-    const snappedMinSize = MIN_SIZE_FOR_NODES(snapGrid, 60, 60);
+    const snappedMinSize = MIN_SIZE_FOR_NODES(snapGrid, 80, 80);
     return {
       "@_width": snappedMinSize.width,
       "@_height": snappedMinSize.height,
     };
   },
   [NODE_TYPES.task]: ({ snapGrid }) => {
-    const snappedMinSize = MIN_SIZE_FOR_NODES(snapGrid, 180, 90);
+    const snappedMinSize = MIN_SIZE_FOR_NODES(snapGrid, 200, 100);
     return {
       "@_width": snappedMinSize.width,
       "@_height": snappedMinSize.height,
     };
   },
   [NODE_TYPES.subProcess]: ({ snapGrid }) => {
-    const snappedMinSize = MIN_SIZE_FOR_NODES(snapGrid, 540, 240);
+    const snappedMinSize = MIN_SIZE_FOR_NODES(snapGrid, 580, 240);
     return {
       "@_width": snappedMinSize.width,
       "@_height": snappedMinSize.height,
     };
   },
   [NODE_TYPES.gateway]: ({ snapGrid }) => {
-    const snappedMinSize = MIN_SIZE_FOR_NODES(snapGrid, 60, 60);
+    const snappedMinSize = MIN_SIZE_FOR_NODES(snapGrid, 80, 80);
     return {
       "@_width": snappedMinSize.width,
       "@_height": snappedMinSize.height,
@@ -695,7 +695,7 @@ export const DEFAULT_NODE_SIZES: NodeSizes<BpmnNodeType> = {
 };
 
 export const NODE_MIN_WIDTH = 120;
-export const NODE_MIN_HEIGHT = 60;
+export const NODE_MIN_HEIGHT = 100;
 
 export const MIN_SIZE_FOR_NODES = (grid: SnapGrid, width = NODE_MIN_WIDTH, height = NODE_MIN_HEIGHT) => {
   const snapped = snapPoint(grid, { "@_x": width, "@_y": height }, "ceil");

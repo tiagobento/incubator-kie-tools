@@ -51,7 +51,12 @@ import { Correlations } from "../propertiesPanel/correlations/Correlations";
 import { Variables } from "../propertiesPanel/variables/Variables";
 import { Button } from "@patternfly/react-core/dist/js/components/Button";
 import { Icon } from "@patternfly/react-core/dist/js/components/Icon";
-import { EmptyState, EmptyStateIcon, EmptyStateBody } from "@patternfly/react-core/dist/js/components/EmptyState";
+import {
+  EmptyState,
+  EmptyStateIcon,
+  EmptyStateBody,
+  EmptyStateActions,
+} from "@patternfly/react-core/dist/js/components/EmptyState";
 import { Title } from "@patternfly/react-core/dist/js/components/Title";
 import { Bullseye } from "@patternfly/react-core/dist/js/layouts/Bullseye";
 import { addVariable } from "../mutations/addVariable";
@@ -341,17 +346,20 @@ function VariablesEmptyState({ addButton: _ }: { addButton: JSX.Element }) {
             <EmptyStateBody style={{ padding: "0 25%" }}>
               {"Variables let you manage mutable data during the lifetime of a Process Instance."}
             </EmptyStateBody>
-            <Button
-              variant="primary"
-              onClick={() => {
-                bpmnEditorStoreApi.setState((s) => {
-                  const { process } = addOrGetProcessAndDiagramElements({ definitions: s.bpmn.model.definitions });
-                  addVariable({ definitions: s.bpmn.model.definitions, pId: process["@_id"] });
-                });
-              }}
-            >
-              {"Add Variable"}
-            </Button>
+            <br />
+            <EmptyStateActions>
+              <Button
+                variant="primary"
+                onClick={() => {
+                  bpmnEditorStoreApi.setState((s) => {
+                    const { process } = addOrGetProcessAndDiagramElements({ definitions: s.bpmn.model.definitions });
+                    addVariable({ definitions: s.bpmn.model.definitions, pId: process["@_id"] });
+                  });
+                }}
+              >
+                {"Add Variable"}
+              </Button>
+            </EmptyStateActions>
           </EmptyState>
         </Bullseye>
       </div>

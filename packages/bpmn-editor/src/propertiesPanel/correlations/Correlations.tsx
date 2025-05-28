@@ -29,7 +29,12 @@ import { generateUuid } from "@kie-tools/xyflow-react-kie-diagram/dist/uuid/uuid
 import { Button, ButtonVariant } from "@patternfly/react-core/dist/js/components/Button/Button";
 import { Card } from "@patternfly/react-core/dist/js/components/Card";
 import { Divider } from "@patternfly/react-core/dist/js/components/Divider";
-import { EmptyState, EmptyStateBody, EmptyStateIcon } from "@patternfly/react-core/dist/js/components/EmptyState";
+import {
+  EmptyState,
+  EmptyStateActions,
+  EmptyStateBody,
+  EmptyStateIcon,
+} from "@patternfly/react-core/dist/js/components/EmptyState";
 import { FormGroup, FormSection } from "@patternfly/react-core/dist/js/components/Form";
 import { Form } from "@patternfly/react-core/dist/js/components/Form/Form";
 import { FormSelect } from "@patternfly/react-core/dist/js/components/FormSelect/FormSelect";
@@ -600,17 +605,20 @@ export function Correlations() {
                               "Correlations Keys lets you group Correlation Properties into subscriptions that bind Process Instances to certain values on observed Message."
                             }
                           </EmptyStateBody>
-                          <Button
-                            style={{
-                              marginTop: hasAtLeastOnePropertyWithMessageBinding ? undefined : "2rem",
-                            }}
-                            variant={
-                              hasAtLeastOnePropertyWithMessageBinding ? ButtonVariant.primary : ButtonVariant.tertiary
-                            }
-                            onClick={addKey}
-                          >
-                            {"Add Correlation Key"}
-                          </Button>
+                          <br />
+                          <EmptyStateActions>
+                            <Button
+                              style={{
+                                marginTop: hasAtLeastOnePropertyWithMessageBinding ? undefined : "2rem",
+                              }}
+                              variant={
+                                hasAtLeastOnePropertyWithMessageBinding ? ButtonVariant.primary : ButtonVariant.tertiary
+                              }
+                              onClick={addKey}
+                            >
+                              {"Add Correlation Key"}
+                            </Button>
+                          </EmptyStateActions>
                         </EmptyState>
                       </div>
                     </>
@@ -629,9 +637,12 @@ export function Correlations() {
                       "Correlations let you bind Process Instances to Messages containing specific property values. Start by creating a Correlation Property."
                     }
                   </EmptyStateBody>
-                  <Button variant={ButtonVariant.primary} onClick={addProperty}>
-                    {"Add Correlation Property"}
-                  </Button>
+                  <br />
+                  <EmptyStateActions>
+                    <Button variant={ButtonVariant.primary} onClick={addProperty}>
+                      {"Add Correlation Property"}
+                    </Button>
+                  </EmptyStateActions>
                 </EmptyState>
               </div>
             </>

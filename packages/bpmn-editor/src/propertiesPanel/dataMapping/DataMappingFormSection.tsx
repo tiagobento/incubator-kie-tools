@@ -31,7 +31,12 @@ import {
 } from "@kie-tools/bpmn-marshaller/dist/schemas/bpmn-2_0/ts-gen/types";
 import { Modal, ModalVariant } from "@patternfly/react-core/dist/js/components/Modal/Modal";
 import { generateUuid } from "@kie-tools/xyflow-react-kie-diagram/dist/uuid/uuid";
-import { EmptyState, EmptyStateIcon, EmptyStateBody } from "@patternfly/react-core/dist/js/components/EmptyState";
+import {
+  EmptyState,
+  EmptyStateIcon,
+  EmptyStateBody,
+  EmptyStateActions,
+} from "@patternfly/react-core/dist/js/components/EmptyState";
 import { Title } from "@patternfly/react-core/dist/js/components/Title";
 import { Bullseye } from "@patternfly/react-core/dist/js/layouts/Bullseye";
 import { Grid, GridItem } from "@patternfly/react-core/dist/js/layouts/Grid";
@@ -566,7 +571,8 @@ export function DataMappingsList({
           <Alert variant="success" title={onSaveMessage} isInline />
         </div>
       )}
-      {((inputDataMapping.length > 0 || outputDataMapping.length > 0) && (
+      {((inputDataMapping.filter((entry) => !DATA_INPUT_RESERVED_NAMES.has(entry.name)).length > 0 ||
+        outputDataMapping.length > 0) && (
         <Form onSubmit={handleSubmit} style={{ gridRowGap: 0 }}>
           <div style={{ position: "sticky", top: "0", backdropFilter: "blur(8px)" }}>
             {titleComponent}
@@ -727,9 +733,12 @@ export function DataMappingsList({
                 <EmptyStateBody style={{ padding: "0 25%" }}>
                   {"This represents the empty state for data mapping. You can add data mappings to get started."}
                 </EmptyStateBody>
-                <Button variant="primary" onClick={addDataMapping}>
-                  {`Add ${entryTitle} data mapping`}
-                </Button>
+                <br />
+                <EmptyStateActions>
+                  <Button variant="primary" onClick={addDataMapping}>
+                    {`Add ${entryTitle} data mapping`}
+                  </Button>
+                </EmptyStateActions>
               </EmptyState>
             </Bullseye>
           </div>

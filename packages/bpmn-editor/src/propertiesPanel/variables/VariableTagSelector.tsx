@@ -92,6 +92,7 @@ export function VariableTagSelector({ p, i }: { p: undefined | WithVariables; i:
     <Select
       toggle={(toggleRef) => (
         <MenuToggle
+          style={{ width: "100%", background: "white" }}
           ref={toggleRef}
           onClick={() => setOpen((prev) => !prev)}
           isExpanded={isOpen}

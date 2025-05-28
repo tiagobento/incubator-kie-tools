@@ -73,7 +73,8 @@ export function BpmnDiagramEmptyState({
           <EmptyStateBody>Start by dragging nodes from the Palette</EmptyStateBody>
           <br />
           <EmptyStateBody>or</EmptyStateBody>
-          <EmptyStateActions>
+          <br />
+          <EmptyStateActions style={{ display: "block" }}>
             <Button
               variant={ButtonVariant.link}
               icon={<UserIcon />}
