@@ -22,12 +22,11 @@ import { BPMN20__tMessage, BPMN20__tProcess } from "@kie-tools/bpmn-marshaller/d
 import { ElementFilter } from "@kie-tools/xml-parser-ts/dist/elementFilter";
 import { Unpacked } from "@kie-tools/xyflow-react-kie-diagram/dist/tsExt/tsExt";
 import { InputGroup, InputGroupText } from "@patternfly/react-core/dist/js/components/InputGroup";
-import { TextInput } from "@patternfly/react-core/dist/js/components/TextInput";
 import { MessageEventSymbolSvg } from "../../diagram/nodes/NodeSvgs";
 import { Normalized } from "../../normalization/normalize";
-import { useBpmnEditorStore, useBpmnEditorStoreApi } from "../../store/StoreContext";
-import "./MessageSelector.css";
+import { useBpmnEditorStore } from "../../store/StoreContext";
 import { FormSelect, FormSelectOption } from "@patternfly/react-core/dist/js/components/FormSelect";
+import "./MessageSelector.css";
 
 export type EventWithMessage =
   | undefined

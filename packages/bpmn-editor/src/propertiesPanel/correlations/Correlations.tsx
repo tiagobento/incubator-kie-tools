@@ -60,6 +60,7 @@ import {
 } from "../itemDefinitionRefSelector/ItemDefinitionRefSelector";
 import { MessageSelector } from "../messageSelector/MessageSelector";
 import "./Correlations.css";
+import TimesIcon from "@patternfly/react-icons/dist/js/icons/times-icon";
 
 export function Correlations() {
   const bpmnEditorStoreApi = useBpmnEditorStoreApi();
@@ -200,6 +201,18 @@ export function Correlations() {
     [bpmnEditorStoreApi]
   );
 
+  const onRemoveProperty = useCallback(
+    (propertyId: string) => {
+      bpmnEditorStoreApi.setState((s) => {
+        s.bpmn.model.definitions.rootElement ??= [];
+        s.bpmn.model.definitions.rootElement = s.bpmn.model.definitions.rootElement?.filter(
+          (e) => e["@_id"] !== propertyId
+        );
+      });
+    },
+    [bpmnEditorStoreApi]
+  );
+
   const addMessageBindingToProperty = useCallback(() => {
     bpmnEditorStoreApi.setState((s) => {
       const property = s.bpmn.model.definitions.rootElement
@@ -250,6 +263,21 @@ export function Correlations() {
     [bpmnEditorStoreApi, selectedPropertyId]
   );
 
+  const removePropertyBinding = useCallback(
+    (i: number) => (e: React.FormEvent) => {
+      bpmnEditorStoreApi.setState((s) => {
+        const property = s.bpmn.model.definitions.rootElement
+          ?.filter((p) => p.__$$element === "correlationProperty")
+          .find((p) => p["@_id"] === selectedPropertyId);
+
+        if (property) {
+          property.correlationPropertyRetrievalExpression.splice(i, 1);
+        }
+      });
+    },
+    [bpmnEditorStoreApi, selectedPropertyId]
+  );
+
   const changeKeyName = useCallback(
     (keyId: string) => (newName: string) => {
       bpmnEditorStoreApi.setState((s) => {
@@ -259,6 +287,18 @@ export function Correlations() {
 
         if (key) {
           key["@_name"] = newName;
+        }
+      });
+    },
+    [bpmnEditorStoreApi]
+  );
+
+  const onRemoveKey = useCallback(
+    (keyId: string) => {
+      bpmnEditorStoreApi.setState((s) => {
+        const collaboration = s.bpmn.model.definitions.rootElement?.find((e) => e.__$$element === "collaboration");
+        if (collaboration) {
+          collaboration.correlationKey = collaboration.correlationKey?.filter((k) => k["@_id"] !== keyId);
         }
       });
     },
@@ -323,13 +363,55 @@ export function Correlations() {
   }, [bpmnEditorStoreApi, selectedKey, selectedKeyId]);
 
   const changeValueOfSubscription = useCallback(
-    (subscriptionIndex: number, propertyBindingIndex: number) => (e: React.FormEvent, newValue: string) => {
+    (subscriptionId: string, propertyBindingIndex: number) => (e: React.FormEvent, newValue: string) => {
       bpmnEditorStoreApi.setState((s) => {
         const { process } = addOrGetProcessAndDiagramElements({ definitions: s.bpmn.model.definitions });
         process.correlationSubscription ??= [];
-        process.correlationSubscription[subscriptionIndex]!.correlationPropertyBinding![
+        process.correlationSubscription.find((subs) => subs["@_id"] === subscriptionId)!.correlationPropertyBinding![
           propertyBindingIndex
         ].dataPath.__$$text = newValue;
+      });
+    },
+    [bpmnEditorStoreApi]
+  );
+
+  const removePropertyFromKey = useCallback(
+    (propertyIndex: number) => {
+      return (e: React.FormEvent) => {
+        bpmnEditorStoreApi.setState((s) => {
+          const key = s.bpmn.model.definitions.rootElement
+            ?.find((e) => e.__$$element === "collaboration")
+            ?.correlationKey?.find((k) => k["@_id"] === selectedKeyId);
+
+          if (key) {
+            key.correlationPropertyRef ??= [];
+            const removedCorrelationPropertyRef = key.correlationPropertyRef[propertyIndex];
+            key.correlationPropertyRef.splice(propertyIndex, 1);
+
+            const { process } = addOrGetProcessAndDiagramElements({ definitions: s.bpmn.model.definitions });
+            for (const subs of process.correlationSubscription ?? []) {
+              if (subs["@_correlationKeyRef"] === selectedKeyId) {
+                subs.correlationPropertyBinding ??= [];
+                subs.correlationPropertyBinding = subs.correlationPropertyBinding.filter(
+                  (b) => b["@_correlationPropertyRef"] !== removedCorrelationPropertyRef.__$$text
+                );
+              }
+            }
+          }
+        });
+      };
+    },
+    [bpmnEditorStoreApi, selectedKeyId]
+  );
+
+  const removeSubscription = useCallback(
+    (subscriptionId: string) => (e: React.FormEvent) => {
+      bpmnEditorStoreApi.setState((s) => {
+        const { process } = addOrGetProcessAndDiagramElements({ definitions: s.bpmn.model.definitions });
+        process.correlationSubscription ??= [];
+        process.correlationSubscription = process.correlationSubscription.filter(
+          (subs) => subs["@_id"] !== subscriptionId
+        );
       });
     },
     [bpmnEditorStoreApi]
@@ -375,7 +457,11 @@ export function Correlations() {
                     </>
                   }
                 >
-                  <Flex alignItems={{ default: "alignItemsFlexStart" }} style={{ gap: "18px" }}>
+                  <Flex
+                    alignItems={{ default: "alignItemsFlexStart" }}
+                    flexWrap={{ default: "nowrap" }}
+                    style={{ gap: "18px" }}
+                  >
                     <FlexItem>
                       <FormSection>
                         <FormGroup
@@ -405,6 +491,7 @@ export function Correlations() {
                                 isSelected={p["@_id"] === selectedPropertyId}
                                 onChange={changePropertyName(p["@_id"])}
                                 onClick={() => setSelectedPropertyId(p["@_id"])}
+                                onRemove={() => onRemoveProperty(p["@_id"])}
                               />
                             ))}
                           </ul>
@@ -427,32 +514,41 @@ export function Correlations() {
                           label="Message bindings"
                           className={"kie-bpmn-editor--correlations--properties--bindings"}
                         >
-                          <Stack hasGutter={true} style={{ gap: "12px" }}>
+                          <Stack hasGutter={true} style={{ gap: "36px" }}>
                             {selectedProperty.correlationPropertyRetrievalExpression.map((cpre, i) => (
                               <Card
                                 key={cpre["@_id"]}
                                 isCompact={true}
                                 className={"kie-bpmn-editor--correlations--properties--bindings--binding"}
                               >
-                                <MessageSelector
-                                  value={cpre["@_messageRef"]}
-                                  onChange={onChangeMessageBindingMessage(i)}
-                                />
-                                <InputGroup>
-                                  <InputGroupText className={"expression-label"}>{`↳`}</InputGroupText>
-                                  <TextInput
-                                    style={{ fontFamily: "monospace" }}
-                                    value={cpre.messagePath.__$$text}
-                                    onChange={onChangeMessageBindingExpression(i)}
-                                    placeholder={"Enter an expression (MVEL)..."}
-                                  />
-                                </InputGroup>
+                                <Flex gap={{ default: "gapNone" }} alignItems={{ default: "alignItemsCenter" }}>
+                                  <FlexItem grow={{ default: "grow" }}>
+                                    <MessageSelector
+                                      value={cpre["@_messageRef"]}
+                                      onChange={onChangeMessageBindingMessage(i)}
+                                    />
+                                    <InputGroup>
+                                      <InputGroupText className={"expression-label"}>{`↳`}</InputGroupText>
+                                      <TextInput
+                                        style={{ fontFamily: "monospace" }}
+                                        value={cpre.messagePath.__$$text}
+                                        onChange={onChangeMessageBindingExpression(i)}
+                                        placeholder={"Enter an expression (MVEL)..."}
+                                      />
+                                    </InputGroup>
+                                  </FlexItem>
+                                  <FlexItem>
+                                    <Button variant={ButtonVariant.plain} onClick={removePropertyBinding(i)}>
+                                      <TimesIcon />
+                                    </Button>
+                                  </FlexItem>
+                                </Flex>
                               </Card>
                             ))}
                             <Button
                               variant={
                                 !hasAtLeastOnePropertyWithMessageBinding
-                                  ? ButtonVariant.primary
+                                  ? ButtonVariant.secondary
                                   : ButtonVariant.tertiary
                               }
                               size={"lg"}
@@ -461,7 +557,11 @@ export function Correlations() {
                             >
                               <svg width={30} height={30}>
                                 <MessageEventSymbolSvg
-                                  stroke={!hasAtLeastOnePropertyWithMessageBinding ? "white" : "black"}
+                                  stroke={
+                                    !hasAtLeastOnePropertyWithMessageBinding
+                                      ? "var(--pf-v5-c-button--m-secondary--hover--after--BorderColor)"
+                                      : "black"
+                                  }
                                   cx={15}
                                   cy={15}
                                   innerCircleRadius={15}
@@ -492,7 +592,11 @@ export function Correlations() {
                 >
                   {(selectedKey && (
                     <>
-                      <Flex alignItems={{ default: "alignItemsFlexStart" }} style={{ gap: "18px" }}>
+                      <Flex
+                        alignItems={{ default: "alignItemsFlexStart" }}
+                        flexWrap={{ default: "nowrap" }}
+                        style={{ gap: "18px" }}
+                      >
                         <FlexItem>
                           <FormSection>
                             <FormGroup
@@ -522,6 +626,7 @@ export function Correlations() {
                                     isSelected={k["@_id"] === selectedKeyId}
                                     onChange={changeKeyName(k["@_id"])}
                                     onClick={() => setSelectedKeyId(k["@_id"])}
+                                    onRemove={() => onRemoveKey(k["@_id"])}
                                   />
                                 ))}
                               </ul>
@@ -531,9 +636,17 @@ export function Correlations() {
                         <FlexItem>
                           <FormSection>
                             <FormGroup label="Properties" className={"kie-bpmn-editor--correlations--keys--properties"}>
-                              {selectedKey.correlationPropertyRef?.map((propertyRef) => (
-                                <li key={propertyRef.__$$text}>
-                                  {propertiesById.get(propertyRef.__$$text)?.["@_name"]}
+                              {selectedKey.correlationPropertyRef?.map((propertyRef, i) => (
+                                <li
+                                  key={propertyRef.__$$text}
+                                  className={"kie-bpmn-editor--correlations--keys--properties--property"}
+                                >
+                                  {propertiesById.get(propertyRef.__$$text)?.["@_name"] ?? (
+                                    <i style={{ color: "red" }}>{`<Unknown>`}</i>
+                                  )}
+                                  <Button onClick={removePropertyFromKey(i)} variant={ButtonVariant.plain}>
+                                    <TimesIcon />
+                                  </Button>
                                 </li>
                               ))}
                               <ul>
@@ -557,7 +670,11 @@ export function Correlations() {
                                       }
                                     />
                                     {availablePropertiesToAddToKey.map((p) => (
-                                      <FormSelectOption key={p["@_id"]} label={p["@_name"] ?? "-"} value={p["@_id"]} />
+                                      <FormSelectOption
+                                        key={p["@_id"]}
+                                        label={p["@_name"] ?? "<Unknown>"}
+                                        value={p["@_id"]}
+                                      />
                                     ))}
                                   </FormSelect>
                                 </li>
@@ -567,35 +684,54 @@ export function Correlations() {
                         </FlexItem>
                         <FlexItem grow={{ default: "grow" }}>
                           <FormSection>
-                            {((selectedKey.correlationPropertyRef ?? []).length > 0 && (
-                              <FormGroup
-                                label="Subscriptions"
-                                className={"kie-bpmn-editor--correlations--keys--subscriptions"}
-                              >
-                                <Stack hasGutter={true}>
-                                  {subscriptions.map((subs, i) => (
-                                    <Card key={subs["@_id"]} isCompact={true}>
-                                      {subs.correlationPropertyBinding?.map((cpb, j) => (
-                                        <InputGroup key={cpb["@_id"]}>
-                                          <InputGroupText style={{ whiteSpace: "nowrap" }}>
-                                            {propertiesById.get(cpb["@_correlationPropertyRef"])?.["@_name"] ?? "-"}
-                                          </InputGroupText>
-                                          <InputGroupText>=</InputGroupText>
-                                          <TextInput
-                                            style={{ fontFamily: "monospace" }}
-                                            value={cpb.dataPath.__$$text}
-                                            onChange={changeValueOfSubscription(i, j)}
-                                            placeholder="Enter a value or expression..."
-                                          />
-                                        </InputGroup>
-                                      ))}
+                            <FormGroup
+                              label="Subscriptions"
+                              className={"kie-bpmn-editor--correlations--keys--subscriptions"}
+                            >
+                              {((selectedKey.correlationPropertyRef ?? []).length > 0 && (
+                                <Stack hasGutter={true} style={{ gap: "36px" }}>
+                                  {subscriptions.map((subs) => (
+                                    <Card
+                                      key={subs["@_id"]}
+                                      isCompact={true}
+                                      className={"kie-bpmn-editor--correlations--keys--subscriptions--subscription"}
+                                    >
+                                      <Flex gap={{ default: "gapNone" }} alignItems={{ default: "alignItemsCenter" }}>
+                                        <FlexItem grow={{ default: "grow" }}>
+                                          {subs.correlationPropertyBinding?.map((cpb, j) => (
+                                            <InputGroup key={cpb["@_id"]}>
+                                              <InputGroupText style={{ whiteSpace: "nowrap" }}>
+                                                {propertiesById.get(cpb["@_correlationPropertyRef"])?.["@_name"] ?? (
+                                                  <i style={{ color: "red" }}>{`<Unknown>`}</i>
+                                                )}
+                                              </InputGroupText>
+                                              <InputGroupText>=</InputGroupText>
+                                              <TextInput
+                                                style={{ fontFamily: "monospace" }}
+                                                value={cpb.dataPath.__$$text}
+                                                onChange={changeValueOfSubscription(subs["@_id"], j)}
+                                                placeholder="Enter a value or expression..."
+                                              />
+                                            </InputGroup>
+                                          ))}
+                                        </FlexItem>
+
+                                        <FlexItem>
+                                          <Button
+                                            variant={ButtonVariant.plain}
+                                            onClick={removeSubscription(subs["@_id"])}
+                                          >
+                                            <TimesIcon />
+                                          </Button>
+                                        </FlexItem>
+                                      </Flex>
                                     </Card>
                                   ))}
 
                                   <Button
                                     variant={
                                       !hasAtLeastOneKeyWithSubscriptions
-                                        ? ButtonVariant.primary
+                                        ? ButtonVariant.secondary
                                         : ButtonVariant.tertiary
                                     }
                                     icon={<PlusCircleIcon />}
@@ -607,22 +743,22 @@ export function Correlations() {
                                     Add Subscription
                                   </Button>
                                 </Stack>
-                              </FormGroup>
-                            )) || (
-                              <>
-                                <div className={"kie-bpmn-editor--correlations--empty-state"}>
-                                  <EmptyState>
-                                    <EmptyStateIcon icon={ObjectGroupIcon} />
-                                    <Title headingLevel="h4">
-                                      {`Can't add Subscriptions without any Property on '${selectedKey["@_name"]}'.`}
-                                    </Title>
-                                    <EmptyStateBody style={{ padding: "0 25%" }}>
-                                      {`Start by adding Properties to '${selectedKey["@_name"]}'.`}
-                                    </EmptyStateBody>
-                                  </EmptyState>
-                                </div>
-                              </>
-                            )}
+                              )) || (
+                                <>
+                                  <div className={"kie-bpmn-editor--correlations--empty-state"}>
+                                    <EmptyState>
+                                      <EmptyStateIcon icon={ObjectGroupIcon} />
+                                      <Title headingLevel="h4">
+                                        {`Can't add Subscriptions without any Property on '${selectedKey["@_name"]}'.`}
+                                      </Title>
+                                      <EmptyStateBody style={{ padding: "0 25%" }}>
+                                        {`Start by adding Properties to '${selectedKey["@_name"]}'.`}
+                                      </EmptyStateBody>
+                                    </EmptyState>
+                                  </div>
+                                </>
+                              )}
+                            </FormGroup>
                           </FormSection>
                         </FlexItem>
                       </Flex>
@@ -694,14 +830,24 @@ function EditableNameListItem({
   isSelected,
   onChange,
   onClick,
+  onRemove,
 }: {
   id: string;
   value: string | undefined;
   isSelected: boolean;
   onChange: OnEditableNodeLabelChange;
   onClick: React.MouseEventHandler<HTMLLIElement>;
+  onRemove: () => void;
 }) {
   const { isEditingLabel, setEditingLabel, triggerEditing, triggerEditingIfEnter } = useEditableNodeLabel(id);
+
+  const _onRemove = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      onRemove();
+    },
+    [onRemove]
+  );
 
   return (
     <li key={id} className={isSelected ? "selected" : ""} onClick={onClick} onDoubleClick={triggerEditing}>
@@ -716,6 +862,9 @@ function EditableNameListItem({
         shouldCommitOnBlur={true}
         validate={() => true}
       />
+      <Button onClick={_onRemove} variant={ButtonVariant.plain}>
+        <TimesIcon />
+      </Button>
     </li>
   );
 }

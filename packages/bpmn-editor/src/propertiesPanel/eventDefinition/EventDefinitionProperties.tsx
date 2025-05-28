@@ -94,7 +94,7 @@ export function EventDefinitionProperties({ event }: { event: Event }) {
                   value={
                     event?.eventDefinition?.find((eventDef) => eventDef.__$$element === "messageEventDefinition")?.[
                       "@_drools:msgref"
-                    ] || ""
+                    ]
                   }
                   onChange={onMessageChange}
                 />
