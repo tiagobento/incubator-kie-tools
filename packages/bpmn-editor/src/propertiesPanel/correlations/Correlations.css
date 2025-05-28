@@ -110,18 +110,13 @@
 
 .kie-bpmn-editor--correlations--keys--subscriptions--subscription:not(:nth-last-child(2))::before,
 .kie-bpmn-editor--correlations--properties--bindings--binding:not(:nth-last-child(2))::before {
+  content: "or";
   position: absolute;
   font-style: italic;
   bottom: -30px;
   width: 100%;
   display: block;
   text-align: center;
-}
-.kie-bpmn-editor--correlations--keys--subscriptions--subscription:not(:nth-last-child(2))::before {
-  content: "and";
-}
-.kie-bpmn-editor--correlations--properties--bindings--binding:not(:nth-last-child(2))::before {
-  content: "or";
 }
 
 .kie-bpmn-editor--correlations--properties li:hover,

@@ -36,6 +36,7 @@ import { USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING } from
 import { ItemDefinitionRefSelector } from "../itemDefinitionRefSelector/ItemDefinitionRefSelector";
 import { Divider } from "@patternfly/react-core/dist/js/components/Divider";
 import "./MultiInstanceProperties.css";
+import { VariableSelector } from "../variableSelector/VariableSelector";
 
 export type WithMultiInstanceProperties = Normalized<
   ElementFilter<
@@ -139,9 +140,30 @@ export function MultiInstanceProperties({ element }: { element: WithMultiInstanc
       <Divider style={{ margin: "16px" }} />
 
       <FormGroup label={"Collection input"}>
-        <FormSelect id={"select"} value={undefined} isDisabled={isReadOnly}>
-          <FormSelectOption id={"none"} isPlaceholder={true} label={"-- Select a value --"} />
-        </FormSelect>
+        <VariableSelector
+          value={
+            element?.loopCharacteristics?.__$$element === "multiInstanceLoopCharacteristics"
+              ? element?.loopCharacteristics["loopDataInputRef"]?.__$$text
+              : undefined
+          }
+          onChange={(e, newVariableRef) => {
+            bpmnEditorStoreApi.setState((s) => {
+              const { process } = addOrGetProcessAndDiagramElements({
+                definitions: s.bpmn.model.definitions,
+              });
+
+              visitFlowElementsAndArtifacts(process, ({ element: e }) => {
+                if (
+                  e["@_id"] === element?.["@_id"] &&
+                  e.__$$element === element.__$$element &&
+                  e.loopCharacteristics?.__$$element === "multiInstanceLoopCharacteristics"
+                ) {
+                  e.loopCharacteristics.loopDataInputRef = { __$$text: newVariableRef };
+                }
+              });
+            });
+          }}
+        />
       </FormGroup>
 
       <FormGroup label="Data input">
@@ -266,9 +288,30 @@ export function MultiInstanceProperties({ element }: { element: WithMultiInstanc
       <Divider style={{ margin: "16px" }} />
 
       <FormGroup label={"Collection output"}>
-        <FormSelect id={"select"} value={undefined} isDisabled={isReadOnly}>
-          <FormSelectOption id={"none"} isPlaceholder={true} label={"-- Select a value --"} />
-        </FormSelect>
+        <VariableSelector
+          value={
+            element?.loopCharacteristics?.__$$element === "multiInstanceLoopCharacteristics"
+              ? element?.loopCharacteristics["loopDataOutputRef"]?.__$$text
+              : undefined
+          }
+          onChange={(e, newVariableRef) => {
+            bpmnEditorStoreApi.setState((s) => {
+              const { process } = addOrGetProcessAndDiagramElements({
+                definitions: s.bpmn.model.definitions,
+              });
+
+              visitFlowElementsAndArtifacts(process, ({ element: e }) => {
+                if (
+                  e["@_id"] === element?.["@_id"] &&
+                  e.__$$element === element.__$$element &&
+                  e.loopCharacteristics?.__$$element === "multiInstanceLoopCharacteristics"
+                ) {
+                  e.loopCharacteristics.loopDataOutputRef = { __$$text: newVariableRef };
+                }
+              });
+            });
+          }}
+        />
       </FormGroup>
 
       <FormGroup label="Data output">

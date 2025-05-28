@@ -99,7 +99,7 @@ export const getDefaultStaticState = (): Omit<State, "bpmn" | "computed" | "disp
     overlaysPanel: {
       isOpen: false,
     },
-    openLhsPanel: BpmnDiagramLhsPanel.CORRELATIONS,
+    openLhsPanel: BpmnDiagramLhsPanel.NONE,
     overlays: {
       enableNodeHierarchyHighlight: false,
       enableCustomNodeStyles: true,
