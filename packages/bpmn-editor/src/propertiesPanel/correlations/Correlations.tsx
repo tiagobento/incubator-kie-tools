@@ -43,6 +43,7 @@ import { InputGroupText } from "@patternfly/react-core/dist/js/components/InputG
 import { InputGroup } from "@patternfly/react-core/dist/js/components/InputGroup/InputGroup";
 import { TextInput } from "@patternfly/react-core/dist/js/components/TextInput";
 import { Title } from "@patternfly/react-core/dist/js/components/Title";
+import { Tabs, Tab, TabTitleIcon, TabTitleText } from "@patternfly/react-core/dist/js/components/Tabs";
 import { Flex } from "@patternfly/react-core/dist/js/layouts/Flex/Flex";
 import { FlexItem } from "@patternfly/react-core/dist/js/layouts/Flex/FlexItem";
 import { Stack } from "@patternfly/react-core/dist/js/layouts/Stack";
@@ -348,113 +349,147 @@ export function Correlations() {
     [keys]
   );
 
+  const [activeTabKey, setActiveTabKey] = React.useState<string | number>(0);
+
   return (
     <div className={"kie-bpmn-editor--correlations"}>
       <>
         <Form>
           {(selectedProperty && (
             <>
-              <Flex alignItems={{ default: "alignItemsFlexStart" }}>
-                <FlexItem>
-                  <Flex style={{ height: "100%" }}>
-                    <FormSection>
-                      <FormGroup
-                        label={
-                          <Flex
-                            justifyContent={{ default: "justifyContentSpaceBetween" }}
-                            alignItems={{ default: "alignItemsCenter" }}
-                          >
-                            <span>Properties</span>
-                            {!isReadOnly && (
-                              <div>
-                                <Button variant={ButtonVariant.link} onClick={addProperty}>
-                                  <PlusCircleIcon />
-                                </Button>
-                              </div>
-                            )}
-                          </Flex>
-                        }
-                        className={"kie-bpmn-editor--correlations--properties"}
-                      >
-                        <ul>
-                          {properties.map((p) => (
-                            <EditableNameListItem
-                              key={p["@_id"]}
-                              id={p["@_id"]}
-                              value={p["@_name"]}
-                              isSelected={p["@_id"] === selectedPropertyId}
-                              onChange={changePropertyName(p["@_id"])}
-                              onClick={() => setSelectedPropertyId(p["@_id"])}
-                            />
-                          ))}
-                        </ul>
-                      </FormGroup>
-                    </FormSection>
-                    <FormSection>
-                      <FormGroup label="Data Type" className={"kie-bpmn-editor--correlations--properties--data-type"}>
-                        <ItemDefinitionRefSelector
-                          value={selectedProperty?.["@_type"]}
-                          onChange={changeSelectedPropertyType}
-                        />
-                      </FormGroup>
-                      <FormGroup
-                        label="Message bindings"
-                        className={"kie-bpmn-editor--correlations--properties--bindings"}
-                      >
-                        <Stack hasGutter={true} style={{ gap: "12px" }}>
-                          {selectedProperty.correlationPropertyRetrievalExpression.map((cpre, i) => (
-                            <Card
-                              key={cpre["@_id"]}
-                              isCompact={true}
-                              className={"kie-bpmn-editor--correlations--properties--bindings--binding"}
+              <Tabs
+                activeKey={activeTabKey}
+                onSelect={(e, eventKey) => setActiveTabKey(eventKey)}
+                isBox={true}
+                aria-label="Tabs in the icons and text example"
+                role="region"
+              >
+                <Tab
+                  eventKey={0}
+                  title={
+                    <>
+                      <TabTitleIcon>
+                        <PeopleCarryIcon />
+                      </TabTitleIcon>
+                      <TabTitleText>Properties</TabTitleText>
+                    </>
+                  }
+                >
+                  <Flex alignItems={{ default: "alignItemsFlexStart" }} style={{ gap: "18px" }}>
+                    <FlexItem>
+                      <FormSection>
+                        <FormGroup
+                          label={
+                            <Flex
+                              justifyContent={{ default: "justifyContentSpaceBetween" }}
+                              alignItems={{ default: "alignItemsCenter" }}
                             >
-                              <MessageSelector
-                                value={cpre["@_messageRef"]}
-                                onChange={onChangeMessageBindingMessage(i)}
+                              <span>Properties</span>
+                              {!isReadOnly && (
+                                <div>
+                                  <Button variant={ButtonVariant.link} onClick={addProperty}>
+                                    <PlusCircleIcon />
+                                  </Button>
+                                </div>
+                              )}
+                            </Flex>
+                          }
+                          className={"kie-bpmn-editor--correlations--properties"}
+                        >
+                          <ul>
+                            {properties.map((p) => (
+                              <EditableNameListItem
+                                key={p["@_id"]}
+                                id={p["@_id"]}
+                                value={p["@_name"]}
+                                isSelected={p["@_id"] === selectedPropertyId}
+                                onChange={changePropertyName(p["@_id"])}
+                                onClick={() => setSelectedPropertyId(p["@_id"])}
                               />
-                              <InputGroup>
-                                <InputGroupText className={"expression-label"}>{`↳`}</InputGroupText>
-                                <TextInput
-                                  style={{ fontFamily: "monospace" }}
-                                  value={cpre.messagePath.__$$text}
-                                  onChange={onChangeMessageBindingExpression(i)}
-                                  placeholder={"Enter an expression (MVEL)..."}
+                            ))}
+                          </ul>
+                        </FormGroup>
+                      </FormSection>
+                    </FlexItem>
+                    <FlexItem>
+                      <FormSection>
+                        <FormGroup label="Data Type" className={"kie-bpmn-editor--correlations--properties--data-type"}>
+                          <ItemDefinitionRefSelector
+                            value={selectedProperty?.["@_type"]}
+                            onChange={changeSelectedPropertyType}
+                          />
+                        </FormGroup>
+                      </FormSection>
+                    </FlexItem>
+                    <FlexItem grow={{ default: "grow" }}>
+                      <FormSection>
+                        <FormGroup
+                          label="Message bindings"
+                          className={"kie-bpmn-editor--correlations--properties--bindings"}
+                        >
+                          <Stack hasGutter={true} style={{ gap: "12px" }}>
+                            {selectedProperty.correlationPropertyRetrievalExpression.map((cpre, i) => (
+                              <Card
+                                key={cpre["@_id"]}
+                                isCompact={true}
+                                className={"kie-bpmn-editor--correlations--properties--bindings--binding"}
+                              >
+                                <MessageSelector
+                                  value={cpre["@_messageRef"]}
+                                  onChange={onChangeMessageBindingMessage(i)}
                                 />
-                              </InputGroup>
-                            </Card>
-                          ))}
-                          <Button
-                            variant={
-                              !hasAtLeastOnePropertyWithMessageBinding ? ButtonVariant.primary : ButtonVariant.tertiary
-                            }
-                            size={"lg"}
-                            style={{ width: "100%", lineHeight: "1" }}
-                            onClick={addMessageBindingToProperty}
-                          >
-                            <svg width={30} height={30}>
-                              <MessageEventSymbolSvg
-                                stroke={!hasAtLeastOnePropertyWithMessageBinding ? "white" : "black"}
-                                cx={15}
-                                cy={15}
-                                innerCircleRadius={15}
-                                fill={"transparent"}
-                                filled={false}
-                              />
-                            </svg>
-                            <br />
-                            Add Message binding
-                          </Button>
-                        </Stack>
-                      </FormGroup>
-                    </FormSection>
+                                <InputGroup>
+                                  <InputGroupText className={"expression-label"}>{`↳`}</InputGroupText>
+                                  <TextInput
+                                    style={{ fontFamily: "monospace" }}
+                                    value={cpre.messagePath.__$$text}
+                                    onChange={onChangeMessageBindingExpression(i)}
+                                    placeholder={"Enter an expression (MVEL)..."}
+                                  />
+                                </InputGroup>
+                              </Card>
+                            ))}
+                            <Button
+                              variant={
+                                !hasAtLeastOnePropertyWithMessageBinding
+                                  ? ButtonVariant.primary
+                                  : ButtonVariant.tertiary
+                              }
+                              size={"lg"}
+                              style={{ width: "100%", lineHeight: "1" }}
+                              onClick={addMessageBindingToProperty}
+                            >
+                              <svg width={30} height={30}>
+                                <MessageEventSymbolSvg
+                                  stroke={!hasAtLeastOnePropertyWithMessageBinding ? "white" : "black"}
+                                  cx={15}
+                                  cy={15}
+                                  innerCircleRadius={15}
+                                  fill={"transparent"}
+                                  filled={false}
+                                />
+                              </svg>
+                              <br />
+                              Add Message binding
+                            </Button>
+                          </Stack>
+                        </FormGroup>
+                      </FormSection>
+                    </FlexItem>
                   </Flex>
-                </FlexItem>
-                <Divider
-                  inset={{ default: "insetMd" }}
-                  orientation={{ default: "vertical" }}
-                  style={{ margin: "20px" }}
-                />
-                <FlexItem grow={{ default: "grow" }} style={{ height: "100%" }}>
+                </Tab>
+                <Tab
+                  eventKey={1}
+                  title={
+                    <>
+                      <TabTitleIcon>
+                        <ObjectGroupIcon />
+                      </TabTitleIcon>
+                      <TabTitleText>Keys</TabTitleText>
+                    </>
+                  }
+                  aria-label="icons and text content"
+                >
                   {(selectedKey && (
                     <>
                       <Flex alignItems={{ default: "alignItemsFlexStart" }} style={{ gap: "18px" }}>
@@ -542,7 +577,7 @@ export function Correlations() {
                                     <Card key={subs["@_id"]} isCompact={true}>
                                       {subs.correlationPropertyBinding?.map((cpb, j) => (
                                         <InputGroup key={cpb["@_id"]}>
-                                          <InputGroupText>
+                                          <InputGroupText style={{ whiteSpace: "nowrap" }}>
                                             {propertiesById.get(cpb["@_correlationPropertyRef"])?.["@_name"] ?? "-"}
                                           </InputGroupText>
                                           <InputGroupText>=</InputGroupText>
@@ -623,8 +658,8 @@ export function Correlations() {
                       </div>
                     </>
                   )}
-                </FlexItem>
-              </Flex>
+                </Tab>
+              </Tabs>
             </>
           )) || (
             <>

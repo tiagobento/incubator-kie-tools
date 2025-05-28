@@ -18,7 +18,7 @@
  */
 
 import * as React from "react";
-import { BPMN20__tProcess } from "@kie-tools/bpmn-marshaller/dist/schemas/bpmn-2_0/ts-gen/types";
+import { BPMN20__tMessage, BPMN20__tProcess } from "@kie-tools/bpmn-marshaller/dist/schemas/bpmn-2_0/ts-gen/types";
 import { ElementFilter } from "@kie-tools/xml-parser-ts/dist/elementFilter";
 import { Unpacked } from "@kie-tools/xyflow-react-kie-diagram/dist/tsExt/tsExt";
 import { InputGroup, InputGroupText } from "@patternfly/react-core/dist/js/components/InputGroup";
@@ -27,6 +27,7 @@ import { MessageEventSymbolSvg } from "../../diagram/nodes/NodeSvgs";
 import { Normalized } from "../../normalization/normalize";
 import { useBpmnEditorStore, useBpmnEditorStoreApi } from "../../store/StoreContext";
 import "./MessageSelector.css";
+import { FormSelect, FormSelectOption } from "@patternfly/react-core/dist/js/components/FormSelect";
 
 export type EventWithMessage =
   | undefined
@@ -37,7 +38,7 @@ export type EventWithMessage =
       >
     >;
 
-export type OnMessageChange = (e: React.FormEvent, newMessage: string) => void;
+export type OnMessageChange = (e: React.FormEvent, newMessageRef: string) => void;
 
 export function MessageSelector({
   value,
@@ -50,29 +51,37 @@ export function MessageSelector({
 }) {
   const isReadOnly = useBpmnEditorStore((s) => s.settings.isReadOnly);
 
+  const messagesById = useBpmnEditorStore(
+    (s) =>
+      new Map(
+        s.bpmn.model.definitions.rootElement
+          ?.filter((e) => e.__$$element === "message")
+          .map((m) => [m["@_id"], m] as [string, BPMN20__tMessage])
+      )
+  );
+
   return (
     <>
       <InputGroup>
         <InputGroupText>
-          <svg width={40} height={40}>
+          <svg width={30} height={30}>
             <MessageEventSymbolSvg
               stroke={"black"}
-              cx={20}
-              cy={20}
-              innerCircleRadius={20}
+              cx={15}
+              cy={15}
+              innerCircleRadius={15}
               fill={"white"}
               filled={false}
             />
           </svg>
         </InputGroupText>
-        <TextInput
-          aria-label={"Message"}
-          type={"text"}
-          isDisabled={isReadOnly}
-          value={value}
-          onChange={onChange}
-          placeholder={"Enter Message..."}
-        />
+        <FormSelect onChange={onChange} value={value} isDisabled={isReadOnly}>
+          <FormSelectOption label={"Select a Message..."} isPlaceholder={true} isDisabled={true} />
+          {value && <FormSelectOption label={`Remove '${messagesById.get(value)?.["@_name"]}'...`} />}
+          {[...messagesById.values()].map((m) => (
+            <FormSelectOption key={m["@_id"]} label={m["@_name"] ?? `<Unknown>`} value={m["@_id"]} />
+          ))}
+        </FormSelect>
       </InputGroup>
     </>
   );
