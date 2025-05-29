@@ -162,7 +162,7 @@ export function ItemDefinitionRefSelector({
       {allOptions.map(({ dataType, itemDefinitionRef }) => (
         <SelectOption
           isSelected={value === itemDefinitionRef}
-          key={itemDefinitionRef}
+          key={itemDefinitionRef ?? "undefined"}
           value={{
             compareTo: (a: any) =>
               (itemDefinitionRef ?? "").toLowerCase().trim() == (a?.toString?.() ?? "").toLowerCase().trim(),

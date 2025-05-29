@@ -351,7 +351,6 @@ export class BpmnEditorRoot extends React.Component<BpmnEditorRootProps, BpmnEdi
       "G",
       "Edit | Create group wrapping selection",
       async () => {
-        console.log(" KEY GROUP PRESSED, ", commands);
         return commands.createGroup();
       }
     );

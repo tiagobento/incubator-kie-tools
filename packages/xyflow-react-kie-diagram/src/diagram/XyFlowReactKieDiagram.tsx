@@ -506,7 +506,6 @@ export function XyFlowReactKieDiagram<
               state.dispatch(state).setNodeStatus(change.id, { dragging: change.dragging });
 
               if (change.positionAbsolute) {
-                console.log(change.positionAbsolute);
                 const allNodes = state.computed(state).getDiagramData().nodes;
 
                 if (nodeIdBeingDraggedRef.current === change.id) {

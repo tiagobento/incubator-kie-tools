@@ -27,6 +27,7 @@ import { Normalized } from "../../normalization/normalize";
 import { useBpmnEditorStore } from "../../store/StoreContext";
 import { FormSelect, FormSelectOption } from "@patternfly/react-core/dist/js/components/FormSelect";
 import "./MessageSelector.css";
+import { generateUuid } from "@kie-tools/xyflow-react-kie-diagram/dist/uuid/uuid";
 
 export type EventWithMessage =
   | undefined
@@ -74,7 +75,7 @@ export function MessageSelector({
             />
           </svg>
         </InputGroupText>
-        <FormSelect onChange={onChange} value={value} isDisabled={isReadOnly}>
+        <FormSelect id={`message-selector-${generateUuid()}`} onChange={onChange} value={value} isDisabled={isReadOnly}>
           <FormSelectOption label={"Select a Message..."} isPlaceholder={true} isDisabled={true} />
           {value && <FormSelectOption label={`Remove '${messagesById.get(value)?.["@_name"]}'...`} />}
           {[...messagesById.values()].map((m) => (

@@ -26,6 +26,7 @@ import { BPMN20__tProcess } from "@kie-tools/bpmn-marshaller/dist/schemas/bpmn-2
 import { ElementFilter } from "@kie-tools/xml-parser-ts/dist/elementFilter";
 import { Unpacked } from "@kie-tools/xyflow-react-kie-diagram/dist/tsExt/tsExt";
 import "./ActivitySelector.css";
+import { generateUuid } from "@kie-tools/xyflow-react-kie-diagram/dist/uuid/uuid";
 
 export type WithActivity =
   | undefined
@@ -38,7 +39,7 @@ export function ActivitySelector({ element }: { element: WithActivity }) {
 
   return (
     <FormGroup label="Activity">
-      <FormSelect id={"select"} value={undefined} isDisabled={isReadOnly}>
+      <FormSelect id={`activity-selector-${generateUuid()}`} value={undefined} isDisabled={isReadOnly}>
         <FormSelectOption id={"none"} isPlaceholder={true} label={"-- None --"} />
       </FormSelect>
     </FormGroup>

@@ -17,9 +17,9 @@
  * under the License.
  */
 
+import * as React from "react";
 import { BPMN20__tCallActivity } from "@kie-tools/bpmn-marshaller/dist/schemas/bpmn-2_0/ts-gen/types";
 import { FormGroup } from "@patternfly/react-core/dist/js/components/Form";
-import * as React from "react";
 import { Normalized } from "../../normalization/normalize";
 import { useBpmnEditorStoreApi } from "../../store/StoreContext";
 import { NameDocumentationAndId } from "../nameDocumentationAndId/NameDocumentationAndId";
@@ -32,7 +32,6 @@ import { MultiInstanceProperties } from "../multiInstance/MultiInstancePropertie
 import { Checkbox } from "@patternfly/react-core/dist/js/components/Checkbox";
 import { visitFlowElementsAndArtifacts } from "../../mutations/_elementVisitor";
 import { addOrGetProcessAndDiagramElements } from "../../mutations/addOrGetProcessAndDiagramElements";
-import { generateUuid } from "@kie-tools/xyflow-react-kie-diagram/dist/uuid/uuid";
 import {
   parseBpmn20Drools10MetaData,
   setBpmn20Drools10MetaData,

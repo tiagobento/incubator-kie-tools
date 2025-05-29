@@ -54,8 +54,8 @@ export function SignalScopeSelector({ element }: { element: WithSignalScope }) {
   return (
     <FormSection>
       <FormGroup label="Signal Scope">
+        aria-label={"Signal Scope"}
         <FormSelect
-          aria-label={"Signal Scope"}
           type={"text"}
           isDisabled={settings.isReadOnly}
           value={parseBpmn20Drools10MetaData(element).get("customScope")}

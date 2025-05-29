@@ -29,6 +29,7 @@ import { FormSelect, FormSelectOption } from "@patternfly/react-core/dist/js/com
 import "./VariableSelector.css";
 import CodeIcon from "@patternfly/react-icons/dist/js/icons/code-icon";
 import { Icon } from "@patternfly/react-core/dist/js/components/Icon";
+import { generateUuid } from "@kie-tools/xyflow-react-kie-diagram/dist/uuid/uuid";
 
 export type OnVariableChange = (e: React.FormEvent, newVariableRef: string) => void;
 
@@ -60,7 +61,12 @@ export function VariableSelector({
             <CodeIcon />
           </Icon>
         </InputGroupText>
-        <FormSelect onChange={onChange} value={value} isDisabled={isReadOnly}>
+        <FormSelect
+          id={`variable-selector-${generateUuid()}`}
+          onChange={onChange}
+          value={value}
+          isDisabled={isReadOnly}
+        >
           <FormSelectOption label={"Select a Variable..."} isPlaceholder={true} isDisabled={true} />
           {[...variablesById.values()].map((v) => (
             <FormSelectOption key={v["@_id"]} label={v["@_name"] ?? `<Unknown>`} value={v["@_id"]} />

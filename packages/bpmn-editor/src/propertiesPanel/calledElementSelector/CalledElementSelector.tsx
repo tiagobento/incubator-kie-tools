@@ -18,13 +18,16 @@
  */
 
 import * as React from "react";
-import { useBpmnEditorStore } from "../../store/StoreContext";
+import { useBpmnEditorStore, useBpmnEditorStoreApi } from "../../store/StoreContext";
 import { FormGroup } from "@patternfly/react-core/dist/js/components/Form";
-import { FormSelect, FormSelectOption } from "@patternfly/react-core/dist/js/components/FormSelect";
 import { Normalized } from "../../normalization/normalize";
 import { BPMN20__tProcess } from "@kie-tools/bpmn-marshaller/dist/schemas/bpmn-2_0/ts-gen/types";
 import { ElementFilter } from "@kie-tools/xml-parser-ts/dist/elementFilter";
 import { Unpacked } from "@kie-tools/xyflow-react-kie-diagram/dist/tsExt/tsExt";
+import { TextInput } from "@patternfly/react-core/dist/js/components/TextInput";
+import { useCallback } from "react";
+import { visitFlowElementsAndArtifacts } from "../../mutations/_elementVisitor";
+import { addOrGetProcessAndDiagramElements } from "../../mutations/addOrGetProcessAndDiagramElements";
 import "./CalledElementSelector.css";
 
 export type WithCalledElement =
@@ -34,11 +37,32 @@ export type WithCalledElement =
 export function CalledElementSelector({ element }: { element: WithCalledElement }) {
   const isReadOnly = useBpmnEditorStore((s) => s.settings.isReadOnly);
 
+  const bpmnEditorStoreApi = useBpmnEditorStoreApi();
+
+  const onChange = useCallback(
+    (e: React.FormEvent, newCalledElement: string) => {
+      bpmnEditorStoreApi.setState((s) => {
+        const { process } = addOrGetProcessAndDiagramElements({
+          definitions: s.bpmn.model.definitions,
+        });
+        visitFlowElementsAndArtifacts(process, ({ element: e }) => {
+          if (e["@_id"] === element?.["@_id"] && e.__$$element === element.__$$element) {
+            e["@_calledElement"] = newCalledElement;
+          }
+        });
+      });
+    },
+    [bpmnEditorStoreApi, element]
+  );
+
   return (
     <FormGroup label="Called element">
-      <FormSelect id={"select"} value={undefined} isDisabled={isReadOnly}>
-        <FormSelectOption id={"none"} isPlaceholder={true} label={"-- None --"} />
-      </FormSelect>
+      <TextInput
+        aria-label={"called-element-selector"}
+        isDisabled={isReadOnly}
+        value={element?.["@_calledElement"]}
+        onChange={onChange}
+      />
     </FormGroup>
   );
 }

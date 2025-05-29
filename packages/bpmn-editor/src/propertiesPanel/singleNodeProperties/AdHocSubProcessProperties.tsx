@@ -76,7 +76,7 @@ export function AdHocSubProcessProperties({
 
         <FormGroup label="Ad-hoc ordering">
           <FormSelect
-            id={"select"}
+            id={"ad-hoc-subprocess-ordering-selector" + generateUuid()}
             type={"text"}
             isDisabled={isReadOnly}
             value={adHocSubProcess?.["@_ordering"] ?? "Parallel"}

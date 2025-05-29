@@ -652,6 +652,7 @@ export function Correlations() {
                               <ul>
                                 <li>
                                   <FormSelect
+                                    id={`correlation-key-properties-selector-${generateUuid()}`}
                                     className={!hasAtLeastOneKeyWithProperties ? "primary" : ""}
                                     onChange={addPropertyToCorrelationKey}
                                     isDisabled={availablePropertiesToAddToKey.length <= 0}

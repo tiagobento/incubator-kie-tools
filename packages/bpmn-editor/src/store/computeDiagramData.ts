@@ -280,8 +280,6 @@ export function computeDiagramData(
       const shapeSource = nodesById.get(sourceId)?.data?.shape;
       const shapeTarget = nodesById.get(targetId)?.data?.shape;
       if (shapeSource === undefined || shapeTarget === undefined) {
-        console.log("source " + sourceId);
-        console.log("target " + targetId);
         return [];
       }
 
