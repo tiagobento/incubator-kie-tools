@@ -59,8 +59,8 @@ import {
   OnChangeItemDefinitionRefSelector,
 } from "../itemDefinitionRefSelector/ItemDefinitionRefSelector";
 import { MessageSelector } from "../messageSelector/MessageSelector";
-import "./Correlations.css";
 import TimesIcon from "@patternfly/react-icons/dist/js/icons/times-icon";
+import "./Correlations.css";
 
 export function Correlations() {
   const bpmnEditorStoreApi = useBpmnEditorStoreApi();
@@ -249,7 +249,7 @@ export function Correlations() {
   );
 
   const onChangeMessageBindingMessage = useCallback(
-    (i: number) => (e: React.FormEvent, newMessaage: string) => {
+    (i: number) => (newMessaage: string) => {
       bpmnEditorStoreApi.setState((s) => {
         const property = s.bpmn.model.definitions.rootElement
           ?.filter((p) => p.__$$element === "correlationProperty")
@@ -526,6 +526,9 @@ export function Correlations() {
                                     <MessageSelector
                                       value={cpre["@_messageRef"]}
                                       onChange={onChangeMessageBindingMessage(i)}
+                                      disableValues={selectedProperty?.correlationPropertyRetrievalExpression.flatMap(
+                                        (c) => (c["@_messageRef"] === cpre["@_messageRef"] ? [] : c["@_messageRef"])
+                                      )}
                                     />
                                     <InputGroup>
                                       <InputGroupText className={"expression-label"}>{`↳`}</InputGroupText>

@@ -23,30 +23,31 @@ import { Unpacked } from "@kie-tools/xyflow-react-kie-diagram/dist/tsExt/tsExt";
 import { Normalized } from "../normalization/normalize";
 import { generateUuid } from "@kie-tools/xyflow-react-kie-diagram/dist/uuid/uuid";
 
-export function addOrGetMessages({
+export function addOrGetEscalations({
   definitions,
-  messageName,
+  escalationName,
 }: {
   definitions: Normalized<BPMN20__tDefinitions>;
-  messageName: string;
+  escalationName: string;
 }): {
-  messageRef: string;
+  escalationRef: string;
 } {
   definitions.rootElement ??= [];
-  const messages = definitions.rootElement.filter((s) => s.__$$element === "message");
-  const existingMessage = messages.find((s) => s["@_id"] === messageName);
+  const escalations = definitions.rootElement.filter((s) => s.__$$element === "escalation");
+  const existingEscalation = escalations.find((s) => s["@_id"] === escalationName);
 
-  if (existingMessage) {
-    return { messageRef: existingMessage["@_id"] };
+  if (existingEscalation) {
+    return { escalationRef: existingEscalation["@_id"] };
   }
 
-  const newMessage: ElementFilter<Unpacked<Normalized<BPMN20__tDefinitions["rootElement"]>>, "message"> = {
-    __$$element: "message",
+  const newEscalation: ElementFilter<Unpacked<Normalized<BPMN20__tDefinitions["rootElement"]>>, "escalation"> = {
+    __$$element: "escalation",
     "@_id": generateUuid(),
-    "@_itemRef": `${messageName}Type`,
-    "@_name": messageName,
+    "@_structureRef": `${escalationName}Type`,
+    "@_name": escalationName,
+    "@_escalationCode": escalationName,
   };
 
-  definitions.rootElement.push(newMessage);
-  return { messageRef: newMessage["@_id"] };
+  definitions.rootElement.push(newEscalation);
+  return { escalationRef: newEscalation["@_id"] };
 }

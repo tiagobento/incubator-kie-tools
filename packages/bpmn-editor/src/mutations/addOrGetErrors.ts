@@ -21,34 +21,33 @@ import { BPMN20__tDefinitions } from "@kie-tools/bpmn-marshaller/dist/schemas/bp
 import { ElementFilter } from "@kie-tools/xml-parser-ts/dist/elementFilter";
 import { Unpacked } from "@kie-tools/xyflow-react-kie-diagram/dist/tsExt/tsExt";
 import { Normalized } from "../normalization/normalize";
+import { generateUuid } from "@kie-tools/xyflow-react-kie-diagram/dist/uuid/uuid";
 
 export function addOrGetErrors({
   definitions,
-  oldError: oldErrorMessage,
-  newError: newErrorMessage,
+  errorName,
 }: {
   definitions: Normalized<BPMN20__tDefinitions>;
-  oldError: string;
-  newError: string;
+  errorName: string;
 }): {
-  error: ElementFilter<Unpacked<Normalized<BPMN20__tDefinitions["rootElement"]>>, "error">;
+  errorRef: string;
 } {
   definitions.rootElement ??= [];
-  const itemDefinitions = definitions.rootElement.filter((s) => s.__$$element === "itemDefinition");
-  const index = itemDefinitions.length;
   const errors = definitions.rootElement.filter((s) => s.__$$element === "error");
-  const existingError = errors.find((s) => s["@_id"] === oldErrorMessage);
-  if (existingError) {
-    existingError["@_id"] = newErrorMessage ?? oldErrorMessage;
-    existingError["@_errorCode"] = newErrorMessage ?? oldErrorMessage;
-    return { error: existingError };
-  }
-  const newError = {
-    __$$element: "error",
-    "@_id": newErrorMessage ?? oldErrorMessage,
-    "@_errorCode": newErrorMessage ?? oldErrorMessage,
-  } as ElementFilter<Unpacked<Normalized<BPMN20__tDefinitions["rootElement"]>>, "error">;
+  const existingError = errors.find((s) => s["@_id"] === errorName);
 
-  definitions.rootElement.splice(index, 0, newError);
-  return { error: newError };
+  if (existingError) {
+    return { errorRef: existingError["@_id"] };
+  }
+
+  const newError: ElementFilter<Unpacked<Normalized<BPMN20__tDefinitions["rootElement"]>>, "error"> = {
+    __$$element: "error",
+    "@_id": generateUuid(),
+    "@_structureRef": `${errorName}Type`,
+    "@_name": errorName,
+    "@_errorCode": errorName,
+  };
+
+  definitions.rootElement.push(newError);
+  return { errorRef: newError["@_id"] };
 }

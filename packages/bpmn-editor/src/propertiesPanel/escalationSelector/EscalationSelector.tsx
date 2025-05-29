@@ -18,20 +18,20 @@
  */
 
 import * as React from "react";
-import { BPMN20__tMessage, BPMN20__tProcess } from "@kie-tools/bpmn-marshaller/dist/schemas/bpmn-2_0/ts-gen/types";
+import { BPMN20__tEscalation, BPMN20__tProcess } from "@kie-tools/bpmn-marshaller/dist/schemas/bpmn-2_0/ts-gen/types";
 import { ElementFilter } from "@kie-tools/xml-parser-ts/dist/elementFilter";
 import { Unpacked } from "@kie-tools/xyflow-react-kie-diagram/dist/tsExt/tsExt";
 import { InputGroup, InputGroupText } from "@patternfly/react-core/dist/js/components/InputGroup";
-import { MessageEventSymbolSvg } from "../../diagram/nodes/NodeSvgs";
+import { EscalationEventSymbolSvg } from "../../diagram/nodes/NodeSvgs";
 import { Normalized } from "../../normalization/normalize";
 import { useBpmnEditorStore, useBpmnEditorStoreApi } from "../../store/StoreContext";
 import { generateUuid } from "@kie-tools/xyflow-react-kie-diagram/dist/uuid/uuid";
 import { TypeaheadSelect } from "../../typeaheadSelect/TypeaheadSelect";
 import { useCallback, useMemo } from "react";
-import { addOrGetMessages } from "../../mutations/addOrGetMessages";
-import "./MessageSelector.css";
+import { addOrGetEscalations } from "../../mutations/addOrGetEscalations";
+import "./EscalationSelector.css";
 
-export type EventWithMessage =
+export type WithEscalation =
   | undefined
   | Normalized<
       ElementFilter<
@@ -40,52 +40,50 @@ export type EventWithMessage =
       >
     >;
 
-export type OnMessageChange = (newMessageRef: string, newMessage: string) => void;
+export type OnEscalationChange = (newEscalationRef: string, newEscalation: string) => void;
 
-export function MessageSelector({
+export function EscalationSelector({
   value,
   onChange,
-  disableValues,
+  omitValues,
 }: {
   value: string | undefined;
-  onChange: OnMessageChange;
-  disableValues?: string[];
+  onChange: OnEscalationChange;
+  omitValues?: string[];
 }) {
   const isReadOnly = useBpmnEditorStore((s) => s.settings.isReadOnly);
 
   const bpmnEditorStoreApi = useBpmnEditorStoreApi();
 
-  const messagesById = useBpmnEditorStore(
+  const escalationsById = useBpmnEditorStore(
     (s) =>
       new Map(
         s.bpmn.model.definitions.rootElement
-          ?.filter((e) => e.__$$element === "message")
-          .map((m) => [m["@_id"], m] as [string, BPMN20__tMessage])
+          ?.filter((e) => e.__$$element === "escalation")
+          .map((m) => [m["@_id"], m] as [string, BPMN20__tEscalation])
       )
   );
 
-  const disableIdsSet = useMemo(() => new Set<string | undefined>(disableValues), [disableValues]);
+  const omitIdsSet = useMemo(() => new Set<string | undefined>(omitValues), [omitValues]);
 
   const options = useMemo(
     () =>
-      [...messagesById.values()].map((m) => ({
-        value: m["@_id"],
-        children: m["@_name"],
-        isDisabled: disableIdsSet.has(m["@_id"]),
-      })),
-    [messagesById, disableIdsSet]
+      [...escalationsById.values()]
+        .filter((m) => !omitIdsSet.has(m["@_id"]))
+        .map((m) => ({ value: m["@_id"], children: m["@_name"] })),
+    [escalationsById, omitIdsSet]
   );
 
   const onCreate = useCallback(
-    (newMessageName: string) => {
-      let newMessageId: string;
+    (newEscalationName: string) => {
+      let newEscalationId: string;
       bpmnEditorStoreApi.setState((s) => {
-        newMessageId = addOrGetMessages({
+        newEscalationId = addOrGetEscalations({
           definitions: s.bpmn.model.definitions,
-          messageName: newMessageName,
-        }).messageRef;
+          escalationName: newEscalationName,
+        }).escalationRef;
       });
-      return newMessageId!;
+      return newEscalationId!;
     },
     [bpmnEditorStoreApi]
   );
@@ -95,24 +93,17 @@ export function MessageSelector({
       <InputGroup>
         <InputGroupText>
           <svg width={30} height={30}>
-            <MessageEventSymbolSvg
-              stroke={"black"}
-              cx={15}
-              cy={15}
-              innerCircleRadius={15}
-              fill={"white"}
-              filled={false}
-            />
+            <EscalationEventSymbolSvg stroke={"black"} cx={16} cy={16} innerCircleRadius={13} filled={false} />
           </svg>
         </InputGroupText>
         <TypeaheadSelect
-          id={`message-selector-${generateUuid()}`}
+          id={`escalation-selector-${generateUuid()}`}
           setSelected={onChange}
           selected={value}
           isDisabled={isReadOnly}
           options={options}
           onCreateNewOption={onCreate}
-          createNewOptionLabel={"Create Message"}
+          createNewOptionLabel={"Create Escalation"}
         />
       </InputGroup>
     </>

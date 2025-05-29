@@ -17,36 +17,34 @@
  * under the License.
  */
 
-import { generateUuid } from "@kie-tools/xyflow-react-kie-diagram/dist/uuid/uuid";
-import { Button, ButtonVariant } from "@patternfly/react-core/dist/js/components/Button";
-import { ToggleGroup, ToggleGroupItem } from "@patternfly/react-core/dist/js/components/ToggleGroup";
-import { TextInput } from "@patternfly/react-core/dist/js/components/TextInput";
-import { Checkbox } from "@patternfly/react-core/dist/js/components/Checkbox";
-import { TextArea } from "@patternfly/react-core/dist/js/components/TextArea";
-import { Modal, ModalVariant } from "@patternfly/react-core/dist/js/components/Modal";
-import { ClipboardCopy } from "@patternfly/react-core/dist/js/components/ClipboardCopy";
-import { Form, FormSection, FormGroup } from "@patternfly/react-core/dist/js/components/Form";
-import { TimesIcon } from "@patternfly/react-icons/dist/js/icons/times-icon";
-import { SyncAltIcon } from "@patternfly/react-icons/dist/js/icons/sync-alt-icon";
-import { DataSourceIcon } from "@patternfly/react-icons/dist/js/icons/data-source-icon";
-import { PeopleCarryIcon } from "@patternfly/react-icons/dist/js/icons/people-carry-icon";
-import { ColumnsIcon } from "@patternfly/react-icons/dist/js/icons/columns-icon";
-import { TagIcon } from "@patternfly/react-icons/dist/js/icons/tag-icon";
-import { ImportIcon } from "@patternfly/react-icons/dist/js/icons/import-icon";
-import { EditIcon } from "@patternfly/react-icons/dist/js/icons/edit-icon";
-import * as React from "react";
-import { useBpmnEditorStore, useBpmnEditorStoreApi } from "../store/StoreContext";
-import { useState } from "react";
-import { SectionHeader } from "@kie-tools/xyflow-react-kie-diagram/dist/propertiesPanel/SectionHeader";
-import { addOrGetProcessAndDiagramElements } from "../mutations/addOrGetProcessAndDiagramElements";
 import {
   parseBpmn20Drools10MetaData,
   setBpmn20Drools10MetaData,
 } from "@kie-tools/bpmn-marshaller/dist/drools-extension-metaData";
-import { Metadata } from "./metadata/Metadata";
-import { Imports } from "./imports/Imports";
-import { SlaDueDateInput } from "./slaDueDate/SlaDueDateInput";
+import { SectionHeader } from "@kie-tools/xyflow-react-kie-diagram/dist/propertiesPanel/SectionHeader";
+import { generateUuid } from "@kie-tools/xyflow-react-kie-diagram/dist/uuid/uuid";
+import { Button, ButtonVariant } from "@patternfly/react-core/dist/js/components/Button";
+import { Checkbox } from "@patternfly/react-core/dist/js/components/Checkbox";
+import { ClipboardCopy } from "@patternfly/react-core/dist/js/components/ClipboardCopy";
 import { Divider } from "@patternfly/react-core/dist/js/components/Divider";
+import { Form, FormGroup, FormSection } from "@patternfly/react-core/dist/js/components/Form";
+import { Modal, ModalVariant } from "@patternfly/react-core/dist/js/components/Modal";
+import { TextArea } from "@patternfly/react-core/dist/js/components/TextArea";
+import { TextInput } from "@patternfly/react-core/dist/js/components/TextInput";
+import { ToggleGroup, ToggleGroupItem } from "@patternfly/react-core/dist/js/components/ToggleGroup";
+import { ColumnsIcon } from "@patternfly/react-icons/dist/js/icons/columns-icon";
+import { DataSourceIcon } from "@patternfly/react-icons/dist/js/icons/data-source-icon";
+import { ImportIcon } from "@patternfly/react-icons/dist/js/icons/import-icon";
+import { SyncAltIcon } from "@patternfly/react-icons/dist/js/icons/sync-alt-icon";
+import { TagIcon } from "@patternfly/react-icons/dist/js/icons/tag-icon";
+import { TimesIcon } from "@patternfly/react-icons/dist/js/icons/times-icon";
+import * as React from "react";
+import { useState } from "react";
+import { addOrGetProcessAndDiagramElements } from "../mutations/addOrGetProcessAndDiagramElements";
+import { useBpmnEditorStore, useBpmnEditorStoreApi } from "../store/StoreContext";
+import { Imports } from "./imports/Imports";
+import { Metadata } from "./metadata/Metadata";
+import { SlaDueDateInput } from "./slaDueDate/SlaDueDateInput";
 
 export function GlobalProperties() {
   const thisBpmn = useBpmnEditorStore((s) => s.bpmn);

@@ -18,20 +18,20 @@
  */
 
 import * as React from "react";
-import { useBpmnEditorStore, useBpmnEditorStoreApi } from "../../store/StoreContext";
-import { FormGroup, FormSection } from "@patternfly/react-core/dist/js/components/Form";
-import { FormSelect, FormSelectOption } from "@patternfly/react-core/dist/js/components/FormSelect";
-import { addOrGetProcessAndDiagramElements } from "../../mutations/addOrGetProcessAndDiagramElements";
-import { visitFlowElementsAndArtifacts } from "../../mutations/_elementVisitor";
-import { Normalized } from "../../normalization/normalize";
-import { BPMN20__tProcess } from "@kie-tools/bpmn-marshaller/dist/schemas/bpmn-2_0/ts-gen/types";
+import { BPMN20__tError, BPMN20__tProcess } from "@kie-tools/bpmn-marshaller/dist/schemas/bpmn-2_0/ts-gen/types";
 import { ElementFilter } from "@kie-tools/xml-parser-ts/dist/elementFilter";
 import { Unpacked } from "@kie-tools/xyflow-react-kie-diagram/dist/tsExt/tsExt";
-import { TextInput } from "@patternfly/react-core/dist/js/components/TextInput";
+import { InputGroup, InputGroupText } from "@patternfly/react-core/dist/js/components/InputGroup";
+import { ErrorEventSymbolSvg } from "../../diagram/nodes/NodeSvgs";
+import { Normalized } from "../../normalization/normalize";
+import { useBpmnEditorStore, useBpmnEditorStoreApi } from "../../store/StoreContext";
+import { generateUuid } from "@kie-tools/xyflow-react-kie-diagram/dist/uuid/uuid";
+import { TypeaheadSelect } from "../../typeaheadSelect/TypeaheadSelect";
+import { useCallback, useMemo } from "react";
 import { addOrGetErrors } from "../../mutations/addOrGetErrors";
 import "./ErrorSelector.css";
 
-export type WithError =
+export type EventWithError =
   | undefined
   | Normalized<
       ElementFilter<
@@ -40,48 +40,79 @@ export type WithError =
       >
     >;
 
-export function ErrorSelector({ element }: { element: WithError }) {
+export type OnErrorChange = (newErrorRef: string, newError: string) => void;
+
+export function ErrorSelector({
+  value,
+  onChange,
+  omitValues,
+}: {
+  value: string | undefined;
+  onChange: OnErrorChange;
+  omitValues?: string[];
+}) {
+  const isReadOnly = useBpmnEditorStore((s) => s.settings.isReadOnly);
+
   const bpmnEditorStoreApi = useBpmnEditorStoreApi();
-  const settings = useBpmnEditorStore((s) => s.settings);
+
+  const errorsById = useBpmnEditorStore(
+    (s) =>
+      new Map(
+        s.bpmn.model.definitions.rootElement
+          ?.filter((e) => e.__$$element === "error")
+          .map((m) => [m["@_id"], m] as [string, BPMN20__tError])
+      )
+  );
+
+  const omitIdsSet = useMemo(() => new Set<string | undefined>(omitValues), [omitValues]);
+
+  const options = useMemo(
+    () =>
+      [...errorsById.values()]
+        .filter((m) => !omitIdsSet.has(m["@_id"]))
+        .map((m) => ({ value: m["@_id"], children: m["@_name"] })),
+    [errorsById, omitIdsSet]
+  );
+
+  const onCreate = useCallback(
+    (newErrorName: string) => {
+      let newErrorId: string;
+      bpmnEditorStoreApi.setState((s) => {
+        newErrorId = addOrGetErrors({
+          definitions: s.bpmn.model.definitions,
+          errorName: newErrorName,
+        }).errorRef;
+      });
+      return newErrorId!;
+    },
+    [bpmnEditorStoreApi]
+  );
 
   return (
-    <FormSection>
-      <FormGroup label="Error">
-        <TextInput
-          aria-label={"Error"}
-          type={"text"}
-          isDisabled={settings.isReadOnly}
-          value={
-            element?.eventDefinition?.find((eventDef) => eventDef.__$$element === "errorEventDefinition")?.[
-              "@_errorRef"
-            ] || ""
-          }
-          onChange={(e, newError) =>
-            bpmnEditorStoreApi.setState((s) => {
-              const { process } = addOrGetProcessAndDiagramElements({
-                definitions: s.bpmn.model.definitions,
-              });
-              visitFlowElementsAndArtifacts(process, ({ element: e }) => {
-                if (e["@_id"] === element?.["@_id"] && e.__$$element === element.__$$element) {
-                  const errorEventDefinition = e.eventDefinition?.find(
-                    (event) => event.__$$element === "errorEventDefinition"
-                  );
-                  addOrGetErrors({
-                    definitions: s.bpmn.model.definitions,
-                    oldError: errorEventDefinition?.["@_errorRef"] || "",
-                    newError: newError,
-                  });
-                  if (errorEventDefinition) {
-                    errorEventDefinition["@_drools:erefname"] = newError;
-                    errorEventDefinition["@_errorRef"] = newError;
-                  }
-                }
-              });
-            })
-          }
-          placeholder={"-- None --"}
+    <>
+      <InputGroup>
+        <InputGroupText>
+          <svg width={30} height={30}>
+            <ErrorEventSymbolSvg
+              stroke={"black"}
+              cx={16}
+              cy={16}
+              innerCircleRadius={13}
+              filled={false}
+              outerCircleRadius={15}
+            />
+          </svg>
+        </InputGroupText>
+        <TypeaheadSelect
+          id={`error-selector-${generateUuid()}`}
+          setSelected={onChange}
+          selected={value}
+          isDisabled={isReadOnly}
+          options={options}
+          onCreateNewOption={onCreate}
+          createNewOptionLabel={"Create Error"}
         />
-      </FormGroup>
-    </FormSection>
+      </InputGroup>
+    </>
   );
 }

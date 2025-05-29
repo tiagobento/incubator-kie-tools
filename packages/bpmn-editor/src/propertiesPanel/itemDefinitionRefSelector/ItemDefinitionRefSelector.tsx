@@ -18,15 +18,14 @@
  */
 
 import * as React from "react";
-import { useBpmnEditorStore, useBpmnEditorStoreApi } from "../../store/StoreContext";
-import { Select, SelectOption } from "@patternfly/react-core/dist/js/components/Select";
-import { useCallback, useMemo, useState } from "react";
+import { generateUuid } from "@kie-tools/xyflow-react-kie-diagram/dist/uuid/uuid";
+import { useCallback, useMemo } from "react";
 import { addOrGetItemDefinitions, DEFAULT_DATA_TYPES } from "../../mutations/addOrGetItemDefinitions";
-import { MenuToggle } from "@patternfly/react-core/dist/js/components/MenuToggle";
+import { useBpmnEditorStore, useBpmnEditorStoreApi } from "../../store/StoreContext";
+import { TypeaheadSelect } from "../../typeaheadSelect/TypeaheadSelect";
 import "./ItemDefinitionRefSelector.css";
 
 const DEFAULT_OPTIONS = [
-  { itemDefinitionRef: undefined, dataType: "<Undefined>" },
   { itemDefinitionRef: "String", dataType: DEFAULT_DATA_TYPES.STRING },
   { itemDefinitionRef: "Boolean", dataType: DEFAULT_DATA_TYPES.BOOLEAN },
   { itemDefinitionRef: "Float", dataType: DEFAULT_DATA_TYPES.FLOAT },
@@ -47,13 +46,6 @@ export function ItemDefinitionRefSelector({
   onChange: OnChangeItemDefinitionRefSelector;
 }) {
   const isReadOnly = useBpmnEditorStore((s) => s.settings.isReadOnly);
-
-  const selections = useMemo(() => {
-    return {
-      compareTo: (a: any) => (value ?? "").toLowerCase().trim() == (a?.toString?.() ?? "").toLowerCase().trim(),
-      toString: () => value,
-    };
-  }, [value]);
 
   const itemDefinitions = useBpmnEditorStore(
     (s) =>
@@ -101,77 +93,36 @@ export function ItemDefinitionRefSelector({
     [bpmnEditorStoreApi]
   );
 
-  const [isOpen, setOpen] = useState(false);
+  const _onChange = useCallback(
+    (newItemDefinitionRef: string | undefined) => {
+      if (
+        newItemDefinitionRef &&
+        DEFAULT_OPTIONS.filter((ddt) => ddt.itemDefinitionRef === newItemDefinitionRef).length > 0
+      ) {
+        const r = addOrGetItemDefinitionId({ newDataType: newItemDefinitionRef });
+        onChange(r, newItemDefinitionRef);
+      } else {
+        onChange(newItemDefinitionRef, allOptionsById.get(newItemDefinitionRef!)?.dataType);
+      }
+    },
+    [addOrGetItemDefinitionId, allOptionsById, onChange]
+  );
+
+  const options = useMemo(() => {
+    return allOptions.map((d) => ({ value: d.itemDefinitionRef, children: d.dataType }));
+  }, [allOptions]);
+
+  const id = useMemo(() => generateUuid(), []);
 
   return (
-    <Select
-      toggle={(toggleRef) => (
-        <MenuToggle
-          ref={toggleRef}
-          style={{ width: "100%", background: "white" }}
-          onClick={() => setOpen((prev) => !prev)}
-          isExpanded={isOpen}
-          isDisabled={isReadOnly}
-        >
-          {allOptionsById.get(selections?.toString() || undefined)?.dataType}
-        </MenuToggle>
-      )}
-      onSelect={(e, newItemDefinitionRef) => {
-        setOpen(false);
-
-        if (typeof newItemDefinitionRef === "string") {
-          // Ignore. Coming from `onCreateOption`.
-          return;
-        }
-
-        // -- None --
-        if ((newItemDefinitionRef?.toString() ?? "") === "") {
-          onChange(undefined, undefined);
-        }
-        // -- Default Data Type
-        else if (
-          DEFAULT_OPTIONS.filter((ddt) => ddt.itemDefinitionRef === newItemDefinitionRef?.toString()).length > 0
-        ) {
-          const ref = addOrGetItemDefinitionId({ newDataType: newItemDefinitionRef!.toString() });
-          onChange(ref, newItemDefinitionRef?.toString());
-        }
-        // -- Custom Data Type
-        else {
-          onChange(
-            newItemDefinitionRef?.toString(),
-            itemDefinitions.filter((s) => s.itemDefinitionRef === newItemDefinitionRef?.toString())?.[0].dataType
-          );
-        }
-      }}
-      isOpen={isOpen}
-      selected={selections}
-      popperProps={{
-        appendTo: document.body,
-      }}
-      // placeholderText="Select a Data Type"
-      // isCreateOptionOnTop={true}
-      // isGrouped={false}
-      // isCreatable={true}
-      // shouldResetOnSelect={true}
-      // isCreateSelectOptionObject={false}
-      // onCreateOption={(newDataType) => {
-      //   const ref = addOrGetItemDefinitionId({ newDataType });
-      //   onChange(ref!, newDataType);
-      // }}
-    >
-      {allOptions.map(({ dataType, itemDefinitionRef }) => (
-        <SelectOption
-          isSelected={value === itemDefinitionRef}
-          key={itemDefinitionRef ?? "undefined"}
-          value={{
-            compareTo: (a: any) =>
-              (itemDefinitionRef ?? "").toLowerCase().trim() == (a?.toString?.() ?? "").toLowerCase().trim(),
-            toString: () => itemDefinitionRef,
-          }}
-        >
-          {dataType}
-        </SelectOption>
-      ))}
-    </Select>
+    <TypeaheadSelect
+      isDisabled={isReadOnly}
+      id={`kie-bpmn-editor--item-definition-ref-selector--${id}`}
+      selected={value}
+      setSelected={_onChange}
+      options={options}
+      onCreateNewOption={(newOptionLabel) => addOrGetItemDefinitionId({ newDataType: newOptionLabel })}
+      createNewOptionLabel={"Create Data Type"}
+    />
   );
 }

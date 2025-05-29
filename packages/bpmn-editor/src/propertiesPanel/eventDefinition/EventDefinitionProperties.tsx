@@ -24,14 +24,14 @@ import { SlaDueDateInput } from "../slaDueDate/SlaDueDateInput";
 import { MessageSelector, OnMessageChange } from "../messageSelector/MessageSelector";
 import { ElementFilter } from "@kie-tools/xml-parser-ts/dist/elementFilter";
 import { Unpacked } from "@kie-tools/xyflow-react-kie-diagram/dist/tsExt/tsExt";
-import { ErrorSelector } from "../errorSelector/ErrorSelector";
-import { EscalationCodeSelector } from "../escalationCodeSelector/EscalationCodeSelector";
-import { SignalSelector } from "../signalSelector/SignalSelector";
+import { ErrorSelector, OnErrorChange } from "../errorSelector/ErrorSelector";
+import { EscalationSelector, OnEscalationChange } from "../escalationSelector/EscalationSelector";
+import { OnSignalChange, SignalSelector } from "../signalSelector/SignalSelector";
 import { TimerOptions } from "../timerOptions/TimerOptions";
 import { ActivitySelector } from "../activitySelector/ActivitySelector";
 import { SignalScopeSelector } from "../signalScopeSelector/SignalScopeSelector";
 import { ConditionalEventSelector } from "../conditionalExpression/ConditionalExpressionSelector";
-import { LinkSelector } from "../linkSelector/LinkSelector";
+import { LinkInput } from "../linkInput/LinkInput";
 import { FormGroup, FormSection } from "@patternfly/react-core/dist/js/components/Form";
 import { visitFlowElementsAndArtifacts } from "../../mutations/_elementVisitor";
 import { addOrGetMessages } from "../../mutations/addOrGetMessages";
@@ -51,7 +51,7 @@ export function EventDefinitionProperties({ event }: { event: Event }) {
   const bpmnEditorStoreApi = useBpmnEditorStoreApi();
 
   const onMessageChange = React.useCallback<OnMessageChange>(
-    (e, newMessage) => {
+    (newMessageRef, newMessage) => {
       bpmnEditorStoreApi.setState((s) => {
         const { process } = addOrGetProcessAndDiagramElements({ definitions: s.bpmn.model.definitions });
         visitFlowElementsAndArtifacts(process, ({ element: e }) => {
@@ -59,10 +59,68 @@ export function EventDefinitionProperties({ event }: { event: Event }) {
             const messageEventDefinition = e.eventDefinition?.find(
               (event) => event.__$$element === "messageEventDefinition"
             );
-            addOrGetMessages({ definitions: s.bpmn.model.definitions, id: e["@_id"], message: newMessage });
             if (messageEventDefinition) {
               messageEventDefinition["@_drools:msgref"] = newMessage;
-              messageEventDefinition["@_messageRef"] = e["@_id"];
+              messageEventDefinition["@_messageRef"] = newMessageRef;
+            }
+          }
+        });
+      });
+    },
+    [bpmnEditorStoreApi, event]
+  );
+
+  const onSignalChange = React.useCallback<OnSignalChange>(
+    (newSignalRef) => {
+      bpmnEditorStoreApi.setState((s) => {
+        const { process } = addOrGetProcessAndDiagramElements({ definitions: s.bpmn.model.definitions });
+        visitFlowElementsAndArtifacts(process, ({ element: e }) => {
+          if (e["@_id"] === event?.["@_id"] && e.__$$element === event.__$$element) {
+            const signalEventDefinition = e.eventDefinition?.find(
+              (event) => event.__$$element === "signalEventDefinition"
+            );
+            if (signalEventDefinition) {
+              signalEventDefinition["@_signalRef"] = newSignalRef;
+            }
+          }
+        });
+      });
+    },
+    [bpmnEditorStoreApi, event]
+  );
+
+  const onErrorChange = React.useCallback<OnErrorChange>(
+    (newErrorRef, newError) => {
+      bpmnEditorStoreApi.setState((s) => {
+        const { process } = addOrGetProcessAndDiagramElements({ definitions: s.bpmn.model.definitions });
+        visitFlowElementsAndArtifacts(process, ({ element: e }) => {
+          if (e["@_id"] === event?.["@_id"] && e.__$$element === event.__$$element) {
+            const errorEventDefinition = e.eventDefinition?.find(
+              (event) => event.__$$element === "errorEventDefinition"
+            );
+            if (errorEventDefinition) {
+              errorEventDefinition["@_errorRef"] = newErrorRef;
+              errorEventDefinition["@_drools:erefname"] = newError;
+            }
+          }
+        });
+      });
+    },
+    [bpmnEditorStoreApi, event]
+  );
+
+  const onEscalationChange = React.useCallback<OnEscalationChange>(
+    (newEscalationRef, newEscalation) => {
+      bpmnEditorStoreApi.setState((s) => {
+        const { process } = addOrGetProcessAndDiagramElements({ definitions: s.bpmn.model.definitions });
+        visitFlowElementsAndArtifacts(process, ({ element: e }) => {
+          if (e["@_id"] === event?.["@_id"] && e.__$$element === event.__$$element) {
+            const escalationEventDefinition = e.eventDefinition?.find(
+              (event) => event.__$$element === "escalationEventDefinition"
+            );
+            if (escalationEventDefinition) {
+              escalationEventDefinition["@_escalationRef"] = newEscalationRef;
+              escalationEventDefinition["@_drools:esccode"] = newEscalation;
             }
           }
         });
@@ -93,7 +151,7 @@ export function EventDefinitionProperties({ event }: { event: Event }) {
                 <MessageSelector
                   value={
                     event?.eventDefinition?.find((eventDef) => eventDef.__$$element === "messageEventDefinition")?.[
-                      "@_drools:msgref"
+                      "@_messageRef"
                     ]
                   }
                   onChange={onMessageChange}
@@ -106,17 +164,28 @@ export function EventDefinitionProperties({ event }: { event: Event }) {
         {/* all */}
         {eventDefinition?.__$$element === "signalEventDefinition" && ( //
           <>
-            <SignalSelector element={event} />
-            {(event.__$$element === "intermediateThrowEvent" || event.__$$element === "endEvent") && (
-              <SignalScopeSelector element={event} />
-            )}
+            <FormSection>
+              <FormGroup label="Signal">
+                <SignalSelector
+                  value={
+                    event?.eventDefinition?.find((eventDef) => eventDef.__$$element === "signalEventDefinition")?.[
+                      "@_signalRef"
+                    ]
+                  }
+                  onChange={onSignalChange}
+                />
+                {(event.__$$element === "intermediateThrowEvent" || event.__$$element === "endEvent") && (
+                  <SignalScopeSelector element={event} />
+                )}
+              </FormGroup>
+            </FormSection>
           </>
         )}
 
         {eventDefinition?.__$$element === "linkEventDefinition" &&
           (event.__$$element === "intermediateCatchEvent" || //
             event.__$$element === "intermediateThrowEvent") && ( //
-            <LinkSelector element={event} />
+            <LinkInput element={event} />
           )}
 
         {eventDefinition?.__$$element === "errorEventDefinition" && //
@@ -124,11 +193,39 @@ export function EventDefinitionProperties({ event }: { event: Event }) {
             event.__$$element === "intermediateCatchEvent" ||
             event.__$$element === "endEvent" ||
             event.__$$element === "boundaryEvent") && ( //
-            <ErrorSelector element={event} />
+            <FormSection>
+              <FormGroup label="Error code">
+                <ErrorSelector
+                  value={
+                    event?.eventDefinition?.find((eventDef) => eventDef.__$$element === "errorEventDefinition")?.[
+                      "@_errorRef"
+                    ]
+                  }
+                  onChange={onErrorChange}
+                />
+              </FormGroup>
+            </FormSection>
           )}
 
         {/* all */}
-        {eventDefinition?.__$$element === "escalationEventDefinition" && <EscalationCodeSelector element={event} />}
+        {eventDefinition?.__$$element === "escalationEventDefinition" && (
+          <>
+            <>
+              <FormSection>
+                <FormGroup label="Escalation code">
+                  <EscalationSelector
+                    value={
+                      event?.eventDefinition?.find(
+                        (eventDef) => eventDef.__$$element === "escalationEventDefinition"
+                      )?.["@_escalationRef"]
+                    }
+                    onChange={onEscalationChange}
+                  />
+                </FormGroup>
+              </FormSection>
+            </>
+          </>
+        )}
 
         {/* all */}
         {eventDefinition?.__$$element === "compensateEventDefinition" &&

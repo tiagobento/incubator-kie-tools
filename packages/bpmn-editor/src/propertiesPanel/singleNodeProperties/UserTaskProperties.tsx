@@ -42,7 +42,7 @@ import { addOrGetProcessAndDiagramElements } from "../../mutations/addOrGetProce
 import { Checkbox } from "@patternfly/react-core/dist/js/components/Checkbox/Checkbox";
 import { TextInput } from "@patternfly/react-core/dist/js/components/TextInput";
 import { useCallback } from "react";
-import { addOrGetItemDefinitions } from "../../mutations/addOrGetItemDefinitions";
+import { addOrGetItemDefinitions, DEFAULT_DATA_TYPES } from "../../mutations/addOrGetItemDefinitions";
 import { USER_TASK_IO_SPECIFICATION_DATA_INPUTS_CONSTANTS_FOR_DMN_BINDING } from "@kie-tools/bpmn-marshaller/dist/drools-extension";
 
 export function UserTaskProperties({
@@ -72,7 +72,7 @@ export function UserTaskProperties({
 
           const objectItemDefinition = addOrGetItemDefinitions({
             definitions: s.bpmn.model.definitions,
-            dataType: "Object",
+            dataType: DEFAULT_DATA_TYPES.OBJECT,
           }).itemDefinition;
 
           let dataInput = e.ioSpecification.dataInput.find((s) => s["@_name"] === fieldName);

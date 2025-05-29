@@ -23,30 +23,30 @@ import { Unpacked } from "@kie-tools/xyflow-react-kie-diagram/dist/tsExt/tsExt";
 import { Normalized } from "../normalization/normalize";
 import { generateUuid } from "@kie-tools/xyflow-react-kie-diagram/dist/uuid/uuid";
 
-export function addOrGetMessages({
+export function addOrGetSignals({
   definitions,
-  messageName,
+  signalName,
 }: {
   definitions: Normalized<BPMN20__tDefinitions>;
-  messageName: string;
+  signalName: string;
 }): {
-  messageRef: string;
+  signalRef: string;
 } {
   definitions.rootElement ??= [];
-  const messages = definitions.rootElement.filter((s) => s.__$$element === "message");
-  const existingMessage = messages.find((s) => s["@_id"] === messageName);
+  const signals = definitions.rootElement.filter((s) => s.__$$element === "signal");
+  const existingSignal = signals.find((s) => s["@_id"] === signalName);
 
-  if (existingMessage) {
-    return { messageRef: existingMessage["@_id"] };
+  if (existingSignal) {
+    return { signalRef: existingSignal["@_id"] };
   }
 
-  const newMessage: ElementFilter<Unpacked<Normalized<BPMN20__tDefinitions["rootElement"]>>, "message"> = {
-    __$$element: "message",
+  const newSignal: ElementFilter<Unpacked<Normalized<BPMN20__tDefinitions["rootElement"]>>, "signal"> = {
+    __$$element: "signal",
     "@_id": generateUuid(),
-    "@_itemRef": `${messageName}Type`,
-    "@_name": messageName,
+    "@_structureRef": `${signalName}Type`,
+    "@_name": signalName,
   };
 
-  definitions.rootElement.push(newMessage);
-  return { messageRef: newMessage["@_id"] };
+  definitions.rootElement.push(newSignal);
+  return { signalRef: newSignal["@_id"] };
 }

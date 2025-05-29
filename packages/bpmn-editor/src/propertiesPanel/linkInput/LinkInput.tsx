@@ -37,30 +37,12 @@ export type WithLinkExpression =
       >
     >;
 
-export function LinkSelector({ element }: { element: WithLinkExpression }) {
+export function LinkInput({ element }: { element: WithLinkExpression }) {
   const bpmnEditorStoreApi = useBpmnEditorStoreApi();
-  const settings = useBpmnEditorStore((s) => s.settings);
+  const isReadOnly = useBpmnEditorStore((s) => s.settings.isReadOnly);
 
   const currentValue =
     element?.eventDefinition?.find((eventDef) => eventDef.__$$element === "linkEventDefinition")?.["@_name"] || "";
-
-  // const links: string[] = [];
-
-  // const getDropdownValues = () => {
-  //   bpmnEditorStoreApi.setState((s) => {
-  //     const { process } = addOrGetProcessAndDiagramElements({
-  //       definitions: s.bpmn.model.definitions,
-  //     });
-  //     visitFlowElementsAndArtifacts(process, ({ element: e }) => {
-  //       if (e.__$$element === element?.__$$element) {
-  //         const linkEventDefinition = e.eventDefinition?.find((event) => event.__$$element === "linkEventDefinition");
-  //         if (linkEventDefinition) {
-  //           links.push(linkEventDefinition["@_name"]);
-  //         }
-  //       }
-  //     });
-  //   });
-  // };
 
   const handleValueChange = (e: React.FormEvent, newValue: string | undefined) => {
     bpmnEditorStoreApi.setState((s) => {
@@ -72,7 +54,6 @@ export function LinkSelector({ element }: { element: WithLinkExpression }) {
           const linkEventDefinition = e.eventDefinition?.find((event) => event.__$$element === "linkEventDefinition");
           if (linkEventDefinition) {
             linkEventDefinition["@_name"] = newValue || "";
-            // links.push(linkEventDefinition["@_name"]);
           }
         }
       });
@@ -82,8 +63,7 @@ export function LinkSelector({ element }: { element: WithLinkExpression }) {
   return (
     <FormSection>
       <FormGroup label="Link">
-        <TextInput value={currentValue} onChange={handleValueChange} label={"Link"} />
-        {/* <Select onToggle={() => getDropdownValues}></Select> */}
+        <TextInput value={currentValue} onChange={handleValueChange} label={"Link"} isDisabled={isReadOnly} />
       </FormGroup>
     </FormSection>
   );

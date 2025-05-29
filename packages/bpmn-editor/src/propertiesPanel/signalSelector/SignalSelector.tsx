@@ -16,20 +16,22 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import * as React from "react";
-import { useBpmnEditorStore, useBpmnEditorStoreApi } from "../../store/StoreContext";
-import { FormGroup, FormSection } from "@patternfly/react-core/dist/js/components/Form";
-import { FormSelect, FormSelectOption } from "@patternfly/react-core/dist/js/components/FormSelect";
-import { addOrGetProcessAndDiagramElements } from "../../mutations/addOrGetProcessAndDiagramElements";
-import { visitFlowElementsAndArtifacts } from "../../mutations/_elementVisitor";
-import { Normalized } from "../../normalization/normalize";
-import { BPMN20__tProcess } from "@kie-tools/bpmn-marshaller/dist/schemas/bpmn-2_0/ts-gen/types";
+import { BPMN20__tSignal, BPMN20__tProcess } from "@kie-tools/bpmn-marshaller/dist/schemas/bpmn-2_0/ts-gen/types";
 import { ElementFilter } from "@kie-tools/xml-parser-ts/dist/elementFilter";
 import { Unpacked } from "@kie-tools/xyflow-react-kie-diagram/dist/tsExt/tsExt";
-import { TextInput } from "@patternfly/react-core/dist/js/components/TextInput";
+import { InputGroup, InputGroupText } from "@patternfly/react-core/dist/js/components/InputGroup";
+import { SignalEventSymbolSvg } from "../../diagram/nodes/NodeSvgs";
+import { Normalized } from "../../normalization/normalize";
+import { useBpmnEditorStore, useBpmnEditorStoreApi } from "../../store/StoreContext";
+import { generateUuid } from "@kie-tools/xyflow-react-kie-diagram/dist/uuid/uuid";
+import { TypeaheadSelect } from "../../typeaheadSelect/TypeaheadSelect";
+import { useCallback, useMemo } from "react";
+import { addOrGetSignals } from "../../mutations/addOrGetSignals";
 import "./SignalSelector.css";
 
-export type WithSignal =
+export type EventWithSignal =
   | undefined
   | Normalized<
       ElementFilter<
@@ -38,42 +40,81 @@ export type WithSignal =
       >
     >;
 
-export function SignalSelector({ element }: { element: WithSignal }) {
+export type OnSignalChange = (newSignalRef: string) => void;
+
+export function SignalSelector({
+  value,
+  onChange,
+  omitValues,
+}: {
+  value: string | undefined;
+  onChange: OnSignalChange;
+  omitValues?: string[];
+}) {
+  const isReadOnly = useBpmnEditorStore((s) => s.settings.isReadOnly);
+
   const bpmnEditorStoreApi = useBpmnEditorStoreApi();
-  const settings = useBpmnEditorStore((s) => s.settings);
+
+  const signalsById = useBpmnEditorStore(
+    (s) =>
+      new Map(
+        s.bpmn.model.definitions.rootElement
+          ?.filter((e) => e.__$$element === "signal")
+          .map((m) => [m["@_id"], m] as [string, BPMN20__tSignal])
+      )
+  );
+
+  const omitIdsSet = useMemo(() => new Set<string | undefined>(omitValues), [omitValues]);
+
+  const options = useMemo(
+    () =>
+      [...signalsById.values()]
+        .filter((m) => !omitIdsSet.has(m["@_id"]))
+        .map((m) => ({ value: m["@_id"], children: m["@_name"] })),
+    [signalsById, omitIdsSet]
+  );
+
+  const onCreate = useCallback(
+    (newSignalName: string) => {
+      let newSignalId: string;
+      bpmnEditorStoreApi.setState((s) => {
+        newSignalId = addOrGetSignals({
+          definitions: s.bpmn.model.definitions,
+          signalName: newSignalName,
+        }).signalRef;
+      });
+      return newSignalId!;
+    },
+    [bpmnEditorStoreApi]
+  );
 
   return (
-    <FormSection>
-      <FormGroup label="Signal">
-        <TextInput
-          aria-label={"Signal"}
-          type={"text"}
-          isDisabled={settings.isReadOnly}
-          value={
-            element?.eventDefinition?.find((eventDef) => eventDef.__$$element === "signalEventDefinition")?.[
-              "@_signalRef"
-            ] || ""
-          }
-          onChange={(e, newSignal: string | undefined) =>
-            bpmnEditorStoreApi.setState((s) => {
-              const { process } = addOrGetProcessAndDiagramElements({
-                definitions: s.bpmn.model.definitions,
-              });
-              visitFlowElementsAndArtifacts(process, ({ element: e }) => {
-                if (e["@_id"] === element?.["@_id"] && e.__$$element === element.__$$element) {
-                  const signalEventDefinition = e.eventDefinition?.find(
-                    (event) => event.__$$element === "signalEventDefinition"
-                  );
-                  if (signalEventDefinition) {
-                    signalEventDefinition["@_signalRef"] = newSignal;
-                  }
-                }
-              });
-            })
-          }
-          placeholder={"-- None --"}
+    <>
+      <InputGroup>
+        <InputGroupText>
+          <svg width={30} height={30}>
+            <SignalEventSymbolSvg
+              stroke={"black"}
+              cx={16}
+              cy={16}
+              innerCircleRadius={13}
+              filled={false}
+              x={0}
+              y={0}
+              outerCircleRadius={15}
+            />
+          </svg>
+        </InputGroupText>
+        <TypeaheadSelect
+          id={`signal-selector-${generateUuid()}`}
+          setSelected={onChange}
+          selected={value}
+          isDisabled={isReadOnly}
+          options={options}
+          onCreateNewOption={onCreate}
+          createNewOptionLabel={"Create Signal"}
         />
-      </FormGroup>
-    </FormSection>
+      </InputGroup>
+    </>
   );
 }
