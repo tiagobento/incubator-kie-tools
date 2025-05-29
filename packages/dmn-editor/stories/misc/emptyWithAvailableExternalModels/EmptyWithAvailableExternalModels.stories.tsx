@@ -21,9 +21,6 @@ import * as React from "react";
 import { useCallback, useMemo, useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react";
 import { DmnLatestModel, DmnMarshaller, getMarshaller } from "@kie-tools/dmn-marshaller";
-import { ns as dmn15ns } from "@kie-tools/dmn-marshaller/dist/schemas/dmn-1_5/ts-gen/meta";
-import { generateUuid } from "@kie-tools/boxed-expression-component/dist/api";
-import { DMN15_SPEC } from "@kie-tools/dmn-marshaller/dist/schemas/dmn-1_5/Dmn15Spec";
 import {
   DmnEditor,
   DmnEditorProps,
@@ -37,17 +34,7 @@ import { normalize, Normalized } from "@kie-tools/dmn-marshaller/dist/normalizat
 import { DmnEditorWrapper } from "../../dmnEditorStoriesWrapper";
 
 import { availableModelsByPath, modelsByNamespace } from "./availableModelsToInclude";
-
-export const generateEmptyDmn15 = () => `<?xml version="1.0" encoding="UTF-8"?>
-<definitions
-  xmlns="${dmn15ns.get("")}"
-  expressionLanguage="${DMN15_SPEC.expressionLanguage.default}"
-  namespace="https://kie.apache.org/dmn/${generateUuid()}"
-  id="${generateUuid()}"
-  name="DMN${generateUuid()}">
-</definitions>`;
-
-const initialModel = generateEmptyDmn15();
+import { REFERENCE_MODELS } from "../../reference/models/models";
 
 function EmptyStoryWithIncludedModels(args: DmnEditorProps) {
   const [state, setState] = useState<{
@@ -55,7 +42,7 @@ function EmptyStoryWithIncludedModels(args: DmnEditorProps) {
     stack: Normalized<DmnLatestModel>[];
     pointer: number;
   }>(() => {
-    const initialDmnMarshaller = getMarshaller(initialModel, { upgradeTo: "latest" });
+    const initialDmnMarshaller = getMarshaller(REFERENCE_MODELS.empty.raw, { upgradeTo: "latest" });
     return {
       marshaller: initialDmnMarshaller,
       stack: [normalize(initialDmnMarshaller.parser.parse())],
@@ -99,7 +86,7 @@ function EmptyStoryWithIncludedModels(args: DmnEditorProps) {
         onModelChange,
         onRequestExternalModelByPath,
         onRequestExternalModelsAvailableToInclude,
-        externalModelsByNamespace: externalModelsByNamespace,
+        externalModelsByNamespace,
         externalContextName: args.externalContextName,
         externalContextDescription: args.externalContextDescription,
         validationMessages: args.validationMessages,
@@ -122,11 +109,11 @@ type Story = StoryObj<typeof EmptyStoryWithIncludedModels>;
 export const EmptyWithAvailableExternalModels: Story = {
   render: (args) => EmptyStoryWithIncludedModels(args),
   args: {
-    model: getMarshaller(initialModel, { upgradeTo: "latest" }).parser.parse(),
+    model: REFERENCE_MODELS.empty.model,
     originalVersion: "1.5",
     evaluationResultsByNodeId: new Map(),
-    externalContextDescription: "External context description",
-    externalContextName: "Storybook - DMN Editor",
+    externalContextDescription: "The Storybook for the DMN Editor",
+    externalContextName: "Apache KIE :: DMN Editor :: Storybook",
     externalModelsByNamespace: {},
     issueTrackerHref: "",
     validationMessages: {},

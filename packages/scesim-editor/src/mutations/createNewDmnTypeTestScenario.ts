@@ -67,7 +67,7 @@ type FactMapping = {
 };
 
 /**
- * It creates a new DMN-type Test Scenario. If isAutoFillTableEnabled is true, the logic automatically fills the
+ * It creates a new DMN-based Test Scenario. If isAutoFillTableEnabled is true, the logic automatically fills the
  * table adding a GIVEN column instance for all the DMN Inputs nodes, and an EXPECT column instance for all the DMN Decision nodes.
  * If isAutoFillTableEnabled is false, 2 empty columns are added.
  */

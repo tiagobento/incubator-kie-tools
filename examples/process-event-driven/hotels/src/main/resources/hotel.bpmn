@@ -7,7 +7,7 @@
   xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
   xmlns:drools="http://www.jboss.org/drools"
   xmlns:xsi="xsi"
-  id="_GlpX8YpdED2dBNv7eRNehQ"
+  id="_3SoBYP09ED2i_Z9jPZvmPg"
   xsi:schemaLocation="http://www.omg.org/spec/BPMN/20100524/MODEL BPMN20.xsd http://www.jboss.org/drools drools.xsd http://www.bpsim.org/schemas/1.0 bpsim.xsd http://www.omg.org/spec/DD/20100524/DC DC.xsd http://www.omg.org/spec/DD/20100524/DI DI.xsd "
   exporter="jBPM Process Modeler"
   exporterVersion="2.0"
@@ -19,24 +19,24 @@
     structureRef="org.acme.message.Message"
   />
   <bpmn2:itemDefinition id="correlationType" structureRef="org.acme.message.Message" />
-  <bpmn2:itemDefinition id="_6404189C-98F1-471A-899F-4A66C9E9BB0E" structureRef="org.acme.message.Message" />
-  <bpmn2:itemDefinition id="_3580F1FA-767F-46C7-B043-9043FD0E817D" structureRef="org.acme.message.Message" />
-  <bpmn2:message id="_GlqmEIpdED2dBNv7eRNehQ" itemRef="correlationType" name="correlation" />
+  <bpmn2:itemDefinition id="_93791700-3417-442C-B312-271B7688DE19" structureRef="org.acme.message.Message" />
+  <bpmn2:itemDefinition id="_7041FB6A-2959-423E-B512-897121FCD7B1" structureRef="org.acme.message.Message" />
+  <bpmn2:message id="_3SoocP09ED2i_Z9jPZvmPg" itemRef="correlationType" name="correlation" />
   <bpmn2:itemDefinition id="CorrelationPropertyId_Type" structureRef="String" />
   <bpmn2:correlationProperty id="CorrelationPropertyId" name="Correlation Property 1" type="CorrelationPropertyId_Type">
     <bpmn2:correlationPropertyRetrievalExpression
-      id="_01E88DC7-3BDD-48E3-BCF9-39AD0772B2AB"
-      messageRef="_GlqmEIpdED2dBNv7eRNehQ"
+      id="_CFCB5047-BACE-4F78-81C2-9E4DF1EDC492"
+      messageRef="_3SoocP09ED2i_Z9jPZvmPg"
     >
       <bpmn2:messagePath
-        id="_F1B5A911-766C-4E07-932E-A7C9BC825274"
-        evaluatesToTypeRef="_6404189C-98F1-471A-899F-4A66C9E9BB0E"
+        id="_CB4455BC-E38C-4A4E-BC15-C42EE74341FB"
+        evaluatesToTypeRef="_93791700-3417-442C-B312-271B7688DE19"
         language="java"
       >id</bpmn2:messagePath>
     </bpmn2:correlationPropertyRetrievalExpression>
   </bpmn2:correlationProperty>
-  <bpmn2:collaboration id="_959642FC-7D00-486A-AED9-4E752C2F4DDC" name="Default Collaboration">
-    <bpmn2:participant id="_1A4E80E2-ECE0-4326-95E5-7EFABCA82EE1" name="Pool Participant" processRef="hotel" />
+  <bpmn2:collaboration id="_870101C3-73AD-4D40-971B-8F43F1C7550B" name="Default Collaboration">
+    <bpmn2:participant id="_CB45FBFE-2806-4A81-BFBD-16701DF2372F" name="Pool Participant" processRef="hotel" />
     <bpmn2:correlationKey id="CorrelationKeyId" name="Correlation Key Name">
       <bpmn2:correlationPropertyRef>CorrelationPropertyId</bpmn2:correlationPropertyRef>
     </bpmn2:correlationKey>
@@ -107,16 +107,16 @@
       <bpmn2:outputSet>
         <bpmn2:dataOutputRefs>_A07CABF6-05E3-44A3-BB33-EDE46ADF5FAA_eventOutputX</bpmn2:dataOutputRefs>
       </bpmn2:outputSet>
-      <bpmn2:messageEventDefinition drools:msgref="correlation" messageRef="_GlqmEIpdED2dBNv7eRNehQ" />
+      <bpmn2:messageEventDefinition drools:msgref="correlation" messageRef="_3SoocP09ED2i_Z9jPZvmPg" />
     </bpmn2:startEvent>
-    <bpmn2:correlationSubscription id="_E73308CB-08B7-4F6A-BB2F-C9B6A6F15959" correlationKeyRef="CorrelationKeyId">
+    <bpmn2:correlationSubscription id="_DA88E4A3-20C6-4CF1-90CC-5781B1D5262F" correlationKeyRef="CorrelationKeyId">
       <bpmn2:correlationPropertyBinding
-        id="_E992CBBD-0534-4098-8011-F7BB829CB6A2"
+        id="_C7B6562D-09C1-4C6F-980A-45C3ABAAC4BA"
         correlationPropertyRef="CorrelationPropertyId"
       >
         <bpmn2:dataPath
-          id="_73166CC8-FD65-4535-A153-146429AD7CCB"
-          evaluatesToTypeRef="_3580F1FA-767F-46C7-B043-9043FD0E817D"
+          id="_572681FC-1ADF-40B5-A6BF-374D8527931B"
+          evaluatesToTypeRef="_7041FB6A-2959-423E-B512-897121FCD7B1"
           language="java"
         >"1"</bpmn2:dataPath>
       </bpmn2:correlationPropertyBinding>
@@ -186,7 +186,7 @@
         </bpsim:Scenario>
       </bpsim:BPSimData>
     </bpmn2:extensionElements>
-    <bpmn2:source>_GlpX8YpdED2dBNv7eRNehQ</bpmn2:source>
-    <bpmn2:target>_GlpX8YpdED2dBNv7eRNehQ</bpmn2:target>
+    <bpmn2:source>_3SoBYP09ED2i_Z9jPZvmPg</bpmn2:source>
+    <bpmn2:target>_3SoBYP09ED2i_Z9jPZvmPg</bpmn2:target>
   </bpmn2:relationship>
 </bpmn2:definitions>

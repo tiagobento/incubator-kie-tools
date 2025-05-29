@@ -29,6 +29,7 @@
     "@kie-tools-core/i18n": "workspace:*",
     "@kie-tools-core/patternfly-base": "workspace:*",
     "@kie-tools-core/vscode-extension": "workspace:*",
+    "@kie-tools/bpmn-editor-envelope": "workspace:*",
     "@kie-tools/form-code-generator-vscode-command": "workspace:*",
     "@kie-tools/kie-bc-editors": "workspace:*"
   },
@@ -38,7 +39,6 @@
     "@kie-tools/root-env": "workspace:*",
     "@kie-tools/stunner-editors": "workspace:*",
     "@kie-tools/tsconfig": "workspace:*",
-    "@kie-tools/vscode-java-code-completion-extension-plugin": "workspace:*",
     "@types/vscode": "1.67.0",
     "@vscode/test-web": "^0.0.66",
     "@vscode/vsce": "^3.2.1",
@@ -60,7 +60,7 @@
   "contributes": {
     "commands": [
       {
-        "command": "extension.kogito.getPreviewSvgBpmn",
+        "command": "extension.kie.tools.generatePreviewSvgBpmn",
         "icon": {
           "dark": "./static/svg-icon-dark.png",
           "light": "./static/svg-icon-light.png"
@@ -68,8 +68,20 @@
         "title": "BPMN Editor: Get preview SVG"
       },
       {
-        "command": "extension.kogito.silentlyGenerateSvgBpmn",
+        "command": "extension.kie.tools.silentlyGenerateSvgBpmn",
         "title": "BPMN Editor: Generate SVG without any notification"
+      },
+      {
+        "command": "extension.kogito.getPreviewSvgBpmn",
+        "icon": {
+          "dark": "./static/svg-icon-dark.png",
+          "light": "./static/svg-icon-light.png"
+        },
+        "title": "BPMN Editor (classic): Get preview SVG"
+      },
+      {
+        "command": "extension.kogito.silentlyGenerateSvgBpmn",
+        "title": "BPMN Editor (classic): Generate SVG without any notification"
       },
       {
         "command": "extension.apache.kie.bpmnEditor.generateFormCode",
@@ -103,6 +115,15 @@
             "filenamePattern": "*.{bpmn,bpmn2}"
           }
         ],
+        "viewType": "kieToolsBpmnEditor"
+      },
+      {
+        "displayName": "Apache KIE BPMN Editor (classic)",
+        "selector": [
+          {
+            "filenamePattern": "*.{bpmn,bpmn2}"
+          }
+        ],
         "viewType": "kieKogitoWebviewEditorsBpmn"
       }
     ],
@@ -129,6 +150,10 @@
         {
           "command": "extension.kogito.getPreviewSvgBpmn",
           "when": "resourceLangId =~ /bpmn|bpmn2/ && activeCustomEditorId == 'kieKogitoWebviewEditorsBpmn'"
+        },
+        {
+          "command": "extension.kie.tools.generatePreviewSvgBpmn",
+          "when": "resourceLangId =~ /bpmn|bpmn2/ && activeCustomEditorId == 'kieToolsBpmnEditor'"
         }
       ],
       "editor/title": [
@@ -136,11 +161,17 @@
           "command": "extension.kogito.getPreviewSvgBpmn",
           "group": "navigation",
           "when": "resourceLangId =~ /bpmn|bpmn2/ && activeCustomEditorId == 'kieKogitoWebviewEditorsBpmn'"
+        },
+        {
+          "command": "extension.kie.tools.generatePreviewSvgBpmn",
+          "group": "navigation",
+          "when": "resourceLangId =~ /bpmn|bpmn2/ && activeCustomEditorId == 'kieToolsBpmnEditor'"
         }
       ]
     }
   },
   "activationEvents": [
+    "onCustomEditor:kieToolsBpmnEditor",
     "onCustomEditor:kieKogitoWebviewEditorsBpmn"
   ],
   "icon": "icon.png",

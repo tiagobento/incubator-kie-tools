@@ -21,5 +21,5 @@ import { addons } from "@storybook/manager-api";
 import { KieToolsTheme } from "@kie-tools/storybook-base/dist/config/theme";
 
 addons.setConfig({
-  theme: KieToolsTheme,
+  theme: { ...KieToolsTheme, brandTitle: "Apache KIE :: Test Scenario Editor" },
 });

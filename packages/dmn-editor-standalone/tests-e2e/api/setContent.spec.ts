@@ -27,7 +27,7 @@ test.describe("DMN Editor - Standalone - API", () => {
     });
 
     test("should update content via setContent", async ({ page, editor, files }) => {
-      // Loan Pre Qualification
+      // Loan Pre-Qualification
       await editor.setContent("loanPreQualification.dmn", await files.getFile(ExternalFile.LOAN_PRE_QUALIFICATION_DMN));
       await expect(editor.get().getByText("Loan Pre-Qualification", { exact: true })).toBeAttached();
       await expect(page).toHaveScreenshot("setContent-loanPreQualification.png");

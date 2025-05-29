@@ -31,6 +31,7 @@ export type DmnEditorContextProviderProps = Pick<
   | "onRequestToJumpToPath"
   | "onRequestToResolvePath"
   | "evaluationResultsByNodeId"
+  | "showDefaultDrdOnly"
 >;
 
 export type DmnModelBeforeEditing = DmnLatestModel;
@@ -43,6 +44,7 @@ export type DmnEditorContextType = Pick<
   | "onRequestToJumpToPath"
   | "onRequestToResolvePath"
   | "evaluationResultsByNodeId"
+  | "showDefaultDrdOnly"
 > & {
   dmnModelBeforeEditingRef: React.MutableRefObject<DmnModelBeforeEditing>;
   dmnEditorRootElementRef: React.RefObject<HTMLDivElement>;
@@ -68,6 +70,7 @@ export function DmnEditorContextProvider(props: React.PropsWithChildren<DmnEdito
       onRequestToJumpToPath: props.onRequestToJumpToPath,
       onRequestToResolvePath: props.onRequestToResolvePath,
       evaluationResultsByNodeId: props.evaluationResultsByNodeId,
+      showDefaultDrdOnly: props.showDefaultDrdOnly,
     }),
     [
       props.externalContextDescription,
@@ -76,6 +79,7 @@ export function DmnEditorContextProvider(props: React.PropsWithChildren<DmnEdito
       props.onRequestToJumpToPath,
       props.onRequestToResolvePath,
       props.evaluationResultsByNodeId,
+      props.showDefaultDrdOnly,
     ]
   );
   return <DmnEditorContext.Provider value={value}>{props.children}</DmnEditorContext.Provider>;

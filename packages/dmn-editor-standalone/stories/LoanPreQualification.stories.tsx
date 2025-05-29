@@ -866,7 +866,7 @@ const loanPreQualificationDmn = `<?xml version="1.0" encoding="UTF-8" ?>
 
 // More on how to set up stories at: https://storybook.js.org/docs/writing-stories#default-export
 const meta: Meta<DevWebAppProps> = {
-  title: "Dev/Loan Pre Qualification",
+  title: "Dev/Loan Pre-Qualification",
 };
 
 export default meta;

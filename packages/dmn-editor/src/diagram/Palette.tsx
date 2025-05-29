@@ -60,7 +60,7 @@ export function Palette({ pulse }: { pulse: boolean }) {
     event.dataTransfer.effectAllowed = "move";
   }, []);
 
-  const { dmnEditorRootElementRef } = useDmnEditor();
+  const { dmnEditorRootElementRef, showDefaultDrdOnly } = useDmnEditor();
   const dmnEditorStoreApi = useDmnEditorStoreApi();
   const diagram = useDmnEditorStore((s) => s.diagram);
   const thisDmn = useDmnEditorStore((s) => s.dmn.model);

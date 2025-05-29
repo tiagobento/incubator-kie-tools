@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<definitions
+  xmlns="https://www.omg.org/spec/DMN/20230324/MODEL/"
+  xmlns:dmndi="https://www.omg.org/spec/DMN/20230324/DMNDI/"
+  xmlns:dc="http://www.omg.org/spec/DMN/20180521/DC/"
+  xmlns:di="http://www.omg.org/spec/DMN/20180521/DI/"
+  xmlns:kie="https://kie.org/dmn/extensions/1.0"
+  expressionLanguage="https://www.omg.org/spec/DMN/20230324/FEEL/"
+  namespace="https://kie.org/dmn/_EB43C729-827F-40E0-8AFA-7BC704DC6143"
+  id="_01C9B4C6-EFDF-45CE-9620-98762B01643C"
+  name="DMN_60DC6697-7580-478A-81F3-C2E46BD46063"
+>
+  <itemDefinition
+    id="_1FC34355-AA3A-4D2E-8E27-5C75ACCE8262"
+    name="External Data Type"
+    isCollection="false"
+    typeLanguage="https://www.omg.org/spec/DMN/20230324/FEEL/"
+  >
+    <typeRef>Any</typeRef>
+  </itemDefinition>
+  <decision name="External Decision node" id="_D7FF2684-DE46-483B-9423-1505610B708A">
+    <variable name="External Decision node" id="_D77E3B5A-3F0A-471A-B49F-1A6CBE1A57A3" typeRef="External Data Type" />
+  </decision>
+  <dmndi:DMNDI>
+    <dmndi:DMNDiagram
+      id="_B04789A7-6C04-4669-AF33-7C4D866C2E10"
+      name="Default DRD"
+      useAlternativeInputDataShape="false"
+    >
+      <di:extension>
+        <kie:ComponentsWidthsExtension>
+          <kie:ComponentWidths />
+        </kie:ComponentsWidthsExtension>
+      </di:extension>
+      <dmndi:DMNShape
+        id="_7799CE89-F916-481A-A532-14BAE210695D"
+        dmnElementRef="_D7FF2684-DE46-483B-9423-1505610B708A"
+        isCollapsed="false"
+        isListedInputData="false"
+      >
+        <dc:Bounds x="280" y="120" width="160" height="80" />
+      </dmndi:DMNShape>
+    </dmndi:DMNDiagram>
+  </dmndi:DMNDI>
+</definitions>

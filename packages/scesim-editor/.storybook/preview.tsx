@@ -27,11 +27,13 @@ const preview: Preview = {
       storySort: {
         order: [
           "Dev",
-          "SceSim Editor",
+          "Test Scenario Editor",
           ["Overview", "*", ["Overview", "*", ["Overview", "*"]]],
           "Features",
           ["Overview", "*", ["Overview", "*", ["Overview", "*"]]],
           "Use Cases",
+          ["Overview", "*", ["Overview", "*", ["Overview", "*"]]],
+          "Misc",
           ["Overview", "*", ["Overview", "*", ["Overview", "*"]]],
         ],
       },

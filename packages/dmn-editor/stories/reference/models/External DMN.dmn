@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<definitions
+  xmlns="https://www.omg.org/spec/DMN/20230324/MODEL/"
+  xmlns:dmndi="https://www.omg.org/spec/DMN/20230324/DMNDI/"
+  xmlns:dc="http://www.omg.org/spec/DMN/20180521/DC/"
+  xmlns:di="http://www.omg.org/spec/DMN/20180521/DI/"
+  xmlns:kie="https://kie.org/dmn/extensions/1.0"
+  expressionLanguage="https://www.omg.org/spec/DMN/20230324/FEEL/"
+  namespace="https://kie.org/dmn/_EFE58D7C-5CF7-4559-AB88-6938DA15C7D4"
+  id="_3BC6C9D6-56D0-496F-836E-D370FC76A941"
+  name="DMN_69FEF6A7-2663-4BDA-8692-EC60B7BF86BE"
+>
+  <itemDefinition
+    id="_E97F31FE-1087-4DCA-B857-0C26A3A1AE2F"
+    name="Data Type"
+    isCollection="false"
+    typeLanguage="https://www.omg.org/spec/DMN/20230324/FEEL/"
+  >
+    <typeRef>Any</typeRef>
+  </itemDefinition>
+  <inputData name="Input Data node" id="_293712D5-B39E-4830-875A-2E44C98C9483">
+    <variable name="Input Data node" id="_C982C577-E7A9-4982-9605-A52A5EF5E1EF" typeRef="Data Type" />
+  </inputData>
+  <decision name="Decision node with hidden Information Requirements" id="_FBF42D6E-3BC2-4B88-BAA2-817E515E8282">
+    <variable
+      id="_C5152D07-B885-4A60-A47B-11882D198FE7"
+      name="Decision node with hidden Information Requirements"
+      typeRef="Data Type"
+    />
+    <informationRequirement id="_5ED79770-9800-4DB9-B8FA-1E2F01B5E838">
+      <requiredInput href="#_293712D5-B39E-4830-875A-2E44C98C9483" />
+    </informationRequirement>
+  </decision>
+  <decision name="Decision node" id="_0A16F847-37BA-400E-B4DD-B1D110BCF38D">
+    <variable name="Decision node" id="_DB942CFE-4CCD-42B4-944A-5C1528C4BAAA" typeRef="Data Type" />
+  </decision>
+  <dmndi:DMNDI>
+    <dmndi:DMNDiagram
+      id="_0EF91B44-8165-438F-ACA9-9B2030172088"
+      name="Default DRD"
+      useAlternativeInputDataShape="false"
+    >
+      <di:extension>
+        <kie:ComponentsWidthsExtension>
+          <kie:ComponentWidths />
+        </kie:ComponentsWidthsExtension>
+      </di:extension>
+      <dmndi:DMNShape
+        id="_86A92032-7812-4D8B-819B-7A84598BFF5D"
+        dmnElementRef="_293712D5-B39E-4830-875A-2E44C98C9483"
+        isCollapsed="false"
+        isListedInputData="false"
+      >
+        <dc:Bounds x="280" y="240" width="160" height="80" />
+      </dmndi:DMNShape>
+      <dmndi:DMNShape
+        id="_718485BB-DB3F-441B-B06F-12660FBBE152"
+        dmnElementRef="_FBF42D6E-3BC2-4B88-BAA2-817E515E8282"
+        isCollapsed="false"
+        isListedInputData="false"
+      >
+        <dc:Bounds x="280" y="100" width="160" height="80" />
+      </dmndi:DMNShape>
+      <dmndi:DMNEdge
+        id="_CE6B2459-CCE8-48E0-9296-25F26DF03F47-AUTO-TARGET"
+        dmnElementRef="_5ED79770-9800-4DB9-B8FA-1E2F01B5E838"
+        sourceElement="_86A92032-7812-4D8B-819B-7A84598BFF5D"
+        targetElement="_718485BB-DB3F-441B-B06F-12660FBBE152"
+      >
+        <di:waypoint x="360" y="280" />
+        <di:waypoint x="360" y="140" />
+      </dmndi:DMNEdge>
+      <dmndi:DMNShape
+        id="_258D0F4E-AFD5-4A7C-A23B-41A4F9467C8C"
+        dmnElementRef="_0A16F847-37BA-400E-B4DD-B1D110BCF38D"
+        isCollapsed="false"
+        isListedInputData="false"
+      >
+        <dc:Bounds x="500" y="100" width="160" height="80" />
+      </dmndi:DMNShape>
+    </dmndi:DMNDiagram>
+  </dmndi:DMNDI>
+</definitions>

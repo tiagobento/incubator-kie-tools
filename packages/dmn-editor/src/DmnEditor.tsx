@@ -101,6 +101,7 @@ export type OnRequestExternalModelsAvailableToInclude = () => Promise<string[]>;
 export type OnRequestExternalModelByPath = (
   normalizedPosixPathRelativeToTheOpenFile: string
 ) => Promise<ExternalModel | null>;
+
 export type ExternalModelsIndex = Record<
   string /** normalizedPosixPathRelativeToTheOpenFile */,
   ExternalModel | undefined
@@ -173,8 +174,11 @@ export type DmnEditorProps = {
   isEvaluationHighlightsSupported?: boolean;
   /**
    * A flag to enable read-only mode on the DMN Editor.
-   * When enabled navigation is still possible (e.g. entering the Boxed Expression Editor, Data Types and Included Models),
+   *
+   * When enabled navigation is still possible (E.g., Entering the Boxed Expression Editor, Data Types and Included Models),
    * but no changes can be made and the model itself is unaltered.
+   *
+   * Default: `false`.
    */
   isReadOnly?: boolean;
   /**
@@ -199,12 +203,21 @@ export type DmnEditorProps = {
    * Notifies the caller when the DMN Editor performs a new edit after the debounce time.
    */
   onModelDebounceStateChanged?: (changed: boolean) => void;
-
+  /**
+   * Notifies the caller when the Boxed Expression Editor is open for a different node.
+   */
   onOpenedBoxedExpressionEditorNodeChange?: (newOpenedNodeId: string | undefined) => void;
+  /**
+   * Hides tabs and the DRD selector. Overlays and Diagram navigation controls are still enabled.
+   *
+   * Default: `false`.
+   * */
+  showDefaultDrdOnly?: boolean;
 };
 
 export const DmnEditorInternal = ({
   model,
+  showDefaultDrdOnly,
   originalVersion,
   onModelChange,
   onOpenedBoxedExpressionEditorNodeChange,
@@ -398,59 +411,55 @@ export const DmnEditorInternal = ({
 
   return (
     <div ref={dmnEditorRootElementRef} className={"kie-dmn-editor--root"}>
-      <Tabs
-        isFilled={true}
-        activeKey={navigationTab}
-        onSelect={onTabChanged}
-        role={"region"}
-        className={"kie-dmn-editor--tabs"}
-      >
-        <Tab eventKey={DmnEditorTab.EDITOR} title={tabTitle.editor}>
-          {navigationTab === DmnEditorTab.EDITOR && (
-            <>
-              {!boxedExpressionEditorActiveDrgElementId && (
-                <Drawer isExpanded={isDiagramPropertiesPanelOpen} isInline={true} position={"right"}>
-                  <DrawerContent panelContent={diagramPropertiesPanel}>
-                    <DrawerContentBody>
-                      <div
-                        className={"kie-tools--dmn-editor--diagram-container"}
-                        ref={diagramContainerRef}
-                        data-testid={"kie-tools--dmn-editor--diagram-container"}
-                      >
-                        {originalVersion && <DmnVersionLabel version={originalVersion} />}
-                        <Diagram ref={diagramRef} container={diagramContainerRef} />
-                      </div>
-                    </DrawerContentBody>
-                  </DrawerContent>
-                </Drawer>
-              )}
-              {boxedExpressionEditorActiveDrgElementId && (
-                <Drawer isExpanded={isBeePropertiesPanelOpen} isInline={true} position={"right"}>
-                  <DrawerContent panelContent={beePropertiesPanel}>
-                    <DrawerContentBody>
-                      <div className={"kie-dmn-editor--bee-container"} ref={beeContainerRef}>
-                        <BoxedExpressionScreen container={beeContainerRef} />
-                      </div>
-                    </DrawerContentBody>
-                  </DrawerContent>
-                </Drawer>
-              )}
-            </>
-          )}
-        </Tab>
+      {showDefaultDrdOnly ?? false ? (
+        <EditorTabContent
+          boxedExpressionEditorActiveDrgElementId={boxedExpressionEditorActiveDrgElementId}
+          isDiagramPropertiesPanelOpen={isDiagramPropertiesPanelOpen}
+          diagramPropertiesPanel={diagramPropertiesPanel}
+          diagramContainerRef={diagramContainerRef}
+          originalVersion={originalVersion}
+          diagramRef={diagramRef}
+          isBeePropertiesPanelOpen={isBeePropertiesPanelOpen}
+          beePropertiesPanel={beePropertiesPanel}
+          beeContainerRef={beeContainerRef}
+        />
+      ) : (
+        <Tabs
+          isFilled={true}
+          activeKey={navigationTab}
+          onSelect={onTabChanged}
+          role={"region"}
+          className={"kie-dmn-editor--tabs"}
+        >
+          <Tab eventKey={DmnEditorTab.EDITOR} title={tabTitle.editor}>
+            {navigationTab === DmnEditorTab.EDITOR && (
+              <EditorTabContent
+                boxedExpressionEditorActiveDrgElementId={boxedExpressionEditorActiveDrgElementId}
+                isDiagramPropertiesPanelOpen={isDiagramPropertiesPanelOpen}
+                diagramPropertiesPanel={diagramPropertiesPanel}
+                diagramContainerRef={diagramContainerRef}
+                originalVersion={originalVersion}
+                diagramRef={diagramRef}
+                isBeePropertiesPanelOpen={isBeePropertiesPanelOpen}
+                beePropertiesPanel={beePropertiesPanel}
+                beeContainerRef={beeContainerRef}
+              />
+            )}
+          </Tab>
 
-        <Tab eventKey={DmnEditorTab.DATA_TYPES} title={tabTitle.dataTypes}>
-          <div data-testid={"kie-tools--dmn-editor--data-types-container"}>
-            {navigationTab === DmnEditorTab.DATA_TYPES && <DataTypes />}
-          </div>
-        </Tab>
+          <Tab eventKey={DmnEditorTab.DATA_TYPES} title={tabTitle.dataTypes}>
+            <div data-testid={"kie-tools--dmn-editor--data-types-container"}>
+              {navigationTab === DmnEditorTab.DATA_TYPES && <DataTypes />}
+            </div>
+          </Tab>
 
-        <Tab eventKey={DmnEditorTab.INCLUDED_MODELS} title={tabTitle.includedModels}>
-          <div data-testid={"kie-tools--dmn-editor--included-models-container"}>
-            {navigationTab === DmnEditorTab.INCLUDED_MODELS && <IncludedModels />}
-          </div>
-        </Tab>
-      </Tabs>
+          <Tab eventKey={DmnEditorTab.INCLUDED_MODELS} title={tabTitle.includedModels}>
+            <div data-testid={"kie-tools--dmn-editor--included-models-container"}>
+              {navigationTab === DmnEditorTab.INCLUDED_MODELS && <IncludedModels />}
+            </div>
+          </Tab>
+        </Tabs>
+      )}
     </div>
   );
 };
@@ -488,6 +497,60 @@ export const DmnEditor = React.forwardRef((props: DmnEditorProps, ref: React.Ref
   );
 });
 
+function EditorTabContent({
+  boxedExpressionEditorActiveDrgElementId,
+  isDiagramPropertiesPanelOpen,
+  diagramPropertiesPanel,
+  diagramContainerRef,
+  originalVersion,
+  diagramRef,
+  isBeePropertiesPanelOpen,
+  beePropertiesPanel,
+  beeContainerRef,
+}: {
+  boxedExpressionEditorActiveDrgElementId: string | undefined;
+  isDiagramPropertiesPanelOpen: boolean;
+  diagramPropertiesPanel: JSX.Element;
+  diagramContainerRef: React.RefObject<HTMLDivElement>;
+  originalVersion: string | undefined;
+  diagramRef: React.RefObject<DiagramRef>;
+  isBeePropertiesPanelOpen: boolean;
+  beePropertiesPanel: JSX.Element;
+  beeContainerRef: React.RefObject<HTMLDivElement>;
+}) {
+  return (
+    <>
+      {!boxedExpressionEditorActiveDrgElementId && (
+        <Drawer isExpanded={isDiagramPropertiesPanelOpen} isInline={true} position={"right"}>
+          <DrawerContent panelContent={diagramPropertiesPanel}>
+            <DrawerContentBody>
+              <div
+                className={"kie-tools--dmn-editor--diagram-container"}
+                ref={diagramContainerRef}
+                data-testid={"kie-tools--dmn-editor--diagram-container"}
+              >
+                {originalVersion && <DmnVersionLabel version={originalVersion} />}
+                <Diagram ref={diagramRef} container={diagramContainerRef} />
+              </div>
+            </DrawerContentBody>
+          </DrawerContent>
+        </Drawer>
+      )}
+      {boxedExpressionEditorActiveDrgElementId && (
+        <Drawer isExpanded={isBeePropertiesPanelOpen} isInline={true} position={"right"}>
+          <DrawerContent panelContent={beePropertiesPanel}>
+            <DrawerContentBody>
+              <div className={"kie-dmn-editor--bee-container"} ref={beeContainerRef}>
+                <BoxedExpressionScreen container={beeContainerRef} />
+              </div>
+            </DrawerContentBody>
+          </DrawerContent>
+        </Drawer>
+      )}
+    </>
+  );
+}
+
 export function usePrevious<T>(value: T) {
   const [current, setCurrent] = useState<T>(value);
   const [previous, setPrevious] = useState<T>(value);
@@ -504,8 +567,7 @@ export function usePrevious<T>(value: T) {
  *
  * @param state The state to save when condition is true
  * @param condition Boolean that, when becomes true, sets the ref with the previous value of the first parameter -- `state`.
- * @param ref The ref that stores the value
- * @returns The ref that was given as the 3rd parameter.
+ * @param set Called with previous value as argument.
  */
 export function useStateAsItWasBeforeConditionBecameTrue<T>(state: T, condition: boolean, set: (prev: T) => void) {
   const previous = usePrevious(state);
