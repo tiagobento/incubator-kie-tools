@@ -23,16 +23,11 @@ import { Normalized } from "../normalization/normalize";
 import {
   BPMN20__tAssociation,
   BPMN20__tDefinitions,
+  BPMN20__tDocumentation,
   BPMN20__tSequenceFlow,
   BPMNDI__BPMNEdge,
 } from "@kie-tools/bpmn-marshaller/dist/schemas/bpmn-2_0/ts-gen/types";
-import {
-  BPMN_GRAPH_STRUCTURE,
-  BpmnDiagramNodeData,
-  BpmnEdgeType,
-  BpmnNodeType,
-  EDGE_TYPES,
-} from "../diagram/BpmnDiagramDomain";
+import { BPMN_GRAPH_STRUCTURE, BpmnEdgeType, BpmnNodeType, EDGE_TYPES } from "../diagram/BpmnDiagramDomain";
 import { DC__Bounds } from "@kie-tools/xyflow-react-kie-diagram/dist/maths/model";
 import { PositionalNodeHandleId } from "@kie-tools/xyflow-react-kie-diagram/dist/nodes/PositionalNodeHandles";
 import { AutoPositionedEdgeMarker } from "@kie-tools/xyflow-react-kie-diagram/dist/edges/AutoPositionedEdgeMarker";
@@ -67,6 +62,8 @@ export function addEdge({
   };
   __readonly_edge: {
     type: BpmnEdgeType;
+    name: string | undefined;
+    documentation: Normalized<BPMN20__tDocumentation[]> | undefined;
     targetHandle: PositionalNodeHandleId;
     sourceHandle: PositionalNodeHandleId;
     autoPositionedEdgeMarker: AutoPositionedEdgeMarker | undefined;
@@ -121,6 +118,8 @@ export function addEdge({
       "@_id": newEdgeId,
       "@_sourceRef": __readonly_sourceNode.href,
       "@_targetRef": __readonly_targetNode.href,
+      "@_name": __readonly_edge.name,
+      documentation: __readonly_edge.documentation,
     };
 
     // Remove previously existing association

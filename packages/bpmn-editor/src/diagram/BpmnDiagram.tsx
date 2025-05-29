@@ -366,6 +366,8 @@ export function BpmnDiagram({
         targetHandle: targetHandle,
         sourceHandle: PositionalNodeHandleId.Center,
         autoPositionedEdgeMarker: undefined,
+        name: undefined,
+        documentation: undefined,
       },
       __readonly_sourceNode: {
         type: sourceNode.type as BpmnNodeType,
@@ -398,6 +400,9 @@ export function BpmnDiagram({
         sourceHandle: ((sourceHandle as PositionalNodeHandleId) ??
           getHandlePosition({ shapeBounds: sourceNode.data.shape["dc:Bounds"], waypoint: firstWaypoint })
             .handlePosition) as PositionalNodeHandleId,
+        name: edge.data?.bpmnElement.__$$element === "sequenceFlow" ? edge.data.bpmnElement["@_name"] : undefined,
+        documentation:
+          edge.data?.bpmnElement.__$$element === "sequenceFlow" ? edge.data.bpmnElement.documentation : undefined,
       },
       __readonly_sourceNode: {
         type: sourceNode.type!,
@@ -416,7 +421,10 @@ export function BpmnDiagram({
 
     // The BPMN Edge changed nodes, so we need to delete the old one, but keep the waypoints.
     if (newBpmnEdge["@_bpmnElement"] !== edge.id) {
-      const { deletedBpmnEdge } = deleteEdge({ definitions: state.bpmn.model.definitions, __readonly_edgeId: edge.id });
+      const { deletedBpmnEdge } = deleteEdge({
+        definitions: state.bpmn.model.definitions,
+        __readonly_edgeId: edge.id,
+      });
       const deletedWaypoints = deletedBpmnEdge?.["di:waypoint"];
 
       if (edge.source !== sourceNode.id && deletedWaypoints) {

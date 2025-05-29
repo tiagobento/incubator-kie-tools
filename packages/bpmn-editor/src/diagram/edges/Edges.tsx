@@ -26,10 +26,17 @@ import { DEFAULT_INTRACTION_WIDTH } from "@kie-tools/xyflow-react-kie-diagram/di
 import { propsHaveSameValuesDeep } from "@kie-tools/xyflow-react-kie-diagram/dist/memoization/memoization";
 import { useIsHovered } from "@kie-tools/xyflow-react-kie-diagram/dist/reactExt/useIsHovered";
 import * as React from "react";
-import { useRef } from "react";
+import { useCallback, useMemo, useRef } from "react";
 import * as RF from "reactflow";
 import { AssociationPath, SequenceFlowPath } from "./EdgeSvgs";
 import { BpmnDiagramEdgeData } from "../BpmnDiagramDomain";
+import { useBpmnEditorStoreApi } from "../../store/StoreContext";
+import {
+  EditableNodeLabel,
+  useEditableNodeLabel,
+} from "@kie-tools/xyflow-react-kie-diagram/dist/nodes/EditableNodeLabel";
+import { updateFlowElement } from "../../mutations/renameNode";
+import "./Edges.css";
 
 const interactionStrokeProps: Partial<React.SVGAttributes<SVGPathElement>> = {
   strokeOpacity: 1,
@@ -57,7 +64,7 @@ export const SequenceFlowEdge = React.memo((props: RF.EdgeProps<BpmnDiagramEdgeD
 
   const {
     onMouseMove: onMouseMoveOnEdge,
-    onDoubleClick: onDoubleClickEdge,
+    onDoubleClick: onDoubleClickEdgeWaypoints,
     potentialWaypoint,
     isDraggingWaypoint,
   } = usePotentialWaypointControls(waypoints, props.selected, props.id, props.data?.bpmnEdgeIndex, interactionPathRef);
@@ -66,6 +73,50 @@ export const SequenceFlowEdge = React.memo((props: RF.EdgeProps<BpmnDiagramEdgeD
   const className = useEdgeClassName(isConnecting, isDraggingWaypoint);
 
   useAlwaysVisibleEdgeUpdatersAtNodeBorders(interactionPathRef, props.source, props.target, waypoints);
+
+  const labelPosition = useMemo(() => {
+    if (waypoints.length > 2) {
+      return waypoints[1];
+    } else {
+      return waypoints[0];
+    }
+  }, [waypoints]);
+
+  const labelStyle = useMemo(() => {
+    return {
+      transform: `translate(${labelPosition["@_x"]}px,${labelPosition["@_y"]}px)`,
+    };
+  }, [labelPosition]);
+
+  const bpmnEditorStoreApi = useBpmnEditorStoreApi();
+
+  const id = props.data?.bpmnElement["@_id"] ?? props.id;
+
+  const onChangeLabel = useCallback(
+    (newName: string) => {
+      bpmnEditorStoreApi.setState((s) => {
+        updateFlowElement({
+          definitions: s.bpmn.model.definitions,
+          id: id,
+          newFlowElement: { "@_name": newName },
+        });
+      });
+    },
+    [bpmnEditorStoreApi, id]
+  );
+
+  const { isEditingLabel, setEditingLabel, triggerEditing: triggerEditingLabel } = useEditableNodeLabel(props.id);
+
+  const onDoubleClickEdge = useCallback(
+    (e: React.MouseEvent) => {
+      if (e.metaKey) {
+        triggerEditingLabel(e);
+      } else {
+        onDoubleClickEdgeWaypoints();
+      }
+    },
+    [onDoubleClickEdgeWaypoints, triggerEditingLabel]
+  );
 
   return (
     <>
@@ -80,6 +131,28 @@ export const SequenceFlowEdge = React.memo((props: RF.EdgeProps<BpmnDiagramEdgeD
         data-edgetype={"information-requirement"}
       />
       <SequenceFlowPath d={path} className={`xyflow-react-kie-diagram--edge ${className}`} />
+
+      {props.data?.bpmnElement.__$$element === "sequenceFlow" &&
+        (!!props.data.bpmnElement["@_name"] || isEditingLabel) && (
+          <RF.EdgeLabelRenderer>
+            <div
+              style={labelStyle}
+              className={`kie-bpmn-editor--floating-edge-label edge-label-renderer__custom-edge nodrag nopan ${props.selected ? "selected" : ""}`}
+            >
+              <EditableNodeLabel
+                id={props.id}
+                name={props.data.bpmnElement["@_name"]}
+                value={props.data.bpmnElement["@_name"]}
+                onChange={onChangeLabel}
+                placeholder={"Enter a label..."}
+                position={"center-center"}
+                isEditing={isEditingLabel}
+                setEditing={setEditingLabel}
+                validate={NO_VALIDATION}
+              />
+            </div>
+          </RF.EdgeLabelRenderer>
+        )}
 
       {props.selected && !isConnecting && props.data?.bpmnEdge && (
         <Waypoints
@@ -147,3 +220,5 @@ export const AssociationEdge = React.memo((props: RF.EdgeProps<BpmnDiagramEdgeDa
     </>
   );
 }, propsHaveSameValuesDeep);
+
+const NO_VALIDATION = () => true;

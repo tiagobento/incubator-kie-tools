@@ -17,20 +17,16 @@
  * under the License.
  */
 
-import { parseBpmn20Drools10MetaData } from "@kie-tools/bpmn-marshaller/dist/drools-extension-metaData";
+import * as React from "react";
+import * as RF from "reactflow";
 import {
   BPMN20__tBoundaryEvent,
-  BPMN20__tComplexGateway,
   BPMN20__tDataObject,
   BPMN20__tEndEvent,
-  BPMN20__tEventBasedGateway,
-  BPMN20__tExclusiveGateway,
   BPMN20__tGroup,
-  BPMN20__tInclusiveGateway,
   BPMN20__tIntermediateCatchEvent,
   BPMN20__tIntermediateThrowEvent,
   BPMN20__tLane,
-  BPMN20__tParallelGateway,
   BPMN20__tProcess,
   BPMN20__tStartEvent,
   BPMN20__tSubProcess,
@@ -60,9 +56,7 @@ import { InfoNodePanel } from "@kie-tools/xyflow-react-kie-diagram/dist/nodes/In
 import { OutgoingStuffNodePanel } from "@kie-tools/xyflow-react-kie-diagram/dist/nodes/OutgoingStuffNodePanel";
 import { PositionalNodeHandles } from "@kie-tools/xyflow-react-kie-diagram/dist/nodes/PositionalNodeHandles";
 import { useIsHovered } from "@kie-tools/xyflow-react-kie-diagram/dist/reactExt/useIsHovered";
-import * as React from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import * as RF from "reactflow";
 import { updateFlowElement, updateLane, updateTextAnnotation } from "../../mutations/renameNode";
 import { Normalized } from "../../normalization/normalize";
 import { useBpmnEditorStore, useBpmnEditorStoreApi } from "../../store/StoreContext";
@@ -103,6 +97,7 @@ import { useTaskNodeMorphingActions } from "./morphing/useTaskNodeMorphingAction
 import { useSubProcessNodeMorphingActions } from "./morphing/useSubProcessNodeMorphingActions";
 import { useKeyboardShortcutsForMorphingActions } from "./morphing/useKeyboardShortcutsForMorphingActions";
 import { getShouldDisplayIsInterruptingFlag } from "../../propertiesPanel/singleNodeProperties/StartEventProperties";
+import "./Nodes.css";
 
 export const StartEventNode = React.memo(
   ({
@@ -1650,23 +1645,5 @@ export function useActivityIcons(
 }
 
 export function NodeLabelAtTheBottom({ children }: React.PropsWithChildren<{}>) {
-  return (
-    <div
-      style={{
-        fontSize: "0.8em",
-        marginTop: "10px",
-        borderRadius: "5px",
-        padding: "5px",
-        backgroundColor: "rgba(0,0,0,0.02)",
-        border: "1px solid rgba(0,0,0,0.2)",
-        boxShadow: "rgba(0, 0, 0, 0.4) 2px 2px 6px",
-        backdropFilter: "blur(4px)",
-        textAlign: "center",
-        width: "calc(100% + 20px)",
-        marginLeft: "-10px",
-      }}
-    >
-      {children}
-    </div>
-  );
+  return <div className={"kie-bpmn-editor--floating-node-label"}>{children}</div>;
 }

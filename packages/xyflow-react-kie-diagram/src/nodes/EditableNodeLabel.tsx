@@ -37,6 +37,7 @@ export function EditableNodeLabel({
   isEditing: _isEditing,
   setEditing: _setEditing,
   value,
+  placeholder,
   onChange,
   position,
   truncate,
@@ -56,6 +57,7 @@ export function EditableNodeLabel({
   position: NodeLabelPosition;
   isEditing: boolean;
   value: string | undefined;
+  placeholder?: string;
   setEditing: React.Dispatch<React.SetStateAction<boolean>>;
   onChange: OnEditableNodeLabelChange;
   skipValidation?: boolean;
@@ -190,6 +192,7 @@ export function EditableNodeLabel({
           tabIndex={-1}
           ref={ref}
           onBlur={onBlur}
+          placeholder={placeholder}
           onChange={(e) => setInternalValue(e.target.value)}
           value={internalValue}
         />

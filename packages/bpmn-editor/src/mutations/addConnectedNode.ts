@@ -159,6 +159,8 @@ export function addConnectedNode({
       sourceHandle: PositionalNodeHandleId.Center,
       targetHandle: PositionalNodeHandleId.Center,
       type: EDGE_TYPES.sequenceFlow,
+      name: undefined,
+      documentation: undefined,
     },
     __readonly_keepWaypoints: false,
     __readonly_sourceNode: {
