@@ -5,7 +5,6 @@
     <content url="file://$MODULE_DIR$">
       <excludeFolder url="file://$MODULE_DIR$/bootstrap/node_modules" />
       <excludeFolder url="file://$MODULE_DIR$/build-env/node_modules" />
-      <excludeFolder url="file://$MODULE_DIR$/check-junit-report-results/node_modules" />
       <excludeFolder url="file://$MODULE_DIR$/run-script-if/node_modules" />
       <excludeFolder url="file://$MODULE_DIR$/sparse-checkout/node_modules" />
       <excludeFolder url="file://$MODULE_DIR$/update-kogito-version/node_modules" />
