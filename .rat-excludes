@@ -344,7 +344,6 @@ pnpm-lock.yaml
 pnpm-workspace.yaml
 repo/graph.dot
 repo/repo.iml
-scripts/check-junit-report-results/tests/index.test.js
-scripts/check-junit-report-results/tests/reports/empty.xml
+ci/tests/reports/empty.xml
 scripts/run-script-if/README.md
 scripts/scripts.iml

@@ -37,6 +37,7 @@
 .project
 **/.settings/
 package-lock.json
+!ci/package-lock.json
 
 ## chrome-extension-pack-kogito-kie-editors
 **/logs/

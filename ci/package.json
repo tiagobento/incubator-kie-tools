@@ -1,0 +1,21 @@
+{
+  "private": true,
+  "name": "@kie-tools/ci",
+  "version": "0.0.0",
+  "description": "Pre-build CI tooling. Standalone (not a pnpm workspace member) because it runs before bootstrap",
+  "scripts": {
+    "cli": "bun src/cli.ts",
+    "postinstall": "node -e \"require('fs').writeFileSync('../turbo.json','{}')\" && turbo telemetry disable",
+    "test": "bun test",
+    "typecheck": "bun --bun x tsc --noEmit"
+  },
+  "dependencies": {
+    "bun": "1.1.6",
+    "fast-xml-parser": "^4.5.5",
+    "turbo": "2.1.2"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.1.0",
+    "typescript": "^5.4.0"
+  }
+}

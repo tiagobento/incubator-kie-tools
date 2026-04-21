@@ -216,6 +216,13 @@ runs:
         brew uninstall node@20
         echo "/usr/local/bin" >> $GITHUB_PATH
 
+    - name: "Install zip (Windows only)"
+      if: runner.os == 'Windows'
+      shell: bash
+      run: |
+        echo "STEP: Install zip (Windows only)"
+        choco install zip --version 3.0 -y
+
     - name: "Print storage usage (after setup)"
       shell: bash
       run: |
